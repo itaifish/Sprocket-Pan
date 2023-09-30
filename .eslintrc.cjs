@@ -4,7 +4,7 @@ module.exports = {
 	root: true,
 	plugins: ['react'],
 	parserOptions: {
-		ecmaVersion: 16, // Allows for the parsing of modern ECMAScript features
+		ecmaVersion: 15, // Allows for the parsing of modern ECMAScript features
 		sourceType: 'module', // Allows for the use of imports
 		ecmaFeatures: {
 			jsx: true,
