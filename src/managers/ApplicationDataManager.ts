@@ -4,8 +4,8 @@ import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@taur
 import { log } from '../utils/logging';
 
 type ApplicationData = Record<string, unknown>;
-export default class ApplicationDataManager {
-	public instance = new ApplicationDataManager();
+class ApplicationDataManager {
+	public static readonly INSTANCE = new ApplicationDataManager();
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
 	private static readonly DATA_FILE_NAME = 'data' as const;
@@ -31,6 +31,10 @@ export default class ApplicationDataManager {
 		});
 	}
 
+	public getApplicationData(): Promise<ApplicationData> {
+		return this.data;
+	}
+
 	private getDefaultData(): ApplicationData {
 		return {};
 	}
@@ -40,6 +44,7 @@ export default class ApplicationDataManager {
 			const contents = await readTextFile(ApplicationDataManager.PATH, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
+			log.trace(`Loaded contents from file:\n${contents}`);
 			return JSON.parse(contents);
 		} catch (e) {
 			console.error(e);
@@ -52,14 +57,17 @@ export default class ApplicationDataManager {
 	 * @returns 'created' if a new folder is created, 'alreadyExists' if not, and 'error' if there was an error
 	 */
 	private createDataFolderIfNotExists = async () => {
+		log.trace(`createDataFolderIfNotExists called`);
 		try {
 			if (!exists(ApplicationDataManager.DATA_FOLDER_NAME, { dir: ApplicationDataManager.DEFAULT_DIRECTORY })) {
+				log.debug(`Folder does not exist, creating...`);
 				await createDir(ApplicationDataManager.DATA_FOLDER_NAME, {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 					recursive: true,
 				});
 				return 'created' as const;
 			} else {
+				log.trace(`Folder already exists, no need to create`);
 				return 'alreadyExists' as const;
 			}
 		} catch (e) {
@@ -72,19 +80,24 @@ export default class ApplicationDataManager {
 	 * @returns 'created' if a new file is created, 'alreadyExists' if not, and 'error' if there was an error
 	 */
 	private createDataFileIfNotExists = async (fileContents: Record<string, unknown>) => {
+		log.trace(`createDataFolderIfNotExists called`);
 		try {
 			if (!exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY })) {
+				log.debug(`File does not exist, creating...`);
 				await writeFile(
 					{ contents: JSON.stringify(fileContents), path: ApplicationDataManager.PATH },
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 				);
 				return 'created' as const;
 			} else {
+				log.trace(`File already exists, no need to create`);
 				return 'alreadyExists' as const;
 			}
 		} catch (e) {
-			console.log(e);
+			log.error(e);
 			return 'error' as const;
 		}
 	};
 }
+
+export const applicationDataManager = ApplicationDataManager.INSTANCE;
