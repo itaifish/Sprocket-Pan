@@ -1,35 +1,20 @@
-import { useState } from 'react';
-import invoke from './utils/invoke';
+import { createContext, useState } from 'react';
 import { ThemeToggleButton } from './components/atoms/theme-toggle/ThemeToggleButton';
+import { SideDrawer } from './components/molecules/SideDrawer';
+
+export const DrawerContext = createContext({ drawerOpen: true, setDrawerOpen: (_: boolean) => undefined as void });
 
 function App() {
-	const [greetMsg, setGreetMsg] = useState('');
-	const [name, setName] = useState('');
-
-	async function greet() {
-		// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-		const greetMsg = await invoke('greet', { name });
-		setGreetMsg(greetMsg);
-	}
-
+	const [drawerOpen, setDrawerOpen] = useState(true);
 	return (
 		<div className="container">
-			<h1>Welcome to Tauri!</h1>
-
-			<p>Click on the Tauri, Vite, and React logos to learn more.</p>
-			<ThemeToggleButton />
-			<form
-				className="row"
-				onSubmit={(e) => {
-					e.preventDefault();
-					greet();
-				}}
-			>
-				<input id="greet-input" onChange={(e) => setName(e.currentTarget.value)} placeholder="Enter a name..." />
-				<button type="submit">Greet</button>
-			</form>
-
-			<p>{greetMsg}</p>
+			<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
+				{drawerOpen && (
+					<SideDrawer>
+						<ThemeToggleButton />
+					</SideDrawer>
+				)}
+			</DrawerContext.Provider>
 		</div>
 	);
 }
