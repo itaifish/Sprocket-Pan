@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import invoke from './utils/invoke';
+import { ThemeToggleButton } from './components/atoms/theme-toggle/ThemeToggleButton';
 
 function App() {
 	const [greetMsg, setGreetMsg] = useState('');
@@ -16,7 +17,7 @@ function App() {
 			<h1>Welcome to Tauri!</h1>
 
 			<p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
+			<ThemeToggleButton />
 			<form
 				className="row"
 				onSubmit={(e) => {
