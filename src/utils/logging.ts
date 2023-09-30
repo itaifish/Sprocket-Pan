@@ -22,7 +22,11 @@ class Logger {
 		this.log('debug', data);
 	}
 
-	public error(data: unknown) {
+	public error<TErrorLog>(data: Error | TErrorLog) {
+		const dError = data as Error;
+		if (dError.stack) {
+			this.log('error', dError.stack);
+		}
 		this.log('error', data);
 	}
 

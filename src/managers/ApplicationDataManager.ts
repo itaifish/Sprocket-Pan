@@ -2,15 +2,17 @@
 // When this is finished, continue copying https://codesandbox.io/s/dnyzyx?file=/components/Navigation.tsx
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
+import { path } from '@tauri-apps/api';
 
 type ApplicationData = Record<string, unknown>;
 class ApplicationDataManager {
-	public static readonly INSTANCE = new ApplicationDataManager();
-	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppData;
+	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
 	private static readonly DATA_FILE_NAME = 'data' as const;
 	private static readonly PATH =
-		`./${ApplicationDataManager.DATA_FOLDER_NAME}/${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
+		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
+	public static readonly INSTANCE = new ApplicationDataManager();
+
 	private data: Promise<ApplicationData>;
 	private constructor() {
 		this.data = new Promise(async (resolve, _reject) => {
@@ -59,7 +61,10 @@ class ApplicationDataManager {
 	private createDataFolderIfNotExists = async () => {
 		log.trace(`createDataFolderIfNotExists called`);
 		try {
-			if (!exists(ApplicationDataManager.DATA_FOLDER_NAME, { dir: ApplicationDataManager.DEFAULT_DIRECTORY })) {
+			const doesExist = await exists(`${ApplicationDataManager.DATA_FOLDER_NAME}`, {
+				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			});
+			if (!doesExist) {
 				log.debug(`Folder does not exist, creating...`);
 				await createDir(ApplicationDataManager.DATA_FOLDER_NAME, {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
@@ -82,7 +87,8 @@ class ApplicationDataManager {
 	private createDataFileIfNotExists = async (fileContents: Record<string, unknown>) => {
 		log.trace(`createDataFolderIfNotExists called`);
 		try {
-			if (!exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY })) {
+			const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+			if (!doesExist) {
 				log.debug(`File does not exist, creating...`);
 				await writeFile(
 					{ contents: JSON.stringify(fileContents), path: ApplicationDataManager.PATH },
