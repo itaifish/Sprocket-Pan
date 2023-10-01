@@ -4,6 +4,7 @@ import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@taur
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import { ApplicationData } from '../types/application-data/application-data';
+import { swaggerParseManager } from './SwaggerParseManager';
 
 class ApplicationDataManager {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -31,6 +32,20 @@ class ApplicationDataManager {
 				resolve(defaultData);
 			}
 		});
+	}
+
+	public async loadSwaggerFile(url: string): Promise<void> {
+		const service = await swaggerParseManager.parseSwaggerFile('filePath', url);
+		const data = structuredClone(await this.getApplicationData());
+		let name = service.name;
+		if (data.services[service.name]) {
+			name = `${service.name} (1)`;
+		}
+		data.services[name] = service;
+		const result = await this.saveApplicationData(data);
+		if (result === 'saved') {
+			this.data = Promise.resolve(data);
+		}
 	}
 
 	public getApplicationData(): Promise<ApplicationData> {
@@ -103,6 +118,26 @@ class ApplicationDataManager {
 			} else {
 				log.trace(`File already exists, no need to create`);
 				return 'alreadyExists' as const;
+			}
+		} catch (e) {
+			log.error(e);
+			return 'error' as const;
+		}
+	};
+
+	private saveApplicationData = async (applicationData: ApplicationData) => {
+		try {
+			const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+			if (!doesExist) {
+				log.warn(`File does not exist, exiting...`);
+				return 'doesNotExist' as const;
+			} else {
+				log.trace(`File already exists, updating...`);
+				await writeFile(
+					{ contents: JSON.stringify(applicationData), path: ApplicationDataManager.PATH },
+					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+				);
+				return 'saved' as const;
 			}
 		} catch (e) {
 			log.error(e);

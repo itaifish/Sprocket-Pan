@@ -7,7 +7,6 @@ import {
 	Service,
 } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
-import { SwaggerApi } from '../types/swagger/swagger-api';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 
 class SwaggerParseManager {
