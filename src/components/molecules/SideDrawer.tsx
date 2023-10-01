@@ -1,9 +1,6 @@
 import { Box, BoxProps, Sheet } from '@mui/joy';
-import { useContext } from 'react';
-import { DrawerContext } from '../../App';
 
 export function SideDrawer(props: BoxProps) {
-	const { setDrawerOpen } = useContext(DrawerContext);
 	return (
 		<Box
 			{...props}
@@ -14,7 +11,6 @@ export function SideDrawer(props: BoxProps) {
 		>
 			<Box
 				role="button"
-				onClick={() => setDrawerOpen(false)}
 				sx={{
 					position: 'absolute',
 					inset: 0,

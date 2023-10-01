@@ -1,10 +1,17 @@
 import { createContext, useState } from 'react';
-import { ThemeToggleButton } from './components/atoms/theme-toggle/ThemeToggleButton';
+import { ThemeToggleButton } from './components/atoms/buttons/ThemeToggleButton';
 import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
-import { NewServiceButton } from './components/atoms/new-service/NewServiceButton';
+import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
+import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
 
-export const DrawerContext = createContext({ drawerOpen: true, setDrawerOpen: (_: boolean) => undefined as void });
+export const DrawerContext = createContext<{
+	drawerOpen: boolean;
+	setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}>({
+	drawerOpen: true,
+	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
+});
 export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
 
 function App() {
@@ -21,6 +28,7 @@ function App() {
 						<SideDrawer>
 							<ThemeToggleButton />
 							<NewServiceButton />
+							<NavigableServicesFileSystem />
 						</SideDrawer>
 					)}
 				</ApplicationDataContext.Provider>

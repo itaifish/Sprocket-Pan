@@ -2,8 +2,7 @@ import { Endpoint, RESTfulRequestVerb, RESTfulRequestVerbs, Service } from '../t
 import { log } from '../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
 import * as SwaggerParser from '@apidevtools/swagger-parser';
-import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
-import { ApplicationDataManager } from './ApplicationDataManager';
+import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 
 class SwaggerParseManager {
