@@ -1,12 +1,13 @@
-import { List, ListItem, ListItemButton, ListItemContent, ListItemDecorator, ListSubheader } from '@mui/joy';
+import { List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
+import { Endpoint, EndpointRequest } from '../../types/application-data/application-data';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
-import { Service } from '../../types/application-data/application-data';
 import { useState } from 'react';
-import { EndpointFileSystem } from './EndpointFileSystem';
+import { RequestFileSystem } from './RequestFileSystem';
 
-export function ServiceFileSystem({ service }: { service: Service }) {
-	const [collapsed, setCollapsed] = useState(false);
+export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoint; serviceName: string }) {
+	const [collapsed, setCollapsed] = useState(true);
+
 	return (
 		<ListItem nested>
 			<ListItemButton
@@ -17,7 +18,7 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 				<ListItemDecorator>
 					{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
 				</ListItemDecorator>
-				<ListSubheader>{service.name}</ListSubheader>
+				<ListSubheader>{endpoint.name}</ListSubheader>
 			</ListItemButton>
 			<List
 				aria-labelledby="nav-list-browse"
@@ -27,8 +28,8 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 				}}
 			>
 				{!collapsed &&
-					Object.values(service.endpoints).map((endpoint, index) => (
-						<EndpointFileSystem endpoint={endpoint} serviceName={service.name} key={index} />
+					Object.values(endpoint.requests).map((request: EndpointRequest, index) => (
+						<RequestFileSystem request={request} serviceName={serviceName} endpointName={endpoint.name} key={index} />
 					))}
 			</List>
 		</ListItem>

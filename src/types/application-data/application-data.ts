@@ -8,7 +8,8 @@ const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] a
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
 const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
-type EndpointRequest<TRequestBodyType extends RequestBodyType> = {
+export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
+	name: string;
 	headers: Record<string, string>;
 	queryParams: Record<string, string[]>;
 	bodyType: TRequestBodyType;
@@ -25,15 +26,12 @@ type EndpointRequest<TRequestBodyType extends RequestBodyType> = {
 		? undefined
 		: RawBodyType | undefined;
 };
-export type Endpoint<
-	TUrlBase extends string = string,
-	TEndpointRequests extends Array<EndpointRequest<RequestBodyType>> = Array<EndpointRequest<RequestBodyType>>,
-> = {
+export type Endpoint<TUrlBase extends string = string> = {
 	url: `${TUrlBase}${string}`;
 	verb: RESTfulRequestVerb;
 	baseHeaders: Record<string, string>;
 	baseQueryParams: Record<string, string[]>;
-	requests: TEndpointRequests;
+	requests: Map<string, EndpointRequest>;
 	preRequestScript?: string;
 	name: string;
 	description: string;
