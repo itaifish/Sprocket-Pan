@@ -2,6 +2,7 @@ import { createContext, useState } from 'react';
 import { ThemeToggleButton } from './components/atoms/theme-toggle/ThemeToggleButton';
 import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
+import { NewServiceButton } from './components/atoms/new-service/NewServiceButton';
 
 export const DrawerContext = createContext({ drawerOpen: true, setDrawerOpen: (_: boolean) => undefined as void });
 
@@ -14,6 +15,7 @@ function App() {
 				{drawerOpen && (
 					<SideDrawer>
 						<ThemeToggleButton />
+						<NewServiceButton />
 					</SideDrawer>
 				)}
 			</DrawerContext.Provider>

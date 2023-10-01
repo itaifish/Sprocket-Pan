@@ -1,25 +1,25 @@
-import * as SwaggerParser from '@apidevtools/swagger-parser';
-import {
-	ApplicationData,
-	Endpoint,
-	RESTfulRequestVerb,
-	RESTfulRequestVerbs,
-	Service,
-} from '../types/application-data/application-data';
+import { Endpoint, RESTfulRequestVerb, RESTfulRequestVerbs, Service } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import { polyfill } from '../utils/pollyfill';
 
 class SwaggerParseManager {
 	public static readonly INSTANCE = new SwaggerParseManager();
-	private parser: SwaggerParser;
+	private parser: any | undefined;
 	private constructor() {
-		this.parser = new SwaggerParser();
+		polyfill().then(async () => {
+			const SwaggerParserConstructor = (await import('@apidevtools/swagger-parser')).default;
+			this.parser = new SwaggerParserConstructor();
+		});
 	}
 
 	public async parseSwaggerFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<Service> {
 		try {
 			const input = inputType === 'fileContents' ? JSON.parse(inputValue) : inputValue;
-			const api = await this.parser.dereference(input);
+			const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
+			if (!api) {
+				throw new Error('Waiting on parser to load');
+			}
 			return this.mapApiToService(api);
 		} catch (e) {
 			log.error(e);

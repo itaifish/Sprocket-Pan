@@ -1,5 +1,6 @@
 import { Settings } from '../settings/settings';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
 export const RESTfulRequestVerbs = ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'] as const;
 export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
