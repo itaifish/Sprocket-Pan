@@ -1,23 +1,24 @@
 import { Endpoint, RESTfulRequestVerb, RESTfulRequestVerbs, Service } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
-import { polyfill } from '../utils/pollyfill';
+import * as SwaggerParser from '@apidevtools/swagger-parser';
+import { exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
+import { ApplicationDataManager } from './ApplicationDataManager';
+import yaml from 'js-yaml';
 
 class SwaggerParseManager {
 	public static readonly INSTANCE = new SwaggerParseManager();
-	private parser: any | undefined;
+	private parser: SwaggerParser;
 	private constructor() {
-		polyfill().then(async () => {
-			const SwaggerParserConstructor = (await import('@apidevtools/swagger-parser')).default;
-			this.parser = new SwaggerParserConstructor();
-		});
+		this.parser = new SwaggerParser();
 	}
 
 	public async parseSwaggerFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<Service> {
 		try {
-			const input = inputType === 'fileContents' ? JSON.parse(inputValue) : inputValue;
+			const input = this.parseSwaggerInput(await this.loadSwaggerFile(inputType, inputValue));
 			const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
 			if (!api) {
+				log.warn(`parser is: ${JSON.stringify(this.parser)}`);
 				throw new Error('Waiting on parser to load');
 			}
 			return this.mapApiToService(api);
@@ -25,6 +26,17 @@ class SwaggerParseManager {
 			log.error(e);
 			return Promise.reject(e);
 		}
+	}
+
+	private parseSwaggerInput(input: string) {
+		return yaml.load(input) as OpenAPI.Document;
+	}
+
+	private async loadSwaggerFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<string> {
+		if (inputType === 'fileContents') {
+			return inputValue;
+		}
+		return await readTextFile(inputValue);
 	}
 
 	private mapApiToService(swaggerApi: OpenAPI.Document): Service {
@@ -96,4 +108,5 @@ class SwaggerParseManager {
 	}
 }
 
-export const swaggerParseManager = SwaggerParseManager.INSTANCE;
+const swaggerParseManager = SwaggerParseManager.INSTANCE;
+export default swaggerParseManager;

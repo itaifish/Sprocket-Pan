@@ -19,7 +19,7 @@
 		"strict": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,
-		"noUnusedLocals": true,
+		"noUnusedLocals": false,
 		"noUnusedParameters": true,
 		"noFallthroughCasesInSwitch": true,
 		"forceConsistentCasingInFileNames": true

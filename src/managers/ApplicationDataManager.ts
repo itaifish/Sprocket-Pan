@@ -4,9 +4,9 @@ import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@taur
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import { ApplicationData } from '../types/application-data/application-data';
-import { swaggerParseManager } from './SwaggerParseManager';
+import swaggerParseManager from './SwaggerParseManager';
 
-class ApplicationDataManager {
+export class ApplicationDataManager {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
 	private static readonly DATA_FILE_NAME = 'data' as const;
@@ -36,6 +36,7 @@ class ApplicationDataManager {
 
 	public async loadSwaggerFile(url: string): Promise<void> {
 		const service = await swaggerParseManager.parseSwaggerFile('filePath', url);
+		log.info(`New service loaded: ${service}`);
 		const data = structuredClone(await this.getApplicationData());
 		let name = service.name;
 		if (data.services[service.name]) {

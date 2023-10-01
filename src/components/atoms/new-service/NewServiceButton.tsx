@@ -1,7 +1,7 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
-import { useColorScheme, IconButton } from '@mui/joy';
-import React from 'react';
-import { log } from '../../../utils/logging';
+import { open } from '@tauri-apps/api/dialog';
+import { IconButton } from '@mui/joy';
+import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 
 export function NewServiceButton() {
 	return (
@@ -10,8 +10,11 @@ export function NewServiceButton() {
 			size="sm"
 			variant="soft"
 			color="neutral"
-			onClick={() => {
-				log.info('clicked');
+			onClick={async () => {
+				const selectedUrl = await open({ filters: [{ name: 'Swagger/OpenAPI File', extensions: ['yaml', 'json'] }] });
+				if (selectedUrl && typeof selectedUrl === 'string') {
+					await applicationDataManager.loadSwaggerFile(selectedUrl);
+				}
 			}}
 		>
 			<CreateNewFolderIcon />
