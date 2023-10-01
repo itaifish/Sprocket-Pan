@@ -3,8 +3,8 @@
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
+import { ApplicationData } from '../types/application-data/application-data';
 
-type ApplicationData = Record<string, unknown>;
 class ApplicationDataManager {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
@@ -38,7 +38,12 @@ class ApplicationDataManager {
 	}
 
 	private getDefaultData(): ApplicationData {
-		return {};
+		return {
+			services: {},
+			settings: {
+				debugLogs: true,
+			},
+		};
 	}
 
 	private loadDataFromFile = async () => {

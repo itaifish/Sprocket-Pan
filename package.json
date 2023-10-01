@@ -12,6 +12,7 @@
 		"lint": "eslint src/ --fix"
 	},
 	"dependencies": {
+		"@apidevtools/swagger-parser": "^10.1.0",
 		"@emotion/react": "^11.11.1",
 		"@emotion/styled": "^11.11.0",
 		"@fontsource/inter": "^5.0.8",
@@ -35,6 +36,7 @@
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^5.0.0",
 		"eslint-plugin-react": "^7.33.2",
+		"openapi-types": "^9.3.0",
 		"prettier": "^3.0.3",
 		"typescript": "^5.2.2",
 		"vite": "^4.4.4",
