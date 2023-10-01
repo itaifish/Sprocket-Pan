@@ -5,8 +5,11 @@ import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import { ApplicationData } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
+import { EventEmitter } from '@tauri-apps/api/shell';
 
-export class ApplicationDataManager {
+type DataEvent = 'update';
+
+export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
 	private static readonly DATA_FILE_NAME = 'data' as const;
@@ -14,24 +17,11 @@ export class ApplicationDataManager {
 		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
 	public static readonly INSTANCE = new ApplicationDataManager();
 
-	private data: Promise<ApplicationData>;
+	private data: ApplicationData;
 	private constructor() {
-		this.data = new Promise(async (resolve, _reject) => {
-			const defaultData = this.getDefaultData();
-			try {
-				const folderStatus = await this.createDataFolderIfNotExists();
-				const fileStatus = await this.createDataFileIfNotExists(defaultData);
-				if (folderStatus === 'alreadyExists' && fileStatus === 'alreadyExists') {
-					const data = await this.loadDataFromFile();
-					resolve(data);
-				} else {
-					resolve(defaultData);
-				}
-			} catch (e) {
-				console.error(e);
-				resolve(defaultData);
-			}
-		});
+		super();
+		this.data = this.getDefaultData();
+		this.init();
 	}
 
 	public async loadSwaggerFile(url: string): Promise<void> {
@@ -45,11 +35,12 @@ export class ApplicationDataManager {
 		data.services[name] = service;
 		const result = await this.saveApplicationData(data);
 		if (result === 'saved') {
-			this.data = Promise.resolve(data);
+			this.data = data;
+			this.emit('update');
 		}
 	}
 
-	public getApplicationData(): Promise<ApplicationData> {
+	public getApplicationData(): ApplicationData {
 		return this.data;
 	}
 
@@ -145,6 +136,25 @@ export class ApplicationDataManager {
 			return 'error' as const;
 		}
 	};
+
+	private async init() {
+		const defaultData = this.getDefaultData();
+		try {
+			const folderStatus = await this.createDataFolderIfNotExists();
+			const fileStatus = await this.createDataFileIfNotExists(defaultData);
+			if (folderStatus === 'alreadyExists' && fileStatus === 'alreadyExists') {
+				const data = await this.loadDataFromFile();
+				this.data = data;
+			} else {
+				this.data = defaultData;
+			}
+		} catch (e) {
+			console.error(e);
+			this.data = defaultData;
+		} finally {
+			this.emit('update');
+		}
+	}
 }
 
 export const applicationDataManager = ApplicationDataManager.INSTANCE;
