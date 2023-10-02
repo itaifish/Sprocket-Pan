@@ -58,5 +58,4 @@ export type Service<TBaseUrl extends string = string> = {
 export type ApplicationData = {
 	services: Record<string, Service>;
 	settings: Settings;
-	__increment: number;
 };

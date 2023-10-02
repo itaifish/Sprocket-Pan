@@ -110,7 +110,6 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			settings: {
 				debugLogs: true,
 			},
-			__increment: 0,
 		};
 	}
 
