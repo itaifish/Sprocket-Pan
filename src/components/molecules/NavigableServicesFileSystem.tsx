@@ -22,9 +22,9 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!collapsed &&
-							Object.values(applicationData.services).map((service, index) => (
-								<ServiceFileSystem service={service} key={index} />
-							))}
+							Object.values(applicationData.services)
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map((service, index) => <ServiceFileSystem service={service} key={index} />)}
 					</List>
 				</ListItem>
 			</List>

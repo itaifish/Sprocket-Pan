@@ -100,9 +100,11 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 				}}
 			>
 				{!collapsed &&
-					Object.values(endpoint.requests).map((request: EndpointRequest, index) => (
-						<RequestFileSystem request={request} serviceName={serviceName} endpointName={endpoint.name} key={index} />
-					))}
+					Object.values(endpoint.requests)
+						.sort((a, b) => a.name.localeCompare(b.name))
+						.map((request: EndpointRequest, index) => (
+							<RequestFileSystem request={request} serviceName={serviceName} endpointName={endpoint.name} key={index} />
+						))}
 			</List>
 		</ListItem>
 	);

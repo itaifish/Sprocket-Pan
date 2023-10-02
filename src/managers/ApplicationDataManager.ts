@@ -41,7 +41,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			service.endpoints[endpointUpdate.name] = endPointToUpdate;
 			delete service.endpoints[endpointName];
 		}
-		log.info(`Endpoint to update after: ${JSON.stringify(endPointToUpdate)}`);
+		log.info(
+			`endpoint object is now: ${JSON.stringify(this.data.services[serviceName].endpoints[endPointToUpdate.name])}`,
+		);
+		// Kinda hacky, need to tell react to update.
+		this.data = { ...this.data };
 		this.emit('update');
 	}
 
@@ -71,6 +75,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			settings: {
 				debugLogs: true,
 			},
+			__increment: 0,
 		};
 	}
 

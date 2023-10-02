@@ -27,9 +27,11 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 				}}
 			>
 				{!collapsed &&
-					Object.values(service.endpoints).map((endpoint, index) => (
-						<EndpointFileSystem endpoint={endpoint} serviceName={service.name} key={index} />
-					))}
+					Object.values(service.endpoints)
+						.sort((a, b) => a.name.localeCompare(b.name))
+						.map((endpoint, index) => (
+							<EndpointFileSystem endpoint={endpoint} serviceName={service.name} key={index} />
+						))}
 			</List>
 		</ListItem>
 	);
