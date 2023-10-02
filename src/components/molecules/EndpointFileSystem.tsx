@@ -25,6 +25,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { ApplicationDataContext } from '../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
+import { keepStringLengthReasonable } from '../../utils/string';
 
 export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoint; serviceName: string }) {
 	const [collapsed, setCollapsed] = useState(false);
@@ -122,7 +123,7 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 							/>
 						</>
 					) : (
-						endpoint.name
+						keepStringLengthReasonable(endpoint.name)
 					)}
 				</ListSubheader>
 			</ListItemButton>

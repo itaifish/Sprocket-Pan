@@ -4,6 +4,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { Service } from '../../types/application-data/application-data';
 import { useState } from 'react';
 import { EndpointFileSystem } from './EndpointFileSystem';
+import { keepStringLengthReasonable } from '../../utils/string';
 
 export function ServiceFileSystem({ service }: { service: Service }) {
 	const [collapsed, setCollapsed] = useState(false);
@@ -17,7 +18,7 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 				<ListItemDecorator>
 					{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
 				</ListItemDecorator>
-				<ListSubheader>{service.name}</ListSubheader>
+				<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
 			</ListItemButton>
 			<List
 				aria-labelledby="nav-list-browse"

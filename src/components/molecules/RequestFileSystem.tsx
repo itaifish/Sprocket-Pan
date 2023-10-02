@@ -4,6 +4,7 @@ import { useContext } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { SelectedRequestContext } from '../../App';
 import { selectedRequestEquals } from '../../utils/object';
+import { keepStringLengthReasonable } from '../../utils/string';
 
 export function RequestFileSystem({
 	request,
@@ -27,7 +28,7 @@ export function RequestFileSystem({
 				<ListItemDecorator>
 					<TextSnippetIcon fontSize="small" />
 				</ListItemDecorator>
-				<ListSubheader>{request.name}</ListSubheader>
+				<ListSubheader>{keepStringLengthReasonable(request.name)}</ListSubheader>
 			</ListItemButton>
 		</ListItem>
 	);
