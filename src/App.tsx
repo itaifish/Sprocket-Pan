@@ -37,18 +37,21 @@ function App() {
 	}, []);
 
 	const [selectedRequest, setSelectedRequest] = useState<SelectedRequest | null>(null);
+	const [searchText, setSearchText] = useState('');
 	return (
 		<div className="container">
 			<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
 				<ApplicationDataContext.Provider value={data}>
 					<SelectedRequestContext.Provider value={{ selectedRequest, setSelectedRequest }}>
-						{drawerOpen && (
-							<SideDrawer>
-								<ThemeToggleButton />
-								<NewServiceButton />
-								<NavigableServicesFileSystem />
-							</SideDrawer>
-						)}
+						<ServicesSearchContext.Provider value={{ searchText, setSearchText }}>
+							{drawerOpen && (
+								<SideDrawer>
+									<ThemeToggleButton />
+									<NewServiceButton />
+									<NavigableServicesFileSystem />
+								</SideDrawer>
+							)}
+						</ServicesSearchContext.Provider>
 					</SelectedRequestContext.Provider>
 				</ApplicationDataContext.Provider>
 			</DrawerContext.Provider>

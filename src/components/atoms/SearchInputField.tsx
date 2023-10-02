@@ -8,15 +8,18 @@ export function SearchInputField({
 	searchText: string;
 	setSearchText: React.Dispatch<React.SetStateAction<string>>;
 }) {
-	<Input
-		size="sm"
-		variant="outlined"
-		placeholder="Search for something"
-		startDecorator={<SearchRoundedIcon color="primary" />}
-		sx={{
-			boxShadow: 'sm',
-		}}
-		value={searchText}
-		onChange={(e) => setSearchText(e.target.value)}
-	/>;
+	return (
+		<Input
+			size="sm"
+			variant="outlined"
+			placeholder="Search for something"
+			startDecorator={<SearchRoundedIcon color="primary" />}
+			sx={{
+				boxShadow: 'sm',
+				width: '100%',
+			}}
+			value={searchText}
+			onChange={(e) => setSearchText(e.target.value)}
+		/>
+	);
 }
