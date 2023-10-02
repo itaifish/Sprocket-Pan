@@ -3,7 +3,7 @@
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
-import { ApplicationData } from '../types/application-data/application-data';
+import { ApplicationData, Endpoint } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 
@@ -22,6 +22,27 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		super();
 		this.data = this.getDefaultData();
 		this.init();
+	}
+
+	public updateEndpoint(serviceName: string, endpointName: string, endpointUpdate: Partial<Endpoint>) {
+		const service = this.data.services[serviceName];
+		if (service == null) {
+			log.warn(`Can't find service ${serviceName}`);
+			return;
+		}
+		let endPointToUpdate = service.endpoints[endpointName];
+		if (endPointToUpdate == null) {
+			log.warn(`Can't find endpoint ${endpointName}`);
+			return;
+		}
+		log.info(`Endpoint to update before: ${JSON.stringify(endPointToUpdate)}`);
+		endPointToUpdate = { ...endPointToUpdate, ...endpointUpdate };
+		if (endpointUpdate?.name) {
+			service.endpoints[endpointUpdate.name] = endPointToUpdate;
+			delete service.endpoints[endpointName];
+		}
+		log.info(`Endpoint to update after: ${JSON.stringify(endPointToUpdate)}`);
+		this.emit('update');
 	}
 
 	public async loadSwaggerFile(url: string): Promise<void> {
@@ -58,7 +79,6 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			const contents = await readTextFile(ApplicationDataManager.PATH, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
-			log.trace(`Loaded contents from file:\n${contents}`);
 			return JSON.parse(contents);
 		} catch (e) {
 			console.error(e);

@@ -25,6 +25,7 @@ export function SideDrawer(props: BoxProps) {
 					p: 2,
 					boxShadow: 'lg',
 					bgcolor: 'background.surface',
+					overflow: 'scroll',
 				}}
 			>
 				{props.children}

@@ -31,7 +31,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	verb: RESTfulRequestVerb;
 	baseHeaders: Record<string, string>;
 	baseQueryParams: Record<string, string[]>;
-	requests: Map<string, EndpointRequest>;
+	requests: Record<string, EndpointRequest>;
 	preRequestScript?: string;
 	name: string;
 	description: string;

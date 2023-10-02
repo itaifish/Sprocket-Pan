@@ -1,10 +1,11 @@
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import { ThemeToggleButton } from './components/atoms/buttons/ThemeToggleButton';
 import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
 import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
 import { SelectedRequest } from './types/state/state';
+import { log } from './utils/logging';
 
 export const DrawerContext = createContext<{
 	drawerOpen: boolean;
@@ -24,9 +25,17 @@ export const SelectedRequestContext = createContext<SelectedRequestContextType>(
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
-	applicationDataManager.on('update', () => {
-		setData(applicationDataManager.getApplicationData());
-	});
+	useEffect(() => {
+		const event = () => {
+			log.info(`update seen`);
+			setData(applicationDataManager.getApplicationData());
+		};
+		applicationDataManager.on('update', event);
+		return () => {
+			applicationDataManager.off('update', event);
+		};
+	}, []);
+
 	const [selectedRequest, setSelectedRequest] = useState<SelectedRequest | null>(null);
 	return (
 		<div className="container">

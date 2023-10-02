@@ -79,7 +79,7 @@ class SwaggerParseManager {
 							baseQueryParams: {},
 							description: '',
 							name: `${method}: ${pathsUri}`,
-							requests: [],
+							requests: {},
 						};
 						if (!pathData || typeof pathData === 'string') {
 							return defaultEndpointData;
