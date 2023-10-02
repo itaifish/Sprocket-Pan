@@ -3,12 +3,11 @@ import { log } from './logging';
 
 export function filterApplicationDataServicesBySearchTerm(searchText: string, services: ApplicationData['services']) {
 	const searchUncased = searchText.toLocaleLowerCase();
-	log.debug(`Filtering based on text "${searchText}"`);
 	if (searchText === '') {
 		return services;
 	}
 	const filteredServices: Record<string, Service> = {};
-	Object.values(services).forEach((service) => {
+	serviceLoop: for (const service of Object.values(services)) {
 		const serviceProperties = [
 			'name',
 			'description',
@@ -17,17 +16,18 @@ export function filterApplicationDataServicesBySearchTerm(searchText: string, se
 		] as const satisfies readonly (keyof Service)[];
 		for (const property of serviceProperties) {
 			if (service[property].toLocaleLowerCase().includes(searchUncased)) {
+				log.trace(`${service.name}.${property} matches ${searchText}`);
 				filteredServices[service.name] = service;
-				return;
+				continue serviceLoop;
 			}
 		}
 		const filteredService: Service = { ...service, endpoints: {} };
-		Object.values(service.endpoints).forEach((endpoint) => {
+		endpointLoop: for (const endpoint of Object.values(service.endpoints)) {
 			const endpointProperties = ['description', 'name', 'verb', 'url'] as const satisfies readonly (keyof Endpoint)[];
 			for (const property of endpointProperties) {
 				if (endpoint[property].toLocaleLowerCase().includes(searchUncased)) {
 					filteredService.endpoints[endpoint.name] = endpoint;
-					return;
+					continue endpointLoop;
 				}
 			}
 			const filteredEndpoint: Endpoint = { ...endpoint, requests: {} };
@@ -44,8 +44,19 @@ export function filterApplicationDataServicesBySearchTerm(searchText: string, se
 					filteredEndpoint.requests[request.name] = request;
 				}
 			});
-		});
-		filteredServices[filteredService.name] = filteredService;
-	});
+			if (Object.keys(filteredEndpoint.requests).length != 0) {
+				filteredService.endpoints[endpoint.name] = filteredEndpoint;
+			}
+		}
+		if (Object.keys(filteredService.endpoints).length != 0) {
+			filteredServices[filteredService.name] = filteredService;
+		}
+	}
+	const requests = Object.values(filteredServices).flatMap((service) =>
+		Object.values(service.endpoints).flatMap((endpoint) =>
+			Object.values(endpoint.requests).map((request) => request.name),
+		),
+	);
+	log.info(`Requests: ${requests}`);
 	return filteredServices;
 }

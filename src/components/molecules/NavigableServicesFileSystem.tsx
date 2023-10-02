@@ -1,18 +1,20 @@
 import { List, ListItem, ListSubheader } from '@mui/joy';
-import { useCallback, useContext, useState } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import { ApplicationDataContext, ServicesSearchContext } from '../../App';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { CollapseExpandButton } from '../atoms/buttons/CollapseExpandButton';
 import { SearchInputField } from '../atoms/SearchInputField';
 import { filterApplicationDataServicesBySearchTerm } from '../../utils/search';
+import { log } from '../../utils/logging';
 
 export function NavigableServicesFileSystem() {
 	const [collapsed, setCollapsed] = useState(false);
 	const applicationData = useContext(ApplicationDataContext);
 	const { searchText, setSearchText } = useContext(ServicesSearchContext);
-	const filteredServices = useCallback(() => {
+	const filteredServices = useMemo(() => {
 		return filterApplicationDataServicesBySearchTerm(searchText, applicationData.services);
-	}, [applicationData, searchText]);
+	}, [applicationData.services, searchText]);
+
 	return (
 		<>
 			<List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px', '--List-nestedInsetStart': '1rem' }}>
@@ -31,7 +33,7 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!collapsed &&
-							Object.values(filteredServices())
+							Object.values(filteredServices)
 								.sort((a, b) => a.name.localeCompare(b.name))
 								.map((service, index) => <ServiceFileSystem service={service} key={index} />)}
 					</List>
