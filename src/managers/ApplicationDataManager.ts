@@ -83,13 +83,16 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public async loadSwaggerFile(url: string): Promise<void> {
 		const service = await swaggerParseManager.parseSwaggerFile('filePath', url);
-		log.info(`New service loaded: ${service}`);
-		const data = structuredClone(await this.getApplicationData());
+		const data = structuredClone(this.getApplicationData());
 		let name = service.name;
-		if (data.services[service.name]) {
-			name = `${service.name} (1)`;
+		let index = 0;
+		while (data.services[`${service.name}${index || ''}`]) {
+			index++;
 		}
-		data.services[name] = service;
+		name += `${index || ''}`;
+		service.name = name;
+		log.info(`New service loaded: ${name}`);
+		data.services[service.name] = service;
 		const result = await this.saveApplicationData(data);
 		if (result === 'saved') {
 			this.data = data;
