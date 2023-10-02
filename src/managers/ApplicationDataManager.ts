@@ -63,6 +63,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		}
 		log.info(`Endpoint to update before: ${JSON.stringify(endPointToUpdate)}`);
 		endPointToUpdate = { ...endPointToUpdate, ...endpointUpdate };
+		this.data.endpoints[endpointId] = endPointToUpdate;
 		log.info(`endpoint object is now: ${JSON.stringify(this.data.endpoints[endpointId])}`);
 		// Kinda hacky, need to tell react to update.
 		this.data = { ...this.data };
