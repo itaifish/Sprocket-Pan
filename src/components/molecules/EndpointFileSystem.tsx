@@ -16,6 +16,7 @@ import { useContext, useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { ApplicationDataContext } from '../../App';
 import { InfoOutlined } from '@mui/icons-material';
@@ -48,13 +49,16 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 				)
 			}
 		>
-			<ListItemButton
-				onClick={() => {
-					setCollapsed((wasCollapsed) => !wasCollapsed);
-				}}
-			>
+			<ListItemButton>
 				<ListItemDecorator>
-					{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
+					<IconButton
+						size="sm"
+						onClick={() => {
+							setCollapsed((wasCollapsed) => !wasCollapsed);
+						}}
+					>
+						{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
+					</IconButton>
 				</ListItemDecorator>
 				<ListSubheader>
 					{editingText != null ? (
@@ -66,16 +70,26 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 								onChange={(e) => setEditingText(e.target.value)}
 								error={!isValidEditingText}
 								endDecorator={
-									<IconButton
-										onClick={() => {
-											if (isValidEditingText) {
-												applicationDataManager.updateEndpoint(serviceName, endpoint.name, { name: editingText });
+									<>
+										<IconButton
+											onClick={() => {
 												setEditingText(null);
-											}
-										}}
-									>
-										<CheckIcon fontSize="large" />
-									</IconButton>
+											}}
+											sx={{ marginRight: '2px' }}
+										>
+											<CancelIcon fontSize="large" />
+										</IconButton>
+										<IconButton
+											onClick={() => {
+												if (isValidEditingText) {
+													applicationDataManager.updateEndpoint(serviceName, endpoint.name, { name: editingText });
+													setEditingText(null);
+												}
+											}}
+										>
+											<CheckIcon fontSize="large" />
+										</IconButton>
+									</>
 								}
 							/>
 						</>
