@@ -37,7 +37,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		}
 		log.info(`Endpoint to update before: ${JSON.stringify(endPointToUpdate)}`);
 		endPointToUpdate = { ...endPointToUpdate, ...endpointUpdate };
-		if (endpointUpdate?.name) {
+		if (endpointUpdate.name != null && endPointToUpdate.name != endpointName) {
 			service.endpoints[endpointUpdate.name] = endPointToUpdate;
 			delete service.endpoints[endpointName];
 		}
