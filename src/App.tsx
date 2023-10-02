@@ -4,24 +4,24 @@ import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
 import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
-import { SelectedRequest } from './types/state/state';
+import { SelectedRequest, StateContext } from './types/state/state';
 import { log } from './utils/logging';
 
-export const DrawerContext = createContext<{
-	drawerOpen: boolean;
-	setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}>({
+export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
 	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
 });
 export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
-type SelectedRequestContextType = {
-	selectedRequest: SelectedRequest | null;
-	setSelectedRequest: React.Dispatch<React.SetStateAction<SelectedRequest | null>>;
-};
+type SelectedRequestContextType = StateContext<SelectedRequest | null, 'selectedRequest'>;
 export const SelectedRequestContext = createContext<SelectedRequestContextType>(
 	null as unknown as SelectedRequestContextType,
 );
+
+type ServicesSearchContextType = StateContext<string, 'searchText'>;
+export const ServicesSearchContext = createContext<ServicesSearchContextType>(
+	null as unknown as ServicesSearchContextType,
+);
+
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());

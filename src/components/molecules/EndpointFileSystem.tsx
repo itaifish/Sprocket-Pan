@@ -22,13 +22,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { ApplicationDataContext } from '../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
 
 export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoint; serviceName: string }) {
-	const [collapsed, setCollapsed] = useState(true);
+	const [collapsed, setCollapsed] = useState(false);
 	const [editingText, setEditingText] = useState<null | string>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const data = useContext(ApplicationDataContext);
