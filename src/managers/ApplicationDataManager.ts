@@ -50,6 +50,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			body: undefined,
 		};
 		this.data.requests[newEndpointRequest.id] = newEndpointRequest;
+		endPointToUpdate.requestIds.push(newEndpointRequest.id);
 		this.data = { ...this.data };
 		this.emit('update');
 	}

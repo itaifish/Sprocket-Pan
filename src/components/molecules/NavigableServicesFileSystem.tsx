@@ -4,17 +4,16 @@ import { ApplicationDataContext, ServicesSearchContext } from '../../App';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { CollapseExpandButton } from '../atoms/buttons/CollapseExpandButton';
 import { SearchInputField } from '../atoms/SearchInputField';
-import { filterApplicationDataServicesBySearchTerm } from '../../utils/search';
-import { log } from '../../utils/logging';
 import ListDivider from '@mui/joy/ListDivider';
+import { getValidIdsFromSearchTerm } from '../../utils/search';
 
 export function NavigableServicesFileSystem() {
 	const [collapsed, setCollapsed] = useState(false);
 	const applicationData = useContext(ApplicationDataContext);
 	const { searchText, setSearchText } = useContext(ServicesSearchContext);
-	const filteredServices = useMemo(() => {
-		return filterApplicationDataServicesBySearchTerm(searchText, applicationData.services);
-	}, [applicationData.services, searchText]);
+	const validIds = useMemo(() => {
+		return getValidIdsFromSearchTerm(searchText, applicationData);
+	}, [applicationData, searchText]);
 
 	return (
 		<>
@@ -34,11 +33,12 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!collapsed &&
-							Object.values(filteredServices)
+							Object.values(applicationData.services)
+								.filter((service) => validIds.has(service.id))
 								.sort((a, b) => a.name.localeCompare(b.name))
 								.map((service, index) => (
 									<div key={index}>
-										<ServiceFileSystem service={service} />
+										<ServiceFileSystem service={service} validIds={validIds} />
 										<ListDivider />{' '}
 									</div>
 								))}

@@ -7,7 +7,7 @@ import { EndpointFileSystem } from './EndpointFileSystem';
 import { keepStringLengthReasonable } from '../../utils/string';
 import { ApplicationDataContext } from '../../App';
 
-export function ServiceFileSystem({ service }: { service: Service }) {
+export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const data = useContext(ApplicationDataContext);
 
@@ -35,10 +35,11 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 			>
 				{!collapsed &&
 					Object.values(service.endpointIds)
+						.filter((endpointId) => validIds.has(endpointId))
 						.map((endpointId) => data.endpoints[endpointId])
 						.filter((x) => x != null)
 						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((endpoint, index) => <EndpointFileSystem endpoint={endpoint} key={index} />)}
+						.map((endpoint, index) => <EndpointFileSystem endpoint={endpoint} validIds={validIds} key={index} />)}
 			</List>
 		</ListItem>
 	);

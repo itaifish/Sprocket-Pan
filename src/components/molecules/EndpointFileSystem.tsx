@@ -27,7 +27,7 @@ import { ApplicationDataContext } from '../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
 import { keepStringLengthReasonable } from '../../utils/string';
 
-export function EndpointFileSystem({ endpoint }: { endpoint: Endpoint }) {
+export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const [editingText, setEditingText] = useState<null | string>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -144,6 +144,7 @@ export function EndpointFileSystem({ endpoint }: { endpoint: Endpoint }) {
 			>
 				{!collapsed &&
 					Object.values(data.endpoints[endpoint.id]?.requestIds)
+						.filter((requestId) => validIds.has(requestId))
 						.map((requestIds) => data.requests[requestIds])
 						.filter((x) => x != null)
 						.sort((a, b) => a.name.localeCompare(b.name))
