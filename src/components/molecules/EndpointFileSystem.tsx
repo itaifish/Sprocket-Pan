@@ -8,6 +8,10 @@ import {
 	Input,
 	FormHelperText,
 	FormControl,
+	Menu,
+	Dropdown,
+	MenuButton,
+	MenuItem,
 } from '@mui/joy';
 import { Endpoint, EndpointRequest } from '../../types/application-data/application-data';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
@@ -17,13 +21,16 @@ import { RequestFileSystem } from './RequestFileSystem';
 import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { ApplicationDataContext } from '../../App';
-import { InfoOutlined } from '@mui/icons-material';
+import { InfoOutlined, MoreVert } from '@mui/icons-material';
 
 export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoint; serviceName: string }) {
 	const [collapsed, setCollapsed] = useState(true);
 	const [editingText, setEditingText] = useState<null | string>(null);
+	const [menuOpen, setMenuOpen] = useState(false);
 	const data = useContext(ApplicationDataContext);
 	const isValidEditingText =
 		editingText === null ||
@@ -32,23 +39,45 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 				.map((endpoint) => endpoint.name)
 				.filter((name) => name != endpoint.name)
 				.includes(editingText));
-	return (
-		<ListItem
-			nested
-			endAction={
-				editingText === null && (
-					<IconButton
-						aria-label="edit endpoint"
-						size="sm"
+	const menuButton = (
+		<>
+			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
+				<MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'plain', color: 'neutral' } }}>
+					<MoreVert />
+				</MenuButton>
+				<Menu sx={{ zIndex: 1201 }}>
+					<MenuItem
 						onClick={() => {
+							setMenuOpen(false);
 							setEditingText(endpoint.name);
 						}}
 					>
-						<EditIcon fontSize="small" />
-					</IconButton>
-				)
-			}
-		>
+						<ListItemDecorator>
+							<IconButton aria-label="edit endpoint" size="sm">
+								<EditIcon fontSize="small" />
+							</IconButton>
+							Edit
+						</ListItemDecorator>
+					</MenuItem>
+					<MenuItem
+						onClick={() => {
+							setMenuOpen(false);
+							applicationDataManager.createDefaultRequest(serviceName, endpoint.name);
+						}}
+					>
+						<ListItemDecorator>
+							<IconButton aria-label="add new request" size="sm">
+								<AddBoxIcon fontSize="small" />
+							</IconButton>
+							Add Request
+						</ListItemDecorator>
+					</MenuItem>
+				</Menu>
+			</Dropdown>
+		</>
+	);
+	return (
+		<ListItem nested endAction={editingText === null && <>{menuButton}</>}>
 			<ListItemButton>
 				<ListItemDecorator>
 					<IconButton

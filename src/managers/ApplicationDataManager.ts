@@ -3,7 +3,7 @@
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
-import { ApplicationData, Endpoint } from '../types/application-data/application-data';
+import { ApplicationData, Endpoint, EndpointRequest } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 
@@ -22,6 +22,38 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		super();
 		this.data = this.getDefaultData();
 		this.init();
+	}
+
+	public createDefaultRequest(serviceName: string, endpointName: string) {
+		const service = this.data.services[serviceName];
+		if (service == null) {
+			log.warn(`Can't find service ${serviceName}`);
+			return;
+		}
+		const endPointToUpdate = service.endpoints[endpointName];
+		if (endPointToUpdate == null) {
+			log.warn(`Can't find endpoint ${endpointName}`);
+			return;
+		}
+		const keys = Object.keys(endPointToUpdate.requests);
+		let requestStr = `New Request`;
+		let index = 0;
+		while (keys.includes(`${requestStr}(${index})`)) {
+			index++;
+		}
+		requestStr += `(${index})`;
+
+		const newEndpointRequest: EndpointRequest<'none'> = {
+			name: requestStr,
+			headers: {},
+			queryParams: {},
+			bodyType: 'none',
+			rawType: undefined,
+			body: undefined,
+		};
+		endPointToUpdate.requests[requestStr] = newEndpointRequest;
+		this.data = { ...this.data };
+		this.emit('update');
 	}
 
 	public updateEndpoint(serviceName: string, endpointName: string, endpointUpdate: Partial<Endpoint>) {
