@@ -52,11 +52,6 @@ export function filterApplicationDataServicesBySearchTerm(searchText: string, se
 			filteredServices[filteredService.name] = filteredService;
 		}
 	}
-	const requests = Object.values(filteredServices).flatMap((service) =>
-		Object.values(service.endpoints).flatMap((endpoint) =>
-			Object.values(endpoint.requests).map((request) => request.name),
-		),
-	);
-	log.info(`Requests: ${requests}`);
+
 	return filteredServices;
 }

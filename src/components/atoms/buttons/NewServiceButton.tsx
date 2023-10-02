@@ -11,7 +11,12 @@ export function NewServiceButton() {
 			variant="soft"
 			color="neutral"
 			onClick={async () => {
-				const selectedUrl = await open({ filters: [{ name: 'Swagger/OpenAPI File', extensions: ['yaml', 'json'] }] });
+				const selectedUrl = await open({
+					filters: [
+						{ name: 'Swagger/OpenAPI File', extensions: ['yaml', 'json', 'yml'] },
+						{ name: 'All Files', extensions: ['*'] },
+					],
+				});
 				if (selectedUrl && typeof selectedUrl === 'string') {
 					await applicationDataManager.loadSwaggerFile(selectedUrl);
 				}

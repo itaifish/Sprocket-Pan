@@ -6,6 +6,7 @@ import { CollapseExpandButton } from '../atoms/buttons/CollapseExpandButton';
 import { SearchInputField } from '../atoms/SearchInputField';
 import { filterApplicationDataServicesBySearchTerm } from '../../utils/search';
 import { log } from '../../utils/logging';
+import ListDivider from '@mui/joy/ListDivider';
 
 export function NavigableServicesFileSystem() {
 	const [collapsed, setCollapsed] = useState(false);
@@ -35,7 +36,12 @@ export function NavigableServicesFileSystem() {
 						{!collapsed &&
 							Object.values(filteredServices)
 								.sort((a, b) => a.name.localeCompare(b.name))
-								.map((service, index) => <ServiceFileSystem service={service} key={index} />)}
+								.map((service, index) => (
+									<>
+										<ServiceFileSystem service={service} key={index} />
+										<ListDivider />{' '}
+									</>
+								))}
 					</List>
 				</ListItem>
 			</List>
