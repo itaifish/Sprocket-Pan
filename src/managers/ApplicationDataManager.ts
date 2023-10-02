@@ -31,18 +31,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			log.warn(`Can't find endpoint ${endpointId}`);
 			return;
 		}
-		const keys = Object.keys(this.data.requests);
-		let requestStr = `New Request`;
-		let index = 0;
-		while (keys.includes(`${requestStr}(${index})`)) {
-			index++;
-		}
-		requestStr += `(${index})`;
 
 		const newEndpointRequest: EndpointRequest<'none'> = {
 			id: v4(),
 			endpointId: endPointToUpdate.id,
-			name: requestStr,
+			name: `New Request`,
 			headers: {},
 			queryParams: {},
 			bodyType: 'none',
