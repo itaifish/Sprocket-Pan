@@ -1,6 +1,6 @@
 import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import { EndpointRequest } from '../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { useContext } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { SelectedRequestContext } from '../../App';
 import { selectedRequestEquals } from '../../utils/object';

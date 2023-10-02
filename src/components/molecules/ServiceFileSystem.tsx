@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemButton, ListItemContent, ListItemDecorator, ListSubheader } from '@mui/joy';
+import { List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { Service } from '../../types/application-data/application-data';
