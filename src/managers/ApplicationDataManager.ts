@@ -6,6 +6,7 @@ import { path } from '@tauri-apps/api';
 import { ApplicationData, Endpoint, EndpointRequest } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
+import { v4 } from 'uuid';
 
 type DataEvent = 'update';
 
@@ -24,18 +25,13 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.init();
 	}
 
-	public createDefaultRequest(serviceName: string, endpointName: string) {
-		const service = this.data.services[serviceName];
-		if (service == null) {
-			log.warn(`Can't find service ${serviceName}`);
-			return;
-		}
-		const endPointToUpdate = service.endpoints[endpointName];
+	public createDefaultRequest(endpointId: string) {
+		const endPointToUpdate = this.data.endpoints[endpointId];
 		if (endPointToUpdate == null) {
-			log.warn(`Can't find endpoint ${endpointName}`);
+			log.warn(`Can't find endpoint ${endpointId}`);
 			return;
 		}
-		const keys = Object.keys(endPointToUpdate.requests);
+		const keys = Object.keys(this.data.requests);
 		let requestStr = `New Request`;
 		let index = 0;
 		while (keys.includes(`${requestStr}(${index})`)) {
@@ -44,6 +40,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		requestStr += `(${index})`;
 
 		const newEndpointRequest: EndpointRequest<'none'> = {
+			id: v4(),
+			endpointId: endPointToUpdate.id,
 			name: requestStr,
 			headers: {},
 			queryParams: {},
@@ -51,48 +49,33 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			rawType: undefined,
 			body: undefined,
 		};
-		endPointToUpdate.requests[requestStr] = newEndpointRequest;
+		this.data.requests[newEndpointRequest.id] = newEndpointRequest;
 		this.data = { ...this.data };
 		this.emit('update');
 	}
 
-	public updateEndpoint(serviceName: string, endpointName: string, endpointUpdate: Partial<Endpoint>) {
-		const service = this.data.services[serviceName];
-		if (service == null) {
-			log.warn(`Can't find service ${serviceName}`);
-			return;
-		}
-		let endPointToUpdate = service.endpoints[endpointName];
+	public updateEndpoint(endpointId: string, endpointUpdate: Partial<Endpoint>) {
+		let endPointToUpdate = this.data.endpoints[endpointId];
 		if (endPointToUpdate == null) {
-			log.warn(`Can't find endpoint ${endpointName}`);
+			log.warn(`Can't find endpoint ${endpointId}`);
 			return;
 		}
 		log.info(`Endpoint to update before: ${JSON.stringify(endPointToUpdate)}`);
 		endPointToUpdate = { ...endPointToUpdate, ...endpointUpdate };
-		if (endpointUpdate.name != null && endPointToUpdate.name != endpointName) {
-			service.endpoints[endpointUpdate.name] = endPointToUpdate;
-			delete service.endpoints[endpointName];
-		}
-		log.info(
-			`endpoint object is now: ${JSON.stringify(this.data.services[serviceName].endpoints[endPointToUpdate.name])}`,
-		);
+		log.info(`endpoint object is now: ${JSON.stringify(this.data.endpoints[endpointId])}`);
 		// Kinda hacky, need to tell react to update.
 		this.data = { ...this.data };
 		this.emit('update');
 	}
 
 	public async loadSwaggerFile(url: string): Promise<void> {
-		const service = await swaggerParseManager.parseSwaggerFile('filePath', url);
+		const newData = await swaggerParseManager.parseSwaggerFile('filePath', url);
 		const data = structuredClone(this.getApplicationData());
-		let name = service.name;
-		let index = 0;
-		while (data.services[`${service.name}${index || ''}`]) {
-			index++;
+		for (const type of ['services', 'endpoints', 'requests'] as const) {
+			newData[type].forEach((x) => {
+				data[type][x.id] = x;
+			});
 		}
-		name += `${index || ''}`;
-		service.name = name;
-		log.info(`New service loaded: ${name}`);
-		data.services[service.name] = service;
 		const result = await this.saveApplicationData(data);
 		if (result === 'saved') {
 			this.data = data;
@@ -107,6 +90,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private getDefaultData(): ApplicationData {
 		return {
 			services: {},
+			endpoints: {},
+			requests: {},
 			settings: {
 				debugLogs: true,
 			},

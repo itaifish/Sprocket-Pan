@@ -1,5 +1,5 @@
 import { Settings } from '../settings/settings';
-
+import { v4 as uuidv4 } from 'uuid';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
 export const RESTfulRequestVerbs = ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'] as const;
@@ -9,6 +9,8 @@ export type RequestBodyType = (typeof RequestBodyTypes)[number];
 const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
+	id: string;
+	endpointId: string;
 	name: string;
 	headers: Record<string, string>;
 	queryParams: Record<string, string[]>;
@@ -27,14 +29,16 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 		: RawBodyType | undefined;
 };
 export type Endpoint<TUrlBase extends string = string> = {
+	id: string;
 	url: `${TUrlBase}${string}`;
 	verb: RESTfulRequestVerb;
 	baseHeaders: Record<string, string>;
 	baseQueryParams: Record<string, string[]>;
-	requests: Record<string, EndpointRequest>;
 	preRequestScript?: string;
 	name: string;
 	description: string;
+	serviceId: string;
+	requestIds: string[];
 };
 
 export type Environment = {
@@ -42,20 +46,21 @@ export type Environment = {
 };
 
 export type Service<TBaseUrl extends string = string> = {
+	id: string;
 	name: string;
 	description: string;
 	version: string;
 	baseUrl: TBaseUrl;
-	endpoints: {
-		[endpointName: string]: Endpoint<TBaseUrl>;
-	};
 	localEnvironments: {
 		[environmentName: string]: Environment;
 	};
+	endpointIds: string[];
 	preRequestScript?: string;
 };
 
 export type ApplicationData = {
 	services: Record<string, Service>;
+	endpoints: Record<string, Endpoint>;
+	requests: Record<string, EndpointRequest>;
 	settings: Settings;
 };

@@ -3,27 +3,17 @@ import { EndpointRequest } from '../../types/application-data/application-data';
 import { useContext } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { SelectedRequestContext } from '../../App';
-import { selectedRequestEquals } from '../../utils/object';
 import { keepStringLengthReasonable } from '../../utils/string';
 
-export function RequestFileSystem({
-	request,
-	serviceName,
-	endpointName,
-}: {
-	request: EndpointRequest;
-	serviceName: string;
-	endpointName: string;
-}) {
+export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const { selectedRequest, setSelectedRequest } = useContext(SelectedRequestContext);
-	const thisRequest = { request: request.name, service: serviceName, endpoint: endpointName };
 	return (
 		<ListItem nested>
 			<ListItemButton
 				onClick={() => {
-					setSelectedRequest(thisRequest);
+					setSelectedRequest(request.id);
 				}}
-				selected={(selectedRequest && selectedRequestEquals(selectedRequest, thisRequest)) ?? false}
+				selected={selectedRequest === request.id ?? false}
 			>
 				<ListItemDecorator>
 					<TextSnippetIcon fontSize="small" />

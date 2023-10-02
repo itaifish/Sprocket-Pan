@@ -37,10 +37,10 @@ export function NavigableServicesFileSystem() {
 							Object.values(filteredServices)
 								.sort((a, b) => a.name.localeCompare(b.name))
 								.map((service, index) => (
-									<>
-										<ServiceFileSystem service={service} key={index} />
+									<div key={index}>
+										<ServiceFileSystem service={service} />
 										<ListDivider />{' '}
-									</>
+									</div>
 								))}
 					</List>
 				</ListItem>

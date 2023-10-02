@@ -27,7 +27,7 @@ import { ApplicationDataContext } from '../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
 import { keepStringLengthReasonable } from '../../utils/string';
 
-export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoint; serviceName: string }) {
+export function EndpointFileSystem({ endpoint }: { endpoint: Endpoint }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const [editingText, setEditingText] = useState<null | string>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -35,8 +35,8 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 	const isValidEditingText =
 		editingText === null ||
 		(editingText != '' &&
-			!Object.values(data.services[serviceName].endpoints)
-				.map((endpoint) => endpoint.name)
+			!Object.values(data.services[endpoint.serviceId].endpointIds)
+				.map((endpointId) => data.endpoints[endpointId]?.name)
 				.filter((name) => name != endpoint.name)
 				.includes(editingText));
 	const menuButton = (
@@ -62,7 +62,7 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.createDefaultRequest(serviceName, endpoint.name);
+							applicationDataManager.createDefaultRequest(endpoint.id);
 						}}
 					>
 						<ListItemDecorator>
@@ -111,7 +111,7 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 										<IconButton
 											onClick={() => {
 												if (isValidEditingText) {
-													applicationDataManager.updateEndpoint(serviceName, endpoint.name, { name: editingText });
+													applicationDataManager.updateEndpoint(endpoint.id, { name: editingText });
 													setEditingText(null);
 												}
 											}}
@@ -143,11 +143,11 @@ export function EndpointFileSystem({ endpoint, serviceName }: { endpoint: Endpoi
 				}}
 			>
 				{!collapsed &&
-					Object.values(endpoint.requests)
+					Object.values(data.endpoints[endpoint.id]?.requestIds)
+						.map((requestIds) => data.requests[requestIds])
+						.filter((x) => x != null)
 						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((request: EndpointRequest, index) => (
-							<RequestFileSystem request={request} serviceName={serviceName} endpointName={endpoint.name} key={index} />
-						))}
+						.map((request: EndpointRequest, index) => <RequestFileSystem request={request} key={index} />)}
 			</List>
 		</ListItem>
 	);

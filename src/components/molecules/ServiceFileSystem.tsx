@@ -2,12 +2,18 @@ import { List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { Service } from '../../types/application-data/application-data';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { EndpointFileSystem } from './EndpointFileSystem';
 import { keepStringLengthReasonable } from '../../utils/string';
+import { ApplicationDataContext } from '../../App';
 
 export function ServiceFileSystem({ service }: { service: Service }) {
 	const [collapsed, setCollapsed] = useState(false);
+	const data = useContext(ApplicationDataContext);
+
+	if (service == null) {
+		return <></>;
+	}
 	return (
 		<ListItem nested>
 			<ListItemButton
@@ -28,11 +34,11 @@ export function ServiceFileSystem({ service }: { service: Service }) {
 				}}
 			>
 				{!collapsed &&
-					Object.values(service.endpoints)
+					Object.values(service.endpointIds)
+						.map((endpointId) => data.endpoints[endpointId])
+						.filter((x) => x != null)
 						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((endpoint, index) => (
-							<EndpointFileSystem endpoint={endpoint} serviceName={service.name} key={index} />
-						))}
+						.map((endpoint, index) => <EndpointFileSystem endpoint={endpoint} key={index} />)}
 			</List>
 		</ListItem>
 	);

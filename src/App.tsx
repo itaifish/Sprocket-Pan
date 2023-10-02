@@ -4,7 +4,7 @@ import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
 import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
-import { SelectedRequest, StateContext } from './types/state/state';
+import { StateContext } from './types/state/state';
 import { log } from './utils/logging';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
@@ -12,7 +12,7 @@ export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>(
 	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
 });
 export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
-type SelectedRequestContextType = StateContext<SelectedRequest | null, 'selectedRequest'>;
+type SelectedRequestContextType = StateContext<string | null, 'selectedRequest'>;
 export const SelectedRequestContext = createContext<SelectedRequestContextType>(
 	null as unknown as SelectedRequestContextType,
 );
@@ -36,7 +36,7 @@ function App() {
 		};
 	}, []);
 
-	const [selectedRequest, setSelectedRequest] = useState<SelectedRequest | null>(null);
+	const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
 	const [searchText, setSearchText] = useState('');
 	return (
 		<div className="container">
