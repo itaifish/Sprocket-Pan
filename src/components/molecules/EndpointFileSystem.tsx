@@ -23,11 +23,14 @@ import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
-import { ApplicationDataContext } from '../../App';
+import { ApplicationDataContext, TabsContext } from '../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
 import { keepStringLengthReasonable } from '../../utils/string';
+import { tabsManager } from '../../managers/TabsManager';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
+	const tabsContext = useContext(TabsContext);
+	const { tabs } = tabsContext;
 	const [collapsed, setCollapsed] = useState(false);
 	const [editingText, setEditingText] = useState<null | string>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -78,7 +81,12 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 	);
 	return (
 		<ListItem nested endAction={editingText === null && <>{menuButton}</>}>
-			<ListItemButton>
+			<ListItemButton
+				onClick={() => {
+					tabsManager.selectTab(tabsContext, endpoint.id, 'endpoint');
+				}}
+				selected={tabs.selected === endpoint.id}
+			>
 				<ListItemDecorator>
 					<IconButton
 						size="sm"

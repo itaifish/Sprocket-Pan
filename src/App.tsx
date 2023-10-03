@@ -4,7 +4,7 @@ import { SideDrawer } from './components/molecules/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
 import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
-import { StateContext } from './types/state/state';
+import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
@@ -12,10 +12,10 @@ export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>(
 	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
 });
 export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
-type SelectedRequestContextType = StateContext<string | null, 'selectedRequest'>;
-export const SelectedRequestContext = createContext<SelectedRequestContextType>(
-	null as unknown as SelectedRequestContextType,
-);
+
+type TabsType = { tabs: Record<string, TabType>; selected: string | null };
+export type TabsContextType = StateContext<TabsType, 'tabs'>;
+export const TabsContext = createContext<TabsContextType>(null as unknown as TabsContextType);
 
 type ServicesSearchContextType = StateContext<string, 'searchText'>;
 export const ServicesSearchContext = createContext<ServicesSearchContextType>(
@@ -36,13 +36,13 @@ function App() {
 		};
 	}, []);
 
-	const [selectedRequest, setSelectedRequest] = useState<string | null>(null);
+	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	const [searchText, setSearchText] = useState('');
 	return (
 		<div className="container">
 			<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
 				<ApplicationDataContext.Provider value={data}>
-					<SelectedRequestContext.Provider value={{ selectedRequest, setSelectedRequest }}>
+					<TabsContext.Provider value={{ tabs, setTabs }}>
 						<ServicesSearchContext.Provider value={{ searchText, setSearchText }}>
 							{drawerOpen && (
 								<SideDrawer>
@@ -52,7 +52,7 @@ function App() {
 								</SideDrawer>
 							)}
 						</ServicesSearchContext.Provider>
-					</SelectedRequestContext.Provider>
+					</TabsContext.Provider>
 				</ApplicationDataContext.Provider>
 			</DrawerContext.Provider>
 		</div>

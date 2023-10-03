@@ -2,18 +2,20 @@ import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui
 import { EndpointRequest } from '../../types/application-data/application-data';
 import { useContext } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { SelectedRequestContext } from '../../App';
+import { TabsContext } from '../../App';
 import { keepStringLengthReasonable } from '../../utils/string';
+import { tabsManager } from '../../managers/TabsManager';
 
 export function RequestFileSystem({ request }: { request: EndpointRequest }) {
-	const { selectedRequest, setSelectedRequest } = useContext(SelectedRequestContext);
+	const tabsContext = useContext(TabsContext);
+	const { tabs } = tabsContext;
 	return (
 		<ListItem nested>
 			<ListItemButton
 				onClick={() => {
-					setSelectedRequest(request.id);
+					tabsManager.selectTab(tabsContext, request.id, 'request');
 				}}
-				selected={selectedRequest === request.id ?? false}
+				selected={tabs.selected === request.id}
 			>
 				<ListItemDecorator>
 					<TextSnippetIcon fontSize="small" />

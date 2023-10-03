@@ -1,5 +1,4 @@
 import { Settings } from '../settings/settings';
-import { v4 as uuidv4 } from 'uuid';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
 export const RESTfulRequestVerbs = ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'] as const;
@@ -62,5 +61,6 @@ export type ApplicationData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
+	environments: Record<string, Environment>;
 	settings: Settings;
 };

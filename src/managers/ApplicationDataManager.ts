@@ -87,6 +87,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			services: {},
 			endpoints: {},
 			requests: {},
+			environments: {},
 			settings: {
 				debugLogs: true,
 			},
