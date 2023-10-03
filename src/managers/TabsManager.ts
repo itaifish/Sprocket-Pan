@@ -16,7 +16,7 @@ class TabsManager {
 		setTabs({ tabs: { ...tabs.tabs, [tabId]: tabType }, selected: tabId });
 	}
 
-	private getMapFromTabType(data: ApplicationData, tabType: TabType) {
+	public getMapFromTabType(data: ApplicationData, tabType: TabType) {
 		let _exaustive: never;
 		switch (tabType) {
 			case 'endpoint':
@@ -29,7 +29,7 @@ class TabsManager {
 				return data.services;
 			default:
 				_exaustive = tabType;
-				break;
+				return data.endpoints;
 		}
 	}
 }

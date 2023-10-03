@@ -6,6 +6,8 @@ import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
 import { NavigableServicesFileSystem } from './components/molecules/NavigableServicesFileSystem';
 import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
+import { TabHeader } from './components/molecules/TabHeader';
+import { Stack } from '@mui/joy';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
@@ -44,13 +46,16 @@ function App() {
 				<ApplicationDataContext.Provider value={data}>
 					<TabsContext.Provider value={{ tabs, setTabs }}>
 						<ServicesSearchContext.Provider value={{ searchText, setSearchText }}>
-							{drawerOpen && (
-								<SideDrawer>
-									<ThemeToggleButton />
-									<NewServiceButton />
-									<NavigableServicesFileSystem />
-								</SideDrawer>
-							)}
+							<Stack direction={'row'}>
+								{drawerOpen && (
+									<SideDrawer>
+										<ThemeToggleButton />
+										<NewServiceButton />
+										<NavigableServicesFileSystem />
+									</SideDrawer>
+								)}
+								<TabHeader />
+							</Stack>
 						</ServicesSearchContext.Provider>
 					</TabsContext.Provider>
 				</ApplicationDataContext.Provider>

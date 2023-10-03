@@ -20,7 +20,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 		<ListItem nested>
 			<ListItemButton
 				onClick={() => {
-					tabsManager.selectTab(tabsContext, service.id, 'request');
+					tabsManager.selectTab(tabsContext, service.id, 'service');
 				}}
 				selected={tabs.selected === service.id}
 			>
