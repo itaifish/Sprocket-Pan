@@ -16,7 +16,14 @@ class TabsManager {
 		setTabs({ tabs: { ...tabs.tabs, [tabId]: tabType }, selected: tabId });
 	}
 
-	public getMapFromTabType(data: ApplicationData, tabType: TabType) {
+	closeTab(tabContext: TabsContextType, tabId: string) {
+		const { tabs, setTabs } = tabContext;
+		const newTabs = structuredClone(tabs.tabs);
+		delete newTabs[tabId];
+		setTabs({ tabs: newTabs, selected: tabs.selected });
+	}
+
+	getMapFromTabType(data: ApplicationData, tabType: TabType) {
 		let _exaustive: never;
 		switch (tabType) {
 			case 'endpoint':

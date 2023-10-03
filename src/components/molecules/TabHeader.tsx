@@ -1,12 +1,13 @@
 import { useContext } from 'react';
 import { ApplicationDataContext, TabsContext } from '../../App';
-import { ListItemDecorator, Tab, TabList, Tabs, tabClasses } from '@mui/joy';
+import { IconButton, ListItemDecorator, Tab, TabList, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../managers/TabsManager';
 import { log } from '../../utils/logging';
 import { keepStringLengthReasonable } from '../../utils/string';
 import { TabType } from '../../types/state/state';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import CloseIcon from '@mui/icons-material/Close';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
@@ -73,6 +74,16 @@ export function TabHeader() {
 						>
 							<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
 							{keepStringLengthReasonable(tabData?.name)}
+							<ListItemDecorator>
+								<IconButton
+									onClick={(e) => {
+										tabsManager.closeTab(tabsContext, tabId);
+										e.stopPropagation();
+									}}
+								>
+									<CloseIcon />
+								</IconButton>
+							</ListItemDecorator>
 						</Tab>
 					);
 				})}
