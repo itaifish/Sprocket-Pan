@@ -1,8 +1,19 @@
-import { useContext, useMemo } from 'react';
+import { useContext } from 'react';
 import { ApplicationDataContext, TabsContext } from '../../App';
 import { ListItemDecorator, Tab, TabList, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../managers/TabsManager';
 import { log } from '../../utils/logging';
+import { keepStringLengthReasonable } from '../../utils/string';
+import { TabType } from '../../types/state/state';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+
+const iconFromTabType: Record<TabType, JSX.Element> = {
+	endpoint: <FolderOpenIcon />,
+	environment: <FolderOpenIcon />,
+	request: <TextSnippetIcon />,
+	service: <FolderOpenIcon />,
+};
 
 export function TabHeader() {
 	const tabsContext = useContext(TabsContext);
@@ -12,6 +23,7 @@ export function TabHeader() {
 	return (
 		<Tabs
 			aria-label="tabs"
+			size="lg"
 			value={tabs.selected}
 			onChange={(_event, newValue) => {
 				const newTabId = newValue as string;
@@ -24,12 +36,17 @@ export function TabHeader() {
 				sticky="top"
 				underlinePlacement="bottom"
 				variant="soft"
+				disableUnderline
 				sx={{
+					overflow: 'auto',
+					scrollSnapType: 'x mandatory',
+					'&::-webkit-scrollbar': { display: 'none' },
 					[`& .${tabClasses.root}`]: {
 						'&[aria-selected="true"]': {
 							color: `primary.500`,
-							bgcolor: (theme) => `rgba(${theme.vars.palette.neutral.darkChannel} / 0.8)`,
+							bgcolor: 'background.surface',
 							borderColor: 'divider',
+							outline: 'none',
 							'&::before': {
 								content: '""',
 								display: 'block',
@@ -38,7 +55,7 @@ export function TabHeader() {
 								bottom: -2,
 								left: 0,
 								right: 0,
-								bgcolor: (theme) => `rgba(${theme.vars.palette.neutral.darkChannel} / 0.8)`,
+								bgcolor: 'background.surface',
 							},
 						},
 					},
@@ -48,9 +65,14 @@ export function TabHeader() {
 					const tabData = tabsManager.getMapFromTabType(data, tabType)[tabId];
 
 					return (
-						<Tab indicatorPlacement="bottom" key={index} value={tabId}>
-							<ListItemDecorator>{/* <GoogleIcon /> */}</ListItemDecorator>
-							{tabData?.name}
+						<Tab
+							indicatorPlacement="top"
+							value={tabId}
+							key={index}
+							sx={{ minWidth: 200, flex: 'none', scrollSnapAlign: 'start' }}
+						>
+							<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
+							{keepStringLengthReasonable(tabData?.name)}
 						</Tab>
 					);
 				})}
