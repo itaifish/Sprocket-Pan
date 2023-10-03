@@ -90,8 +90,10 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 				<ListItemDecorator>
 					<IconButton
 						size="sm"
-						onClick={() => {
+						onClick={(e) => {
 							setCollapsed((wasCollapsed) => !wasCollapsed);
+							e.preventDefault();
+							e.stopPropagation();
 						}}
 					>
 						{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
