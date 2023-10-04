@@ -2,7 +2,7 @@
 // yarn add -D eslint eslint-config-prettier eslint-plugin-prettier prettier @typescript-eslint/parser eslint-plugin-react @typescript-eslint/eslint-plugin eslint-config-next
 module.exports = {
 	root: true,
-	plugins: ['react'],
+	plugins: ['react', 'unused-imports'],
 	parserOptions: {
 		ecmaVersion: 15, // Allows for the parsing of modern ECMAScript features
 		sourceType: 'module', // Allows for the use of imports
@@ -51,6 +51,8 @@ module.exports = {
 						caughtErrorsIgnorePattern: '^_',
 					},
 				],
+				'unused-imports/no-unused-imports': 'error',
+				'unused-imports/no-unused-vars': 'off',
 			},
 		},
 	],

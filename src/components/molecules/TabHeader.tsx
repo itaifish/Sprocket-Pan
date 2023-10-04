@@ -1,20 +1,7 @@
 import { useContext } from 'react';
 import { ApplicationDataContext, TabsContext } from '../../App';
-import {
-	Chip,
-	Grid,
-	IconButton,
-	ListItemDecorator,
-	Sheet,
-	Stack,
-	Tab,
-	TabList,
-	TabPanel,
-	Tabs,
-	tabClasses,
-} from '@mui/joy';
+import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../managers/TabsManager';
-import { log } from '../../utils/logging';
 import { keepStringLengthReasonable } from '../../utils/string';
 import { TabType } from '../../types/state/state';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';

@@ -7,7 +7,7 @@ import { NavigableServicesFileSystem } from './components/molecules/NavigableSer
 import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/TabHeader';
-import { Box, Grid, Stack } from '@mui/joy';
+import { Box, Grid } from '@mui/joy';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
