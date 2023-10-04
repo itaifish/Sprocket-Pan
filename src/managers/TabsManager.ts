@@ -11,15 +11,19 @@ class TabsManager {
 		const { tabs, setTabs } = tabContext;
 		if (tabs.tabs[tabId] != null) {
 			setTabs({ tabs: tabs.tabs, selected: tabId });
-			return;
+		} else {
+			setTabs({ tabs: { ...tabs.tabs, [tabId]: tabType }, selected: tabId });
 		}
-		setTabs({ tabs: { ...tabs.tabs, [tabId]: tabType }, selected: tabId });
 	}
 
 	closeTab(tabContext: TabsContextType, tabId: string) {
 		const { tabs, setTabs } = tabContext;
 		const newTabs = structuredClone(tabs.tabs);
 		delete newTabs[tabId];
+		const newTabsKeys = Object.keys(newTabs);
+		if (tabs.selected === tabId && newTabsKeys.length > 0) {
+			tabs.selected = newTabsKeys[0];
+		}
 		setTabs({ tabs: newTabs, selected: tabs.selected });
 	}
 

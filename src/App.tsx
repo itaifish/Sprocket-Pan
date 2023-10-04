@@ -7,7 +7,7 @@ import { NavigableServicesFileSystem } from './components/molecules/NavigableSer
 import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/TabHeader';
-import { Stack } from '@mui/joy';
+import { Box, Grid, Stack } from '@mui/joy';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
@@ -39,6 +39,7 @@ function App() {
 	}, []);
 
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
+	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
 	const [searchText, setSearchText] = useState('');
 	return (
 		<div className="container">
@@ -46,16 +47,27 @@ function App() {
 				<ApplicationDataContext.Provider value={data}>
 					<TabsContext.Provider value={{ tabs, setTabs }}>
 						<ServicesSearchContext.Provider value={{ searchText, setSearchText }}>
-							<Stack direction={'row'}>
-								{drawerOpen && (
-									<SideDrawer>
-										<ThemeToggleButton />
-										<NewServiceButton />
-										<NavigableServicesFileSystem />
-									</SideDrawer>
-								)}
-								<TabHeader />
-							</Stack>
+							<Box
+								sx={{
+									minHeight: '100vh',
+									maxWidth: '100vw',
+								}}
+							>
+								<Grid container spacing={0}>
+									<Grid xs={'auto'}>
+										{drawerOpen && (
+											<SideDrawer>
+												<ThemeToggleButton />
+												<NewServiceButton />
+												<NavigableServicesFileSystem />
+											</SideDrawer>
+										)}
+									</Grid>
+									<Grid xs={true}>
+										<TabHeader />
+									</Grid>
+								</Grid>
+							</Box>
 						</ServicesSearchContext.Provider>
 					</TabsContext.Provider>
 				</ApplicationDataContext.Provider>

@@ -1,6 +1,18 @@
 import { useContext } from 'react';
 import { ApplicationDataContext, TabsContext } from '../../App';
-import { IconButton, ListItemDecorator, Tab, TabList, Tabs, tabClasses } from '@mui/joy';
+import {
+	Chip,
+	Grid,
+	IconButton,
+	ListItemDecorator,
+	Sheet,
+	Stack,
+	Tab,
+	TabList,
+	TabPanel,
+	Tabs,
+	tabClasses,
+} from '@mui/joy';
 import { tabsManager } from '../../managers/TabsManager';
 import { log } from '../../utils/logging';
 import { keepStringLengthReasonable } from '../../utils/string';
@@ -8,6 +20,8 @@ import { TabType } from '../../types/state/state';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import CloseIcon from '@mui/icons-material/Close';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
@@ -38,13 +52,14 @@ export function TabHeader() {
 				underlinePlacement="bottom"
 				variant="soft"
 				disableUnderline
+				id="tabScroll"
 				sx={{
 					overflow: 'auto',
 					scrollSnapType: 'x mandatory',
 					'&::-webkit-scrollbar': { display: 'none' },
 					[`& .${tabClasses.root}`]: {
 						'&[aria-selected="true"]': {
-							color: `primary.500`,
+							color: `secondary.500`,
 							bgcolor: 'background.surface',
 							borderColor: 'divider',
 							outline: 'none',
@@ -62,6 +77,19 @@ export function TabHeader() {
 					},
 				}}
 			>
+				<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px' }}>
+					<IconButton
+						size="lg"
+						color="primary"
+						variant="soft"
+						sx={{ boxShadow: '5px 5px 5px black' }}
+						onClick={() => {
+							document.getElementById('tabScroll')?.scrollBy({ left: -50, behavior: 'instant' });
+						}}
+					>
+						<ArrowLeftIcon />
+					</IconButton>
+				</div>
 				{Object.entries(tabs.tabs).map(([tabId, tabType], index) => {
 					const tabData = tabsManager.getMapFromTabType(data, tabType)[tabId];
 
@@ -70,12 +98,14 @@ export function TabHeader() {
 							indicatorPlacement="top"
 							value={tabId}
 							key={index}
-							sx={{ minWidth: 200, flex: 'none', scrollSnapAlign: 'start' }}
+							id={`tab_${tabId}`}
+							sx={{ minWidth: 230, flex: 'none', scrollSnapAlign: 'start' }}
 						>
 							<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
-							{keepStringLengthReasonable(tabData?.name)}
+							{keepStringLengthReasonable(tabData?.name, 20)}
 							<ListItemDecorator>
 								<IconButton
+									color="danger"
 									onClick={(e) => {
 										tabsManager.closeTab(tabsContext, tabId);
 										e.stopPropagation();
@@ -87,7 +117,26 @@ export function TabHeader() {
 						</Tab>
 					);
 				})}
+
+				<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px', right: 40 }}>
+					<IconButton
+						size="lg"
+						color="primary"
+						variant="soft"
+						sx={{ boxShadow: '5px 5px 5px black' }}
+						onClick={() => {
+							document.getElementById('tabScroll')?.scrollBy({ left: 50, behavior: 'instant' });
+						}}
+					>
+						<ArrowRightIcon />
+					</IconButton>
+				</div>
 			</TabList>
+			{Object.keys(tabs.tabs).map((tabId, index) => (
+				<TabPanel value={tabId} key={index}>
+					<Sheet sx={{ height: '100%', boxSizing: 'content-box' }}>{tabId}</Sheet>
+				</TabPanel>
+			))}
 		</Tabs>
 	);
 }
