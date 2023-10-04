@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { ApplicationDataContext, TabsContext } from '../../App';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../managers/TabsManager';
@@ -21,7 +21,34 @@ export function TabHeader() {
 	const tabsContext = useContext(TabsContext);
 	const data = useContext(ApplicationDataContext);
 	const { tabs } = tabsContext;
+	const [disabled, setDisabled] = useState({ left: false, right: false });
+	const getTabScroll = () => document.getElementById('tabScroll');
+	const validateScroll = useCallback(() => {
+		const scrollEl = getTabScroll();
+		if (!scrollEl) {
+			setDisabled({ left: true, right: true });
+			return;
+		}
+		let left = false;
+		let right = false;
+		if (scrollEl.scrollLeft <= 0) {
+			left = true;
+		} else if (scrollEl.scrollLeft >= scrollEl?.scrollWidth - scrollEl?.clientWidth) {
+			right = true;
+		}
+		setDisabled({ left, right });
+	}, []);
 
+	useEffect(() => {
+		const tabScroll = getTabScroll();
+		tabScroll?.addEventListener('scroll', () => {
+			validateScroll();
+		});
+	}, []);
+
+	useEffect(() => {
+		validateScroll();
+	}, [tabs]);
 	return (
 		<Tabs
 			aria-label="tabs"
@@ -71,8 +98,9 @@ export function TabHeader() {
 						variant="soft"
 						sx={{ boxShadow: '5px 5px 5px black' }}
 						onClick={() => {
-							document.getElementById('tabScroll')?.scrollBy({ left: -50, behavior: 'instant' });
+							getTabScroll()?.scrollBy({ left: -50, behavior: 'instant' });
 						}}
+						disabled={disabled.left}
 					>
 						<ArrowLeftIcon />
 					</IconButton>
@@ -114,6 +142,7 @@ export function TabHeader() {
 						onClick={() => {
 							document.getElementById('tabScroll')?.scrollBy({ left: 50, behavior: 'instant' });
 						}}
+						disabled={disabled.right}
 					>
 						<ArrowRightIcon />
 					</IconButton>
