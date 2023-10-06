@@ -3,9 +3,9 @@ import { Settings } from '../settings/settings';
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
 export const RESTfulRequestVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const;
 export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
-const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
+export const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
-const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
+export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
