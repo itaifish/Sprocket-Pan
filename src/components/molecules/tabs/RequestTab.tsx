@@ -125,11 +125,18 @@ export function RequestTab(props: TabProps) {
 			<Grid container direction={'row'} spacing={1}>
 				<Grid xs={6}>
 					<Card>
+						<Typography level="h3" sx={{ textAlign: 'center' }}>
+							Request
+						</Typography>
 						<RequestBody requestData={requestData} />
 					</Card>
 				</Grid>
 				<Grid xs={6}>
-					<Card></Card>
+					<Card>
+						<Typography level="h3" sx={{ textAlign: 'center' }}>
+							Response
+						</Typography>
+					</Card>
 				</Grid>
 			</Grid>
 		</>
