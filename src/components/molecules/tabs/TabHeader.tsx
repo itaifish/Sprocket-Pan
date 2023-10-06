@@ -60,7 +60,7 @@ export function TabHeader() {
 				const newTabId = newValue as string;
 				tabsManager.selectTab(tabsContext, newTabId, tabs.tabs[newTabId]);
 			}}
-			sx={{ width: '100%' }}
+			sx={{ width: '100%', height: '100%', overflow: 'hidden' }}
 		>
 			<TabList
 				tabFlex="1"
@@ -152,7 +152,7 @@ export function TabHeader() {
 			</TabList>
 			{Object.entries(tabs.tabs).map(([tabId, tabType], index) => (
 				<TabPanel value={tabId} key={index}>
-					<Sheet sx={{ height: '100%', boxSizing: 'content-box' }}>
+					<Sheet sx={{ boxSizing: 'content-box' }}>
 						<TabContent id={tabId} type={tabType} />
 					</Sheet>
 				</TabPanel>

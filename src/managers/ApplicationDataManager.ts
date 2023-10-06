@@ -8,7 +8,7 @@ import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 
-type DataEvent = 'update';
+type DataEvent = 'update' | 'saved';
 
 export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -59,6 +59,17 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.data.endpoints[endpointId] = endPointToUpdate;
 		log.info(`endpoint object is now: ${JSON.stringify(this.data.endpoints[endpointId])}`);
 		// Kinda hacky, need to tell react to update.
+		this.data = { ...this.data };
+		this.emit('update');
+	}
+
+	public updateRequest(requestId: string, requestUpdate: Partial<EndpointRequest>) {
+		let requestToUpdate = this.data.requests[requestId];
+		if (requestToUpdate == null) {
+			log.warn(`Can't find request ${requestId}`);
+		}
+		requestToUpdate = { ...requestToUpdate, ...requestUpdate };
+		this.data.requests[requestId] = requestToUpdate;
 		this.data = { ...this.data };
 		this.emit('update');
 	}
@@ -157,7 +168,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		}
 	};
 
-	private saveApplicationData = async (applicationData: ApplicationData) => {
+	public saveApplicationData = async (applicationData: ApplicationData) => {
 		try {
 			const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
 			if (!doesExist) {
@@ -169,6 +180,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					{ contents: JSON.stringify(applicationData), path: ApplicationDataManager.PATH },
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 				);
+				this.emit('saved');
 				return 'saved' as const;
 			}
 		} catch (e) {

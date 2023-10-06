@@ -122,7 +122,7 @@ export function RequestTab(props: TabProps) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<Grid container direction={'row'} spacing={1}>
+			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
 				<Grid xs={6}>
 					<Card>
 						<Typography level="h3" sx={{ textAlign: 'center' }}>

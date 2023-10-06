@@ -33,6 +33,7 @@ export default function JsonEditor(props: JSONEditorPropsOptional) {
 
 	return (
 		<div
+			style={{ maxHeight: '500px', overflowY: 'scroll', objectFit: 'cover' }}
 			className={`vanilla-jsoneditor-react ${mode === 'dark' ? 'jse-theme-dark' : ''}`}
 			ref={refContainer as any}
 		></div>

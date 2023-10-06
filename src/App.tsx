@@ -1,13 +1,12 @@
 import { createContext, useEffect, useState } from 'react';
-import { ThemeToggleButton } from './components/atoms/buttons/ThemeToggleButton';
 import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
-import { NewServiceButton } from './components/atoms/buttons/NewServiceButton';
-import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
 import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/tabs/TabHeader';
 import { Box, Grid } from '@mui/joy';
+import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
+import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
@@ -57,8 +56,7 @@ function App() {
 									<Grid xs={'auto'}>
 										{drawerOpen && (
 											<SideDrawer>
-												<ThemeToggleButton />
-												<NewServiceButton />
+												<SideDrawerActionButtons />
 												<NavigableServicesFileSystem />
 											</SideDrawer>
 										)}
