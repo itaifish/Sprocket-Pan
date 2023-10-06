@@ -11,6 +11,7 @@ import {
 	IconButton,
 	useTheme,
 	useColorScheme,
+	Card,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
 import { RESTfulRequestVerb, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
@@ -21,6 +22,7 @@ import { ApplicationDataContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
+import { RequestBody } from './request/RequestBody';
 
 const verbColors: Record<RESTfulRequestVerb, OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>> = {
 	GET: 'primary',
@@ -118,6 +120,16 @@ export function RequestTab(props: TabProps) {
 							</IconButton>
 						</ParticleEffectButton>
 					</Stack>
+				</Grid>
+			</Grid>
+			<Grid container direction={'row'} spacing={1}>
+				<Grid xs={6}>
+					<Card>
+						<RequestBody requestData={requestData} />
+					</Card>
+				</Grid>
+				<Grid xs={6}>
+					<Card></Card>
 				</Grid>
 			</Grid>
 		</>
