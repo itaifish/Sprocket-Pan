@@ -23,6 +23,7 @@
 		"js-yaml": "^4.1.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
+		"react-particle-effect-button": "^1.0.1",
 		"tauri-plugin-log-api": "https://github.com/tauri-apps/tauri-plugin-log",
 		"tauri-plugin-window-state-api": "https://github.com/tauri-apps/tauri-plugin-window-state#v1",
 		"uuid": "^9.0.1"

@@ -1,7 +1,7 @@
 import { Settings } from '../settings/settings';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
-export const RESTfulRequestVerbs = ['POST', 'GET', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'] as const;
+export const RESTfulRequestVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const;
 export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
 const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
@@ -53,6 +53,7 @@ export type Service<TBaseUrl extends string = string> = {
 	localEnvironments: {
 		[environmentName: string]: Environment;
 	};
+	selectedEnvironment?: string;
 	endpointIds: string[];
 	preRequestScript?: string;
 };
@@ -62,5 +63,6 @@ export type ApplicationData = {
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
+	selectedEnvironment?: string;
 	settings: Settings;
 };

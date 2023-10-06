@@ -1,14 +1,15 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { ApplicationDataContext, TabsContext } from '../../App';
+import { ApplicationDataContext, TabsContext } from '../../../App';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
-import { tabsManager } from '../../managers/TabsManager';
-import { keepStringLengthReasonable } from '../../utils/string';
-import { TabType } from '../../types/state/state';
+import { tabsManager } from '../../../managers/TabsManager';
+import { keepStringLengthReasonable } from '../../../utils/string';
+import { TabType } from '../../../types/state/state';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { TabContent } from './TabContent';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
@@ -149,9 +150,11 @@ export function TabHeader() {
 					</IconButton>
 				</div>
 			</TabList>
-			{Object.keys(tabs.tabs).map((tabId, index) => (
+			{Object.entries(tabs.tabs).map(([tabId, tabType], index) => (
 				<TabPanel value={tabId} key={index}>
-					<Sheet sx={{ height: '100%', boxSizing: 'content-box' }}>{tabId}</Sheet>
+					<Sheet sx={{ height: '100%', boxSizing: 'content-box' }}>
+						<TabContent id={tabId} type={tabType} />
+					</Sheet>
 				</TabPanel>
 			))}
 		</Tabs>

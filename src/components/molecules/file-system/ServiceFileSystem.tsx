@@ -1,12 +1,12 @@
 import { IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
-import { Service } from '../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { useState, useContext } from 'react';
+import { ApplicationDataContext, TabsContext } from '../../../App';
+import { tabsManager } from '../../../managers/TabsManager';
+import { Service } from '../../../types/application-data/application-data';
+import { keepStringLengthReasonable } from '../../../utils/string';
 import { EndpointFileSystem } from './EndpointFileSystem';
-import { keepStringLengthReasonable } from '../../utils/string';
-import { ApplicationDataContext, TabsContext } from '../../App';
-import { tabsManager } from '../../managers/TabsManager';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);

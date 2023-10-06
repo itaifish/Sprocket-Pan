@@ -13,7 +13,7 @@ import {
 	MenuButton,
 	MenuItem,
 } from '@mui/joy';
-import { Endpoint, EndpointRequest } from '../../types/application-data/application-data';
+import { Endpoint, EndpointRequest } from '../../../types/application-data/application-data';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { useContext, useState } from 'react';
@@ -22,11 +22,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { applicationDataManager } from '../../managers/ApplicationDataManager';
-import { ApplicationDataContext, TabsContext } from '../../App';
+import { applicationDataManager } from '../../../managers/ApplicationDataManager';
+import { ApplicationDataContext, TabsContext } from '../../../App';
 import { InfoOutlined, MoreVert } from '@mui/icons-material';
-import { keepStringLengthReasonable } from '../../utils/string';
-import { tabsManager } from '../../managers/TabsManager';
+import { keepStringLengthReasonable } from '../../../utils/string';
+import { tabsManager } from '../../../managers/TabsManager';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);

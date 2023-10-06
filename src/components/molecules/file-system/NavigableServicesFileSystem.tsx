@@ -1,11 +1,10 @@
-import { List, ListItem, ListSubheader } from '@mui/joy';
+import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
 import { useContext, useMemo, useState } from 'react';
-import { ApplicationDataContext, ServicesSearchContext } from '../../App';
+import { ApplicationDataContext, ServicesSearchContext } from '../../../App';
+import { getValidIdsFromSearchTerm } from '../../../utils/search';
+import { SearchInputField } from '../../atoms/SearchInputField';
+import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
-import { CollapseExpandButton } from '../atoms/buttons/CollapseExpandButton';
-import { SearchInputField } from '../atoms/SearchInputField';
-import ListDivider from '@mui/joy/ListDivider';
-import { getValidIdsFromSearchTerm } from '../../utils/search';
 
 export function NavigableServicesFileSystem() {
 	const [collapsed, setCollapsed] = useState(false);
