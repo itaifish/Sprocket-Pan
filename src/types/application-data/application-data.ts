@@ -26,6 +26,8 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 		: TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded'
 		? undefined
 		: RawBodyType | undefined;
+	preRequestScript?: string;
+	postRequestScript?: string;
 };
 export type Endpoint<TUrlBase extends string = string> = {
 	id: string;
@@ -34,6 +36,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	baseHeaders: Record<string, string>;
 	baseQueryParams: Record<string, string[]>;
 	preRequestScript?: string;
+	postRequestScript?: string;
 	name: string;
 	description: string;
 	serviceId: string;
@@ -41,6 +44,8 @@ export type Endpoint<TUrlBase extends string = string> = {
 };
 
 export type Environment = {
+	__name: string;
+	__id: string;
 	[key: string]: string;
 };
 

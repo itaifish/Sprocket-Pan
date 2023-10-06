@@ -65,7 +65,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.createDefaultRequest(endpoint.id);
+							applicationDataManager.addNew('request', { endpointId: endpoint.id });
 						}}
 					>
 						<ListItemDecorator>

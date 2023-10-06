@@ -7,6 +7,7 @@ import { ApplicationData, Endpoint, EndpointRequest } from '../types/application
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
+import { TabType } from '../types/state/state';
 
 type DataEvent = 'update' | 'saved';
 
@@ -25,25 +26,66 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.init();
 	}
 
-	public createDefaultRequest(endpointId: string) {
-		const endPointToUpdate = this.data.endpoints[endpointId];
-		if (endPointToUpdate == null) {
-			log.warn(`Can't find endpoint ${endpointId}`);
-			return;
+	public addNew<
+		TTabType extends TabType,
+		TAdditionalContext = TTabType extends 'request'
+			? { endpointId: string }
+			: TTabType extends 'endpoint'
+			? { serviceId: string }
+			: undefined,
+	>(type: TTabType, additionalContext: TAdditionalContext) {
+		let _exaustive: never;
+		const newId = v4();
+		switch (type) {
+			case 'environment':
+				this.data.environments[newId] = {
+					__id: newId,
+					__name: 'New Environment',
+				};
+				break;
+			case 'service':
+				this.data.services[newId] = {
+					id: newId,
+					name: 'New Service',
+					description: '',
+					version: '1.0.0',
+					baseUrl: '',
+					localEnvironments: {},
+					endpointIds: [],
+				};
+				break;
+			case 'endpoint':
+				const { serviceId } = additionalContext as { serviceId: string };
+				this.data.endpoints[newId] = {
+					id: newId,
+					url: '',
+					verb: 'GET',
+					baseHeaders: {},
+					name: 'New Endpoint',
+					baseQueryParams: {},
+					description: '',
+					serviceId,
+					requestIds: [],
+				};
+				this.data.services[serviceId]?.endpointIds?.push(newId);
+				break;
+			case 'request':
+				const { endpointId } = additionalContext as { endpointId: string };
+				this.data.requests[newId] = {
+					id: newId,
+					endpointId: endpointId,
+					name: 'New Request',
+					headers: {},
+					queryParams: {},
+					body: undefined,
+					bodyType: 'none',
+					rawType: undefined,
+				};
+				this.data.endpoints[endpointId]?.requestIds?.push(newId);
+				break;
+			default:
+				_exaustive = type;
 		}
-
-		const newEndpointRequest: EndpointRequest<'none'> = {
-			id: v4(),
-			endpointId: endPointToUpdate.id,
-			name: `New Request`,
-			headers: {},
-			queryParams: {},
-			bodyType: 'none',
-			rawType: undefined,
-			body: undefined,
-		};
-		this.data.requests[newEndpointRequest.id] = newEndpointRequest;
-		endPointToUpdate.requestIds.push(newEndpointRequest.id);
 		this.data = { ...this.data };
 		this.emit('update');
 	}

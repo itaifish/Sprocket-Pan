@@ -4,7 +4,6 @@ import {
 	Option,
 	ColorPaletteProp,
 	OptionPropsColorOverrides,
-	Input,
 	Typography,
 	Button,
 	Stack,
@@ -12,17 +11,22 @@ import {
 	useTheme,
 	useColorScheme,
 	Card,
+	Divider,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
 import { RESTfulRequestVerb, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
-import SendIcon from '@mui/icons-material/Send';
+import LabelIcon from '@mui/icons-material/Label';
 import { OverridableStringUnion } from '@mui/types';
 import { ApplicationDataContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
 import { RequestBody } from './request/RequestBody';
+import SendIcon from '@mui/icons-material/Send';
+import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EditableTitle } from '../../atoms/EditableTitle';
+import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 
 const verbColors: Record<RESTfulRequestVerb, OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>> = {
 	GET: 'primary',
@@ -51,14 +55,16 @@ export function RequestTab(props: TabProps) {
 	}
 	return (
 		<>
-			<Typography level="h2" sx={{ textAlign: 'center' }}>
-				{requestData.name}
-			</Typography>
+			<EditableTitle
+				titleText={requestData.name}
+				setTitleText={(newText: string) => applicationDataManager.updateRequest(props.id, { name: newText })}
+				isValidFunc={(text: string) => text.length >= 1}
+			/>
 			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
 				<Grid xs={2}>
 					<Select
 						value={endpointData.verb}
-						startDecorator={<SendIcon />}
+						startDecorator={<LabelIcon />}
 						color={verbColors[endpointData.verb]}
 						variant="soft"
 						listboxOpen={false}
@@ -76,21 +82,26 @@ export function RequestTab(props: TabProps) {
 					</Select>
 				</Grid>
 				<Grid xs={8}>
-					<Input
-						placeholder="URL"
+					<Card
 						variant="outlined"
 						color={'primary'}
-						value={`${serviceData.baseUrl}${endpointData.url}`}
-						onFocus={() => {
+						onClick={() => {
 							if (!isAnimating) {
 								setHidden(true);
 							}
 						}}
-					/>
+						sx={{
+							'--Card-padding': '6px',
+						}}
+					>
+						{environmentContextResolver.stringWithVarsToTypography(`${serviceData.baseUrl}${endpointData.url}`, data)}
+					</Card>
 				</Grid>
 				<Grid xs={2}>
 					<Stack direction={'row'} spacing={2}>
-						<Button color="primary">Send</Button>
+						<Button color="primary" startDecorator={<SendIcon />}>
+							Send
+						</Button>
 						<ParticleEffectButton
 							hidden={hidden}
 							canvasPadding={50}
@@ -128,6 +139,7 @@ export function RequestTab(props: TabProps) {
 						<Typography level="h3" sx={{ textAlign: 'center' }}>
 							Request
 						</Typography>
+						<Divider />
 						<RequestBody requestData={requestData} />
 					</Card>
 				</Grid>
@@ -136,6 +148,7 @@ export function RequestTab(props: TabProps) {
 						<Typography level="h3" sx={{ textAlign: 'center' }}>
 							Response
 						</Typography>
+						<Divider />
 					</Card>
 				</Grid>
 			</Grid>

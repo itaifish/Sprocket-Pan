@@ -10,6 +10,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
+import { Environment } from '../../../types/application-data/application-data';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
@@ -119,7 +120,7 @@ export function TabHeader() {
 							sx={{ minWidth: 230, flex: 'none', scrollSnapAlign: 'start' }}
 						>
 							<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
-							{keepStringLengthReasonable(tabData?.name, 20)}
+							{keepStringLengthReasonable(tabData?.name ?? (tabData as Environment)?.__name ?? '', 20)}
 							<ListItemDecorator>
 								<IconButton
 									color="danger"

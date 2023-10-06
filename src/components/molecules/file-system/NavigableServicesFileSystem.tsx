@@ -5,9 +5,12 @@ import { getValidIdsFromSearchTerm } from '../../../utils/search';
 import { SearchInputField } from '../../atoms/SearchInputField';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
+import { EnvironmentFileSystem } from './EnvironmentFileSystem';
 
 export function NavigableServicesFileSystem() {
-	const [collapsed, setCollapsed] = useState(false);
+	const [servicesCollapsed, setServicesCollapsed] = useState(false);
+	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
+
 	const applicationData = useContext(ApplicationDataContext);
 	const { searchText, setSearchText } = useContext(ServicesSearchContext);
 	const validIds = useMemo(() => {
@@ -22,8 +25,8 @@ export function NavigableServicesFileSystem() {
 				</ListItem>
 				<ListItem nested>
 					<ListSubheader>
-						Services
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						Environments
+						<CollapseExpandButton collapsed={environmentsCollapsed} setCollapsed={setEnvironmentsCollapsed} />
 					</ListSubheader>
 					<List
 						aria-labelledby="nav-list-browse"
@@ -31,14 +34,37 @@ export function NavigableServicesFileSystem() {
 							'& .JoyListItemButton-root': { p: '8px' },
 						}}
 					>
-						{!collapsed &&
+						{!environmentsCollapsed &&
+							Object.values(applicationData.environments)
+								.sort((a, b) => a.__name.localeCompare(b.__name))
+								.map((env, index, arr) => (
+									<div key={index}>
+										<EnvironmentFileSystem environment={env} />
+										{index != arr.length - 1 && <ListDivider />}
+									</div>
+								))}
+					</List>
+				</ListItem>
+				<ListDivider />
+				<ListItem nested>
+					<ListSubheader>
+						Services
+						<CollapseExpandButton collapsed={servicesCollapsed} setCollapsed={setServicesCollapsed} />
+					</ListSubheader>
+					<List
+						aria-labelledby="nav-list-browse"
+						sx={{
+							'& .JoyListItemButton-root': { p: '8px' },
+						}}
+					>
+						{!servicesCollapsed &&
 							Object.values(applicationData.services)
 								.filter((service) => validIds.has(service.id))
 								.sort((a, b) => a.name.localeCompare(b.name))
 								.map((service, index) => (
 									<div key={index}>
 										<ServiceFileSystem service={service} validIds={validIds} />
-										<ListDivider />{' '}
+										<ListDivider />
 									</div>
 								))}
 					</List>

@@ -1,8 +1,28 @@
+import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
 
 class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
 	private constructor() {}
+
+	public stringWithVarsToTypography(text: string, data: ApplicationData, serviceId?: string) {
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+		return (
+			<Typography>
+				{snippets.map((snippet, index) => {
+					if (snippet.variableName) {
+						return (
+							<Typography variant="outlined" color={snippet.value ? 'success' : 'danger'} key={index}>
+								{`{${snippet.variableName}}`}: {snippet.value ?? 'unknown'}
+							</Typography>
+						);
+					} else {
+						return snippet.value;
+					}
+				})}
+			</Typography>
+		);
+	}
 
 	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
 		const env = this.buildEnvironmentVariables(data, serviceId);
@@ -30,7 +50,7 @@ class EnvironmentContextResolver {
 	}
 
 	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string) {
-		let env: Environment = {};
+		let env: Environment = { __name: '', __id: '' };
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
 		}
