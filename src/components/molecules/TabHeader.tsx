@@ -33,7 +33,8 @@ export function TabHeader() {
 		let right = false;
 		if (scrollEl.scrollLeft <= 0) {
 			left = true;
-		} else if (scrollEl.scrollLeft >= scrollEl?.scrollWidth - scrollEl?.clientWidth) {
+		}
+		if (scrollEl.scrollLeft >= scrollEl.scrollWidth - scrollEl.clientWidth) {
 			right = true;
 		}
 		setDisabled({ left, right });
