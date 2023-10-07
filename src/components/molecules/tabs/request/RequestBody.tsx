@@ -36,7 +36,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 										} else {
 											update.rawType = undefined;
 										}
-										applicationDataManager.updateRequest(requestData.id, update);
+										applicationDataManager.update('request', requestData.id, update);
 									}
 								}}
 							>
@@ -67,7 +67,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 										}}
 										onChange={(_e, value) => {
 											if (value) {
-												applicationDataManager.updateRequest(requestData.id, { rawType: value });
+												applicationDataManager.update('request', requestData.id, { rawType: value });
 											}
 										}}
 									>

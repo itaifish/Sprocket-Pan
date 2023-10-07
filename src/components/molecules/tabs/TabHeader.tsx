@@ -11,10 +11,11 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { Environment } from '../../../types/application-data/application-data';
+import TableChartIcon from '@mui/icons-material/TableChart';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
-	environment: <FolderOpenIcon />,
+	environment: <TableChartIcon />,
 	request: <TextSnippetIcon />,
 	service: <FolderOpenIcon />,
 };

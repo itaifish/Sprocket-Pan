@@ -57,7 +57,7 @@ export function RequestTab(props: TabProps) {
 		<>
 			<EditableTitle
 				titleText={requestData.name}
-				setTitleText={(newText: string) => applicationDataManager.updateRequest(props.id, { name: newText })}
+				setTitleText={(newText: string) => applicationDataManager.update('request', props.id, { name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
 			/>
 			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>

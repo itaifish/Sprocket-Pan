@@ -121,7 +121,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 										<IconButton
 											onClick={() => {
 												if (isValidEditingText) {
-													applicationDataManager.updateEndpoint(endpoint.id, { name: editingText });
+													applicationDataManager.update('endpoint', endpoint.id, { name: editingText });
 													setEditingText(null);
 												}
 											}}

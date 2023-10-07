@@ -33,7 +33,7 @@ export function NewButton() {
 					}}
 				>
 					<ListItemDecorator>
-						<IconButton aria-label="add new request" size="sm">
+						<IconButton aria-label="add new environment" size="sm">
 							<TableChartIcon fontSize="small" />
 						</IconButton>
 						New Environment

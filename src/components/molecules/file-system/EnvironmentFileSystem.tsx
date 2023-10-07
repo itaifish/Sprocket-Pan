@@ -4,7 +4,7 @@ import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { useContext } from 'react';
 import { TabsContext } from '../../../App';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import TableChartIcon from '@mui/icons-material/TableChart';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);
@@ -18,7 +18,7 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 				selected={tabs.selected === environment.__id}
 			>
 				<ListItemDecorator>
-					<TextSnippetIcon fontSize="small" />
+					<TableChartIcon fontSize="small" />
 				</ListItemDecorator>
 				<ListSubheader>{keepStringLengthReasonable(environment.__name)}</ListSubheader>
 			</ListItemButton>

@@ -3,13 +3,26 @@
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
-import { ApplicationData, Endpoint, EndpointRequest } from '../types/application-data/application-data';
+import {
+	ApplicationData,
+	Endpoint,
+	EndpointRequest,
+	Environment,
+	Service,
+} from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 import { TabType } from '../types/state/state';
 
 type DataEvent = 'update' | 'saved';
+
+type UpdateType = {
+	service: Partial<Service>;
+	endpoint: Partial<Endpoint>;
+	request: Partial<EndpointRequest>;
+	environment: Partial<Environment>;
+};
 
 export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -90,28 +103,14 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public updateEndpoint(endpointId: string, endpointUpdate: Partial<Endpoint>) {
-		let endPointToUpdate = this.data.endpoints[endpointId];
-		if (endPointToUpdate == null) {
-			log.warn(`Can't find endpoint ${endpointId}`);
+	public update<TTabType extends TabType>(updateType: TTabType, updateId: string, updateObj: UpdateType[TTabType]) {
+		let dataToUpdate = this.data[`${updateType}s`][updateId];
+		if (dataToUpdate == null) {
+			log.warn(`Can't find ${updateType} ${updateId}`);
 			return;
 		}
-		log.info(`Endpoint to update before: ${JSON.stringify(endPointToUpdate)}`);
-		endPointToUpdate = { ...endPointToUpdate, ...endpointUpdate };
-		this.data.endpoints[endpointId] = endPointToUpdate;
-		log.info(`endpoint object is now: ${JSON.stringify(this.data.endpoints[endpointId])}`);
-		// Kinda hacky, need to tell react to update.
-		this.data = { ...this.data };
-		this.emit('update');
-	}
-
-	public updateRequest(requestId: string, requestUpdate: Partial<EndpointRequest>) {
-		let requestToUpdate = this.data.requests[requestId];
-		if (requestToUpdate == null) {
-			log.warn(`Can't find request ${requestId}`);
-		}
-		requestToUpdate = { ...requestToUpdate, ...requestUpdate };
-		this.data.requests[requestId] = requestToUpdate;
+		dataToUpdate = { ...dataToUpdate, ...updateObj } as any;
+		this.data[`${updateType}s`][updateId] = dataToUpdate;
 		this.data = { ...this.data };
 		this.emit('update');
 	}
