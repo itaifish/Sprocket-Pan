@@ -1,12 +1,26 @@
-import { Select, Stack, Option, FormControl, FormLabel, Grid } from '@mui/joy';
+import { Select, Stack, Option, FormControl, FormLabel, Grid, useColorScheme } from '@mui/joy';
 import { EndpointRequest, RawBodyTypes, RequestBodyTypes } from '../../../../types/application-data/application-data';
-import JsonEditor from '../../../atoms/editor/JsonEditor';
 import ListIcon from '@mui/icons-material/List';
-import { Mode } from 'vanilla-jsoneditor';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import DataObjectIcon from '@mui/icons-material/DataObject';
+import { Editor } from '@monaco-editor/react';
+import { useEffect, useState } from 'react';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
+	const { mode } = useColorScheme();
+	const [editor, setEditor] = useState<string | undefined>(undefined);
+	const [editorText, setEditorText] = useState(typeof requestData.body === 'string' ? requestData.body : '');
+	useEffect(() => {
+		if (requestData.bodyType === 'raw') {
+			if (requestData.rawType != undefined) {
+				const newEditor = requestData.rawType.toLocaleLowerCase();
+				setEditor(newEditor);
+			}
+		} else {
+			setEditor(undefined);
+		}
+	}, [requestData.rawType, requestData.bodyType]);
+
 	return (
 		<>
 			<Stack spacing={1}>
@@ -82,8 +96,14 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 						</Grid>
 					</Grid>
 				</FormControl>
-				{requestData.bodyType === 'raw' && requestData.rawType === 'JSON' && (
-					<JsonEditor mode={Mode.text} mainMenuBar={false} tabSize={3} indentation={'\t'} />
+				{editor && (
+					<Editor
+						height={'50vh'}
+						value={editorText}
+						onChange={(value) => setEditorText(value ?? '')}
+						language={editor}
+						theme={mode === 'dark' ? 'vs-dark' : mode}
+					/>
 				)}
 			</Stack>
 		</>
