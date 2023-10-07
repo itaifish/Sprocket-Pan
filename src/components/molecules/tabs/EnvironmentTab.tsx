@@ -13,7 +13,12 @@ export function EnvironmentTab(props: TabProps) {
 			<EditableTitle
 				titleText={environment.__name}
 				setTitleText={(newText: string) => applicationDataManager.update('environment', props.id, { __name: newText })}
-				isValidFunc={(text: string) => text.length >= 1}
+				isValidFunc={(text: string) =>
+					text.length >= 1 &&
+					Object.values(data.environments)
+						.filter((env) => env.__id != props.id)
+						.filter((env) => env.__name === text).length === 0
+				}
 			/>
 			<Table stripe={'even'} variant="outlined" size="lg" sx={{ marginTop: '20px' }}>
 				<thead>

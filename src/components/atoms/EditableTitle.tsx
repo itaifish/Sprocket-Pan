@@ -1,5 +1,5 @@
 import { IconButton, Input, Typography } from '@mui/joy';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { keepStringLengthReasonable } from '../../utils/string';
@@ -13,6 +13,10 @@ interface EditableTitleProps {
 export function EditableTitle(props: EditableTitleProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [typingText, setTypingText] = useState(props.titleText);
+	const [isValid, setIsValid] = useState(true);
+	useEffect(() => {
+		setIsValid(props.isValidFunc(typingText));
+	}, [typingText, props.isValidFunc]);
 	return isEditing ? (
 		<Input
 			size="lg"
@@ -21,7 +25,7 @@ export function EditableTitle(props: EditableTitleProps) {
 			variant="outlined"
 			value={typingText}
 			onChange={(e) => setTypingText(e.target.value)}
-			error={!props.isValidFunc(typingText)}
+			error={!isValid}
 			endDecorator={
 				<>
 					<IconButton
@@ -34,11 +38,12 @@ export function EditableTitle(props: EditableTitleProps) {
 					</IconButton>
 					<IconButton
 						onClick={() => {
-							if (props.isValidFunc(typingText)) {
+							if (isValid) {
 								props.setTitleText(typingText);
 								setIsEditing(false);
 							}
 						}}
+						disabled={!isValid}
 					>
 						<CheckIcon fontSize="large" />
 					</IconButton>
