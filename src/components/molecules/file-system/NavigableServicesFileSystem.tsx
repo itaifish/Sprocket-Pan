@@ -36,6 +36,7 @@ export function NavigableServicesFileSystem() {
 					>
 						{!environmentsCollapsed &&
 							Object.values(applicationData.environments)
+								.filter((env) => validIds.has(env.__id))
 								.sort((a, b) => a.__name.localeCompare(b.__name))
 								.map((env, index, arr) => (
 									<div key={index}>

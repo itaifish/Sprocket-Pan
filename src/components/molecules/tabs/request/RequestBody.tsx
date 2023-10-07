@@ -98,7 +98,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 				</FormControl>
 				{editor && (
 					<Editor
-						height={'50vh'}
+						height={'45vh'}
 						value={editorText}
 						onChange={(value) => setEditorText(value ?? '')}
 						language={editor}

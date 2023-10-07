@@ -41,7 +41,7 @@ function App() {
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
 	const [searchText, setSearchText] = useState('');
 	return (
-		<div className="container">
+		<div className="container" style={{ height: '100vh' }}>
 			<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
 				<ApplicationDataContext.Provider value={data}>
 					<TabsContext.Provider value={{ tabs, setTabs }}>

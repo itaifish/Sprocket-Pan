@@ -1,24 +1,26 @@
 import { useContext } from 'react';
 import { ApplicationDataContext } from '../../../App';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { EditableTitle } from '../../atoms/EditableTitle';
+import { EditableText } from '../../atoms/EditableText';
 import { TabProps } from './TabContent';
-import { Table } from '@mui/joy';
+import { IconButton, Table } from '@mui/joy';
+import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 
 export function EnvironmentTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const environment = data.environments[props.id];
 	return (
 		<>
-			<EditableTitle
-				titleText={environment.__name}
-				setTitleText={(newText: string) => applicationDataManager.update('environment', props.id, { __name: newText })}
+			<EditableText
+				text={environment.__name}
+				setText={(newText: string) => applicationDataManager.update('environment', props.id, { __name: newText })}
 				isValidFunc={(text: string) =>
 					text.length >= 1 &&
 					Object.values(data.environments)
 						.filter((env) => env.__id != props.id)
 						.filter((env) => env.__name === text).length === 0
 				}
+				isTitle
 			/>
 			<Table stripe={'even'} variant="outlined" size="lg" sx={{ marginTop: '20px' }}>
 				<thead>
@@ -33,12 +35,58 @@ export function EnvironmentTab(props: TabProps) {
 						.sort()
 						.map((key, index) => (
 							<tr key={index}>
-								<td>{key}</td>
-								<td>{environment[key]}</td>
+								<td>
+									<EditableText
+										isTitle={false}
+										text={key}
+										setText={(newText) => {
+											applicationDataManager.update('environment', props.id, {
+												[key]: undefined,
+												[newText]: environment[key],
+											});
+										}}
+										isValidFunc={(text) =>
+											text.length >= 1 &&
+											!text.startsWith('__') &&
+											!Object.keys(environment)
+												.filter((x) => x != key)
+												.includes(text)
+										}
+									/>
+								</td>
+								<td>
+									<EditableText
+										isTitle={false}
+										text={environment[key]}
+										setText={(newText) => {
+											applicationDataManager.update('environment', props.id, {
+												[key]: newText,
+											});
+										}}
+										isValidFunc={(_text) => true}
+									/>
+								</td>
 							</tr>
 						))}
 					<tr>
-						<td></td>
+						<td>
+							<IconButton
+								onClick={() => {
+									let newVariable = `New Variable`;
+									const keys = Object.keys(environment);
+									let index = 0;
+									while (keys.includes(`${newVariable}${index === 0 ? '' : ` (${index})`}`)) {
+										index++;
+									}
+									newVariable = `${newVariable}${index === 0 ? '' : ` (${index})`}`;
+									applicationDataManager.update('environment', props.id, {
+										[newVariable]: '?',
+									});
+								}}
+							>
+								<LibraryAddIcon />
+							</IconButton>
+						</td>
 						<td></td>
 					</tr>
 				</tbody>

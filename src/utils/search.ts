@@ -69,5 +69,11 @@ export function getValidIdsFromSearchTerm(searchText: string, data: ApplicationD
 		}
 	}
 
+	for (const env of Object.values(data.environments)) {
+		if (env.__name.toLocaleLowerCase().includes(searchText)) {
+			validIds.add(env.__id);
+		}
+	}
+
 	return validIds;
 }

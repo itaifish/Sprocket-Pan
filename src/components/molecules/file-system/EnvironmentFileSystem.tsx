@@ -3,11 +3,12 @@ import { Environment } from '../../../types/application-data/application-data';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { useContext } from 'react';
-import { TabsContext } from '../../../App';
+import { ApplicationDataContext, TabsContext } from '../../../App';
 import TableChartIcon from '@mui/icons-material/TableChart';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);
+	const data = useContext(ApplicationDataContext);
 	const { tabs } = tabsContext;
 	return (
 		<ListItem nested>
@@ -16,6 +17,7 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 					tabsManager.selectTab(tabsContext, environment.__id, 'environment');
 				}}
 				selected={tabs.selected === environment.__id}
+				color={data.selectedEnvironment === environment.__id ? 'success' : 'neutral'}
 			>
 				<ListItemDecorator>
 					<TableChartIcon fontSize="small" />

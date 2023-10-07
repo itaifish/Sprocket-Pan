@@ -25,7 +25,7 @@ import { rgbToHex } from '@mui/material';
 import { RequestBody } from './request/RequestBody';
 import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { EditableTitle } from '../../atoms/EditableTitle';
+import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 
 const verbColors: Record<RESTfulRequestVerb, OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>> = {
@@ -55,10 +55,11 @@ export function RequestTab(props: TabProps) {
 	}
 	return (
 		<>
-			<EditableTitle
-				titleText={requestData.name}
-				setTitleText={(newText: string) => applicationDataManager.update('request', props.id, { name: newText })}
+			<EditableText
+				text={requestData.name}
+				setText={(newText: string) => applicationDataManager.update('request', props.id, { name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
+				isTitle
 			/>
 			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
 				<Grid xs={2}>

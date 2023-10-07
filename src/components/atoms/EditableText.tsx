@@ -4,24 +4,25 @@ import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { keepStringLengthReasonable } from '../../utils/string';
 
-interface EditableTitleProps {
-	titleText: string;
-	setTitleText: (text: string) => void;
+interface EditableTextProps {
+	text: string;
+	setText: (text: string) => void;
 	isValidFunc: (text: string) => boolean;
+	isTitle?: boolean;
 }
 
-export function EditableTitle(props: EditableTitleProps) {
+export function EditableText(props: EditableTextProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [typingText, setTypingText] = useState(props.titleText);
+	const [typingText, setTypingText] = useState(props.text);
 	const [isValid, setIsValid] = useState(true);
 	useEffect(() => {
 		setIsValid(props.isValidFunc(typingText));
 	}, [typingText, props.isValidFunc]);
 	return isEditing ? (
 		<Input
-			size="lg"
+			size={props.isTitle ? 'lg' : 'md'}
 			sx={{ maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}
-			placeholder={'Enter your title here'}
+			placeholder={props.isTitle ? `Enter your title here` : `${props.text}`}
 			variant="outlined"
 			value={typingText}
 			onChange={(e) => setTypingText(e.target.value)}
@@ -39,7 +40,7 @@ export function EditableTitle(props: EditableTitleProps) {
 					<IconButton
 						onClick={() => {
 							if (isValid) {
-								props.setTitleText(typingText);
+								props.setText(typingText);
 								setIsEditing(false);
 							}
 						}}
@@ -52,14 +53,14 @@ export function EditableTitle(props: EditableTitleProps) {
 		/>
 	) : (
 		<Typography
-			level="h2"
+			level={props.isTitle ? `h2` : 'body-md'}
 			sx={{ textAlign: 'center' }}
 			onClick={() => {
-				setTypingText(props.titleText);
+				setTypingText(props.text);
 				setIsEditing(true);
 			}}
 		>
-			{keepStringLengthReasonable(props.titleText, 100)}
+			{keepStringLengthReasonable(props.text, props.isTitle ? 100 : 30)}
 		</Typography>
 	);
 }

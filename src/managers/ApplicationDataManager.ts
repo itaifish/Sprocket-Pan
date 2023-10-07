@@ -110,6 +110,14 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			return;
 		}
 		dataToUpdate = { ...dataToUpdate, ...updateObj } as any;
+		if (updateType === 'environment') {
+			Object.keys(dataToUpdate).forEach((key) => {
+				const envDataToUpdate = dataToUpdate as Environment;
+				if (envDataToUpdate[key] === undefined) {
+					delete envDataToUpdate[key];
+				}
+			});
+		}
 		this.data[`${updateType}s`][updateId] = dataToUpdate;
 		this.data = { ...this.data };
 		this.emit('update');
