@@ -123,6 +123,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
+	public setSelectedEnvironment(newEnvId: string | undefined) {
+		this.data.selectedEnvironment = newEnvId;
+		this.data = { ...this.data };
+		this.emit('update');
+	}
+
 	public async loadSwaggerFile(url: string): Promise<void> {
 		const newData = await swaggerParseManager.parseSwaggerFile('filePath', url);
 		const data = structuredClone(this.getApplicationData());

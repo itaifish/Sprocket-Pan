@@ -5,6 +5,7 @@ import { EditableText } from '../../atoms/EditableText';
 import { TabProps } from './TabContent';
 import { IconButton, Table } from '@mui/joy';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
+import Checkbox from '@mui/joy/Checkbox';
 
 export function EnvironmentTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -21,6 +22,17 @@ export function EnvironmentTab(props: TabProps) {
 						.filter((env) => env.__name === text).length === 0
 				}
 				isTitle
+			/>
+			<Checkbox
+				label="Selected"
+				checked={data.selectedEnvironment === props.id}
+				onChange={() => {
+					if (data.selectedEnvironment === props.id) {
+						applicationDataManager.setSelectedEnvironment(undefined);
+					} else {
+						applicationDataManager.setSelectedEnvironment(props.id);
+					}
+				}}
 			/>
 			<Table stripe={'even'} variant="outlined" size="lg" sx={{ marginTop: '20px' }}>
 				<thead>

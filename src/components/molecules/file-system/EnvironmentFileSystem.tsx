@@ -10,13 +10,14 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 	const tabsContext = useContext(TabsContext);
 	const data = useContext(ApplicationDataContext);
 	const { tabs } = tabsContext;
+	const selected = tabs.selected === environment.__id;
 	return (
 		<ListItem nested>
 			<ListItemButton
 				onClick={() => {
 					tabsManager.selectTab(tabsContext, environment.__id, 'environment');
 				}}
-				selected={tabs.selected === environment.__id}
+				selected={selected}
 				color={data.selectedEnvironment === environment.__id ? 'success' : 'neutral'}
 			>
 				<ListItemDecorator>
