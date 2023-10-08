@@ -2,8 +2,6 @@ import {
 	Grid,
 	Select,
 	Option,
-	ColorPaletteProp,
-	OptionPropsColorOverrides,
 	Typography,
 	Button,
 	Stack,
@@ -15,10 +13,9 @@ import {
 	CircularProgress,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
-import { RESTfulRequestVerb, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
-import { OverridableStringUnion } from '@mui/types';
 import { ApplicationDataContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
@@ -30,16 +27,7 @@ import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { NetworkCallResponse, networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { ResponseBody } from './request/ResponseBody';
-
-const verbColors: Record<RESTfulRequestVerb, OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>> = {
-	GET: 'primary',
-	POST: 'success',
-	DELETE: 'danger',
-	PUT: 'warning',
-	PATCH: 'warning',
-	OPTIONS: 'neutral',
-	HEAD: 'neutral',
-};
+import { verbColors } from '../../../utils/style';
 
 export function RequestTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -104,7 +92,11 @@ export function RequestTab(props: TabProps) {
 							'--Card-padding': '6px',
 						}}
 					>
-						{environmentContextResolver.stringWithVarsToTypography(`${serviceData.baseUrl}${endpointData.url}`, data)}
+						{environmentContextResolver.stringWithVarsToTypography(
+							`${serviceData.baseUrl}${endpointData.url}`,
+							data,
+							serviceData.id,
+						)}
 					</Card>
 				</Grid>
 				<Grid xs={2}>

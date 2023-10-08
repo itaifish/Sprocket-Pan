@@ -5,10 +5,15 @@ class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
 	private constructor() {}
 
-	public stringWithVarsToTypography(text: string, data: ApplicationData, serviceId?: string) {
+	public stringWithVarsToTypography(
+		text: string,
+		data: ApplicationData,
+		serviceId?: string,
+		typographyProps?: React.ComponentProps<typeof Typography>,
+	) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
 		return (
-			<Typography>
+			<Typography {...typographyProps}>
 				{snippets.map((snippet, index) => {
 					if (snippet.variableName) {
 						return (
