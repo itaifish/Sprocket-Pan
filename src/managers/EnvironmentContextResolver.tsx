@@ -24,6 +24,11 @@ class EnvironmentContextResolver {
 		);
 	}
 
+	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string) {
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+		return snippets.map((snippet) => snippet.value).join('');
+	}
+
 	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
 		const env = this.buildEnvironmentVariables(data, serviceId);
 		let state: 'variable' | 'text' = 'text';

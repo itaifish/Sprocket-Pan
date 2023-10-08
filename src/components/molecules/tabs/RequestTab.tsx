@@ -12,6 +12,7 @@ import {
 	useColorScheme,
 	Card,
 	Divider,
+	CircularProgress,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
 import { RESTfulRequestVerb, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
@@ -27,6 +28,8 @@ import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
+import { NetworkCallResponse, networkRequestManager } from '../../../managers/NetworkRequestManager';
+import { ResponseBody } from './request/ResponseBody';
 
 const verbColors: Record<RESTfulRequestVerb, OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>> = {
 	GET: 'primary',
@@ -50,6 +53,12 @@ export function RequestTab(props: TabProps) {
 	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
+	const [response, setResponse] = useState<NetworkCallResponse>({
+		responseText: 'View the response here',
+		contentType: 'text',
+	});
+	const [isLoading, setLoading] = useState(false);
+
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
@@ -100,7 +109,18 @@ export function RequestTab(props: TabProps) {
 				</Grid>
 				<Grid xs={2}>
 					<Stack direction={'row'} spacing={2}>
-						<Button color="primary" startDecorator={<SendIcon />}>
+						<Button
+							color="primary"
+							startDecorator={isLoading ? <CircularProgress /> : <SendIcon />}
+							onClick={async () => {
+								if (!isLoading) {
+									setLoading(true);
+									const result = await networkRequestManager.sendRequest(requestData, data);
+									setResponse(result);
+									setLoading(false);
+								}
+							}}
+						>
 							Send
 						</Button>
 						<ParticleEffectButton
@@ -150,6 +170,7 @@ export function RequestTab(props: TabProps) {
 							Response
 						</Typography>
 						<Divider />
+						<ResponseBody response={response} />
 					</Card>
 				</Grid>
 			</Grid>
