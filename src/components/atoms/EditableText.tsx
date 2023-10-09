@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { keepStringLengthReasonable } from '../../utils/string';
-
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 interface EditableTextProps {
 	text: string;
 	setText: (text: string) => void;
@@ -21,7 +21,12 @@ export function EditableText(props: EditableTextProps) {
 	return isEditing ? (
 		<Input
 			size={props.isTitle ? 'lg' : 'md'}
-			sx={{ maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}
+			sx={{
+				maxWidth: props.isTitle ? '100%' : '600px',
+				marginLeft: 'auto',
+				marginRight: 'auto',
+				width: props.isTitle ? '80%' : undefined,
+			}}
 			placeholder={props.isTitle ? `Enter your title here` : `${props.text}`}
 			variant="outlined"
 			value={typingText}
@@ -54,12 +59,13 @@ export function EditableText(props: EditableTextProps) {
 	) : (
 		<Typography
 			level={props.isTitle ? `h2` : 'body-md'}
-			sx={{ textAlign: 'center' }}
+			sx={{ textAlign: 'center', ml: 'auto', mr: 'auto' }}
 			onClick={() => {
 				setTypingText(props.text);
 				setIsEditing(true);
 			}}
 		>
+			{!props.isTitle && <ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
 			{keepStringLengthReasonable(props.text, props.isTitle ? 100 : 30)}
 		</Typography>
 	);

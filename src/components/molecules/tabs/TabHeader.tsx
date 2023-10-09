@@ -54,111 +54,112 @@ export function TabHeader() {
 		validateScroll();
 	}, [tabs]);
 	return (
-		<Tabs
-			aria-label="tabs"
-			size="lg"
-			value={tabs.selected}
-			onChange={(_event, newValue) => {
-				const newTabId = newValue as string;
-				tabsManager.selectTab(tabsContext, newTabId, tabs.tabs[newTabId]);
-			}}
-			sx={{ width: '100%', height: '100%', overflow: 'hidden' }}
-		>
-			<TabList
-				tabFlex="1"
-				sticky="top"
-				underlinePlacement="bottom"
-				variant="soft"
-				disableUnderline
-				id="tabScroll"
-				sx={{
-					overflow: 'auto',
-					scrollSnapType: 'x mandatory',
-					'&::-webkit-scrollbar': { display: 'none' },
-					[`& .${tabClasses.root}`]: {
-						'&[aria-selected="true"]': {
-							color: `secondary.500`,
-							bgcolor: 'background.surface',
-							borderColor: 'divider',
-							outline: 'none',
-							'&::before': {
-								content: '""',
-								display: 'block',
-								position: 'absolute',
-								height: 2,
-								bottom: -2,
-								left: 0,
-								right: 0,
-								bgcolor: 'background.surface',
-							},
-						},
-					},
+		<div style={{ width: '100%', height: '100%', overflowY: 'auto', maxHeight: '100vh' }}>
+			<Tabs
+				aria-label="tabs"
+				size="lg"
+				value={tabs.selected}
+				onChange={(_event, newValue) => {
+					const newTabId = newValue as string;
+					tabsManager.selectTab(tabsContext, newTabId, tabs.tabs[newTabId]);
 				}}
 			>
-				<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px' }}>
-					<IconButton
-						size="lg"
-						color="primary"
-						variant="soft"
-						sx={{ boxShadow: '5px 5px 5px black' }}
-						onClick={() => {
-							getTabScroll()?.scrollBy({ left: -50, behavior: 'instant' });
-						}}
-						disabled={disabled.left}
-					>
-						<ArrowLeftIcon />
-					</IconButton>
-				</div>
-				{Object.entries(tabs.tabs).map(([tabId, tabType], index) => {
-					const tabData = tabsManager.getMapFromTabType(data, tabType)[tabId];
-
-					return (
-						<Tab
-							indicatorPlacement="top"
-							value={tabId}
-							key={index}
-							id={`tab_${tabId}`}
-							sx={{ minWidth: 230, flex: 'none', scrollSnapAlign: 'start' }}
+				<TabList
+					tabFlex="1"
+					sticky="top"
+					underlinePlacement="bottom"
+					variant="soft"
+					disableUnderline
+					id="tabScroll"
+					sx={{
+						overflow: 'auto',
+						scrollSnapType: 'x mandatory',
+						'&::-webkit-scrollbar': { display: 'none' },
+						[`& .${tabClasses.root}`]: {
+							'&[aria-selected="true"]': {
+								color: `secondary.500`,
+								bgcolor: 'background.surface',
+								borderColor: 'divider',
+								outline: 'none',
+								'&::before': {
+									content: '""',
+									display: 'block',
+									position: 'absolute',
+									height: 2,
+									bottom: -2,
+									left: 0,
+									right: 0,
+									bgcolor: 'background.surface',
+								},
+							},
+						},
+					}}
+				>
+					<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px' }}>
+						<IconButton
+							size="lg"
+							color="primary"
+							variant="soft"
+							sx={{ boxShadow: '5px 5px 5px black' }}
+							onClick={() => {
+								getTabScroll()?.scrollBy({ left: -50, behavior: 'instant' });
+							}}
+							disabled={disabled.left}
 						>
-							<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
-							{keepStringLengthReasonable(tabData?.name ?? (tabData as Environment)?.__name ?? '', 20)}
-							<ListItemDecorator>
-								<IconButton
-									color="danger"
-									onClick={(e) => {
-										tabsManager.closeTab(tabsContext, tabId);
-										e.stopPropagation();
-									}}
-								>
-									<CloseIcon />
-								</IconButton>
-							</ListItemDecorator>
-						</Tab>
-					);
-				})}
+							<ArrowLeftIcon />
+						</IconButton>
+					</div>
+					{Object.entries(tabs.tabs).map(([tabId, tabType], index) => {
+						const tabData = tabsManager.getMapFromTabType(data, tabType)[tabId];
 
-				<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px', right: 40 }}>
-					<IconButton
-						size="lg"
-						color="primary"
-						variant="soft"
-						sx={{ boxShadow: '5px 5px 5px black' }}
-						onClick={() => {
-							document.getElementById('tabScroll')?.scrollBy({ left: 50, behavior: 'instant' });
-						}}
-						disabled={disabled.right}
-					>
-						<ArrowRightIcon />
-					</IconButton>
-				</div>
-			</TabList>
-			{Object.entries(tabs.tabs).map(([tabId, tabType], index) => (
-				<TabPanel value={tabId} key={index}>
-					<Sheet sx={{ boxSizing: 'content-box' }}>
-						<TabContent id={tabId} type={tabType} />
-					</Sheet>
-				</TabPanel>
-			))}
-		</Tabs>
+						return (
+							<Tab
+								indicatorPlacement="top"
+								value={tabId}
+								key={index}
+								id={`tab_${tabId}`}
+								sx={{ minWidth: 230, flex: 'none', scrollSnapAlign: 'start' }}
+							>
+								<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
+								{keepStringLengthReasonable(tabData?.name ?? (tabData as Environment)?.__name ?? '', 20)}
+								<ListItemDecorator>
+									<IconButton
+										color="danger"
+										onClick={(e) => {
+											tabsManager.closeTab(tabsContext, tabId);
+											e.stopPropagation();
+										}}
+									>
+										<CloseIcon />
+									</IconButton>
+								</ListItemDecorator>
+							</Tab>
+						);
+					})}
+
+					<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px', right: 40 }}>
+						<IconButton
+							size="lg"
+							color="primary"
+							variant="soft"
+							sx={{ boxShadow: '5px 5px 5px black' }}
+							onClick={() => {
+								document.getElementById('tabScroll')?.scrollBy({ left: 50, behavior: 'instant' });
+							}}
+							disabled={disabled.right}
+						>
+							<ArrowRightIcon />
+						</IconButton>
+					</div>
+				</TabList>
+				{Object.entries(tabs.tabs).map(([tabId, tabType], index) => (
+					<TabPanel value={tabId} key={index}>
+						<Sheet sx={{ boxSizing: 'content-box' }}>
+							<TabContent id={tabId} type={tabType} />
+						</Sheet>
+					</TabPanel>
+				))}
+			</Tabs>
+		</div>
 	);
 }
