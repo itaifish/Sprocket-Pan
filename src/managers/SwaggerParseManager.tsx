@@ -106,7 +106,7 @@ class SwaggerParseManager {
 							url: `${pathsUri}`,
 							baseHeaders: {},
 							baseQueryParams: {},
-							description: '',
+							description: 'This is a new endpoint',
 							name: `${method}: ${pathsUri}`,
 							requestIds: [],
 						};

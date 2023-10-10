@@ -5,9 +5,6 @@ import {
 	ListItemButton,
 	ListItemDecorator,
 	ListSubheader,
-	Input,
-	FormHelperText,
-	FormControl,
 	Menu,
 	Dropdown,
 	MenuButton,
@@ -18,30 +15,23 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { useContext, useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
-import EditIcon from '@mui/icons-material/Edit';
-import CheckIcon from '@mui/icons-material/Check';
-import CancelIcon from '@mui/icons-material/Cancel';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { ApplicationDataContext, TabsContext } from '../../../App';
-import { InfoOutlined, MoreVert } from '@mui/icons-material';
-import { keepStringLengthReasonable } from '../../../utils/string';
+import { MoreVert } from '@mui/icons-material';
 import { tabsManager } from '../../../managers/TabsManager';
+import { keepStringLengthReasonable } from '../../../utils/string';
+import FolderCopyIcon from '@mui/icons-material/FolderCopy';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
 	const { tabs } = tabsContext;
 	const [collapsed, setCollapsed] = useState(false);
-	const [editingText, setEditingText] = useState<null | string>(null);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const data = useContext(ApplicationDataContext);
-	const isValidEditingText =
-		editingText === null ||
-		(editingText != '' &&
-			!Object.values(data.services[endpoint.serviceId].endpointIds)
-				.map((endpointId) => data.endpoints[endpointId]?.name)
-				.filter((name) => name != endpoint.name)
-				.includes(editingText));
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -52,14 +42,14 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							setEditingText(endpoint.name);
+							applicationDataManager.addNew('endpoint', { serviceId: endpoint.serviceId }, endpoint);
 						}}
 					>
 						<ListItemDecorator>
-							<IconButton aria-label="edit endpoint" size="sm">
-								<EditIcon fontSize="small" />
+							<IconButton aria-label="copy endpoint" size="sm">
+								<FolderCopyIcon fontSize="small" />
 							</IconButton>
-							Edit
+							Duplicate
 						</ListItemDecorator>
 					</MenuItem>
 					<MenuItem
@@ -75,12 +65,25 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 							Add Request
 						</ListItemDecorator>
 					</MenuItem>
+					<MenuItem
+						onClick={() => {
+							setMenuOpen(false);
+							setDeleteModalOpen(true);
+						}}
+					>
+						<ListItemDecorator>
+							<IconButton aria-label="delete endpoint" size="sm">
+								<DeleteForeverIcon fontSize="small" />
+							</IconButton>
+							Delete
+						</ListItemDecorator>
+					</MenuItem>
 				</Menu>
 			</Dropdown>
 		</>
 	);
 	return (
-		<ListItem nested endAction={editingText === null && <>{menuButton}</>}>
+		<ListItem nested endAction={<>{menuButton}</>}>
 			<ListItemButton
 				onClick={() => {
 					tabsManager.selectTab(tabsContext, endpoint.id, 'endpoint');
@@ -99,52 +102,8 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 						{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
 					</IconButton>
 				</ListItemDecorator>
-				<ListSubheader>
-					{editingText != null ? (
-						<>
-							<Input
-								placeholder={endpoint.name}
-								variant="outlined"
-								value={editingText}
-								onChange={(e) => setEditingText(e.target.value)}
-								error={!isValidEditingText}
-								endDecorator={
-									<>
-										<IconButton
-											onClick={() => {
-												setEditingText(null);
-											}}
-											sx={{ marginRight: '2px' }}
-										>
-											<CancelIcon fontSize="large" />
-										</IconButton>
-										<IconButton
-											onClick={() => {
-												if (isValidEditingText) {
-													applicationDataManager.update('endpoint', endpoint.id, { name: editingText });
-													setEditingText(null);
-												}
-											}}
-										>
-											<CheckIcon fontSize="large" />
-										</IconButton>
-									</>
-								}
-							/>
-						</>
-					) : (
-						keepStringLengthReasonable(endpoint.name)
-					)}
-				</ListSubheader>
+				<ListSubheader>{keepStringLengthReasonable(endpoint.name)}</ListSubheader>
 			</ListItemButton>
-			{!isValidEditingText && (
-				<FormControl error>
-					<FormHelperText color="danger">
-						<InfoOutlined />
-						Name must be unique
-					</FormHelperText>
-				</FormControl>
-			)}
 			<List
 				aria-labelledby="nav-list-browse"
 				sx={{
@@ -160,6 +119,12 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 						.sort((a, b) => a.name.localeCompare(b.name))
 						.map((request: EndpointRequest, index) => <RequestFileSystem request={request} key={index} />)}
 			</List>
+			<AreYouSureModal
+				action={`delete '${endpoint.name}' and all its data`}
+				open={deleteModalOpen}
+				closeFunc={() => setDeleteModalOpen(false)}
+				actionFunc={() => applicationDataManager.delete('endpoint', endpoint.id)}
+			/>
 		</ListItem>
 	);
 }

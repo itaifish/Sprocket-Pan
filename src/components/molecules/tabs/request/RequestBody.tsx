@@ -103,6 +103,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 						onChange={(value) => setEditorText(value ?? '')}
 						language={editor}
 						theme={mode === 'dark' ? 'vs-dark' : mode}
+						options={{ tabSize: 2, insertSpaces: false }}
 					/>
 				)}
 			</Stack>

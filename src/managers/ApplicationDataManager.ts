@@ -24,6 +24,12 @@ type UpdateType = {
 	environment: Partial<Environment>;
 };
 
+type AdditionalContextType<TTabType> = TTabType extends 'request'
+	? { endpointId: string }
+	: TTabType extends 'endpoint'
+	? { serviceId: string }
+	: undefined;
+
 export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	private static readonly DATA_FOLDER_NAME = 'data' as const;
@@ -41,51 +47,62 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public addNew<
 		TTabType extends TabType,
-		TAdditionalContext = TTabType extends 'request'
-			? { endpointId: string }
-			: TTabType extends 'endpoint'
-			? { serviceId: string }
-			: undefined,
-	>(type: TTabType, additionalContext: TAdditionalContext) {
+		TAdditionalContext extends AdditionalContextType<TTabType> = AdditionalContextType<TTabType>,
+	>(type: TTabType, additionalContext: TAdditionalContext, data: UpdateType[TTabType] = {}, emitUpdate = true) {
+		data = structuredClone(data);
 		let _exaustive: never;
 		const newId = v4();
+		let newDatum: Required<UpdateType[TTabType]> | null = null;
 		switch (type) {
 			case 'environment':
 				this.data.environments[newId] = {
-					__id: newId,
 					__name: 'New Environment',
+					...(data as UpdateType['environment']),
+					__id: newId,
 				};
+				newDatum = this.data.environments[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'service':
 				this.data.services[newId] = {
-					id: newId,
 					name: 'New Service',
-					description: '',
+					description: 'This is a new service',
 					version: '1.0.0',
 					baseUrl: '',
 					localEnvironments: {},
+					...data,
 					endpointIds: [],
+					id: newId,
 				};
+				const endpointIds = (data as UpdateType['service'])?.endpointIds ?? [];
+				endpointIds.forEach((endpointId) =>
+					this.addNew('endpoint', { serviceId: newId }, this.data.endpoints[endpointId], false),
+				);
+				newDatum = this.data.services[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'endpoint':
 				const { serviceId } = additionalContext as { serviceId: string };
 				this.data.endpoints[newId] = {
-					id: newId,
 					url: '',
 					verb: 'GET',
 					baseHeaders: {},
 					name: 'New Endpoint',
 					baseQueryParams: {},
-					description: '',
+					description: 'This is a new endpoint',
 					serviceId,
+					...data,
 					requestIds: [],
+					id: newId,
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
+				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
+				requestIds.forEach((requestId) =>
+					this.addNew('request', { endpointId: newId }, this.data.requests[requestId], false),
+				);
+				newDatum = this.data.endpoints[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'request':
 				const { endpointId } = additionalContext as { endpointId: string };
 				this.data.requests[newId] = {
-					id: newId,
 					endpointId: endpointId,
 					name: 'New Request',
 					headers: {},
@@ -93,14 +110,21 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
+					...data,
+					id: newId,
 				};
 				this.data.endpoints[endpointId]?.requestIds?.push(newId);
+				newDatum = this.data.requests[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			default:
 				_exaustive = type;
 		}
-		this.data = { ...this.data };
-		this.emit('update');
+
+		if (emitUpdate) {
+			this.data = { ...this.data };
+			this.emit('update');
+		}
+		return newDatum;
 	}
 
 	public update<TTabType extends TabType>(updateType: TTabType, updateId: string, updateObj: UpdateType[TTabType]) {
@@ -121,6 +145,48 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.data[`${updateType}s`][updateId] = dataToUpdate;
 		this.data = { ...this.data };
 		this.emit('update');
+	}
+
+	public delete(deleteType: TabType, id: string, emitUpdate = true) {
+		let _exaustive: never;
+		switch (deleteType) {
+			case 'environment':
+				delete this.data.environments[id];
+				break;
+			case 'service':
+				const service = this.data.services[id];
+				if (service) {
+					service.endpointIds.forEach((endpointId) => this.delete('endpoint', endpointId, false));
+				}
+				delete this.data.services[id];
+				break;
+			case 'endpoint':
+				const endpoint = this.data.endpoints[id];
+				if (endpoint) {
+					this.data.services[endpoint.serviceId].endpointIds = this.data.services[
+						endpoint.serviceId
+					].endpointIds.filter((endId) => endId != id);
+					endpoint.requestIds.forEach((requestId) => this.delete('request', requestId, false));
+				}
+				delete this.data.endpoints[id];
+				break;
+			case 'request':
+				const request = this.data.requests[id];
+				if (request) {
+					this.data.endpoints[request.endpointId].requestIds = this.data.endpoints[
+						request.endpointId
+					].requestIds.filter((reqId) => reqId != id);
+				}
+				delete this.data.requests[id];
+				break;
+			default:
+				_exaustive = deleteType;
+				break;
+		}
+		if (emitUpdate) {
+			this.data = { ...this.data };
+			this.emit('update');
+		}
 	}
 
 	public setSelectedEnvironment(newEnvId: string | undefined) {
