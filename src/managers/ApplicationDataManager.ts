@@ -14,6 +14,8 @@ import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 import { TabType } from '../types/state/state';
+import { TabsContextType } from '../App';
+import { tabsManager } from './TabsManager';
 
 type DataEvent = 'update' | 'saved';
 
@@ -147,7 +149,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public delete(deleteType: TabType, id: string, emitUpdate = true) {
+	public delete(deleteType: TabType, id: string, tabsContext: TabsContextType, emitUpdate = true) {
 		let _exaustive: never;
 		switch (deleteType) {
 			case 'environment':
@@ -156,7 +158,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			case 'service':
 				const service = this.data.services[id];
 				if (service) {
-					service.endpointIds.forEach((endpointId) => this.delete('endpoint', endpointId, false));
+					service.endpointIds.forEach((endpointId) => this.delete('endpoint', endpointId, tabsContext, false));
 				}
 				delete this.data.services[id];
 				break;
@@ -166,7 +168,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					this.data.services[endpoint.serviceId].endpointIds = this.data.services[
 						endpoint.serviceId
 					].endpointIds.filter((endId) => endId != id);
-					endpoint.requestIds.forEach((requestId) => this.delete('request', requestId, false));
+					endpoint.requestIds.forEach((requestId) => this.delete('request', requestId, tabsContext, false));
 				}
 				delete this.data.endpoints[id];
 				break;
@@ -183,6 +185,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				_exaustive = deleteType;
 				break;
 		}
+		tabsManager.closeTab(tabsContext, id);
 		if (emitUpdate) {
 			this.data = { ...this.data };
 			this.emit('update');

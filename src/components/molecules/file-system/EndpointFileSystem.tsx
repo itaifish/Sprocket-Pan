@@ -123,7 +123,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 				action={`delete '${endpoint.name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('endpoint', endpoint.id)}
+				actionFunc={() => applicationDataManager.delete('endpoint', endpoint.id, tabsContext)}
 			/>
 		</ListItem>
 	);

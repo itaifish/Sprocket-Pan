@@ -126,7 +126,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 				action={`delete '${service.name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('service', service.id)}
+				actionFunc={() => applicationDataManager.delete('service', service.id, tabsContext)}
 			/>
 		</ListItem>
 	);
