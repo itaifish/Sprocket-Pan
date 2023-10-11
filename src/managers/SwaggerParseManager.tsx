@@ -11,12 +11,16 @@ import * as SwaggerParser from '@apidevtools/swagger-parser';
 import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
+import * as xmlParse from 'xml2js';
 
 type ParsedServiceApplicationData = {
 	services: Service[];
 	endpoints: Endpoint[];
 	requests: EndpointRequest[];
 };
+
+type SwaggerDataType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
+
 class SwaggerParseManager {
 	public static readonly INSTANCE = new SwaggerParseManager();
 	private parser: SwaggerParser;
@@ -90,6 +94,7 @@ class SwaggerParseManager {
 		switch (version) {
 			case '2':
 				const typedPaths = paths as OpenAPIV2.PathsObject;
+				const mappedRequests: EndpointRequest[] = [];
 				const mappedEndpoints = Object.keys(typedPaths).flatMap((pathsUri: keyof typeof typedPaths) => {
 					const paths = typedPaths[pathsUri];
 					return Object.keys(paths).flatMap((pathsVerbUntyped) => {
@@ -114,16 +119,69 @@ class SwaggerParseManager {
 						if (!pathData || typeof pathData === 'string') {
 							return defaultEndpointData;
 						}
-						const parameters =
-							(pathData as OpenAPIV2.OperationObject)?.parameters ?? (pathData as OpenAPIV2.Parameters | undefined);
+						const typedPathData = pathData as OpenAPIV2.OperationObject;
+						defaultEndpointData.description = typedPathData?.description ?? defaultEndpointData.description;
+
+						const parameters = typedPathData?.parameters ?? (pathData as OpenAPIV2.Parameters | undefined);
 						if (!parameters) {
 							return defaultEndpointData;
 						}
-						// TODO: Parse input specs
+						// TODO: Parse input specs for headers and url query etc
+
+						const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
+							id: v4(),
+							endpointId: defaultEndpointData.id,
+							name: defaultEndpointData.name,
+							headers: {},
+							queryParams: {},
+							body: undefined,
+							bodyType: 'none',
+							rawType: undefined,
+						};
+						const newRequests: EndpointRequest[] = [];
+						parameters.forEach((param) => {
+							const typedParam = param as OpenAPIV2.Parameter;
+							if (typedParam?.in === 'body') {
+								const body = this.getExampleSwaggerV2BodyObject(typedParam.schema);
+								newRequestBase.body = body;
+							}
+						});
+
+						const mimeTypes = typedPathData?.consumes;
+						if (mimeTypes) {
+							mimeTypes.forEach((mimeType) => {
+								const newId = v4();
+								if (mimeType.includes('json')) {
+									newRequests.push({
+										...newRequestBase,
+										body: JSON.stringify(newRequestBase.body),
+										bodyType: 'raw',
+										rawType: 'JSON',
+										id: newId,
+									});
+									defaultEndpointData.requestIds.push(newId);
+								} else if (mimeType.includes('xml')) {
+									newRequests.push({
+										...newRequestBase,
+										body: new xmlParse.Builder().buildObject(newRequestBase.body),
+										bodyType: 'raw',
+										rawType: 'XML',
+										id: newId,
+									});
+									defaultEndpointData.requestIds.push(newId);
+								}
+							});
+						} else {
+							newRequests.push(newRequestBase);
+							defaultEndpointData.requestIds.push(newRequestBase.id);
+						}
+
+						mappedRequests.push(...newRequests);
+
 						return defaultEndpointData;
 					});
 				});
-				return { endpoints: mappedEndpoints, requests: [] };
+				return { endpoints: mappedEndpoints, requests: mappedRequests };
 			case '3':
 				break;
 			case '3.1':
@@ -132,6 +190,31 @@ class SwaggerParseManager {
 				_exhaustive = version;
 		}
 		return empty;
+	}
+
+	private getExampleSwaggerV2BodyObject(object: any): any {
+		const resObj: any = {};
+		const type = object.type as SwaggerDataType;
+		let _exhaustive: never;
+		switch (type) {
+			case 'string':
+				return 'string';
+			case 'number':
+				return 0.5;
+			case 'boolean':
+				return true;
+			case 'object':
+				Object.entries(object.properties ?? {}).forEach(([key, value]) => {
+					resObj[key] = this.getExampleSwaggerV2BodyObject(value);
+				});
+				return resObj;
+			case 'integer':
+				return 1;
+			case 'array':
+				return [this.getExampleSwaggerV2BodyObject(object.items)];
+			default:
+				_exhaustive = type;
+		}
 	}
 }
 

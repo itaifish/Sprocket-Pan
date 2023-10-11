@@ -1,6 +1,6 @@
 // TODO:
 // When this is finished, continue copying https://codesandbox.io/s/dnyzyx?file=/components/Navigation.tsx
-import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, createDir, exists, readTextFile, removeFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import {
@@ -300,6 +300,9 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				return 'doesNotExist' as const;
 			} else {
 				log.trace(`File already exists, updating...`);
+				// need to delete the file first because of this bug:
+				// https://github.com/tauri-apps/tauri/issues/7973
+				await removeFile(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
 				await writeFile(
 					{ contents: JSON.stringify(applicationData), path: ApplicationDataManager.PATH },
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
