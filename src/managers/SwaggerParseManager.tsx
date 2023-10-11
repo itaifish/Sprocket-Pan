@@ -114,6 +114,7 @@ class SwaggerParseManager {
 							description: 'This is a new endpoint',
 							name: `${method}: ${pathsUri}`,
 							requestIds: [],
+							history: [],
 						};
 						service.endpointIds.push(defaultEndpointData.id);
 						if (!pathData || typeof pathData === 'string') {

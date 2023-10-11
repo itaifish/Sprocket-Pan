@@ -41,6 +41,11 @@ export type Endpoint<TUrlBase extends string = string> = {
 	description: string;
 	serviceId: string;
 	requestIds: string[];
+	history: {
+		request: EndpointRequest;
+		response: EndpointResponse;
+		dateTime: Date;
+	}[];
 };
 
 export type Environment = {
@@ -70,4 +75,11 @@ export type ApplicationData = {
 	environments: Record<string, Environment>;
 	selectedEnvironment?: string;
 	settings: Settings;
+};
+
+export type EndpointResponse = {
+	statusCode: number;
+	body: string;
+	bodyType: RawBodyType;
+	headers: Record<string, string>;
 };
