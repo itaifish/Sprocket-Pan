@@ -1,12 +1,13 @@
 // TODO:
 // When this is finished, continue copying https://codesandbox.io/s/dnyzyx?file=/components/Navigation.tsx
-import { BaseDirectory, createDir, exists, readTextFile, removeFile, writeFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import {
 	ApplicationData,
 	Endpoint,
 	EndpointRequest,
+	EndpointResponse,
 	Environment,
 	Service,
 } from '../types/application-data/application-data';
@@ -94,6 +95,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					...data,
 					requestIds: [],
 					id: newId,
+					history: [],
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
 				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
@@ -147,6 +149,20 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.data[`${updateType}s`][updateId] = dataToUpdate;
 		this.data = { ...this.data };
 		this.emit('update');
+	}
+
+	public addResponseToHistory(requestId: string, response: EndpointResponse) {
+		const reqToUpdate = this.data.requests[requestId];
+		const endpointToUpdate = this.data.endpoints[reqToUpdate?.endpointId];
+		if (reqToUpdate == null || endpointToUpdate == null) {
+			log.warn(`Can't find request ${requestId}`);
+			return;
+		}
+		endpointToUpdate.history.push({
+			request: structuredClone(reqToUpdate),
+			response,
+			dateTime: new Date(),
+		});
 	}
 
 	public delete(deleteType: TabType, id: string, tabsContext: TabsContextType, emitUpdate = true) {
@@ -302,7 +318,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				log.trace(`File already exists, updating...`);
 				// need to delete the file first because of this bug:
 				// https://github.com/tauri-apps/tauri/issues/7973
-				await removeFile(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+				// await removeFile(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
 				await writeFile(
 					{ contents: JSON.stringify(applicationData), path: ApplicationDataManager.PATH },
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },

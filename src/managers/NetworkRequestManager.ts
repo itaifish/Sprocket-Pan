@@ -1,4 +1,10 @@
-import { ApplicationData, EndpointRequest } from '../types/application-data/application-data';
+import {
+	ApplicationData,
+	EndpointRequest,
+	RawBodyType,
+	RawBodyTypes,
+} from '../types/application-data/application-data';
+import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 
 export type NetworkCallResponse = {
@@ -24,10 +30,32 @@ class NetworkRequestManager {
 			});
 
 			const responseText = await (await res.blob()).text();
+			applicationDataManager.addResponseToHistory(request.id, {
+				statusCode: res.status,
+				headers: [...res.headers.entries()].reduce<Record<string, string>>((obj, [keyValuePair]) => {
+					obj[keyValuePair[0]] = keyValuePair[1];
+					return obj;
+				}, {}),
+				bodyType: this.headersContentTypeToBodyType(res.headers.get('content-type')),
+				body: responseText,
+			});
 			return { responseText, contentType: res.headers.get('content-type') };
 		} catch (e) {
 			return { responseText: JSON.stringify(e, Object.getOwnPropertyNames(e)), contentType: 'application/json' };
 		}
+	}
+
+	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {
+		let bodyType: RawBodyType = 'Text';
+		if (contentType == null) {
+			return bodyType;
+		}
+		RawBodyTypes.forEach((rawBodyType) => {
+			if (contentType.toLowerCase().includes(rawBodyType.toLowerCase())) {
+				bodyType = rawBodyType;
+			}
+		});
+		return bodyType;
 	}
 }
 
