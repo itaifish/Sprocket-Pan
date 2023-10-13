@@ -141,7 +141,6 @@ class SwaggerParseManager {
 				if (!parameters) {
 					return defaultEndpointData;
 				}
-				// TODO: Parse input specs for headers and url query etc
 
 				const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
 					id: v4(),
