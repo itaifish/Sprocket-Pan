@@ -20,7 +20,6 @@ import { ApplicationDataContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
-import { RequestBody } from './request/RequestBody';
 import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
@@ -28,6 +27,7 @@ import { applicationDataManager } from '../../../managers/ApplicationDataManager
 import { NetworkCallResponse, networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
+import { RequestEditTabs } from './request/RequestEditTabs';
 
 export function RequestTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -153,7 +153,7 @@ export function RequestTab(props: TabProps) {
 							Request
 						</Typography>
 						<Divider />
-						<RequestBody requestData={requestData} />
+						<RequestEditTabs request={requestData} />
 					</Card>
 				</Grid>
 				<Grid xs={6}>
