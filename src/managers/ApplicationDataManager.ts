@@ -94,6 +94,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					...data,
 					requestIds: [],
 					id: newId,
+					history: [],
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
 				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
