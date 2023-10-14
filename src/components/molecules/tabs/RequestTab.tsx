@@ -29,6 +29,11 @@ import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 
+const defaultResponse = {
+	responseText: 'View the response here',
+	contentType: 'text',
+};
+
 export function RequestTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const requestData = data.requests[props.id];
@@ -41,10 +46,7 @@ export function RequestTab(props: TabProps) {
 	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [response, setResponse] = useState<NetworkCallResponse>({
-		responseText: 'View the response here',
-		contentType: 'text',
-	});
+	const [response, setResponse] = useState<NetworkCallResponse>(endpointData.history[endpointData.history.length - 1]);
 	const [isLoading, setLoading] = useState(false);
 
 	if (requestData == null || endpointData == null || serviceData == null) {
