@@ -13,7 +13,7 @@ import {
 	CircularProgress,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
-import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { HistoricalEndpointResponse, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import { ApplicationDataContext } from '../../../App';
@@ -24,7 +24,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { NetworkCallResponse, networkRequestManager } from '../../../managers/NetworkRequestManager';
+import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
@@ -46,7 +46,10 @@ export function RequestTab(props: TabProps) {
 	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [response, setResponse] = useState<NetworkCallResponse>(endpointData.history[endpointData.history.length - 1]);
+	// TOOD: add default
+	const [response, setResponse] = useState<HistoricalEndpointResponse>(
+		endpointData.history[endpointData.history.length - 1],
+	);
 	const [isLoading, setLoading] = useState(false);
 
 	if (requestData == null || endpointData == null || serviceData == null) {
