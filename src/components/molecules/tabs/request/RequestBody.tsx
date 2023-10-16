@@ -5,6 +5,8 @@ import { applicationDataManager } from '../../../../managers/ApplicationDataMana
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
+import { log } from '../../../../utils/logging';
+import { Constants } from '../../../../utils/constants';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const { mode } = useColorScheme();
@@ -12,17 +14,16 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const [editorText, setEditorText] = useState(typeof requestData.body === 'string' ? requestData.body : '');
 	const latestText = useRef(editorText);
 
-	// We update the text just once every 30 seconds and on close to prevent constant state updates
+	// We update the text only after the user stops typing
 	useEffect(() => {
-		const timeoutFunction = () => {
+		const delayDebounceFunc = setTimeout(() => {
 			applicationDataManager.update('request', requestData.id, { body: latestText.current });
-		};
-		const interval = setInterval(timeoutFunction, 30_000);
-		return () => {
-			timeoutFunction();
-			clearInterval(interval);
-		};
-	}, []);
+			log.info('update triggered');
+		}, Constants.debounceTimeMS);
+
+		return () => clearTimeout(delayDebounceFunc);
+	}, [latestText.current]);
+
 	useEffect(() => {
 		if (requestData.bodyType === 'raw') {
 			if (requestData.rawType != undefined) {
@@ -37,9 +38,9 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	return (
 		<>
 			<Stack spacing={1}>
-				<FormControl>
-					<Grid container spacing={1}>
-						<Grid xs={6}>
+				<Grid container spacing={1}>
+					<Grid xs={6}>
+						<FormControl>
 							<FormLabel id="select-body-type-label" htmlFor="select-body-type">
 								Body Type
 							</FormLabel>
@@ -73,42 +74,42 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 									</Option>
 								))}
 							</Select>
-						</Grid>
-						<Grid xs={6}>
-							{requestData.bodyType === 'raw' && (
-								<>
-									<FormLabel id="select-text-type-label" htmlFor="select-text-type">
-										Text Type
-									</FormLabel>
-									<Select
-										value={requestData.rawType ?? 'JSON'}
-										startDecorator={<DataObjectIcon />}
-										color="primary"
-										slotProps={{
-											button: {
-												id: 'select-text-type-button',
-												// TODO: Material UI set aria-labelledby correctly & automatically
-												// but Base UI and Joy UI don't yet.
-												'aria-labelledby': 'select-text-type-label select-text-type-button',
-											},
-										}}
-										onChange={(_e, value) => {
-											if (value) {
-												applicationDataManager.update('request', requestData.id, { rawType: value });
-											}
-										}}
-									>
-										{RawBodyTypes.map((type, index) => (
-											<Option value={type} key={index}>
-												{type}
-											</Option>
-										))}
-									</Select>
-								</>
-							)}
-						</Grid>
+						</FormControl>
 					</Grid>
-				</FormControl>
+					<Grid xs={6}>
+						{requestData.bodyType === 'raw' && (
+							<FormControl>
+								<FormLabel id="select-text-type-label" htmlFor="select-text-type">
+									Text Type
+								</FormLabel>
+								<Select
+									value={requestData.rawType ?? 'JSON'}
+									startDecorator={<DataObjectIcon />}
+									color="primary"
+									slotProps={{
+										button: {
+											id: 'select-text-type-button',
+											// TODO: Material UI set aria-labelledby correctly & automatically
+											// but Base UI and Joy UI don't yet.
+											'aria-labelledby': 'select-text-type-label select-text-type-button',
+										},
+									}}
+									onChange={(_e, value) => {
+										if (value) {
+											applicationDataManager.update('request', requestData.id, { rawType: value });
+										}
+									}}
+								>
+									{RawBodyTypes.map((type, index) => (
+										<Option value={type} key={index}>
+											{type}
+										</Option>
+									))}
+								</Select>
+							</FormControl>
+						)}
+					</Grid>
+				</Grid>
 				{editor && (
 					<Editor
 						height={'45vh'}
