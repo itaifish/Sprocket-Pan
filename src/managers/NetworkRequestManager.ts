@@ -24,9 +24,10 @@ class NetworkRequestManager {
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId);
+			const body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
 			const res = await fetch(url, {
 				method: endpoint.verb,
-				body: request.body ? JSON.stringify(request.body) : undefined,
+				body,
 			});
 
 			const responseText = await (await res.blob()).text();

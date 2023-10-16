@@ -13,7 +13,7 @@ import {
 	CircularProgress,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
-import { HistoricalEndpointResponse, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import { ApplicationDataContext } from '../../../App';
@@ -47,14 +47,20 @@ export function RequestTab(props: TabProps) {
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
 	// TOOD: add default
-	const [response, setResponse] = useState<HistoricalEndpointResponse>(
-		endpointData.history[endpointData.history.length - 1],
-	);
+	const [response, setResponse] = useState<number | 'latest'>('latest');
 	const [isLoading, setLoading] = useState(false);
 
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
+	const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
+	const responseData =
+		responseIndex >= requestData.history.length
+			? defaultResponse
+			: {
+					responseText: requestData.history[responseIndex].response.body,
+					contentType: requestData.history[responseIndex].response.bodyType,
+			  };
 	return (
 		<>
 			<EditableText
@@ -112,8 +118,8 @@ export function RequestTab(props: TabProps) {
 							onClick={async () => {
 								if (!isLoading) {
 									setLoading(true);
-									const result = await networkRequestManager.sendRequest(requestData, data);
-									setResponse(result);
+									await networkRequestManager.sendRequest(requestData, data);
+									setResponse('latest');
 									setLoading(false);
 								}
 							}}
@@ -167,7 +173,7 @@ export function RequestTab(props: TabProps) {
 							Response
 						</Typography>
 						<Divider />
-						<ResponseBody response={response} />
+						<ResponseBody response={responseData} />
 					</Card>
 				</Grid>
 			</Grid>

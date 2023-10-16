@@ -95,7 +95,6 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					...data,
 					requestIds: [],
 					id: newId,
-					history: [],
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
 				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
@@ -116,6 +115,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					rawType: undefined,
 					...data,
 					id: newId,
+					history: [],
 				};
 				this.data.endpoints[endpointId]?.requestIds?.push(newId);
 				newDatum = this.data.requests[newId] as unknown as Required<UpdateType[TTabType]>;
@@ -153,12 +153,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public addResponseToHistory(requestId: string, response: EndpointResponse) {
 		const reqToUpdate = this.data.requests[requestId];
-		const endpointToUpdate = this.data.endpoints[reqToUpdate?.endpointId];
-		if (reqToUpdate == null || endpointToUpdate == null) {
+		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
 			return;
 		}
-		endpointToUpdate.history.push({
+		reqToUpdate.history.push({
 			request: structuredClone(reqToUpdate),
 			response,
 			dateTime: new Date(),

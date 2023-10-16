@@ -4,12 +4,25 @@ import ListIcon from '@mui/icons-material/List';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { Editor } from '@monaco-editor/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const { mode } = useColorScheme();
 	const [editor, setEditor] = useState<string | undefined>(undefined);
 	const [editorText, setEditorText] = useState(typeof requestData.body === 'string' ? requestData.body : '');
+	const latestText = useRef(editorText);
+
+	// We update the text just once every 30 seconds and on close to prevent constant state updates
+	useEffect(() => {
+		const timeoutFunction = () => {
+			applicationDataManager.update('request', requestData.id, { body: latestText.current });
+		};
+		const interval = setInterval(timeoutFunction, 30_000);
+		return () => {
+			timeoutFunction();
+			clearInterval(interval);
+		};
+	}, []);
 	useEffect(() => {
 		if (requestData.bodyType === 'raw') {
 			if (requestData.rawType != undefined) {
@@ -100,7 +113,10 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 					<Editor
 						height={'45vh'}
 						value={editorText}
-						onChange={(value) => setEditorText(value ?? '')}
+						onChange={(value) => {
+							setEditorText(value ?? '');
+							latestText.current = value ?? '';
+						}}
 						language={editor}
 						theme={mode === 'dark' ? 'vs-dark' : mode}
 						options={{ tabSize: 2, insertSpaces: false }}

@@ -28,6 +28,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 		: RawBodyType | undefined;
 	preRequestScript?: string;
 	postRequestScript?: string;
+	history: HistoricalEndpointResponse[];
 };
 
 export type HistoricalEndpointResponse = {
@@ -48,7 +49,6 @@ export type Endpoint<TUrlBase extends string = string> = {
 	description: string;
 	serviceId: string;
 	requestIds: string[];
-	history: HistoricalEndpointResponse[];
 };
 
 export type Environment = {
