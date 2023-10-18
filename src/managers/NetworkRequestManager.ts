@@ -4,6 +4,7 @@ import {
 	RawBodyType,
 	RawBodyTypes,
 } from '../types/application-data/application-data';
+import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 
@@ -17,7 +18,7 @@ class NetworkRequestManager {
 
 	private constructor() {}
 
-	public async sendRequest(request: EndpointRequest, data: ApplicationData): Promise<NetworkCallResponse> {
+	public async sendRequest(request: EndpointRequest, data: ApplicationData): Promise<string | null> {
 		try {
 			const endpointId = request.endpointId;
 			const endpoint = data.endpoints[endpointId];
@@ -40,10 +41,12 @@ class NetworkRequestManager {
 				bodyType: this.headersContentTypeToBodyType(res.headers.get('content-type')),
 				body: responseText,
 			});
-			return { responseText, contentType: res.headers.get('content-type') };
 		} catch (e) {
-			return { responseText: JSON.stringify(e, Object.getOwnPropertyNames(e)), contentType: 'application/json' };
+			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+			log.warn(errorStr);
+			return errorStr;
 		}
+		return null;
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {

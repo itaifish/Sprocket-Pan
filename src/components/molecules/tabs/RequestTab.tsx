@@ -47,20 +47,26 @@ export function RequestTab(props: TabProps) {
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
 	// TOOD: add default
-	const [response, setResponse] = useState<number | 'latest'>('latest');
+	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
+	const [lastError, setLastError] = useState({ responseText: '', contentType: 'text' });
 	const [isLoading, setLoading] = useState(false);
 
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
-	const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
-	const responseData =
-		responseIndex >= requestData.history.length
-			? defaultResponse
-			: {
-					responseText: requestData.history[responseIndex].response.body,
-					contentType: requestData.history[responseIndex].response.bodyType,
-			  };
+	let responseData;
+	if (response != 'error') {
+		const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
+		responseData =
+			responseIndex >= requestData.history.length
+				? defaultResponse
+				: {
+						responseText: requestData.history[responseIndex].response.body,
+						contentType: requestData.history[responseIndex].response.bodyType,
+				  };
+	} else {
+		responseData = lastError;
+	}
 	return (
 		<>
 			<EditableText
@@ -118,8 +124,13 @@ export function RequestTab(props: TabProps) {
 							onClick={async () => {
 								if (!isLoading) {
 									setLoading(true);
-									await networkRequestManager.sendRequest(requestData, data);
-									setResponse('latest');
+									const result = await networkRequestManager.sendRequest(requestData, data);
+									if (result) {
+										setLastError({ contentType: 'json', responseText: result });
+										setResponse('error');
+									} else {
+										setResponse('latest');
+									}
 									setLoading(false);
 								}
 							}}
