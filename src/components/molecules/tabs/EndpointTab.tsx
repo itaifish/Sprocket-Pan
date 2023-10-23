@@ -9,6 +9,7 @@ import { RESTfulRequestVerbs } from '../../../types/application-data/application
 import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { RequestTab } from './RequestTab';
 
 export function EndpointTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -69,6 +70,7 @@ export function EndpointTab(props: TabProps) {
 					</Stack>
 				</Grid>
 			</Grid>
+			{endpointData.defaultRequest && <RequestTab id={endpointData.defaultRequest} />}
 		</>
 	);
 }

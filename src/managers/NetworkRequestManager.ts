@@ -25,10 +25,23 @@ class NetworkRequestManager {
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId);
-			const body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
+			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
+			if (body) {
+				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId);
+			}
+			const headers: Record<string, string> = {};
+			Object.keys(request.headers).forEach((headerKey) => {
+				const parsedKey = environmentContextResolver.resolveVariablesForString(headerKey, data, endpoint.serviceId);
+				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
+					request.headers[headerKey],
+					data,
+					endpoint.serviceId,
+				);
+			});
 			const res = await fetch(url, {
 				method: endpoint.verb,
 				body,
+				headers: headers,
 			});
 
 			const responseText = await (await res.blob()).text();

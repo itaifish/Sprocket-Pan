@@ -11,6 +11,7 @@ import {
 	Card,
 	Divider,
 	CircularProgress,
+	Switch,
 } from '@mui/joy';
 import { TabProps } from './TabContent';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
@@ -46,11 +47,10 @@ export function RequestTab(props: TabProps) {
 	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
-	// TOOD: add default
 	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
 	const [lastError, setLastError] = useState({ responseText: '', contentType: 'text' });
 	const [isLoading, setLoading] = useState(false);
-
+	const isDefault = endpointData.defaultRequest === requestData.id;
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
@@ -96,7 +96,7 @@ export function RequestTab(props: TabProps) {
 						))}
 					</Select>
 				</Grid>
-				<Grid xs={8}>
+				<Grid xs={5} xl={7}>
 					<Card
 						variant="outlined"
 						color={'primary'}
@@ -116,7 +116,7 @@ export function RequestTab(props: TabProps) {
 						)}
 					</Card>
 				</Grid>
-				<Grid xs={2}>
+				<Grid xs={5} xl={3}>
 					<Stack direction={'row'} spacing={2}>
 						<Button
 							color="primary"
@@ -165,6 +165,15 @@ export function RequestTab(props: TabProps) {
 								<EditIcon />
 							</IconButton>
 						</ParticleEffectButton>
+						<Switch
+							checked={isDefault}
+							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
+								applicationDataManager.update('endpoint', endpointData.id, {
+									defaultRequest: isDefault ? null : requestData.id,
+								})
+							}
+							endDecorator={'Default'}
+						/>
 					</Stack>
 				</Grid>
 			</Grid>

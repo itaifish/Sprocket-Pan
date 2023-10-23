@@ -1,6 +1,11 @@
 import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
 
+type Snippet = {
+	value: string;
+	variableName?: string;
+};
+
 class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
 	private constructor() {}
@@ -12,6 +17,19 @@ class EnvironmentContextResolver {
 		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+		return this.snippetsToTypography(snippets, typographyProps);
+	}
+
+	public stringWithEnvironmentToTypography(
+		text: string,
+		env: Environment,
+		typographyProps?: React.ComponentProps<typeof Typography>,
+	) {
+		const snippets = this.parseStringWithEnvironment(text, env);
+		return this.snippetsToTypography(snippets, typographyProps);
+	}
+
+	private snippetsToTypography(snippets: Snippet[], typographyProps?: React.ComponentProps<typeof Typography>) {
 		return (
 			<Typography {...typographyProps}>
 				{snippets.map((snippet, index) => {
@@ -34,8 +52,7 @@ class EnvironmentContextResolver {
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
-	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
-		const env = this.buildEnvironmentVariables(data, serviceId);
+	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
 		let state: 'variable' | 'text' = 'text';
 		let startVariablePos = 0;
 		const resultText = [];
@@ -57,6 +74,11 @@ class EnvironmentContextResolver {
 			resultText.push(endPiece);
 		}
 		return resultText;
+	}
+
+	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
+		const env = this.buildEnvironmentVariables(data, serviceId);
+		return this.parseStringWithEnvironment(text, env);
 	}
 
 	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string) {
