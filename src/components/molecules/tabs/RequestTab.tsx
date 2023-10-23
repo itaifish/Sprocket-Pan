@@ -68,6 +68,10 @@ export function RequestTab(props: TabProps) {
 	} else {
 		responseData = lastError;
 	}
+	let queryStr = queryParamsToString(requestData.queryParams);
+	if (queryStr) {
+		queryStr = `?${queryStr}`;
+	}
 	return (
 		<>
 			<EditableText
@@ -111,7 +115,7 @@ export function RequestTab(props: TabProps) {
 						}}
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
-							`${serviceData.baseUrl}${endpointData.url}?${queryParamsToString(requestData.queryParams)}`,
+							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
 							data,
 							serviceData.id,
 						)}

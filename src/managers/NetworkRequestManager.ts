@@ -39,10 +39,13 @@ class NetworkRequestManager {
 					endpoint.serviceId,
 				);
 			});
-			const queryParamStr = queryParamsToStringReplaceVars(request.queryParams, (text) =>
+			let queryParamStr = queryParamsToStringReplaceVars(request.queryParams, (text) =>
 				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId),
 			);
-			const res = await fetch(`${url}?${queryParamStr}`, {
+			if (queryParamStr) {
+				queryParamStr = `?${queryParamStr}`;
+			}
+			const res = await fetch(`${url}${queryParamStr}`, {
 				method: endpoint.verb,
 				body,
 				headers: headers,
