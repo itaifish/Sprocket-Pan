@@ -118,6 +118,7 @@ class SwaggerParseManager {
 				if (!RESTfulRequestVerbs.includes(method)) {
 					return [];
 				}
+				// todo add fefault
 				const defaultEndpointData: Endpoint = {
 					id: v4(),
 					serviceId: service.id,
@@ -128,7 +129,7 @@ class SwaggerParseManager {
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
 					requestIds: [],
-					history: [],
+					defaultRequest: null,
 				};
 				service.endpointIds.push(defaultEndpointData.id);
 				if (!pathData || typeof pathData === 'string') {
@@ -151,6 +152,7 @@ class SwaggerParseManager {
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
+					history: [],
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {

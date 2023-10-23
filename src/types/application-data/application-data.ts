@@ -49,6 +49,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	description: string;
 	serviceId: string;
 	requestIds: string[];
+	defaultRequest: string | null;
 };
 
 export type Environment = {

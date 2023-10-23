@@ -95,12 +95,13 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					...data,
 					requestIds: [],
 					id: newId,
+					defaultRequest: null,
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
 				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
-				requestIds.forEach((requestId) =>
-					this.addNew('request', { endpointId: newId }, this.data.requests[requestId], false),
-				);
+				requestIds.forEach((requestId) => {
+					this.addNew('request', { endpointId: newId }, this.data.requests[requestId], false);
+				});
 				newDatum = this.data.endpoints[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'request':
@@ -117,7 +118,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					id: newId,
 					history: [],
 				};
-				this.data.endpoints[endpointId]?.requestIds?.push(newId);
+				const endpointData = this.data.endpoints[endpointId];
+				endpointData?.requestIds?.push(newId);
+				if (endpointData?.defaultRequest == null) {
+					endpointData.defaultRequest = newId;
+				}
 				newDatum = this.data.requests[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			default:
