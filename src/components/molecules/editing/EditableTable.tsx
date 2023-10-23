@@ -97,17 +97,26 @@ export function EditableTable(props: EditableTableProps) {
 				);
 			})}
 			<Stack direction={'row'}>
-				<Input
-					size="sm"
-					value={''}
-					onChange={(e) => {
-						setSelected(e.target.value);
-						props.addNewData(e.target.value, newRowValueText);
-						setNewRowValueText('');
-					}}
-					sx={{ width: '50%' }}
-				/>
-				<Input size="sm" value={newRowValueText} onChange={(e) => setNewRowValueText(e.target.value)} />
+				{mode === 'edit' && (
+					<>
+						<Input
+							size="sm"
+							value={''}
+							onChange={(e) => {
+								setSelected(e.target.value);
+								props.addNewData(e.target.value, newRowValueText);
+								setNewRowValueText('');
+							}}
+							sx={{ width: '50%' }}
+						/>
+						<Input
+							size="sm"
+							value={newRowValueText}
+							onChange={(e) => setNewRowValueText(e.target.value)}
+							sx={{ width: '50%' }}
+						/>
+					</>
+				)}
 			</Stack>
 		</>
 	);
