@@ -36,7 +36,7 @@ class EnvironmentContextResolver {
 					if (snippet.variableName) {
 						return (
 							<Typography variant="outlined" color={snippet.value ? 'success' : 'danger'} key={index}>
-								{`{${snippet.variableName}}`}: {snippet.value ?? 'unknown'}
+								{`${snippet.variableName}`}: {snippet.value ?? 'unknown'}
 							</Typography>
 						);
 					} else {

@@ -5,6 +5,7 @@ import { RequestBody } from './RequestBody';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
+import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
@@ -37,6 +38,14 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 					setNewEnvironment={(newEnvironment: Environment) =>
 						applicationDataManager.update('request', request.id, { headers: newEnvironment })
 					}
+				/>
+			</TabPanel>
+			<TabPanel value="queryParams">
+				<QueryParamEditableTable
+					queryParams={request.queryParams}
+					setNewQueryParams={(newQueryParams: Record<string, string[]>) => {
+						applicationDataManager.update('request', request.id, { queryParams: newQueryParams });
+					}}
 				/>
 			</TabPanel>
 		</Tabs>

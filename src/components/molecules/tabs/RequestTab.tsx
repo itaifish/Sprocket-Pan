@@ -29,6 +29,7 @@ import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
+import { queryParamsToString } from '../../../utils/application';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -110,7 +111,7 @@ export function RequestTab(props: TabProps) {
 						}}
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
-							`${serviceData.baseUrl}${endpointData.url}`,
+							`${serviceData.baseUrl}${endpointData.url}?${queryParamsToString(requestData.queryParams)}`,
 							data,
 							serviceData.id,
 						)}

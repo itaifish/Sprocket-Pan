@@ -4,6 +4,7 @@ import {
 	RawBodyType,
 	RawBodyTypes,
 } from '../types/application-data/application-data';
+import { queryParamsToStringReplaceVars } from '../utils/application';
 import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
@@ -38,7 +39,10 @@ class NetworkRequestManager {
 					endpoint.serviceId,
 				);
 			});
-			const res = await fetch(url, {
+			const queryParamStr = queryParamsToStringReplaceVars(request.queryParams, (text) =>
+				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId),
+			);
+			const res = await fetch(`${url}?${queryParamStr}`, {
 				method: endpoint.verb,
 				body,
 				headers: headers,

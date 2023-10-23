@@ -1,5 +1,4 @@
 import { Environment } from '../../../types/application-data/application-data';
-import { log } from '../../../utils/logging';
 import { EditableTable } from './EditableTable';
 
 interface EnvironmentEditableTableProps {
@@ -27,7 +26,6 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 		} else {
 			newEnv[id] = newValue ?? '';
 		}
-		log.info(`new keys: ${Object.keys(newEnv)}`);
 		props.setNewEnvironment(newEnv);
 	};
 	const addNewData = (key: string, value: string) => changeData(key, key, value);
