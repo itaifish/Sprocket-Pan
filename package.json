@@ -5,11 +5,12 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "build:types && vite build",
 		"preview": "vite preview",
 		"tauri": "tauri",
 		"start": "tauri dev",
-		"lint": "eslint src/ --fix"
+		"lint": "eslint src/ --fix",
+		"build:types": "tsc"
 	},
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",

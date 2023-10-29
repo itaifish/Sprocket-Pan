@@ -7,7 +7,7 @@ import {
 } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
-import * as SwaggerParser from '@apidevtools/swagger-parser';
+import SwaggerParser from '@apidevtools/swagger-parser';
 import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
@@ -153,6 +153,7 @@ class SwaggerParseManager {
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
+					environmentOverride: {},
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {

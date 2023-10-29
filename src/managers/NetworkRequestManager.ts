@@ -9,6 +9,7 @@ import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import ts from 'typescript';
+import { getScriptInjectionCode } from './ScriptInjectionManager';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -28,7 +29,9 @@ class NetworkRequestManager {
 			// Run pre-request script
 			if (request.preRequestScript && request.preRequestScript != '') {
 				try {
-					const state = this.getApplicationStateDataForScript(request, data);
+					const sprocketPan = getScriptInjectionCode(request, data);
+					// eslint-disable-next-line @typescript-eslint/no-unused-vars
+					const sp = sprocketPan;
 					const jsScript = ts.transpile(request.preRequestScript);
 					eval(jsScript);
 				} catch (e) {
@@ -78,12 +81,6 @@ class NetworkRequestManager {
 			return errorStr;
 		}
 		return null;
-	}
-
-	getApplicationStateDataForScript(_request: EndpointRequest, _data: ApplicationData) {
-		return {
-			x: 'string',
-		};
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {

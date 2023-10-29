@@ -15,7 +15,7 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { Constants } from '../../../../utils/constants';
-=import { log } from '../../../../utils/logging';
+import { getScriptInjectionCode } from '../../../../managers/ScriptInjectionManager';
 
 interface RequestScriptProps {
 	request: EndpointRequest;
@@ -49,7 +49,16 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 			noImplicitUseStrict: true,
 			noUnusedLocals: true,
 		});
-		log.info(monaco.languages.typescript.typescriptDefaults.getExtraLibs());
+
+		monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+		monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+
+		const injectedCode = `
+				const sprocketPan = ${getScriptInjectionCode.toString()}({} as any, {} as any);
+				const sp = sprocketPan;
+			`;
+		monaco.editor.createModel(injectedCode, 'typescript', `ts:src/lib_${request.id}${scriptKey}.ts`);
+
 		format();
 	};
 	useEffect(() => {
@@ -62,7 +71,7 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 	}, [latestText.current]);
 
 	return (
-		<Stack>
+		<Stack sx={{ zIndex: 150 }}>
 			<Stack direction={'row'} spacing={2}>
 				<IconButton onClick={() => format()}>
 					<AutoFixHighIcon />

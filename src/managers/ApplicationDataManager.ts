@@ -114,6 +114,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
+					environmentOverride: {},
 					...data,
 					id: newId,
 					history: [],

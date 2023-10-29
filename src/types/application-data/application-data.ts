@@ -28,6 +28,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 		: RawBodyType | undefined;
 	preRequestScript?: string;
 	postRequestScript?: string;
+	environmentOverride: Record<string, string>;
 	history: HistoricalEndpointResponse[];
 };
 
