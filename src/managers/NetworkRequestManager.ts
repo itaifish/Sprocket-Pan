@@ -8,7 +8,7 @@ import { queryParamsToStringReplaceVars } from '../utils/application';
 import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
-
+import ts from 'typescript';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -25,6 +25,17 @@ class NetworkRequestManager {
 			const endpoint = data.endpoints[endpointId];
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
+			// Run pre-request script
+			if (request.preRequestScript && request.preRequestScript != '') {
+				try {
+					const state = this.getApplicationStateDataForScript(request, data);
+					const jsScript = ts.transpile(request.preRequestScript);
+					eval(jsScript);
+				} catch (e) {
+					const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+				}
+			}
 			const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId);
 			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
 			if (body) {
@@ -67,6 +78,12 @@ class NetworkRequestManager {
 			return errorStr;
 		}
 		return null;
+	}
+
+	getApplicationStateDataForScript(_request: EndpointRequest, _data: ApplicationData) {
+		return {
+			x: 'string',
+		};
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {

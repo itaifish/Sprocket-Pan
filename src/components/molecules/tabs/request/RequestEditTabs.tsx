@@ -6,8 +6,9 @@ import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
+import { RequestScripts } from './RequestScripts';
 
-const requestTabs = ['body', 'headers', 'queryParams', 'environment'] as const;
+const requestTabs = ['body', 'headers', 'queryParams', 'scripts'] as const;
 type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
@@ -47,6 +48,9 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 						applicationDataManager.update('request', request.id, { queryParams: newQueryParams });
 					}}
 				/>
+			</TabPanel>
+			<TabPanel value="scripts">
+				<RequestScripts request={request} />
 			</TabPanel>
 		</Tabs>
 	);
