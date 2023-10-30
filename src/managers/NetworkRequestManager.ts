@@ -10,6 +10,8 @@ import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import ts from 'typescript';
 import { getPreScriptInjectionCode } from './ScriptInjectionManager';
+import { Constants } from '../utils/constants';
+import { asyncCallWithTimeout } from '../utils/functions';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -30,10 +32,12 @@ class NetworkRequestManager {
 			if (request.preRequestScript && request.preRequestScript != '') {
 				try {
 					const sprocketPan = getPreScriptInjectionCode(request, data);
-					// eslint-disable-next-line @typescript-eslint/no-unused-vars
-					const sp = sprocketPan;
+					const _this = globalThis as any;
+					_this.sp = sprocketPan;
+					_this.sprocketPan = sprocketPan;
 					const jsScript = ts.transpile(request.preRequestScript);
-					eval(jsScript);
+					const preRequestScriptTask = Object.getPrototypeOf(async function () {}).constructor(jsScript)();
+					await asyncCallWithTimeout(preRequestScriptTask, Constants.scriptsTimeoutMS);
 				} catch (e) {
 					const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
@@ -70,12 +74,13 @@ class NetworkRequestManager {
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;
 			}
-			const res = await fetch(`${url}${queryParamStr}`, {
+
+			const networkCall = fetch(`${url}${queryParamStr}`, {
 				method: endpoint.verb,
 				body,
 				headers: headers,
 			});
-
+			const res = await asyncCallWithTimeout(networkCall, Constants.networkRequestTimeoutMS);
 			const responseText = await (await res.blob()).text();
 			applicationDataManager.addResponseToHistory(request.id, {
 				statusCode: res.status,

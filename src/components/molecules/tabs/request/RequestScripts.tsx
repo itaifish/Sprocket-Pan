@@ -37,13 +37,25 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 
 	const handleEditorDidMount = (editor: any, monaco: Monaco) => {
 		editorRef.current = editor;
+		const uri = `ts:src/lib_${request.id}${scriptKey}.ts`;
+		const existingModel = monaco.editor.getModel(uri);
+		if (existingModel) {
+			log.info(`disposing of existingModel`);
+			existingModel.dispose();
+		}
 		monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
 			noSemanticValidation: false,
 			noSyntaxValidation: false,
 		});
-
+		monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+			diagnosticCodesToIgnore: [
+				1375, //'await' expressions are only allowed at the top level of a file when that file is a module
+				1378, //Top-level 'await' expressions are only allowed when the 'module' option is set to 'esnext' or 'system', and the 'target' option is set to 'es2017' or higher
+			],
+		});
 		monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-			target: monaco.languages.typescript.ScriptTarget.ES6,
+			target: monaco.languages.typescript.ScriptTarget.ESNext,
+			module: monaco.languages.typescript.ModuleKind.ESNext,
 			allowNonTsExtensions: true,
 			alwaysStrict: true,
 			noUnusedParameters: true,
@@ -54,12 +66,6 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 		monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 		monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
 
-		const uri = `ts:src/lib_${request.id}${scriptKey}.ts`;
-		const existingModel = monaco.editor.getModel(uri);
-		if (existingModel) {
-			log.info(`disposing of existingModel`);
-			existingModel.dispose();
-		}
 		const injectedCode = `
 				const sprocketPan = ${getPreScriptInjectionCode.toString()}({} as any, {} as any);
 				const sp = sprocketPan;
