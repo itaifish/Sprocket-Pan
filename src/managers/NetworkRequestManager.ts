@@ -9,7 +9,7 @@ import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import ts from 'typescript';
-import { getPreScriptInjectionCode } from './ScriptInjectionManager';
+import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { Constants } from '../utils/constants';
 import { asyncCallWithTimeout } from '../utils/functions';
 export type NetworkCallResponse = {
@@ -31,7 +31,7 @@ class NetworkRequestManager {
 			// Run pre-request script
 			if (request.preRequestScript && request.preRequestScript != '') {
 				try {
-					const sprocketPan = getPreScriptInjectionCode(request, data);
+					const sprocketPan = getScriptInjectionCode(request, data);
 					const _this = globalThis as any;
 					_this.sp = sprocketPan;
 					_this.sprocketPan = sprocketPan;
@@ -82,7 +82,7 @@ class NetworkRequestManager {
 			});
 			const res = await asyncCallWithTimeout(networkCall, Constants.networkRequestTimeoutMS);
 			const responseText = await (await res.blob()).text();
-			applicationDataManager.addResponseToHistory(request.id, {
+			const response = {
 				statusCode: res.status,
 				headers: [...res.headers.entries()].reduce<Record<string, string>>((obj, [keyValuePair]) => {
 					obj[keyValuePair[0]] = keyValuePair[1];
@@ -90,7 +90,23 @@ class NetworkRequestManager {
 				}, {}),
 				bodyType: this.headersContentTypeToBodyType(res.headers.get('content-type')),
 				body: responseText,
-			});
+			};
+			applicationDataManager.addResponseToHistory(request.id, response);
+			// Run post-request script
+			if (request.postRequestScript && request.postRequestScript != '') {
+				try {
+					const sprocketPan = getScriptInjectionCode(request, data, response);
+					const _this = globalThis as any;
+					_this.sp = sprocketPan;
+					_this.sprocketPan = sprocketPan;
+					const jsScript = ts.transpile(request.postRequestScript);
+					const postRequestScriptTask = Object.getPrototypeOf(async function () {}).constructor(jsScript)();
+					await asyncCallWithTimeout(postRequestScriptTask, Constants.scriptsTimeoutMS);
+				} catch (e) {
+					const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+				}
+			}
 		} catch (e) {
 			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 			log.warn(errorStr);

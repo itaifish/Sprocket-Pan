@@ -1,16 +1,41 @@
-import { ApplicationData, EndpointRequest } from '../types/application-data/application-data';
-import { log } from '../utils/logging';
+import { ApplicationData, EndpointRequest, EndpointResponse } from '../types/application-data/application-data';
 import { applicationDataManager } from './ApplicationDataManager';
 
-export function getPreScriptInjectionCode(request: EndpointRequest, data: ApplicationData) {
+export function getScriptInjectionCode(request: EndpointRequest, data: ApplicationData, response?: EndpointResponse) {
 	const setEnvironmentVariable = (key: string, value: string) => {
-		log.info(`Set ENvironment Variable Called`);
 		applicationDataManager.update('request', request.id, {
 			environmentOverride: { ...request.environmentOverride, [key]: value },
 		});
 	};
+
+	const setQueryParam = (key: string, value: string) => {
+		const newValue = request.queryParams[key] ? [...request.queryParams[key], value] : [value];
+		applicationDataManager.update('request', request.id, {
+			queryParams: { ...request.queryParams, [key]: newValue },
+		});
+	};
+
+	const setQueryParams = (key: string, values: string[]) => {
+		applicationDataManager.update('request', request.id, {
+			queryParams: { ...request.queryParams, [key]: values },
+		});
+	};
+
+	const setHeader = (key: string, value: string) => {
+		applicationDataManager.update('request', request.id, {
+			headers: { ...request.headers, [key]: value },
+		});
+	};
+
+	const readonlyData = structuredClone(data);
+	const latestResponse =
+		response ?? (request.history && request.history.length > 0) ? request.history[request.history.length - 1] : null;
 	return {
 		setEnvironmentVariable,
-		data,
+		setQueryParam,
+		setQueryParams,
+		setHeader,
+		data: readonlyData,
+		response: latestResponse,
 	};
 }

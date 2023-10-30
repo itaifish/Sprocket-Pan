@@ -7,6 +7,8 @@ import { TabHeader } from './components/molecules/tabs/TabHeader';
 import { Box, Grid } from '@mui/joy';
 import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
 import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
+import { useMonaco } from '@monaco-editor/react';
+import { initMonaco } from './managers/MonacoInitManager';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
@@ -26,6 +28,8 @@ export const ServicesSearchContext = createContext<ServicesSearchContextType>(
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
+	const monaco = useMonaco();
+
 	useEffect(() => {
 		const event = () => {
 			log.info(`update seen`);
@@ -36,6 +40,12 @@ function App() {
 			applicationDataManager.off('update', event);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (monaco) {
+			initMonaco(monaco);
+		}
+	}, [monaco]);
 
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
