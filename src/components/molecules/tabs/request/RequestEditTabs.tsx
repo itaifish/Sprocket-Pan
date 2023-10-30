@@ -8,7 +8,7 @@ import { applicationDataManager } from '../../../../managers/ApplicationDataMana
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 import { RequestScripts } from './RequestScripts';
 
-const requestTabs = ['body', 'headers', 'queryParams', 'scripts'] as const;
+const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
@@ -51,6 +51,14 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			</TabPanel>
 			<TabPanel value="scripts">
 				<RequestScripts request={request} />
+			</TabPanel>
+			<TabPanel value="environment">
+				<EnvironmentEditableTable
+					environment={(request.environmentOverride ?? {}) as Environment}
+					setNewEnvironment={(newEnvironment: Environment) =>
+						applicationDataManager.update('request', request.id, { environmentOverride: newEnvironment })
+					}
+				/>
 			</TabPanel>
 		</Tabs>
 	);

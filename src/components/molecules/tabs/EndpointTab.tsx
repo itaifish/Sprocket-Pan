@@ -53,6 +53,7 @@ export function EndpointTab(props: TabProps) {
 							serviceData.baseUrl || 'unknown',
 							data,
 							serviceData.id,
+							undefined,
 							{ variant: 'outlined', color: 'primary' },
 						)}
 						value={endpointData.url}

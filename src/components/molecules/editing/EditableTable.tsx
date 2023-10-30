@@ -86,7 +86,7 @@ export function EditableTable(props: EditableTableProps) {
 											width: '50%',
 										}}
 									>
-										{environmentContextResolver.stringWithEnvironmentToTypography(tableData.value, environment, {
+										{environmentContextResolver.stringWithEnvironmentToTypography(tableData.value ?? '', environment, {
 											fontSize: 14,
 										})}
 									</Card>

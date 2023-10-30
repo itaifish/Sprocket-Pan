@@ -9,7 +9,7 @@ import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import ts from 'typescript';
-import { getScriptInjectionCode } from './ScriptInjectionManager';
+import { getPreScriptInjectionCode } from './ScriptInjectionManager';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -29,7 +29,7 @@ class NetworkRequestManager {
 			// Run pre-request script
 			if (request.preRequestScript && request.preRequestScript != '') {
 				try {
-					const sprocketPan = getScriptInjectionCode(request, data);
+					const sprocketPan = getPreScriptInjectionCode(request, data);
 					// eslint-disable-next-line @typescript-eslint/no-unused-vars
 					const sp = sprocketPan;
 					const jsScript = ts.transpile(request.preRequestScript);
@@ -39,22 +39,33 @@ class NetworkRequestManager {
 					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
 				}
 			}
-			const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId);
+			const url = environmentContextResolver.resolveVariablesForString(
+				unparsedUrl,
+				data,
+				endpoint.serviceId,
+				request.id,
+			);
 			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
 			if (body) {
-				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId);
+				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId, request.id);
 			}
 			const headers: Record<string, string> = {};
 			Object.keys(request.headers).forEach((headerKey) => {
-				const parsedKey = environmentContextResolver.resolveVariablesForString(headerKey, data, endpoint.serviceId);
+				const parsedKey = environmentContextResolver.resolveVariablesForString(
+					headerKey,
+					data,
+					endpoint.serviceId,
+					request.id,
+				);
 				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
 					request.headers[headerKey],
 					data,
 					endpoint.serviceId,
+					request.id,
 				);
 			});
 			let queryParamStr = queryParamsToStringReplaceVars(request.queryParams, (text) =>
-				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId),
+				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
 			);
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;

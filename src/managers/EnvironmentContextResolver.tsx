@@ -14,9 +14,10 @@ class EnvironmentContextResolver {
 		text: string,
 		data: ApplicationData,
 		serviceId?: string,
+		requestId?: string,
 		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return this.snippetsToTypography(snippets, typographyProps);
 	}
 
@@ -47,12 +48,13 @@ class EnvironmentContextResolver {
 		);
 	}
 
-	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string, requestId?: string) {
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
 	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
+		text = text.toString();
 		let state: 'variable' | 'text' = 'text';
 		let startVariablePos = 0;
 		const resultText = [];
@@ -76,12 +78,17 @@ class EnvironmentContextResolver {
 		return resultText;
 	}
 
-	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
-		const env = this.buildEnvironmentVariables(data, serviceId);
+	public parseStringWithEnvironmentOverrides(
+		text: string,
+		data: ApplicationData,
+		serviceId?: string,
+		requestId?: string,
+	) {
+		const env = this.buildEnvironmentVariables(data, serviceId, requestId);
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string) {
+	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
 		let env: Environment = { __name: '', __id: '' };
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
@@ -90,6 +97,12 @@ class EnvironmentContextResolver {
 			const service = data.services[serviceId];
 			if (service?.selectedEnvironment) {
 				env = { ...env, ...service.localEnvironments[service.selectedEnvironment] };
+			}
+		}
+		if (requestId) {
+			const request = data.requests[requestId];
+			if (request?.environmentOverride) {
+				env = { ...env, ...request.environmentOverride };
 			}
 		}
 		return env;

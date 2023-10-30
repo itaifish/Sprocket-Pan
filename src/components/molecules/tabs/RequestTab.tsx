@@ -118,6 +118,7 @@ export function RequestTab(props: TabProps) {
 							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
 							data,
 							serviceData.id,
+							requestData.id,
 						)}
 					</Card>
 				</Grid>

@@ -15,7 +15,8 @@ import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { Constants } from '../../../../utils/constants';
-import { getScriptInjectionCode } from '../../../../managers/ScriptInjectionManager';
+import { getPreScriptInjectionCode } from '../../../../managers/ScriptInjectionManager';
+import { log } from '../../../../utils/logging';
 
 interface RequestScriptProps {
 	request: EndpointRequest;
@@ -53,11 +54,17 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 		monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 		monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
 
+		const uri = `ts:src/lib_${request.id}${scriptKey}.ts`;
+		const existingModel = monaco.editor.getModel(uri);
+		if (existingModel) {
+			log.info(`disposing of existingModel`);
+			existingModel.dispose();
+		}
 		const injectedCode = `
-				const sprocketPan = ${getScriptInjectionCode.toString()}({} as any, {} as any);
+				const sprocketPan = ${getPreScriptInjectionCode.toString()}({} as any, {} as any);
 				const sp = sprocketPan;
 			`;
-		monaco.editor.createModel(injectedCode, 'typescript', `ts:src/lib_${request.id}${scriptKey}.ts`);
+		monaco.editor.createModel(injectedCode, 'typescript', uri);
 
 		format();
 	};
@@ -93,7 +100,7 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 			</Stack>
 
 			<Editor
-				height={'45vh'}
+				height={'55vh'}
 				value={editorText}
 				onChange={(value) => {
 					setEditorText(value ?? '');
