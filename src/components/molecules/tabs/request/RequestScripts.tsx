@@ -32,7 +32,7 @@ function RequestScript({ request, scriptKey }: RequestScriptProps) {
 			editorRef.current.getAction('editor.action.formatDocument').run();
 		}
 	};
-	const handleEditorDidMount = (editor: any, monaco: Monaco) => {
+	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
 		editorRef.current = editor;
 
 		format();

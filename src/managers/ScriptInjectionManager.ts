@@ -2,10 +2,22 @@ import { ApplicationData, EndpointRequest, EndpointResponse } from '../types/app
 import { applicationDataManager } from './ApplicationDataManager';
 
 export function getScriptInjectionCode(request: EndpointRequest, data: ApplicationData, response?: EndpointResponse) {
-	const setEnvironmentVariable = (key: string, value: string) => {
-		applicationDataManager.update('request', request.id, {
-			environmentOverride: { ...request.environmentOverride, [key]: value },
-		});
+	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
+		if (level === 'request') {
+			applicationDataManager.update('request', request.id, {
+				environmentOverride: { ...request.environmentOverride, [key]: value },
+			});
+		} else if (level === 'service') {
+			const endpoint = data.endpoints[request.endpointId];
+			if (!endpoint) {
+				return;
+			}
+			const service = data.services[endpoint.serviceId];
+			if (!service) {
+				return;
+			}
+			// applicationDataManager.update('service', endpoint.serviceId, {e});
+		}
 	};
 
 	const setQueryParam = (key: string, value: string) => {

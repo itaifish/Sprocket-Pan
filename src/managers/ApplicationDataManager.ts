@@ -163,8 +163,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			log.warn(`Can't find request ${requestId}`);
 			return;
 		}
+		const copiedRequest: any = structuredClone(reqToUpdate);
+		delete copiedRequest.history;
 		reqToUpdate.history.push({
-			request: structuredClone(reqToUpdate),
+			request: copiedRequest,
 			response,
 			dateTime: new Date(),
 		});

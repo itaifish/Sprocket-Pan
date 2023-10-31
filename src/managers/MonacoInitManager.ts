@@ -24,84 +24,82 @@ export function initMonaco(monaco: Monaco) {
 	monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 	monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
 	const injectedCode = `
-				type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
-					id: string;
-					endpointId: string;
-					name: string;
-					headers: Record<string, string>;
-					queryParams: Record<string, string[]>;
-					bodyType: TRequestBodyType;
-					body: TRequestBodyType extends 'none' ? undefined : TRequestBodyType extends 'raw' ? string : TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded' ? Map<string, string> : Map<string, string> | string | undefined;
-					rawType: TRequestBodyType extends 'raw' ? RawBodyType : TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded' ? undefined : RawBodyType | undefined;
-					preRequestScript?: string;
-					postRequestScript?: string;
-					environmentOverride: Record<string, string>;
-					history: HistoricalEndpointResponse[];
-			};
-			type HistoricalEndpointResponse = {
-					request: EndpointRequest;
-					response: EndpointResponse;
-					dateTime: Date;
-			};
-			type Endpoint<TUrlBase extends string = string> = {
-					id: string;
-					url: string;
-					verb: RESTfulRequestVerb;
-					baseHeaders: Record<string, string>;
-					baseQueryParams: Record<string, string[]>;
-					preRequestScript?: string;
-					postRequestScript?: string;
-					name: string;
-					description: string;
-					serviceId: string;
-					requestIds: string[];
-					defaultRequest: string | null;
-			};
-			type Environment = {
-					__name: string;
-					__id: string;
-					[key: string]: string;
-			};
-			type Service<TBaseUrl extends string = string> = {
-					id: string;
-					name: string;
-					description: string;
-					version: string;
-					baseUrl: TBaseUrl;
-					localEnvironments: {
-							[environmentName: string]: Environment;
-					};
-					selectedEnvironment?: string;
-					endpointIds: string[];
-					preRequestScript?: string;
-			};
-			type ApplicationData = {
-					services: Record<string, Service>;
-					endpoints: Record<string, Endpoint>;
-					requests: Record<string, EndpointRequest>;
-					environments: Record<string, Environment>;
-					selectedEnvironment?: string;
-					settings: Settings;
-			};
-			type EndpointResponse = {
-					statusCode: number;
-					body: string;
-					bodyType: RawBodyType;
-					headers: Record<string, string>;
-			};
-
-			type SprocketPan = {
-				setEnvironmentVariable: (key: string, value: string) => void;
-				setQueryParam: (key: string, value: string) => void;
-				setQueryParams: (key: string, values: string[]) => void;
-				setHeader: (key: string, value: string) => void;
-				data: ApplicationData;
-				response: HistoricalEndpointResponse | null;
+		type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
+			id: string;
+			endpointId: string;
+			name: string;
+			headers: Record<string, string>;
+			queryParams: Record<string, string[]>;
+			bodyType: TRequestBodyType;
+			body: TRequestBodyType extends 'none' ? undefined : TRequestBodyType extends 'raw' ? string : TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded' ? Map<string, string> : Map<string, string> | string | undefined;
+			rawType: TRequestBodyType extends 'raw' ? RawBodyType : TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded' ? undefined : RawBodyType | undefined;
+			preRequestScript?: string;
+			postRequestScript?: string;
+			environmentOverride: Record<string, string>;
+			history: HistoricalEndpointResponse[];
 		};
-				const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any);
-				const sp = sprocketPan as SprocketPan;
+		type HistoricalEndpointResponse = {
+				request: Omit<EndpointRequest, 'history'>;
+				response: EndpointResponse;
+				dateTime: Date;
+		};
+		type Endpoint<TUrlBase extends string = string> = {
+				id: string;
+				url: string;
+				verb: RESTfulRequestVerb;
+				baseHeaders: Record<string, string>;
+				baseQueryParams: Record<string, string[]>;
+				preRequestScript?: string;
+				postRequestScript?: string;
+				name: string;
+				description: string;
+				serviceId: string;
+				requestIds: string[];
+				defaultRequest: string | null;
+		};
+		type Environment = {
+				__name: string;
+				__id: string;
+				[key: string]: string;
+		};
+		type Service<TBaseUrl extends string = string> = {
+				id: string;
+				name: string;
+				description: string;
+				version: string;
+				baseUrl: TBaseUrl;
+				localEnvironments: {
+						[environmentName: string]: Environment;
+				};
+				selectedEnvironment?: string;
+				endpointIds: string[];
+				preRequestScript?: string;
+		};
+		type ApplicationData = {
+				services: Record<string, Service>;
+				endpoints: Record<string, Endpoint>;
+				requests: Record<string, EndpointRequest>;
+				environments: Record<string, Environment>;
+				selectedEnvironment?: string;
+				settings: Settings;
+		};
+		type EndpointResponse = {
+				statusCode: number;
+				body: string;
+				bodyType: RawBodyType;
+				headers: Record<string, string>;
+		};
+
+		type SprocketPan = {
+			setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void
+			setQueryParam: (key: string, value: string) => void;
+			setQueryParams: (key: string, values: string[]) => void;
+			setHeader: (key: string, value: string) => void;
+			data: ApplicationData;
+			response: HistoricalEndpointResponse | null;
+		};
+		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
+		const sp = sprocketPan;
 			`;
 	monaco.languages.typescript.typescriptDefaults.addExtraLib(injectedCode, 'ts:types/types.d.ts');
-
-	// monaco.editor.createModel(injectedCode, 'typescript', `ts:src/lib_injection_script.ts`);
 }

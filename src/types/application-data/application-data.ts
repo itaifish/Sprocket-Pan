@@ -33,7 +33,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 };
 
 export type HistoricalEndpointResponse = {
-	request: EndpointRequest;
+	request: Omit<EndpointRequest, 'history'>;
 	response: EndpointResponse;
 	dateTime: Date;
 };
