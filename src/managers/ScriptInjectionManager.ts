@@ -1,5 +1,6 @@
 import { ApplicationData, EndpointRequest, EndpointResponse } from '../types/application-data/application-data';
 import { applicationDataManager } from './ApplicationDataManager';
+import { environmentContextResolver } from './EnvironmentContextResolver';
 
 export function getScriptInjectionCode(request: EndpointRequest, data: ApplicationData, response?: EndpointResponse) {
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
@@ -44,6 +45,12 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 		});
 	};
 
+	const getEnvironment = () => {
+		const endpoint = data.endpoints[request.endpointId];
+		const serviceId = endpoint?.serviceId;
+		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
+	};
+
 	const readonlyData = structuredClone(data);
 	const latestResponse =
 		response ?? (request.history && request.history.length > 0) ? request.history[request.history.length - 1] : null;
@@ -52,6 +59,7 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 		setQueryParam,
 		setQueryParams,
 		setHeader,
+		getEnvironment,
 		data: readonlyData,
 		response: latestResponse,
 	};

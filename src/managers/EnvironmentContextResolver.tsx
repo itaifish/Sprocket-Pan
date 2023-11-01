@@ -88,7 +88,7 @@ class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
+	public buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
 		let env: Environment = { __name: '', __id: '' };
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };

@@ -91,13 +91,14 @@ export function initMonaco(monaco: Monaco) {
 		};
 
 		type SprocketPan = {
-			setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void
-			setQueryParam: (key: string, value: string) => void;
-			setQueryParams: (key: string, values: string[]) => void;
-			setHeader: (key: string, value: string) => void;
-			data: ApplicationData;
-			response: HistoricalEndpointResponse | null;
-		};
+				setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
+				setQueryParam: (key: string, value: string) => void;
+				setQueryParams: (key: string, values: string[]) => void;
+				setHeader: (key: string, value: string) => void;
+				getEnvironment: () => Record<string, string>;
+				data: ApplicationData;
+				response: HistoricalEndpointResponse | null;
+		}
 		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 		const sp = sprocketPan;
 			`;
