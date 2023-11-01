@@ -71,6 +71,7 @@ export type Service<TBaseUrl extends string = string> = {
 	selectedEnvironment?: string;
 	endpointIds: string[];
 	preRequestScript?: string;
+	postRequestScript?: string;
 };
 
 export type ApplicationData = {

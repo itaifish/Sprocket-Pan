@@ -19,3 +19,7 @@ export const asyncCallWithTimeout = async <T>(asyncPromise: Promise<T>, timeLimi
 		return result as T;
 	});
 };
+
+export const evalAsync = async (codeToEval: string) => {
+	return Object.getPrototypeOf(async function () {}).constructor(codeToEval)();
+};

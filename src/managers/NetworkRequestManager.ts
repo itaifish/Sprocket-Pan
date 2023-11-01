@@ -11,7 +11,7 @@ import { environmentContextResolver } from './EnvironmentContextResolver';
 import ts from 'typescript';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { Constants } from '../utils/constants';
-import { asyncCallWithTimeout } from '../utils/functions';
+import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -28,21 +28,25 @@ class NetworkRequestManager {
 			const endpoint = data.endpoints[endpointId];
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
-			// Run pre-request script
-			if (request.preRequestScript && request.preRequestScript != '') {
-				try {
-					const sprocketPan = getScriptInjectionCode(request, data);
-					const _this = globalThis as any;
-					_this.sp = sprocketPan;
-					_this.sprocketPan = sprocketPan;
-					const jsScript = ts.transpile(request.preRequestScript);
-					const preRequestScriptTask = Object.getPrototypeOf(async function () {}).constructor(jsScript)();
-					await asyncCallWithTimeout(preRequestScriptTask, Constants.scriptsTimeoutMS);
-				} catch (e) {
-					const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+			// Run pre-request scripts
+			const preRequestScripts = [service.preRequestScript, request.preRequestScript];
+			for (const preRequestScript of preRequestScripts) {
+				if (preRequestScript && preRequestScript != '') {
+					try {
+						const sprocketPan = getScriptInjectionCode(request, data);
+						const _this = globalThis as any;
+						_this.sp = sprocketPan;
+						_this.sprocketPan = sprocketPan;
+						const jsScript = ts.transpile(preRequestScript);
+						const preRequestScriptTask = evalAsync(jsScript);
+						await asyncCallWithTimeout(preRequestScriptTask, Constants.scriptsTimeoutMS);
+					} catch (e) {
+						const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+						return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+					}
 				}
 			}
+
 			const url = environmentContextResolver.resolveVariablesForString(
 				unparsedUrl,
 				data,
@@ -92,19 +96,22 @@ class NetworkRequestManager {
 				body: responseText,
 			};
 			applicationDataManager.addResponseToHistory(request.id, response);
-			// Run post-request script
-			if (request.postRequestScript && request.postRequestScript != '') {
-				try {
-					const sprocketPan = getScriptInjectionCode(request, data, response);
-					const _this = globalThis as any;
-					_this.sp = sprocketPan;
-					_this.sprocketPan = sprocketPan;
-					const jsScript = ts.transpile(request.postRequestScript);
-					const postRequestScriptTask = Object.getPrototypeOf(async function () {}).constructor(jsScript)();
-					await asyncCallWithTimeout(postRequestScriptTask, Constants.scriptsTimeoutMS);
-				} catch (e) {
-					const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-					return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+			// Run post-request scripts
+			const postRequestScripts = [service.postRequestScript, request.postRequestScript];
+			for (const postRequestScript of postRequestScripts) {
+				if (postRequestScript && postRequestScript != '') {
+					try {
+						const sprocketPan = getScriptInjectionCode(request, data, response);
+						const _this = globalThis as any;
+						_this.sp = sprocketPan;
+						_this.sprocketPan = sprocketPan;
+						const jsScript = ts.transpile(postRequestScript);
+						const postRequestScriptTask = evalAsync(jsScript);
+						await asyncCallWithTimeout(postRequestScriptTask, Constants.scriptsTimeoutMS);
+					} catch (e) {
+						const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+						return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
+					}
 				}
 			}
 		} catch (e) {

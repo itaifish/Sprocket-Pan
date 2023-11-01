@@ -8,6 +8,8 @@ import { EditableTextArea } from '../../atoms/EditableTextArea';
 import Table from '@mui/joy/Table';
 import { Service } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
+import { RequestScript } from '../scripts/RequestScript';
+
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const serviceData = data.services[props.id];
@@ -59,6 +61,30 @@ export function ServiceTab(props: TabProps) {
 									))}
 								</tbody>
 							</Table>
+						</AccordionDetails>
+					</Accordion>
+					<Accordion defaultExpanded>
+						<AccordionSummary>Pre-Request Script</AccordionSummary>
+						<AccordionDetails>
+							<RequestScript
+								scriptText={serviceData.preRequestScript}
+								scriptKey={'preRequestScript'}
+								updateScript={(scriptText: string) => {
+									applicationDataManager.update('service', serviceData.id, { preRequestScript: scriptText });
+								}}
+							/>
+						</AccordionDetails>
+					</Accordion>
+					<Accordion defaultExpanded>
+						<AccordionSummary>Post-Request Script</AccordionSummary>
+						<AccordionDetails>
+							<RequestScript
+								scriptText={serviceData.postRequestScript}
+								scriptKey={'postRequestScript'}
+								updateScript={(scriptText: string) => {
+									applicationDataManager.update('service', serviceData.id, { postRequestScript: scriptText });
+								}}
+							/>
 						</AccordionDetails>
 					</Accordion>
 				</AccordionGroup>

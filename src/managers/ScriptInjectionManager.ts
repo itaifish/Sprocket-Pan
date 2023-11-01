@@ -17,6 +17,11 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 				return;
 			}
 			// applicationDataManager.update('service', endpoint.serviceId, {e});
+		} else if (level === 'global') {
+			const selectedEnvironment = data.selectedEnvironment;
+			if (selectedEnvironment) {
+				applicationDataManager.update('environment', selectedEnvironment, { [key]: value });
+			}
 		}
 	};
 
