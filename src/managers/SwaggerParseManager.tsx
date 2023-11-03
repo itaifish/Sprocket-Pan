@@ -97,13 +97,88 @@ class SwaggerParseManager {
 			case '2':
 				return this.mapV2Path(paths, service);
 			case '3':
-				break;
+				return this.mapV3Path(paths, service);
 			case '3.1':
-				break;
+				return this.mapV3Path(paths, service);
 			default:
 				_exhaustive = version;
 		}
 		return empty;
+	}
+
+	private mapV3Path(paths: OpenAPI.Document['paths'], service: Service) {
+		const typedPaths = paths as OpenAPIV3.PathsObject;
+		const mappedRequests: EndpointRequest[] = [];
+		const mappedEndpoints = Object.keys(typedPaths).flatMap((pathsUri: keyof typeof typedPaths) => {
+			const paths = typedPaths[pathsUri] ?? {};
+			return RESTfulRequestVerbs.map((verb) => verb.toLocaleLowerCase() as Lowercase<RESTfulRequestVerb>).flatMap(
+				(verb) => {
+					const pathData = paths[verb];
+					if (pathData == undefined) {
+						return [];
+					}
+					const method = verb.toLocaleUpperCase() as RESTfulRequestVerb;
+					const defaultEndpointData: Endpoint = {
+						id: v4(),
+						serviceId: service.id,
+						verb: method,
+						url: `${pathsUri}`,
+						baseHeaders: {},
+						baseQueryParams: {},
+						description: pathData.description ?? 'This is a new endpoint',
+						name: `${method}: ${pathsUri}`,
+						requestIds: [],
+						defaultRequest: null,
+					};
+					service.endpointIds.push(defaultEndpointData.id);
+					const parameters = pathData.parameters;
+					if (!parameters) {
+						return defaultEndpointData;
+					}
+					const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
+						id: v4(),
+						endpointId: defaultEndpointData.id,
+						name: defaultEndpointData.name,
+						headers: {},
+						queryParams: {},
+						body: undefined,
+						bodyType: 'none',
+						rawType: undefined,
+						history: [],
+						environmentOverride: {},
+					};
+					const newRequests: EndpointRequest[] = [];
+					parameters.forEach((param) => {
+						const typedParam = param as OpenAPIV3.ParameterObject;
+						const paramIn = typedParam.in;
+						const schema = typedParam.schema as OpenAPIV3.SchemaObject | undefined;
+						switch (paramIn) {
+							case 'header':
+								if (typedParam.name) {
+									defaultEndpointData.baseHeaders[typedParam.name] = schema?.type ?? 'string';
+								}
+								break;
+							case 'path':
+								if (typedParam.name) {
+									if (schema?.type !== 'array') {
+										defaultEndpointData.baseQueryParams[typedParam.name] = ['string'];
+									} else {
+										defaultEndpointData.baseQueryParams[typedParam.name] = ['string', 'string2'];
+									}
+								}
+								break;
+							case 'query':
+								break;
+							case 'cookie':
+								break;
+						}
+					});
+					pathData.requestBody
+				},
+			);
+		});
+		log.info(`Paths: ${JSON.stringify(typedPaths)}`);
+		return { endpoints: [], requests: mappedRequests };
 	}
 
 	private mapV2Path(paths: OpenAPI.Document['paths'], service: Service) {
@@ -118,7 +193,6 @@ class SwaggerParseManager {
 				if (!RESTfulRequestVerbs.includes(method)) {
 					return [];
 				}
-				// todo add fefault
 				const defaultEndpointData: Endpoint = {
 					id: v4(),
 					serviceId: service.id,
@@ -184,7 +258,7 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								if (typedParam.type === 'array') {
+								if (typedParam.type !== 'array') {
 									defaultEndpointData.baseQueryParams[typedParam.name] = ['string'];
 								} else {
 									defaultEndpointData.baseQueryParams[typedParam.name] = ['string', 'string2'];
