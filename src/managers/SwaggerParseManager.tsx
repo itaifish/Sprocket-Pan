@@ -66,17 +66,20 @@ class SwaggerParseManager {
 				: (swaggerApi as OpenAPIV3.Document).openapi.charAt(3) === '0'
 				? '3'
 				: '3.1';
+		const swaggerV3 = swaggerApi as OpenAPIV3.Document;
 		const services: Service[] = [
 			{
 				id: v4(),
 				name: swaggerApi?.info?.title ?? 'New Service',
 				version: swaggerApi?.info?.version ?? '1.0.0',
 				description: swaggerApi?.info?.description ?? '',
-				baseUrl: swaggerApi?.externalDocs?.url ?? '',
+				baseUrl:
+					swaggerApi?.externalDocs?.url ?? (swaggerV3?.servers?.length ?? -1) > 0 ? swaggerV3?.servers![0].url : '',
 				localEnvironments: {},
 				endpointIds: [],
 			},
 		];
+		log.info(JSON.stringify(swaggerApi));
 		return { services, ...this.mapPaths(swaggerApi.paths, version, services[0]) };
 	}
 
@@ -131,10 +134,8 @@ class SwaggerParseManager {
 						defaultRequest: null,
 					};
 					service.endpointIds.push(defaultEndpointData.id);
-					const parameters = pathData.parameters;
-					if (!parameters) {
-						return defaultEndpointData;
-					}
+					const parameters = pathData.parameters ?? [];
+
 					const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
@@ -173,12 +174,53 @@ class SwaggerParseManager {
 								break;
 						}
 					});
-					pathData.requestBody
+					if (pathData.requestBody) {
+						const typedRequestBody = pathData.requestBody as OpenAPIV3.RequestBodyObject;
+						Object.keys(typedRequestBody.content).forEach((contentType) => {
+							const newId = v4();
+							const body = this.getExampleSwaggerBodyObject(
+								typedRequestBody.content[contentType].schema as OpenAPIV3.SchemaObject,
+							);
+							if (contentType.includes('json')) {
+								newRequests.push({
+									...newRequestBase,
+									body: JSON.stringify(body),
+									bodyType: 'raw',
+									rawType: 'JSON',
+									id: newId,
+								});
+							} else if (contentType.includes('xml')) {
+								newRequests.push({
+									...newRequestBase,
+									body: new xmlParse.Builder().buildObject(body),
+									bodyType: 'raw',
+									rawType: 'XML',
+									id: newId,
+								});
+							} else if (contentType.includes('x-www-form-urlencoded')) {
+								const newEndpoint: EndpointRequest<'x-www-form-urlencoded'> = {
+									...newRequestBase,
+									bodyType: 'x-www-form-urlencoded',
+									id: newId,
+									rawType: undefined,
+								};
+								newRequests.push(newEndpoint);
+							} else {
+								newRequests.push({ ...newRequestBase, id: newId });
+							}
+
+							defaultEndpointData.requestIds.push(newId);
+						});
+					} else {
+						newRequests.push(newRequestBase);
+						defaultEndpointData.requestIds.push(newRequestBase.id);
+					}
+					mappedRequests.push(...newRequests);
+					return defaultEndpointData;
 				},
 			);
 		});
-		log.info(`Paths: ${JSON.stringify(typedPaths)}`);
-		return { endpoints: [], requests: mappedRequests };
+		return { endpoints: mappedEndpoints, requests: mappedRequests };
 	}
 
 	private mapV2Path(paths: OpenAPI.Document['paths'], service: Service) {
@@ -238,7 +280,7 @@ class SwaggerParseManager {
 						case null:
 							break;
 						case 'body':
-							const body = this.getExampleSwaggerV2BodyObject(typedParam.schema);
+							const body = this.getExampleSwaggerBodyObject(typedParam.schema);
 							newRequestBase.body = body;
 							break;
 						case 'header':
@@ -317,9 +359,9 @@ class SwaggerParseManager {
 		return { endpoints: mappedEndpoints, requests: mappedRequests };
 	}
 
-	private getExampleSwaggerV2BodyObject(object: any): any {
+	private getExampleSwaggerBodyObject(object: OpenAPIV3.SchemaObject): any {
 		const resObj: any = {};
-		const type = object.type as SwaggerDataType;
+		const type = object.type;
 		let _exhaustive: never;
 		switch (type) {
 			case 'string':
@@ -330,13 +372,17 @@ class SwaggerParseManager {
 				return true;
 			case 'object':
 				Object.entries(object.properties ?? {}).forEach(([key, value]) => {
-					resObj[key] = this.getExampleSwaggerV2BodyObject(value);
+					resObj[key] = this.getExampleSwaggerBodyObject(value as OpenAPIV3.SchemaObject);
 				});
 				return resObj;
 			case 'integer':
 				return 1;
 			case 'array':
-				return [this.getExampleSwaggerV2BodyObject(object.items)];
+				return [
+					this.getExampleSwaggerBodyObject((object as OpenAPIV3.ArraySchemaObject).items as OpenAPIV3.SchemaObject),
+				];
+			case undefined:
+				break;
 			default:
 				_exhaustive = type;
 		}
