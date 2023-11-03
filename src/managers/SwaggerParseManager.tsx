@@ -208,12 +208,15 @@ class SwaggerParseManager {
 							} else {
 								newRequests.push({ ...newRequestBase, id: newId });
 							}
-
+							if (defaultEndpointData.defaultRequest == null) {
+								defaultEndpointData.defaultRequest = newId;
+							}
 							defaultEndpointData.requestIds.push(newId);
 						});
 					} else {
 						newRequests.push(newRequestBase);
 						defaultEndpointData.requestIds.push(newRequestBase.id);
+						defaultEndpointData.defaultRequest = newRequestBase.id;
 					}
 					mappedRequests.push(...newRequests);
 					return defaultEndpointData;
