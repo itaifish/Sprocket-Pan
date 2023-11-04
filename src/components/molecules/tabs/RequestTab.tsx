@@ -68,7 +68,8 @@ export function RequestTab(props: TabProps) {
 	} else {
 		responseData = lastError;
 	}
-	let queryStr = queryParamsToString(requestData.queryParams);
+	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
+	let queryStr = queryParamsToString(fullQueryParams);
 	if (queryStr) {
 		queryStr = `?${queryStr}`;
 	}

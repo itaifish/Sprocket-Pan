@@ -72,7 +72,8 @@ class NetworkRequestManager {
 					request.id,
 				);
 			});
-			let queryParamStr = queryParamsToStringReplaceVars(request.queryParams, (text) =>
+			const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
+			let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
 				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
 			);
 			if (queryParamStr) {

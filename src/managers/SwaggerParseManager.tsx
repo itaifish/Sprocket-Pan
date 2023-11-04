@@ -79,7 +79,6 @@ class SwaggerParseManager {
 				endpointIds: [],
 			},
 		];
-		log.info(JSON.stringify(swaggerApi));
 		return { services, ...this.mapPaths(swaggerApi.paths, version, services[0]) };
 	}
 
@@ -153,22 +152,23 @@ class SwaggerParseManager {
 						const typedParam = param as OpenAPIV3.ParameterObject;
 						const paramIn = typedParam.in;
 						const schema = typedParam.schema as OpenAPIV3.SchemaObject | undefined;
+						const type = schema?.type ?? 'string';
 						switch (paramIn) {
 							case 'header':
 								if (typedParam.name) {
-									defaultEndpointData.baseHeaders[typedParam.name] = schema?.type ?? 'string';
-								}
-								break;
-							case 'path':
-								if (typedParam.name) {
-									if (schema?.type !== 'array') {
-										defaultEndpointData.baseQueryParams[typedParam.name] = ['string'];
-									} else {
-										defaultEndpointData.baseQueryParams[typedParam.name] = ['string', 'string2'];
-									}
+									defaultEndpointData.baseHeaders[typedParam.name] = type;
 								}
 								break;
 							case 'query':
+								if (typedParam.name) {
+									if (schema?.type !== 'array') {
+										defaultEndpointData.baseQueryParams[typedParam.name] = [type];
+									} else {
+										defaultEndpointData.baseQueryParams[typedParam.name] = [type, type];
+									}
+								}
+								break;
+							case 'path':
 								break;
 							case 'cookie':
 								break;
