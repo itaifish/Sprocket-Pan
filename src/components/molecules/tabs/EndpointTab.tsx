@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { ApplicationDataContext } from '../../../App';
+import { ApplicationDataContext, TabsContext } from '../../../App';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
 import { TabProps } from './TabContent';
@@ -9,10 +9,12 @@ import { RESTfulRequestVerbs } from '../../../types/application-data/application
 import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { RequestTab } from './RequestTab';
+import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
+import { tabsManager } from '../../../managers/TabsManager';
 
 export function EndpointTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
+	const tabsContext = useContext(TabsContext);
 	const endpointData = data.endpoints[props.id];
 	const serviceData = data.services[endpointData.serviceId];
 
@@ -65,13 +67,22 @@ export function EndpointTab(props: TabProps) {
 				</Grid>
 				<Grid xs={2}>
 					<Stack direction={'row'} spacing={2}>
-						<Button color="primary" startDecorator={<ExitToAppIcon />} onClick={() => {}}>
+						<Button
+							color="primary"
+							startDecorator={<ExitToAppIcon />}
+							disabled={!endpointData.defaultRequest}
+							onClick={() => {
+								if (endpointData.defaultRequest) {
+									tabsManager.selectTab(tabsContext, endpointData.defaultRequest, 'request');
+								}
+							}}
+						>
 							Jump To Request
 						</Button>
 					</Stack>
 				</Grid>
 			</Grid>
-			{endpointData.defaultRequest && <RequestTab id={endpointData.defaultRequest} />}
+			<EndpointEditTabs endpoint={endpointData} />
 		</>
 	);
 }

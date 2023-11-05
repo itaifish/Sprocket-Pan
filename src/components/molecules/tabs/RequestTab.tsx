@@ -17,7 +17,7 @@ import { TabProps } from './TabContent';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
-import { ApplicationDataContext } from '../../../App';
+import { ApplicationDataContext, TabsContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
@@ -30,6 +30,7 @@ import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
+import { tabsManager } from '../../../managers/TabsManager';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -42,6 +43,7 @@ export function RequestTab(props: TabProps) {
 	const endpointData = data.endpoints[requestData.endpointId];
 	const serviceData = data.services[endpointData?.serviceId];
 	const theme = useTheme();
+	const tabsContext = useContext(TabsContext);
 	const { mode } = useColorScheme();
 	const [hidden, setHidden] = useState(false);
 	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
@@ -168,7 +170,13 @@ export function RequestTab(props: TabProps) {
 								}
 							}}
 						>
-							<IconButton variant="outlined" color="primary">
+							<IconButton
+								variant="outlined"
+								color="primary"
+								onClick={() => {
+									tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
+								}}
+							>
 								<EditIcon />
 							</IconButton>
 						</ParticleEffectButton>

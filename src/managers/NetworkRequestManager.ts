@@ -1,6 +1,7 @@
 import {
 	ApplicationData,
 	EndpointRequest,
+	EndpointResponse,
 	RawBodyType,
 	RawBodyTypes,
 } from '../types/application-data/application-data';
@@ -29,21 +30,12 @@ class NetworkRequestManager {
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			// Run pre-request scripts
-			const preRequestScripts = [service.preRequestScript, request.preRequestScript];
+			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
 			for (const preRequestScript of preRequestScripts) {
-				if (preRequestScript && preRequestScript != '') {
-					try {
-						const sprocketPan = getScriptInjectionCode(request, data);
-						const _this = globalThis as any;
-						_this.sp = sprocketPan;
-						_this.sprocketPan = sprocketPan;
-						const jsScript = ts.transpile(preRequestScript);
-						const preRequestScriptTask = evalAsync(jsScript);
-						await asyncCallWithTimeout(preRequestScriptTask, Constants.scriptsTimeoutMS);
-					} catch (e) {
-						const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-						return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
-					}
+				const res = await this.runScript(preRequestScript, request, data);
+				// if an error, return it
+				if (res) {
+					return res;
 				}
 			}
 
@@ -98,21 +90,12 @@ class NetworkRequestManager {
 			};
 			applicationDataManager.addResponseToHistory(request.id, response);
 			// Run post-request scripts
-			const postRequestScripts = [service.postRequestScript, request.postRequestScript];
+			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
 			for (const postRequestScript of postRequestScripts) {
-				if (postRequestScript && postRequestScript != '') {
-					try {
-						const sprocketPan = getScriptInjectionCode(request, data, response);
-						const _this = globalThis as any;
-						_this.sp = sprocketPan;
-						_this.sprocketPan = sprocketPan;
-						const jsScript = ts.transpile(postRequestScript);
-						const postRequestScriptTask = evalAsync(jsScript);
-						await asyncCallWithTimeout(postRequestScriptTask, Constants.scriptsTimeoutMS);
-					} catch (e) {
-						const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-						return JSON.stringify({ ...JSON.parse(errorStr), errorType: 'Invalid Pre-request Script' });
-					}
+				const res = await this.runScript(postRequestScript, request, data, response);
+				// if an error, return it
+				if (res) {
+					return res;
 				}
 			}
 		} catch (e) {
@@ -121,6 +104,31 @@ class NetworkRequestManager {
 			return errorStr;
 		}
 		return null;
+	}
+
+	private async runScript(
+		script: string | undefined,
+		request: EndpointRequest,
+		data: ApplicationData,
+		response?: EndpointResponse | undefined,
+	): Promise<string | undefined> {
+		if (script && script != '') {
+			try {
+				const sprocketPan = getScriptInjectionCode(request, data, response);
+				const _this = globalThis as any;
+				_this.sp = sprocketPan;
+				_this.sprocketPan = sprocketPan;
+				const jsScript = ts.transpile(script);
+				const scriptTask = evalAsync(jsScript);
+				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
+			} catch (e) {
+				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+				return JSON.stringify({
+					...JSON.parse(errorStr),
+					errorType: `Invalid ${response != undefined ? 'Post' : 'Pre'}-request Script`,
+				});
+			}
+		}
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {
