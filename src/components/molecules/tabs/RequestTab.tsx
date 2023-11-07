@@ -31,6 +31,8 @@ import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
 import { tabsManager } from '../../../managers/TabsManager';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -208,6 +210,49 @@ export function RequestTab(props: TabProps) {
 							Response
 						</Typography>
 						<Divider />
+						<Stack direction={'row'}>
+							<IconButton
+								aria-label="previousHistory"
+								disabled={response === 0}
+								onClick={() => {
+									setResponse((currentResponse) => {
+										if (currentResponse === 0) {
+											return currentResponse;
+										} else if (currentResponse === 'error') {
+											return requestData.history.length - 1;
+										} else if (currentResponse === 'latest') {
+											return requestData.history.length - 2;
+										} else {
+											return currentResponse - 1;
+										}
+									});
+								}}
+							>
+								<ArrowLeftIcon />
+							</IconButton>
+							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
+								{response === 'latest' || response === 'error' ? requestData.history.length : response + 1} /{' '}
+								{requestData.history.length}
+							</Typography>
+							<IconButton
+								aria-label="nextHistory"
+								disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
+								onClick={() => {
+									setResponse((currentResponse) => {
+										if (currentResponse == 'error') {
+											return currentResponse;
+										}
+										if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
+											return currentResponse;
+										} else {
+											return currentResponse + 1;
+										}
+									});
+								}}
+							>
+								<ArrowRightIcon />
+							</IconButton>
+						</Stack>
 						<ResponseBody response={responseData} />
 					</Card>
 				</Grid>
