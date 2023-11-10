@@ -4,6 +4,14 @@
 use tauri::{Manager, Window};
 use tauri_plugin_log::LogTarget;
 
+#[cfg(debug_assertions)]
+fn open_devtools(window: &Window) {
+    window.open_devtools();
+}
+
+#[cfg(not(debug_assertions))]
+fn open_devtools(window: &Window) {}
+
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -29,14 +37,12 @@ async fn close_splashscreen(window: Window) {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            {
-                let window = app.get_window("main").unwrap();
-                // only include this code on debug builds
-                if cfg!(debug_assertions) {
-                    window.open_devtools();
-                }
-                window.hide().unwrap();
+            let window = app.get_window("main").unwrap();
+            // only include this code on debug builds
+            if cfg!(debug_assertions) {
+                open_devtools(&window);
             }
+            window.hide().unwrap();
             Ok(())
         })
         .plugin(
