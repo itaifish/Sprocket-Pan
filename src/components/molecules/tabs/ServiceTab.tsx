@@ -1,6 +1,4 @@
 import { useContext } from 'react';
-import { TabProps } from './TabContent';
-import { ApplicationDataContext } from '../../../App';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
 import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Stack, Typography } from '@mui/joy';
@@ -9,6 +7,8 @@ import Table from '@mui/joy/Table';
 import { Service } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { RequestScript } from '../scripts/RequestScript';
+import { TabProps } from './tab-props';
+import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);

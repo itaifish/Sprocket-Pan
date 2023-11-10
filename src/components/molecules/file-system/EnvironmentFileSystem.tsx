@@ -13,13 +13,13 @@ import { Environment } from '../../../types/application-data/application-data';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { useContext, useState } from 'react';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { MoreVert } from '@mui/icons-material';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);

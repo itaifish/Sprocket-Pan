@@ -13,11 +13,9 @@ import {
 	CircularProgress,
 	Switch,
 } from '@mui/joy';
-import { TabProps } from './TabContent';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
@@ -33,6 +31,8 @@ import { queryParamsToString } from '../../../utils/application';
 import { tabsManager } from '../../../managers/TabsManager';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabProps } from './tab-props';
 
 const defaultResponse = {
 	responseText: 'View the response here',

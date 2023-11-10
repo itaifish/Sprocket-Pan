@@ -1,11 +1,11 @@
 import { useContext } from 'react';
-import { ApplicationDataContext } from '../../../App';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
-import { TabProps } from './TabContent';
 import { IconButton, Table } from '@mui/joy';
 import LibraryAddIcon from '@mui/icons-material/LibraryAdd';
 import Checkbox from '@mui/joy/Checkbox';
+import { TabProps } from './tab-props';
+import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 
 export function EnvironmentTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);

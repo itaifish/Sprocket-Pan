@@ -9,21 +9,13 @@ import { SideDrawerActionButtons } from './components/molecules/file-system/Side
 import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
 import { useMonaco } from '@monaco-editor/react';
 import { initMonaco } from './managers/MonacoInitManager';
-
-export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
-	drawerOpen: true,
-	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
-});
-export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
-
-type TabsType = { tabs: Record<string, TabType>; selected: string | null };
-export type TabsContextType = StateContext<TabsType, 'tabs'>;
-export const TabsContext = createContext<TabsContextType>(null as unknown as TabsContextType);
-
-type ServicesSearchContextType = StateContext<string, 'searchText'>;
-export const ServicesSearchContext = createContext<ServicesSearchContextType>(
-	null as unknown as ServicesSearchContextType,
-);
+import {
+	ApplicationDataContext,
+	DrawerContext,
+	ServicesSearchContext,
+	TabsContext,
+	TabsType,
+} from './managers/GlobalContextManager';
 
 function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);

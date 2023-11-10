@@ -10,7 +10,8 @@
 		"tauri": "tauri",
 		"start": "tauri dev",
 		"lint": "eslint src/ --fix",
-		"build:types": "tsc"
+		"build:types": "tsc",
+		"build:executable": "tauri build --debug"
 	},
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",
@@ -42,6 +43,7 @@
 		"@typescript-eslint/eslint-plugin": "^6.7.3",
 		"@typescript-eslint/parser": "^6.7.3",
 		"@vitejs/plugin-react": "^4.0.3",
+		"dpdm": "^3.14.0",
 		"eslint": "^8.50.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^5.0.0",

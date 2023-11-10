@@ -1,6 +1,6 @@
-import { TabsContextType } from '../App';
 import { ApplicationData } from '../types/application-data/application-data';
 import { TabType } from '../types/state/state';
+import { TabsContextType } from './GlobalContextManager';
 
 class TabsManager {
 	public static readonly INSTANCE = new TabsManager();

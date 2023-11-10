@@ -5,6 +5,9 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
 	plugins: [react(), eslint(), nodePolyfills()],
+	build: {
+		minify: false,
+	},
 
 	// Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
 	//

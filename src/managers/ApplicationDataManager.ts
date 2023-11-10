@@ -16,9 +16,9 @@ import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 import { TabType } from '../types/state/state';
-import { TabsContextType } from '../App';
 import { tabsManager } from './TabsManager';
 import { noHistoryReplacer } from '../utils/functions';
+import { TabsContextType } from './GlobalContextManager';
 
 type DataEvent = 'update' | 'saved';
 

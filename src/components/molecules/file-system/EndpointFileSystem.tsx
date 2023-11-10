@@ -19,7 +19,6 @@ import { useContext, useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import { MoreVert } from '@mui/icons-material';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
@@ -27,6 +26,7 @@ import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import { verbColors } from '../../../utils/style';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);

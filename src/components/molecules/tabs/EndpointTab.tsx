@@ -1,8 +1,6 @@
 import { useContext } from 'react';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
-import { TabProps } from './TabContent';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
@@ -11,6 +9,8 @@ import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
 import { tabsManager } from '../../../managers/TabsManager';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabProps } from './tab-props';
 
 export function EndpointTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);

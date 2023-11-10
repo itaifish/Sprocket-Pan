@@ -13,7 +13,6 @@ import {
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { useState, useContext } from 'react';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import { tabsManager } from '../../../managers/TabsManager';
 import { Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
@@ -24,6 +23,7 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
