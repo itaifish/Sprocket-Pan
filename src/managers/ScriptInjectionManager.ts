@@ -1,6 +1,7 @@
 import { ApplicationData, EndpointRequest, EndpointResponse } from '../types/application-data/application-data';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
+import { networkRequestManager } from './NetworkRequestManager';
 
 export function getScriptInjectionCode(request: EndpointRequest, data: ApplicationData, response?: EndpointResponse) {
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
@@ -17,7 +18,11 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 			if (!service) {
 				return;
 			}
-			// applicationDataManager.update('service', endpoint.serviceId, {e});
+			const selectedEnvironment = service.selectedEnvironment;
+			if (selectedEnvironment) {
+				// TODO: Deal with updating service-level environments in application data manager - also let it be edited within service
+				// applicationDataManager.update('service', endpoint.serviceId, {localEnvironments: {...service.localEnvironments, []} })
+			}
 		} else if (level === 'global') {
 			const selectedEnvironment = data.selectedEnvironment;
 			if (selectedEnvironment) {
@@ -51,6 +56,14 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
 	};
 
+	const sendRequest = async (requestId: string) => {
+		const request = data.requests[requestId];
+		if (request) {
+			await networkRequestManager.sendRequest(request, data);
+		}
+		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
+	};
+
 	const readonlyData = structuredClone(data);
 	const latestResponse =
 		response ?? (request.history && request.history.length > 0) ? request.history[request.history.length - 1] : null;
@@ -60,6 +73,7 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 		setQueryParams,
 		setHeader,
 		getEnvironment,
+		sendRequest,
 		data: readonlyData,
 		response: latestResponse,
 	};

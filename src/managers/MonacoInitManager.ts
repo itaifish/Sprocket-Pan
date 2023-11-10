@@ -95,6 +95,7 @@ export function initMonaco(monaco: Monaco) {
 				setQueryParam: (key: string, value: string) => void;
 				setQueryParams: (key: string, values: string[]) => void;
 				setHeader: (key: string, value: string) => void;
+				sendRequest: (requestId: string) => Promise<EndpointResponse>;
 				getEnvironment: () => Record<string, string>;
 				data: ApplicationData;
 				response: HistoricalEndpointResponse | null;
