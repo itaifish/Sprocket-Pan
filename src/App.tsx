@@ -15,6 +15,7 @@ import {
 	TabsContext,
 	TabsType,
 } from './managers/GlobalContextManager';
+import invoke from './utils/invoke';
 
 export function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
@@ -27,6 +28,8 @@ export function App() {
 			setData(applicationDataManager.getApplicationData());
 		};
 		applicationDataManager.on('update', event);
+		invoke('close_splashscreen', undefined);
+
 		return () => {
 			applicationDataManager.off('update', event);
 		};

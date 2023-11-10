@@ -7,6 +7,10 @@ type InvokeMap = {
 			name: string;
 		};
 	};
+	close_splashscreen: {
+		returnType: void;
+		args: undefined;
+	};
 };
 
 type InvocationName = keyof InvokeMap;

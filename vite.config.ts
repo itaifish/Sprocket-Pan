@@ -2,7 +2,7 @@ import { defineConfig, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
-
+import path from 'node:path';
 
 // Code breaks when I don't add this. NO FUCKIGN CLUE WHY.
 function getCustomNoNullDefaultsPlugin(): Plugin {
@@ -31,9 +31,11 @@ export default defineConfig(async () => ({
 	],
 	build: {
 		minify: false,
-		commonjsOptions: {
-			transformMixedEsModules: false,
-			exclude: ['node_modules/lodash-merge/**'],
+		rollupOptions: {
+			input: {
+				main: path.resolve(__dirname, 'index.html'),
+				splashscreen: path.resolve(__dirname, 'splashscreen.html'),
+			},
 		},
 	},
 
