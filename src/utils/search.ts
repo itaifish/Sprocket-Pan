@@ -70,7 +70,7 @@ export function getValidIdsFromSearchTerm(searchText: string, data: ApplicationD
 	}
 
 	for (const env of Object.values(data.environments)) {
-		if (env.__name.toLocaleLowerCase().includes(searchText)) {
+		if (env.__name.toLocaleLowerCase().includes(searchUncased)) {
 			validIds.add(env.__id);
 		}
 	}
