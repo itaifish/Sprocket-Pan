@@ -1,41 +1,45 @@
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
-import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/tabs/TabHeader';
 import { Box, Grid } from '@mui/joy';
 import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
 import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
+import { useMonaco } from '@monaco-editor/react';
+import { initMonaco } from './managers/MonacoInitManager';
+import {
+	ApplicationDataContext,
+	DrawerContext,
+	ServicesSearchContext,
+	TabsContext,
+	TabsType,
+} from './managers/GlobalContextManager';
+import invoke from './utils/invoke';
 
-export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
-	drawerOpen: true,
-	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
-});
-export const ApplicationDataContext = createContext(applicationDataManager.getApplicationData());
-
-type TabsType = { tabs: Record<string, TabType>; selected: string | null };
-export type TabsContextType = StateContext<TabsType, 'tabs'>;
-export const TabsContext = createContext<TabsContextType>(null as unknown as TabsContextType);
-
-type ServicesSearchContextType = StateContext<string, 'searchText'>;
-export const ServicesSearchContext = createContext<ServicesSearchContextType>(
-	null as unknown as ServicesSearchContextType,
-);
-
-function App() {
+export function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
+	const monaco = useMonaco();
+
 	useEffect(() => {
 		const event = () => {
 			log.info(`update seen`);
 			setData(applicationDataManager.getApplicationData());
 		};
 		applicationDataManager.on('update', event);
+		invoke('close_splashscreen', undefined);
+
 		return () => {
 			applicationDataManager.off('update', event);
 		};
 	}, []);
+
+	useEffect(() => {
+		if (monaco) {
+			initMonaco(monaco);
+		}
+	}, [monaco]);
 
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
@@ -73,5 +77,3 @@ function App() {
 		</div>
 	);
 }
-
-export default App;

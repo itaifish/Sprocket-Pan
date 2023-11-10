@@ -11,12 +11,11 @@ import {
 	Card,
 	Divider,
 	CircularProgress,
+	Switch,
 } from '@mui/joy';
-import { TabProps } from './TabContent';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
-import { ApplicationDataContext } from '../../../App';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
 import { rgbToHex } from '@mui/material';
@@ -24,10 +23,21 @@ import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { NetworkCallResponse, networkRequestManager } from '../../../managers/NetworkRequestManager';
+import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
+import { queryParamsToString } from '../../../utils/application';
+import { tabsManager } from '../../../managers/TabsManager';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabProps } from './tab-props';
+
+const defaultResponse = {
+	responseText: 'View the response here',
+	contentType: 'text',
+};
 
 export function RequestTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -35,20 +45,37 @@ export function RequestTab(props: TabProps) {
 	const endpointData = data.endpoints[requestData.endpointId];
 	const serviceData = data.services[endpointData?.serviceId];
 	const theme = useTheme();
+	const tabsContext = useContext(TabsContext);
 	const { mode } = useColorScheme();
 	const [hidden, setHidden] = useState(false);
 	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
 	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const [response, setResponse] = useState<NetworkCallResponse>({
-		responseText: 'View the response here',
-		contentType: 'text',
-	});
+	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
+	const [lastError, setLastError] = useState({ responseText: '', contentType: 'text' });
 	const [isLoading, setLoading] = useState(false);
-
+	const isDefault = endpointData.defaultRequest === requestData.id;
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
+	}
+	let responseData;
+	if (response != 'error') {
+		const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
+		responseData =
+			responseIndex >= requestData.history.length
+				? defaultResponse
+				: {
+						responseText: requestData.history[responseIndex].response.body,
+						contentType: requestData.history[responseIndex].response.bodyType,
+				  };
+	} else {
+		responseData = lastError;
+	}
+	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
+	let queryStr = queryParamsToString(fullQueryParams);
+	if (queryStr) {
+		queryStr = `?${queryStr}`;
 	}
 	return (
 		<>
@@ -79,7 +106,7 @@ export function RequestTab(props: TabProps) {
 						))}
 					</Select>
 				</Grid>
-				<Grid xs={8}>
+				<Grid xs={5} xl={7}>
 					<Card
 						variant="outlined"
 						color={'primary'}
@@ -93,13 +120,14 @@ export function RequestTab(props: TabProps) {
 						}}
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
-							`${serviceData.baseUrl}${endpointData.url}`,
+							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
 							data,
 							serviceData.id,
+							requestData.id,
 						)}
 					</Card>
 				</Grid>
-				<Grid xs={2}>
+				<Grid xs={5} xl={3}>
 					<Stack direction={'row'} spacing={2}>
 						<Button
 							color="primary"
@@ -108,7 +136,12 @@ export function RequestTab(props: TabProps) {
 								if (!isLoading) {
 									setLoading(true);
 									const result = await networkRequestManager.sendRequest(requestData, data);
-									setResponse(result);
+									if (result) {
+										setLastError({ contentType: 'json', responseText: result });
+										setResponse('error');
+									} else {
+										setResponse('latest');
+									}
 									setLoading(false);
 								}
 							}}
@@ -139,10 +172,25 @@ export function RequestTab(props: TabProps) {
 								}
 							}}
 						>
-							<IconButton variant="outlined" color="primary">
+							<IconButton
+								variant="outlined"
+								color="primary"
+								onClick={() => {
+									tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
+								}}
+							>
 								<EditIcon />
 							</IconButton>
 						</ParticleEffectButton>
+						<Switch
+							checked={isDefault}
+							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
+								applicationDataManager.update('endpoint', endpointData.id, {
+									defaultRequest: isDefault ? null : requestData.id,
+								})
+							}
+							endDecorator={'Default'}
+						/>
 					</Stack>
 				</Grid>
 			</Grid>
@@ -162,7 +210,50 @@ export function RequestTab(props: TabProps) {
 							Response
 						</Typography>
 						<Divider />
-						<ResponseBody response={response} />
+						<Stack direction={'row'}>
+							<IconButton
+								aria-label="previousHistory"
+								disabled={response === 0}
+								onClick={() => {
+									setResponse((currentResponse) => {
+										if (currentResponse === 0) {
+											return currentResponse;
+										} else if (currentResponse === 'error') {
+											return requestData.history.length - 1;
+										} else if (currentResponse === 'latest') {
+											return requestData.history.length - 2;
+										} else {
+											return currentResponse - 1;
+										}
+									});
+								}}
+							>
+								<ArrowLeftIcon />
+							</IconButton>
+							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
+								{response === 'latest' || response === 'error' ? requestData.history.length : response + 1} /{' '}
+								{requestData.history.length}
+							</Typography>
+							<IconButton
+								aria-label="nextHistory"
+								disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
+								onClick={() => {
+									setResponse((currentResponse) => {
+										if (currentResponse == 'error') {
+											return currentResponse;
+										}
+										if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
+											return currentResponse;
+										} else {
+											return currentResponse + 1;
+										}
+									});
+								}}
+							>
+								<ArrowRightIcon />
+							</IconButton>
+						</Stack>
+						<ResponseBody response={responseData} />
 					</Card>
 				</Grid>
 			</Grid>

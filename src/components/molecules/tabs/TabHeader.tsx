@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useState } from 'react';
-import { ApplicationDataContext, TabsContext } from '../../../App';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
@@ -12,6 +11,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { Environment } from '../../../types/application-data/application-data';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 
 const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,

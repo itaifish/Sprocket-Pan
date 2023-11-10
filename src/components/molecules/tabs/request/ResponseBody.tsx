@@ -10,17 +10,6 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 	const editorRef = useRef<any>(null);
 	const [copied, setCopied] = useState(false);
 	const { mode } = useColorScheme();
-	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
-		editorRef.current = editor;
-	};
-
-	let editorType = 'text';
-	if (response.contentType?.toLowerCase()?.includes('json')) {
-		editorType = 'json';
-	} else if (response.contentType?.toLowerCase()?.includes('html')) {
-		editorType = 'html';
-	}
-
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.updateOptions({ readOnly: false });
@@ -33,9 +22,20 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 				});
 		}
 	};
+	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
+		editorRef.current = editor;
+		format();
+	};
+
+	let editorType = 'text';
+	if (response.contentType?.toLowerCase()?.includes('json')) {
+		editorType = 'json';
+	} else if (response.contentType?.toLowerCase()?.includes('html')) {
+		editorType = 'html';
+	}
 
 	useEffect(() => {
-		// format();
+		format();
 	}, [response.responseText, editorRef.current]);
 
 	return (

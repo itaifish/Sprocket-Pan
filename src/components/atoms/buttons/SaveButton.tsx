@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
-import { ApplicationDataContext } from '../../../App';
 import { CircularProgress, IconButton } from '@mui/joy';
 import SaveIcon from '@mui/icons-material/Save';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import Badge from '@mui/joy/Badge';
+import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 export function SaveButton() {
 	const data = useContext(ApplicationDataContext);
 	const [loading, setLoading] = useState(false);

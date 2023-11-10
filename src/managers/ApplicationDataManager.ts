@@ -9,14 +9,16 @@ import {
 	EndpointRequest,
 	EndpointResponse,
 	Environment,
+	HistoricalEndpointResponse,
 	Service,
 } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 import { TabType } from '../types/state/state';
-import { TabsContextType } from '../App';
 import { tabsManager } from './TabsManager';
+import { noHistoryReplacer } from '../utils/functions';
+import { TabsContextType } from './GlobalContextManager';
 
 type DataEvent = 'update' | 'saved';
 
@@ -39,6 +41,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DATA_FILE_NAME = 'data' as const;
 	private static readonly PATH =
 		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
+	private static readonly HISTORY_PATH =
+		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const;
 	public static readonly INSTANCE = new ApplicationDataManager();
 
 	private data: ApplicationData;
@@ -91,33 +95,39 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					name: 'New Endpoint',
 					baseQueryParams: {},
 					description: 'This is a new endpoint',
-					serviceId,
 					...data,
+					serviceId,
 					requestIds: [],
 					id: newId,
-					history: [],
+					defaultRequest: null,
 				};
 				this.data.services[serviceId]?.endpointIds?.push(newId);
 				const requestIds = (data as UpdateType['endpoint'])?.requestIds ?? [];
-				requestIds.forEach((requestId) =>
-					this.addNew('request', { endpointId: newId }, this.data.requests[requestId], false),
-				);
+				requestIds.forEach((requestId) => {
+					this.addNew('request', { endpointId: newId }, this.data.requests[requestId], false);
+				});
 				newDatum = this.data.endpoints[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'request':
 				const { endpointId } = additionalContext as { endpointId: string };
 				this.data.requests[newId] = {
-					endpointId: endpointId,
 					name: 'New Request',
 					headers: {},
 					queryParams: {},
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
+					environmentOverride: {},
 					...data,
+					endpointId: endpointId,
 					id: newId,
+					history: [],
 				};
-				this.data.endpoints[endpointId]?.requestIds?.push(newId);
+				const endpointData = this.data.endpoints[endpointId];
+				endpointData?.requestIds?.push(newId);
+				if (endpointData?.defaultRequest == null) {
+					endpointData.defaultRequest = newId;
+				}
 				newDatum = this.data.requests[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			default:
@@ -153,13 +163,14 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public addResponseToHistory(requestId: string, response: EndpointResponse) {
 		const reqToUpdate = this.data.requests[requestId];
-		const endpointToUpdate = this.data.endpoints[reqToUpdate?.endpointId];
-		if (reqToUpdate == null || endpointToUpdate == null) {
+		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
 			return;
 		}
-		endpointToUpdate.history.push({
-			request: structuredClone(reqToUpdate),
+		const copiedRequest: any = structuredClone(reqToUpdate);
+		delete copiedRequest.history;
+		reqToUpdate.history.push({
+			request: copiedRequest,
 			response,
 			dateTime: new Date(),
 		});
@@ -247,10 +258,20 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	private loadDataFromFile = async () => {
 		try {
-			const contents = await readTextFile(ApplicationDataManager.PATH, {
+			const contentsTask = readTextFile(ApplicationDataManager.PATH, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
-			return JSON.parse(contents);
+			const history = await readTextFile(ApplicationDataManager.HISTORY_PATH, {
+				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			});
+			const contents = await contentsTask;
+
+			const data = JSON.parse(contents) as ApplicationData;
+			const parsedHistory = JSON.parse(history) as { id: string; history: HistoricalEndpointResponse[] }[];
+			parsedHistory.forEach((responseHistory) => {
+				data.requests[responseHistory.id].history = responseHistory?.history ?? [];
+			});
+			return data;
 		} catch (e) {
 			console.error(e);
 			return this.getDefaultData();
@@ -289,43 +310,79 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	 */
 	private createDataFileIfNotExists = async (fileContents: Record<string, unknown>) => {
 		log.trace(`createDataFolderIfNotExists called`);
-		try {
-			const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
-			if (!doesExist) {
-				log.debug(`File does not exist, creating...`);
-				await writeFile(
-					{ contents: JSON.stringify(fileContents), path: ApplicationDataManager.PATH },
-					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
-				);
-				return 'created' as const;
-			} else {
-				log.trace(`File already exists, no need to create`);
-				return 'alreadyExists' as const;
-			}
-		} catch (e) {
-			log.error(e);
-			return 'error' as const;
-		}
+
+		const pathsToCreate = [ApplicationDataManager.PATH, ApplicationDataManager.HISTORY_PATH];
+		const createIfNotExistsPromises = pathsToCreate.map((path) => {
+			const action = async () => {
+				try {
+					const doesExist = await exists(path, {
+						dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+					});
+					if (!doesExist) {
+						log.debug(`File does not exist, creating...`);
+						await writeFile(
+							{ contents: JSON.stringify(fileContents), path },
+							{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+						);
+						return 'created' as const;
+					} else {
+						log.trace(`File already exists, no need to create`);
+						return 'alreadyExists' as const;
+					}
+				} catch (e) {
+					log.error(e);
+					return 'error' as const;
+				}
+			};
+			return action();
+		});
+		const results = await Promise.all(createIfNotExistsPromises);
+		return results.includes('error') ? 'error' : results.includes('created') ? 'created' : 'alreadyExists';
 	};
 
 	public saveApplicationData = async (applicationData: ApplicationData) => {
 		try {
-			const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
-			if (!doesExist) {
-				log.warn(`File does not exist, exiting...`);
-				return 'doesNotExist' as const;
-			} else {
-				log.trace(`File already exists, updating...`);
-				// need to delete the file first because of this bug:
-				// https://github.com/tauri-apps/tauri/issues/7973
-				// await removeFile(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
-				await writeFile(
-					{ contents: JSON.stringify(applicationData), path: ApplicationDataManager.PATH },
-					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
-				);
-				this.emit('saved');
-				return 'saved' as const;
-			}
+			const saveData = async () => {
+				const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+				if (!doesExist) {
+					log.warn(`File does not exist, exiting...`);
+					return 'doesNotExist' as const;
+				} else {
+					log.trace(`File already exists, updating...`);
+					await writeFile(
+						{ contents: JSON.stringify(applicationData, noHistoryReplacer, 4), path: ApplicationDataManager.PATH },
+						{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+					);
+					this.emit('saved');
+					return 'saved' as const;
+				}
+			};
+			const saveHistory = async () => {
+				const doesExist = await exists(ApplicationDataManager.HISTORY_PATH, {
+					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+				});
+				if (!doesExist) {
+					log.warn(`File does not exist, exiting...`);
+					return 'doesNotExist' as const;
+				} else {
+					log.trace(`File already exists, updating...`);
+					const historyOnly = Object.values(applicationData.requests).map((request) => {
+						return { id: request.id, history: request.history };
+					});
+					await writeFile(
+						{
+							contents: JSON.stringify(historyOnly, undefined, 4),
+							path: ApplicationDataManager.HISTORY_PATH,
+						},
+						{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+					);
+					this.emit('saved');
+					return 'saved' as const;
+				}
+			};
+
+			const results = await Promise.all([saveData(), saveHistory()]);
+			return results.includes('doesNotExist') ? 'doesNotExist' : 'saved';
 		} catch (e) {
 			log.error(e);
 			return 'error' as const;

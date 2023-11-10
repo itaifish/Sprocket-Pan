@@ -1,12 +1,18 @@
 import {
 	ApplicationData,
 	EndpointRequest,
+	EndpointResponse,
 	RawBodyType,
 	RawBodyTypes,
 } from '../types/application-data/application-data';
+import { queryParamsToStringReplaceVars } from '../utils/application';
+import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
-
+import ts from 'typescript';
+import { getScriptInjectionCode } from './ScriptInjectionManager';
+import { Constants } from '../utils/constants';
+import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -17,20 +23,63 @@ class NetworkRequestManager {
 
 	private constructor() {}
 
-	public async sendRequest(request: EndpointRequest, data: ApplicationData): Promise<NetworkCallResponse> {
+	public async sendRequest(request: EndpointRequest, data: ApplicationData): Promise<string | null> {
 		try {
 			const endpointId = request.endpointId;
 			const endpoint = data.endpoints[endpointId];
 			const service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
-			const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId);
-			const res = await fetch(url, {
-				method: endpoint.verb,
-				body: request.body ? JSON.stringify(request.body) : undefined,
-			});
+			// Run pre-request scripts
+			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
+			for (const preRequestScript of preRequestScripts) {
+				const res = await this.runScript(preRequestScript, request, data);
+				// if an error, return it
+				if (res) {
+					return res;
+				}
+			}
 
+			const url = environmentContextResolver.resolveVariablesForString(
+				unparsedUrl,
+				data,
+				endpoint.serviceId,
+				request.id,
+			);
+			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
+			if (body) {
+				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId, request.id);
+			}
+			const headers: Record<string, string> = {};
+			Object.keys(request.headers).forEach((headerKey) => {
+				const parsedKey = environmentContextResolver.resolveVariablesForString(
+					headerKey,
+					data,
+					endpoint.serviceId,
+					request.id,
+				);
+				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
+					request.headers[headerKey],
+					data,
+					endpoint.serviceId,
+					request.id,
+				);
+			});
+			const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
+			let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
+				environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
+			);
+			if (queryParamStr) {
+				queryParamStr = `?${queryParamStr}`;
+			}
+
+			const networkCall = fetch(`${url}${queryParamStr}`, {
+				method: endpoint.verb,
+				body,
+				headers: headers,
+			});
+			const res = await asyncCallWithTimeout(networkCall, Constants.networkRequestTimeoutMS);
 			const responseText = await (await res.blob()).text();
-			applicationDataManager.addResponseToHistory(request.id, {
+			const response = {
 				statusCode: res.status,
 				headers: [...res.headers.entries()].reduce<Record<string, string>>((obj, [keyValuePair]) => {
 					obj[keyValuePair[0]] = keyValuePair[1];
@@ -38,10 +87,47 @@ class NetworkRequestManager {
 				}, {}),
 				bodyType: this.headersContentTypeToBodyType(res.headers.get('content-type')),
 				body: responseText,
-			});
-			return { responseText, contentType: res.headers.get('content-type') };
+			};
+			applicationDataManager.addResponseToHistory(request.id, response);
+			// Run post-request scripts
+			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
+			for (const postRequestScript of postRequestScripts) {
+				const res = await this.runScript(postRequestScript, request, data, response);
+				// if an error, return it
+				if (res) {
+					return res;
+				}
+			}
 		} catch (e) {
-			return { responseText: JSON.stringify(e, Object.getOwnPropertyNames(e)), contentType: 'application/json' };
+			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+			log.warn(errorStr);
+			return errorStr;
+		}
+		return null;
+	}
+
+	private async runScript(
+		script: string | undefined,
+		request: EndpointRequest,
+		data: ApplicationData,
+		response?: EndpointResponse | undefined,
+	): Promise<string | undefined> {
+		if (script && script != '') {
+			try {
+				const sprocketPan = getScriptInjectionCode(request, data, response);
+				const _this = globalThis as any;
+				_this.sp = sprocketPan;
+				_this.sprocketPan = sprocketPan;
+				const jsScript = ts.transpile(script);
+				const scriptTask = evalAsync(jsScript);
+				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
+			} catch (e) {
+				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+				return JSON.stringify({
+					...JSON.parse(errorStr),
+					errorType: `Invalid ${response != undefined ? 'Post' : 'Pre'}-request Script`,
+				});
+			}
 		}
 	}
 

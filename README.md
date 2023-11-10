@@ -13,4 +13,6 @@ This template should help get you started developing with Tauri, React and Types
 ## How to run
 
 1. `yarn`
-2. `yarn run start`
+2. `yarn run build:types`
+This is for the pre-request script editor's type definitions
+3. `yarn run start`

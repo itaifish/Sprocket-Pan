@@ -1,15 +1,18 @@
 {
-	"name": "SprocketPan",
+	"name": "sprocket_pan",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "tsc && vite build",
+		"build": "vite build",
 		"preview": "vite preview",
 		"tauri": "tauri",
 		"start": "tauri dev",
-		"lint": "eslint src/ --fix"
+		"lint": "eslint src/ --fix",
+		"build:types": "tsc",
+		"build:executable": "tauri build",
+		"postinstall": "patch-package"
 	},
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",
@@ -41,12 +44,14 @@
 		"@typescript-eslint/eslint-plugin": "^6.7.3",
 		"@typescript-eslint/parser": "^6.7.3",
 		"@vitejs/plugin-react": "^4.0.3",
+		"dpdm": "^3.14.0",
 		"eslint": "^8.50.0",
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-prettier": "^5.0.0",
 		"eslint-plugin-react": "^7.33.2",
 		"eslint-plugin-unused-imports": "^3.0.0",
 		"openapi-types": "^9.3.0",
+		"patch-package": "^8.0.0",
 		"prettier": "^3.0.3",
 		"typescript": "^5.2.2",
 		"vite": "^4.4.4",

@@ -4,6 +4,7 @@ import { RequestTab } from './RequestTab';
 import { EndpointTab } from './EndpointTab';
 import { ServiceTab } from './ServiceTab';
 import { EnvironmentTab } from './EnvironmentTab';
+import { TabProps } from './tab-props';
 
 const contentMap: Record<TabType, FunctionComponent<TabProps>> = {
 	request: RequestTab,
@@ -15,8 +16,4 @@ const contentMap: Record<TabType, FunctionComponent<TabProps>> = {
 export function TabContent({ type, id }: { type: TabType; id: string }) {
 	const Tab = contentMap[type];
 	return <Tab id={id} />;
-}
-
-export interface TabProps {
-	id: string;
 }

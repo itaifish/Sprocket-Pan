@@ -1,6 +1,11 @@
 import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
 
+type Snippet = {
+	value: string;
+	variableName?: string;
+};
+
 class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
 	private constructor() {}
@@ -9,16 +14,30 @@ class EnvironmentContextResolver {
 		text: string,
 		data: ApplicationData,
 		serviceId?: string,
+		requestId?: string,
 		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
+		return this.snippetsToTypography(snippets, typographyProps);
+	}
+
+	public stringWithEnvironmentToTypography(
+		text: string,
+		env: Environment,
+		typographyProps?: React.ComponentProps<typeof Typography>,
+	) {
+		const snippets = this.parseStringWithEnvironment(text, env);
+		return this.snippetsToTypography(snippets, typographyProps);
+	}
+
+	private snippetsToTypography(snippets: Snippet[], typographyProps?: React.ComponentProps<typeof Typography>) {
 		return (
 			<Typography {...typographyProps}>
 				{snippets.map((snippet, index) => {
 					if (snippet.variableName) {
 						return (
 							<Typography variant="outlined" color={snippet.value ? 'success' : 'danger'} key={index}>
-								{`{${snippet.variableName}}`}: {snippet.value ?? 'unknown'}
+								{`${snippet.variableName}`}: {snippet.value ?? 'unknown'}
 							</Typography>
 						);
 					} else {
@@ -29,13 +48,13 @@ class EnvironmentContextResolver {
 		);
 	}
 
-	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId);
+	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string, requestId?: string) {
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
-	public parseStringWithEnvironmentOverrides(text: string, data: ApplicationData, serviceId?: string) {
-		const env = this.buildEnvironmentVariables(data, serviceId);
+	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
+		text = text.toString();
 		let state: 'variable' | 'text' = 'text';
 		let startVariablePos = 0;
 		const resultText = [];
@@ -59,7 +78,17 @@ class EnvironmentContextResolver {
 		return resultText;
 	}
 
-	private buildEnvironmentVariables(data: ApplicationData, serviceId?: string) {
+	public parseStringWithEnvironmentOverrides(
+		text: string,
+		data: ApplicationData,
+		serviceId?: string,
+		requestId?: string,
+	) {
+		const env = this.buildEnvironmentVariables(data, serviceId, requestId);
+		return this.parseStringWithEnvironment(text, env);
+	}
+
+	public buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
 		let env: Environment = { __name: '', __id: '' };
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
@@ -68,6 +97,12 @@ class EnvironmentContextResolver {
 			const service = data.services[serviceId];
 			if (service?.selectedEnvironment) {
 				env = { ...env, ...service.localEnvironments[service.selectedEnvironment] };
+			}
+		}
+		if (requestId) {
+			const request = data.requests[requestId];
+			if (request?.environmentOverride) {
+				env = { ...env, ...request.environmentOverride };
 			}
 		}
 		return env;
