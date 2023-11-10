@@ -43,7 +43,7 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 						}}
 					>
 						<ListItemDecorator>
-							<IconButton aria-label="copy endpoint" size="sm">
+							<IconButton aria-label="copy request" size="sm">
 								<FolderCopyIcon fontSize="small" />
 							</IconButton>
 							Duplicate
@@ -56,7 +56,7 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 						}}
 					>
 						<ListItemDecorator>
-							<IconButton aria-label="delete endpoint" size="sm">
+							<IconButton aria-label="delete request" size="sm">
 								<DeleteForeverIcon fontSize="small" />
 							</IconButton>
 							Delete
