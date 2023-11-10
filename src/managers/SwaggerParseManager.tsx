@@ -19,8 +19,6 @@ type ParsedServiceApplicationData = {
 	requests: EndpointRequest[];
 };
 
-type SwaggerDataType = 'string' | 'number' | 'integer' | 'boolean' | 'array' | 'object';
-
 type SwaggerParamInType = 'body' | 'query' | 'path' | 'header' | 'formData';
 
 class SwaggerParseManager {

@@ -1,7 +1,6 @@
-import { createContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
-import { StateContext, TabType } from './types/state/state';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/tabs/TabHeader';
 import { Box, Grid } from '@mui/joy';

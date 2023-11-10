@@ -2,10 +2,10 @@ import { Card, IconButton, Input, Stack } from '@mui/joy';
 import { useState, useContext } from 'react';
 import { log } from '../../../utils/logging';
 import { Environment } from '../../../types/application-data/application-data';
-import { ApplicationDataContext } from '../../../App';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 
 interface EditableTableProps {
 	tableData: {
