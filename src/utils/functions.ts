@@ -23,3 +23,10 @@ export const asyncCallWithTimeout = async <T>(asyncPromise: Promise<T>, timeLimi
 export const evalAsync = async (codeToEval: string) => {
 	return Object.getPrototypeOf(async function () {}).constructor(codeToEval)();
 };
+
+export const noHistoryReplacer = (key: string, value: unknown) => {
+	if (key === 'history') {
+		return [];
+	}
+	return value;
+};
