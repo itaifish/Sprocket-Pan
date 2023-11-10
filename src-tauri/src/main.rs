@@ -29,10 +29,12 @@ async fn close_splashscreen(window: Window) {
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
-            #[cfg(debug_assertions)] // only include this code on debug builds
             {
                 let window = app.get_window("main").unwrap();
-                window.open_devtools();
+                // only include this code on debug builds
+                if cfg!(debug_assertions) {
+                    window.open_devtools();
+                }
                 window.hide().unwrap();
             }
             Ok(())
