@@ -95,8 +95,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					name: 'New Endpoint',
 					baseQueryParams: {},
 					description: 'This is a new endpoint',
-					serviceId,
 					...data,
+					serviceId,
 					requestIds: [],
 					id: newId,
 					defaultRequest: null,
@@ -111,7 +111,6 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			case 'request':
 				const { endpointId } = additionalContext as { endpointId: string };
 				this.data.requests[newId] = {
-					endpointId: endpointId,
 					name: 'New Request',
 					headers: {},
 					queryParams: {},
@@ -120,6 +119,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					rawType: undefined,
 					environmentOverride: {},
 					...data,
+					endpointId: endpointId,
 					id: newId,
 					history: [],
 				};
