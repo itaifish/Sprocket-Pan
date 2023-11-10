@@ -1,5 +1,5 @@
 {
-	"name": "SprocketPan",
+	"name": "sprocket_pan",
 	"private": true,
 	"version": "0.0.0",
 	"type": "module",
@@ -11,7 +11,8 @@
 		"start": "tauri dev",
 		"lint": "eslint src/ --fix",
 		"build:types": "tsc",
-		"build:executable": "tauri build --debug"
+		"build:executable": "tauri build",
+		"postinstall": "patch-package"
 	},
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",
@@ -50,6 +51,7 @@
 		"eslint-plugin-react": "^7.33.2",
 		"eslint-plugin-unused-imports": "^3.0.0",
 		"openapi-types": "^9.3.0",
+		"patch-package": "^8.0.0",
 		"prettier": "^3.0.3",
 		"typescript": "^5.2.2",
 		"vite": "^4.4.4",

@@ -16,7 +16,7 @@ import {
 	TabsType,
 } from './managers/GlobalContextManager';
 
-function App() {
+export function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
@@ -74,5 +74,3 @@ function App() {
 		</div>
 	);
 }
-
-export default App;
