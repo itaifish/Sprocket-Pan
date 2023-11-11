@@ -3,17 +3,27 @@ import { EndpointRequest, RawBodyTypes, RequestBodyTypes } from '../../../../typ
 import ListIcon from '@mui/icons-material/List';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import DataObjectIcon from '@mui/icons-material/DataObject';
-import { Editor } from '@monaco-editor/react';
+import { Editor, Monaco } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
 import { log } from '../../../../utils/logging';
 import { Constants } from '../../../../utils/constants';
+import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const { mode } = useColorScheme();
 	const [editor, setEditor] = useState<string | undefined>(undefined);
 	const [editorText, setEditorText] = useState(typeof requestData.body === 'string' ? requestData.body : '');
 	const latestText = useRef(editorText);
-
+	const editorRef = useRef<any>(null);
+	const format = () => {
+		if (editorRef.current) {
+			editorRef.current.getAction('editor.action.formatDocument').run();
+		}
+	};
+	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
+		editorRef.current = editor;
+		format();
+	};
 	// We update the text only after the user stops typing
 	useEffect(() => {
 		const delayDebounceFunc = setTimeout(() => {
@@ -76,7 +86,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 							</Select>
 						</FormControl>
 					</Grid>
-					<Grid xs={6}>
+					<Grid xs={5}>
 						{requestData.bodyType === 'raw' && (
 							<FormControl>
 								<FormLabel id="select-text-type-label" htmlFor="select-text-type">
@@ -109,6 +119,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 							</FormControl>
 						)}
 					</Grid>
+					<Grid xs={1}>{requestData.bodyType === 'raw' && <FormatIcon actionFunction={() => format()} />}</Grid>
 				</Grid>
 				{editor && (
 					<Editor
@@ -121,6 +132,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 						language={editor}
 						theme={mode === 'dark' ? 'vs-dark' : mode}
 						options={{ tabSize: 2, insertSpaces: false }}
+						onMount={handleEditorDidMount}
 					/>
 				)}
 			</Stack>

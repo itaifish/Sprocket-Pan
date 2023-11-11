@@ -33,6 +33,7 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
+import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -172,15 +173,17 @@ export function RequestTab(props: TabProps) {
 								}
 							}}
 						>
-							<IconButton
-								variant="outlined"
-								color="primary"
-								onClick={() => {
-									tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
-								}}
-							>
-								<EditIcon />
-							</IconButton>
+							<SprocketTooltip text="Edit Endpoint">
+								<IconButton
+									variant="outlined"
+									color="primary"
+									onClick={() => {
+										tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
+									}}
+								>
+									<EditIcon />
+								</IconButton>
+							</SprocketTooltip>
 						</ParticleEffectButton>
 						<Switch
 							checked={isDefault}

@@ -3,8 +3,8 @@ import { Editor, Monaco } from '@monaco-editor/react';
 import { NetworkCallResponse } from '../../../../managers/NetworkRequestManager';
 import { useEffect, useRef, useState } from 'react';
 import { log } from '../../../../utils/logging';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 
 export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 	const editorRef = useRef<any>(null);
@@ -42,9 +42,7 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 		<div>
 			<Stack>
 				<Stack direction={'row'} spacing={2}>
-					<IconButton onClick={() => format()}>
-						<AutoFixHighIcon />
-					</IconButton>
+					<FormatIcon actionFunction={() => format()} />
 					<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
 						<IconButton
 							disabled={copied}
