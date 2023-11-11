@@ -4,6 +4,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import Badge from '@mui/joy/Badge';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
+import { SprocketTooltip } from '../SprocketTooltip';
 export function SaveButton() {
 	const data = useContext(ApplicationDataContext);
 	const [loading, setLoading] = useState(false);
@@ -27,30 +28,32 @@ export function SaveButton() {
 			{loading ? (
 				<CircularProgress />
 			) : (
-				<Badge
-					size="sm"
-					invisible={!isModified}
-					anchorOrigin={{
-						vertical: 'top',
-						horizontal: 'right',
-					}}
-					badgeInset="14%"
-				>
-					<IconButton
-						id="toggle-mode"
+				<SprocketTooltip text="Save">
+					<Badge
 						size="sm"
-						variant="soft"
-						color="neutral"
-						onClick={async () => {
-							setLoading(true);
-							await applicationDataManager.saveApplicationData(data);
-							setTimeout(() => setLoading(false), 200);
+						invisible={!isModified}
+						anchorOrigin={{
+							vertical: 'top',
+							horizontal: 'right',
 						}}
-						disabled={!isModified}
+						badgeInset="14%"
 					>
-						<SaveIcon />
-					</IconButton>
-				</Badge>
+						<IconButton
+							id="toggle-mode"
+							size="sm"
+							variant="soft"
+							color="neutral"
+							onClick={async () => {
+								setLoading(true);
+								await applicationDataManager.saveApplicationData(data);
+								setTimeout(() => setLoading(false), 200);
+							}}
+							disabled={!isModified}
+						>
+							<SaveIcon />
+						</IconButton>
+					</Badge>
+				</SprocketTooltip>
 			)}
 		</>
 	);
