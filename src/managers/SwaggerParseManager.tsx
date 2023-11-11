@@ -65,14 +65,19 @@ class SwaggerParseManager {
 				? '3'
 				: '3.1';
 		const swaggerV3 = swaggerApi as OpenAPIV3.Document;
+		let baseUrl = (swaggerApi as OpenAPIV2.Document)?.host;
+		if ((swaggerV3?.servers?.length as number) > 0) {
+			baseUrl ??= swaggerV3?.servers![0].url;
+		}
+		baseUrl ??= '';
+		console.log(baseUrl);
 		const services: Service[] = [
 			{
 				id: v4(),
 				name: swaggerApi?.info?.title ?? 'New Service',
 				version: swaggerApi?.info?.version ?? '1.0.0',
 				description: swaggerApi?.info?.description ?? '',
-				baseUrl:
-					swaggerApi?.externalDocs?.url ?? (swaggerV3?.servers?.length ?? -1) > 0 ? swaggerV3?.servers![0].url : '',
+				baseUrl,
 				localEnvironments: {},
 				endpointIds: [],
 			},
@@ -351,7 +356,7 @@ class SwaggerParseManager {
 					newRequests.push(newRequestBase);
 					defaultEndpointData.requestIds.push(newRequestBase.id);
 				}
-
+				defaultEndpointData.defaultRequest = newRequests[0]?.id;
 				mappedRequests.push(...newRequests);
 
 				return defaultEndpointData;
