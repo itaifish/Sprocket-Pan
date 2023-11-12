@@ -26,6 +26,9 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		} else {
 			if (!newValue) {
 				props.queryParams[queryKey].splice(+arrayIndex, 1);
+				if (props.queryParams[queryKey].length === 0) {
+					delete props.queryParams[queryKey];
+				}
 			} else {
 				props.queryParams[queryKey][+arrayIndex] = newValue as string;
 			}

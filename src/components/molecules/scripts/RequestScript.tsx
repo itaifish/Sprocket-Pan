@@ -2,8 +2,8 @@ import { Monaco, Editor } from '@monaco-editor/react';
 import { useColorScheme, Stack, IconButton, Tooltip } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
 import { Constants } from '../../../utils/constants';
-import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { FormatIcon } from '../../atoms/buttons/FormatIcon';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;
@@ -15,8 +15,8 @@ export function RequestScript(props: RequestScriptProps) {
 	const { mode } = useColorScheme();
 	const [editorText, setEditorText] = useState(props.scriptText ?? '');
 	const latestText = useRef(editorText);
-	const editorRef = useRef<any>(null);
 	const [copied, setCopied] = useState(false);
+	const editorRef = useRef<any>(null);
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.getAction('editor.action.formatDocument').run();
@@ -37,9 +37,7 @@ export function RequestScript(props: RequestScriptProps) {
 	return (
 		<Stack>
 			<Stack direction={'row'} spacing={2}>
-				<IconButton onClick={() => format()}>
-					<AutoFixHighIcon />
-				</IconButton>
+				<FormatIcon actionFunction={() => format()} />
 				<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
 					<IconButton
 						disabled={copied}
