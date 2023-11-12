@@ -12,6 +12,7 @@ import {
 	Divider,
 	CircularProgress,
 	Switch,
+	Tooltip,
 } from '@mui/joy';
 import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
@@ -34,6 +35,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import FingerprintIcon from '@mui/icons-material/Fingerprint';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -57,6 +59,8 @@ export function RequestTab(props: TabProps) {
 	const [lastError, setLastError] = useState({ responseText: '', contentType: 'text' });
 	const [isLoading, setLoading] = useState(false);
 	const isDefault = endpointData.defaultRequest === requestData.id;
+	const [copied, setCopied] = useState(false);
+
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
@@ -184,6 +188,25 @@ export function RequestTab(props: TabProps) {
 									<EditIcon />
 								</IconButton>
 							</SprocketTooltip>
+							<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
+								<SprocketTooltip text={copied ? '' : 'Copy Request ID'}>
+									<IconButton
+										sx={{ ml: '5px' }}
+										variant="outlined"
+										color="primary"
+										disabled={copied}
+										onClick={() => {
+											setCopied(true);
+											setTimeout(() => {
+												setCopied(false);
+											}, 800);
+											navigator.clipboard.writeText(requestData.id);
+										}}
+									>
+										<FingerprintIcon />
+									</IconButton>
+								</SprocketTooltip>
+							</Tooltip>
 						</ParticleEffectButton>
 						<Switch
 							checked={isDefault}

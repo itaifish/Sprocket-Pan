@@ -6,7 +6,7 @@ import {
 	Service,
 } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
-import { OpenAPI, OpenAPIV2, OpenAPIV3 } from 'openapi-types';
+import { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
@@ -104,14 +104,14 @@ class SwaggerParseManager {
 			case '3':
 				return this.mapV3Path(paths, service);
 			case '3.1':
-				return this.mapV3Path(paths, service);
+				return this.mapV3Path(paths, service, true);
 			default:
 				_exhaustive = version;
 		}
 		return empty;
 	}
 
-	private mapV3Path(paths: OpenAPI.Document['paths'], service: Service) {
+	private mapV3Path(paths: OpenAPI.Document['paths'], service: Service, is3_1: boolean = false) {
 		const typedPaths = paths as OpenAPIV3.PathsObject;
 		const mappedRequests: EndpointRequest[] = [];
 		const mappedEndpoints = Object.keys(typedPaths).flatMap((pathsUri: keyof typeof typedPaths) => {
@@ -181,9 +181,13 @@ class SwaggerParseManager {
 						const typedRequestBody = pathData.requestBody as OpenAPIV3.RequestBodyObject;
 						Object.keys(typedRequestBody.content).forEach((contentType) => {
 							const newId = v4();
-							const body = this.getExampleSwaggerBodyObject(
-								typedRequestBody.content[contentType].schema as OpenAPIV3.SchemaObject,
-							);
+							const body = is3_1
+								? this.getExampleSwaggerBodyObjectV3_1(
+										typedRequestBody.content[contentType].schema as OpenAPIV3_1.SchemaObject,
+								  )
+								: this.getExampleSwaggerBodyObject(
+										typedRequestBody.content[contentType].schema as OpenAPIV3.SchemaObject,
+								  );
 							if (contentType.includes('json')) {
 								newRequests.push({
 									...newRequestBase,
@@ -369,6 +373,9 @@ class SwaggerParseManager {
 		const resObj: any = {};
 		const type = object.type;
 		let _exhaustive: never;
+		if (object.example) {
+			return object.example;
+		}
 		switch (type) {
 			case 'string':
 				return 'string';
@@ -391,6 +398,46 @@ class SwaggerParseManager {
 				break;
 			default:
 				_exhaustive = type;
+		}
+	}
+
+	private getExampleSwaggerBodyObjectV3_1(object: OpenAPIV3_1.SchemaObject) {
+		const resObj: any = {};
+		const type = object.type;
+		let _exhaustive: never;
+		let nonArrayType: 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
+		if (type?.length) {
+			nonArrayType = type[0] as 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
+		} else {
+			nonArrayType = type as 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
+		}
+		const example = object.example ?? (object?.examples?.length ?? 0) > 0 ? object.examples![0] : null;
+		if (example) {
+			return example;
+		}
+		switch (nonArrayType) {
+			case 'string':
+				return 'string';
+			case 'number':
+				return 0.5;
+			case 'boolean':
+				return true;
+			case 'object':
+				Object.entries(object.properties ?? {}).forEach(([key, value]) => {
+					resObj[key] = this.getExampleSwaggerBodyObject(value as OpenAPIV3.SchemaObject);
+				});
+				return resObj;
+			case 'integer':
+				return 1;
+			case 'array':
+				return [
+					this.getExampleSwaggerBodyObject((object as OpenAPIV3.ArraySchemaObject).items as OpenAPIV3.SchemaObject),
+				];
+			case 'null':
+			case undefined:
+				break;
+			default:
+				_exhaustive = nonArrayType;
 		}
 	}
 }
