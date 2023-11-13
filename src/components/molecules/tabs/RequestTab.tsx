@@ -36,6 +36,7 @@ import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalCon
 import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
+import { clamp } from '../../../utils/math';
 
 const defaultResponse = {
 	responseText: 'View the response here',
@@ -239,18 +240,20 @@ export function RequestTab(props: TabProps) {
 						<Stack direction={'row'}>
 							<IconButton
 								aria-label="previousHistory"
-								disabled={response === 0}
+								disabled={response === 0 || response == 'error' || requestData.history.length === 0}
 								onClick={() => {
 									setResponse((currentResponse) => {
+										let newResponse: number;
 										if (currentResponse === 0) {
-											return currentResponse;
+											newResponse = currentResponse;
 										} else if (currentResponse === 'error') {
-											return requestData.history.length - 1;
+											newResponse = requestData.history.length - 1;
 										} else if (currentResponse === 'latest') {
-											return requestData.history.length - 2;
+											newResponse = requestData.history.length - 2;
 										} else {
-											return currentResponse - 1;
+											newResponse = currentResponse - 1;
 										}
+										return clamp(newResponse, 0, Math.max(requestData.history.length - 1, 0));
 									});
 								}}
 							>
