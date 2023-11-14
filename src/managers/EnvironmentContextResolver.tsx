@@ -53,6 +53,51 @@ class EnvironmentContextResolver {
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
+	public resolveVariablesForMappedObject<T extends Record<string, unknown>>(
+		object: T,
+		context: {
+			data: ApplicationData;
+			serviceId?: string;
+			requestId?: string;
+		},
+	) {
+		const { data, serviceId, requestId } = context;
+		const newObj: Record<string, unknown> = {};
+		Object.keys(object).forEach((key) => {
+			const newKey = this.resolveVariablesForString(key, data, serviceId, requestId);
+			newObj[newKey] = this.resolveVariableForObjectKey(object, key, context);
+		});
+		return newObj;
+	}
+
+	private resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(
+		object: T,
+		key: TKey,
+		context: {
+			data: ApplicationData;
+			serviceId?: string;
+			requestId?: string;
+		},
+	): T[TKey] {
+		const { data, serviceId, requestId } = context;
+		const oldValue = object[key];
+		if (oldValue === null) {
+			return null as T[TKey];
+		} else if (typeof oldValue === 'object') {
+			if (Array.isArray(oldValue)) {
+				return oldValue.map((_val, index) => this.resolveVariableForObjectKey(oldValue, index, context)) as T[TKey];
+			} else {
+				return this.resolveVariablesForMappedObject(
+					oldValue as T[keyof T] & Record<string, unknown>,
+					context,
+				) as T[TKey];
+			}
+		} else if (typeof oldValue === 'string') {
+			return this.resolveVariablesForString(oldValue, data, serviceId, requestId) as T[TKey];
+		}
+		return oldValue;
+	}
+
 	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
 		text = text.toString();
 		let state: 'variable' | 'text' = 'text';

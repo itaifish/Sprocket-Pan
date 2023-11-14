@@ -13,6 +13,8 @@ import ts from 'typescript';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { Constants } from '../utils/constants';
 import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
+import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
+
 export type NetworkCallResponse = {
 	responseText: string;
 	contentType?: string | null;
@@ -45,9 +47,20 @@ class NetworkRequestManager {
 				endpoint.serviceId,
 				request.id,
 			);
-			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
+			let body =
+				request.bodyType === 'none'
+					? undefined
+					: request.body
+					? typeof request.body === 'string'
+						? (JSON.parse(request.body) as Record<string, unknown>)
+						: request.body
+					: undefined;
 			if (body) {
-				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId, request.id);
+				body = environmentContextResolver.resolveVariablesForMappedObject(body, {
+					data,
+					serviceId: endpoint.serviceId,
+					requestId: request.id,
+				});
 			}
 			const headers: Record<string, string> = {};
 			Object.keys(request.headers).forEach((headerKey) => {
@@ -71,23 +84,27 @@ class NetworkRequestManager {
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;
 			}
-
 			const networkCall = fetch(`${url}${queryParamStr}`, {
 				method: endpoint.verb,
-				body,
+				body: body ? Body.json(body) : undefined,
 				headers: headers,
+				responseType: ResponseType.Text,
 			});
-			const res = await asyncCallWithTimeout(networkCall, Constants.networkRequestTimeoutMS);
-			const responseText = await (await res.blob()).text();
+			const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
+				networkCall,
+				Constants.networkRequestTimeoutMS,
+			);
+			const responseText = res.data as string;
 			const response = {
 				statusCode: res.status,
-				headers: [...res.headers.entries()].reduce<Record<string, string>>((obj, [keyValuePair]) => {
+				headers: [...Object.entries(res.headers)].reduce<Record<string, string>>((obj, [keyValuePair]) => {
 					obj[keyValuePair[0]] = keyValuePair[1];
 					return obj;
 				}, {}),
-				bodyType: this.headersContentTypeToBodyType(res.headers.get('content-type')),
+				bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 				body: responseText,
 			};
+
 			applicationDataManager.addResponseToHistory(request.id, response);
 			// Run post-request scripts
 			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
@@ -118,6 +135,7 @@ class NetworkRequestManager {
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
 				_this.sprocketPan = sprocketPan;
+				_this.fetch = fetch;
 				const jsScript = ts.transpile(script);
 				const scriptTask = evalAsync(jsScript);
 				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);

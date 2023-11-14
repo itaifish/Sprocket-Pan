@@ -4,7 +4,12 @@ import eslint from 'vite-plugin-eslint';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'node:path';
 
-// Code breaks when I don't add this. NO FUCKIGN CLUE WHY.
+/**
+ * The production build breaks without this. I have no clue why. I tried googling it, 0 results found.
+ * Nothing in the docs. Is it Vite's Fault? Tauri's? Some random dependancy? I don't know.
+ * This works though - in both minified and non-minified builds. So yeah...
+ * The workaround is literally just adding another if check to prevent an error
+ */
 function getCustomNoNullDefaultsPlugin(): Plugin {
 	return {
 		name: 'no-defaults',
