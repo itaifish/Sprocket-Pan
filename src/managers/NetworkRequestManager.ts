@@ -47,9 +47,21 @@ class NetworkRequestManager {
 				endpoint.serviceId,
 				request.id,
 			);
-			let body = request.bodyType === 'none' ? undefined : request.body ? JSON.stringify(request.body) : undefined;
+			let body =
+				request.bodyType === 'none'
+					? undefined
+					: request.body
+					? typeof request.body === 'string'
+						? (JSON.parse(request.body) as Record<string, unknown>)
+						: request.body
+					: undefined;
+			log.info(`Body before env: ${JSON.stringify(body)}`);
 			if (body) {
-				body = environmentContextResolver.resolveVariablesForString(body, data, endpoint.serviceId, request.id);
+				body = environmentContextResolver.resolveVariablesForMappedObject(body, {
+					data,
+					serviceId: endpoint.serviceId,
+					requestId: request.id,
+				});
 			}
 			const headers: Record<string, string> = {};
 			Object.keys(request.headers).forEach((headerKey) => {
@@ -73,14 +85,17 @@ class NetworkRequestManager {
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;
 			}
-
+			log.info(`Body after env: ${JSON.stringify(body)}`);
 			const networkCall = fetch(`${url}${queryParamStr}`, {
 				method: endpoint.verb,
-				body: body ? Body.json(JSON.parse(body)) : undefined,
+				body: body ? Body.json(body) : undefined,
 				headers: headers,
 				responseType: ResponseType.Text,
 			});
-			const res = await asyncCallWithTimeout(networkCall, Constants.networkRequestTimeoutMS);
+			const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
+				networkCall,
+				Constants.networkRequestTimeoutMS,
+			);
 			const responseText = res.data as string;
 			const response = {
 				statusCode: res.status,
