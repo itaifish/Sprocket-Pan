@@ -55,7 +55,6 @@ class NetworkRequestManager {
 						? (JSON.parse(request.body) as Record<string, unknown>)
 						: request.body
 					: undefined;
-			log.info(`Body before env: ${JSON.stringify(body)}`);
 			if (body) {
 				body = environmentContextResolver.resolveVariablesForMappedObject(body, {
 					data,
@@ -85,7 +84,6 @@ class NetworkRequestManager {
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;
 			}
-			log.info(`Body after env: ${JSON.stringify(body)}`);
 			const networkCall = fetch(`${url}${queryParamStr}`, {
 				method: endpoint.verb,
 				body: body ? Body.json(body) : undefined,
