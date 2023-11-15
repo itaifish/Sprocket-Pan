@@ -10,7 +10,7 @@ export function OpenSettingsButton() {
 	return (
 		<>
 			<SprocketTooltip text="Settings">
-				<IconButton onClick={() => setIsOpen(true)}>
+				<IconButton onClick={() => setIsOpen(true)} size="sm" variant="soft" color="neutral">
 					<SettingsIcon />
 				</IconButton>
 			</SprocketTooltip>
