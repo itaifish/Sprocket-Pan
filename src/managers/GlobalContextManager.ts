@@ -1,6 +1,7 @@
 import { createContext } from 'react';
 import { StateContext, TabType } from '../types/state/state';
 import { ApplicationData } from '../types/application-data/application-data';
+import { ApplicationDataManager } from './ApplicationDataManager';
 
 export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>({
 	drawerOpen: true,
@@ -11,9 +12,7 @@ export const ApplicationDataContext = createContext<ApplicationData>({
 	endpoints: {},
 	requests: {},
 	environments: {},
-	settings: {
-		debugLogs: true,
-	},
+	settings: ApplicationDataManager.getDefaultData().settings,
 });
 
 export type TabsType = { tabs: Record<string, TabType>; selected: string | null };

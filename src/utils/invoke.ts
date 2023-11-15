@@ -1,12 +1,6 @@
 import { invoke as tauriInvoke } from '@tauri-apps/api/tauri';
 
 type InvokeMap = {
-	greet: {
-		returnType: string;
-		args: {
-			name: string;
-		};
-	};
 	close_splashscreen: {
 		returnType: void;
 		args: undefined;
