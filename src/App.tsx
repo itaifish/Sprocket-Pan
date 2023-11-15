@@ -29,7 +29,6 @@ export function App() {
 		};
 		applicationDataManager.on('update', event);
 		invoke('close_splashscreen', undefined);
-
 		return () => {
 			applicationDataManager.off('update', event);
 		};

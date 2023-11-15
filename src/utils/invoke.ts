@@ -11,6 +11,12 @@ type InvokeMap = {
 		returnType: void;
 		args: undefined;
 	};
+	zoom: {
+		returnType: boolean;
+		args: {
+			amount: number;
+		};
+	};
 };
 
 type InvocationName = keyof InvokeMap;
