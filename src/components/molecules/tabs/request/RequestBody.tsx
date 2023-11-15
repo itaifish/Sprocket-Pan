@@ -10,7 +10,8 @@ import { Constants } from '../../../../utils/constants';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
-	const { mode } = useColorScheme();
+	const { mode, systemMode } = useColorScheme();
+	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [editor, setEditor] = useState<string | undefined>(undefined);
 	const [editorText, setEditorText] = useState(typeof requestData.body === 'string' ? requestData.body : '');
 	const latestText = useRef(editorText);
@@ -130,7 +131,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 							latestText.current = value ?? '';
 						}}
 						language={editor}
-						theme={mode === 'dark' ? 'vs-dark' : mode}
+						theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 						options={{ tabSize: 2, insertSpaces: false }}
 						onMount={handleEditorDidMount}
 					/>

@@ -9,7 +9,8 @@ import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 	const editorRef = useRef<any>(null);
 	const [copied, setCopied] = useState(false);
-	const { mode } = useColorScheme();
+	const { mode, systemMode } = useColorScheme();
+	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.updateOptions({ readOnly: false });
@@ -62,7 +63,7 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 					height={'45vh'}
 					value={response.responseText}
 					language={editorType}
-					theme={mode === 'dark' ? 'vs-dark' : mode}
+					theme={resolvedMode === 'dark' ? 'vs-dark' : mode}
 					options={{ readOnly: true, domReadOnly: true, tabSize: 2, insertSpaces: false }}
 					onMount={handleEditorDidMount}
 				/>

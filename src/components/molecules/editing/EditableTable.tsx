@@ -74,9 +74,14 @@ export function EditableTable(props: EditableTableProps) {
 											width: '50%',
 										}}
 									>
-										{environmentContextResolver.stringWithEnvironmentToTypography(tableData.key, environment, {
-											fontSize: 14,
-										})}
+										{environmentContextResolver.stringWithEnvironmentToTypography(
+											tableData.key,
+											environment,
+											data.settings.displayVariableNames,
+											{
+												fontSize: 14,
+											},
+										)}
 									</Card>
 									<Card
 										variant="outlined"
@@ -86,9 +91,14 @@ export function EditableTable(props: EditableTableProps) {
 											width: '50%',
 										}}
 									>
-										{environmentContextResolver.stringWithEnvironmentToTypography(tableData.value ?? '', environment, {
-											fontSize: 14,
-										})}
+										{environmentContextResolver.stringWithEnvironmentToTypography(
+											tableData.value ?? '',
+											environment,
+											data.settings.displayVariableNames,
+											{
+												fontSize: 14,
+											},
+										)}
 									</Card>
 								</>
 							)}

@@ -19,6 +19,7 @@ import { TabType } from '../types/state/state';
 import { tabsManager } from './TabsManager';
 import { noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
+import { Settings } from '../types/settings/settings';
 
 type DataEvent = 'update' | 'saved';
 
@@ -48,7 +49,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private data: ApplicationData;
 	private constructor() {
 		super();
-		this.data = this.getDefaultData();
+		this.data = ApplicationDataManager.getDefaultData();
 		this.init();
 	}
 
@@ -139,6 +140,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			this.emit('update');
 		}
 		return newDatum;
+	}
+
+	public setSettings(newSettings: Settings) {
+		this.data.settings = newSettings;
+		this.data = { ...this.data };
+		this.emit('update');
 	}
 
 	public update<TTabType extends TabType>(updateType: TTabType, updateId: string, updateObj: UpdateType[TTabType]) {
@@ -244,7 +251,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		return this.data;
 	}
 
-	private getDefaultData(): ApplicationData {
+	static getDefaultData(): ApplicationData {
 		return {
 			services: {},
 			endpoints: {},
@@ -252,6 +259,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			environments: {},
 			settings: {
 				debugLogs: true,
+				zoomLevel: 100,
+				timeoutDurationMS: 1_000 * 60 * 10,
+				defaultTheme: 'system-default',
+				maxHistoryLength: -1,
+				displayVariableNames: true,
 			},
 		};
 	}
@@ -274,7 +286,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			return data;
 		} catch (e) {
 			console.error(e);
-			return this.getDefaultData();
+			return ApplicationDataManager.getDefaultData();
 		}
 	};
 
@@ -390,7 +402,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	};
 
 	private async init() {
-		const defaultData = this.getDefaultData();
+		const defaultData = ApplicationDataManager.getDefaultData();
 		try {
 			const folderStatus = await this.createDataFolderIfNotExists();
 			const fileStatus = await this.createDataFileIfNotExists(defaultData);

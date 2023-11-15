@@ -12,12 +12,6 @@ fn open_devtools(window: &Window) {
 #[cfg(not(debug_assertions))]
 fn open_devtools(window: &Window) {}
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
-
 #[tauri::command]
 async fn close_splashscreen(window: Window) {
     // Close splashscreen
@@ -32,6 +26,37 @@ async fn close_splashscreen(window: Window) {
         .expect("no window labeled 'main' found")
         .show()
         .unwrap();
+}
+
+#[tauri::command]
+fn zoom(window: Window, amount: f64) -> bool {
+    let res: Result<(), tauri::Error> = window
+        .get_window("main")
+        .expect("no window labeled 'main' found")
+        .with_webview(move |webview| {
+            #[cfg(target_os = "linux")]
+            {
+                // see https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/struct.WebView.html
+                // and https://docs.rs/webkit2gtk/0.18.2/webkit2gtk/trait.WebViewExt.html
+                use webkit2gtk::traits::WebViewExt;
+                webview.inner().set_zoom_level(amount);
+            }
+
+            #[cfg(windows)]
+            unsafe {
+                // see https://docs.rs/webview2-com/0.19.1/webview2_com/Microsoft/Web/WebView2/Win32/struct.ICoreWebView2Controller.html
+                webview.controller().SetZoomFactor(amount).unwrap();
+            }
+
+            #[cfg(target_os = "macos")]
+            unsafe {
+                let () = msg_send![webview.inner(), setPageZoom: amount];
+            }
+        });
+    match res {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }
 
 fn main() {
@@ -51,8 +76,7 @@ fn main() {
                 .build(),
         )
         .plugin(tauri_plugin_window_state::Builder::default().build())
-        .invoke_handler(tauri::generate_handler![greet])
-        .invoke_handler(tauri::generate_handler![close_splashscreen])
+        .invoke_handler(tauri::generate_handler![close_splashscreen, zoom])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
