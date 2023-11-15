@@ -53,7 +53,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 							<Tab>Requests</Tab>
 						</TabList>
 						<TabPanel value={0}>
-							<Stack>
+							<Stack spacing={3}>
 								<InputSlider
 									value={unsavedSettings.zoomLevel}
 									label="Zoom"
@@ -94,7 +94,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 										<Option value="system-default">System Default</Option>
 									</Select>
 								</FormControl>
-								<FormControl sx={{ width: 240, mt: '20px' }}>
+								<FormControl sx={{ width: 240 }}>
 									<FormLabel id="select-default-theme-label" htmlFor="select-default-theme-button">
 										Display Variable Names
 									</FormLabel>
