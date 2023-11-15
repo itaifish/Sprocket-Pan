@@ -1,8 +1,12 @@
 import { Box, Button, Sheet, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
-import SaveIcon from '@mui/icons-material/Save';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import { InputSlider } from '../atoms/input/InputSlider';
+import ZoomInIcon from '@mui/icons-material/ZoomIn';
+import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
+import { applicationDataManager } from '../../managers/ApplicationDataManager';
 
 const style = {
 	position: 'absolute' as const,
@@ -36,7 +40,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 							<Tab>Requests</Tab>
 						</TabList>
 						<TabPanel value={0}>
-							<b>First</b> tab panel
+							<InputSlider
+								value={unsavedSettings.zoomLevel}
+								label="Zoom"
+								setValue={(val) =>
+									setUnsavedSettings((currSettings) => {
+										return { ...currSettings, zoomLevel: val };
+									})
+								}
+								endDecorator="%"
+								icon={<ZoomInIcon />}
+								range={{ min: 20, max: 300 }}
+							/>
 						</TabPanel>
 						<TabPanel value={1}>
 							<b>Second</b> tab panel
@@ -48,12 +63,16 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 							flexDirection: 'row-reverse',
 						}}
 					>
-						<Button startDecorator={<SaveIcon />} disabled={!hasChanged}>
-							Save
+						<Button
+							startDecorator={<ThumbUpAltIcon />}
+							disabled={!hasChanged}
+							onClick={() => applicationDataManager.setSettings(unsavedSettings)}
+						>
+							Apply
 						</Button>
 						<Button
 							color={hasChanged ? 'danger' : 'warning'}
-							startDecorator={<NotInterestedIcon />}
+							startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
 							sx={{ mr: '10px' }}
 							onClick={props.closePanel}
 						>

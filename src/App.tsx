@@ -35,6 +35,10 @@ export function App() {
 	}, []);
 
 	useEffect(() => {
+		invoke('zoom', { amount: data.settings.zoomLevel / 100 });
+	}, [data.settings.zoomLevel]);
+
+	useEffect(() => {
 		if (monaco) {
 			initMonaco(monaco);
 		}

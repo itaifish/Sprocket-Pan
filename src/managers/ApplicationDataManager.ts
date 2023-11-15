@@ -19,6 +19,7 @@ import { TabType } from '../types/state/state';
 import { tabsManager } from './TabsManager';
 import { noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
+import { Settings } from '../types/settings/settings';
 
 type DataEvent = 'update' | 'saved';
 
@@ -141,6 +142,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		return newDatum;
 	}
 
+	public setSettings(newSettings: Settings) {
+		this.data.settings = newSettings;
+		this.data = { ...this.data };
+		this.emit('update');
+	}
+
 	public update<TTabType extends TabType>(updateType: TTabType, updateId: string, updateObj: UpdateType[TTabType]) {
 		let dataToUpdate = this.data[`${updateType}s`][updateId];
 		if (dataToUpdate == null) {
@@ -252,7 +259,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			environments: {},
 			settings: {
 				debugLogs: true,
-				zoomLevel: 1,
+				zoomLevel: 100,
 				timeoutDurationMS: 1_000 * 60 * 10,
 				defaultTheme: 'system-default',
 				maxHistoryLength: -1,
