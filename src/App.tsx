@@ -3,7 +3,7 @@ import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/tabs/TabHeader';
-import { Box, Grid } from '@mui/joy';
+import { Box, Grid, useColorScheme } from '@mui/joy';
 import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
 import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
 import { useMonaco } from '@monaco-editor/react';
@@ -21,6 +21,7 @@ export function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
+	const { setMode } = useColorScheme();
 
 	useEffect(() => {
 		const event = () => {
@@ -37,6 +38,10 @@ export function App() {
 	useEffect(() => {
 		invoke('zoom', { amount: data.settings.zoomLevel / 100 });
 	}, [data.settings.zoomLevel]);
+
+	useEffect(() => {
+		setMode(data.settings.defaultTheme === 'system-default' ? 'system' : data.settings.defaultTheme);
+	}, [data.settings.defaultTheme]);
 
 	useEffect(() => {
 		if (monaco) {

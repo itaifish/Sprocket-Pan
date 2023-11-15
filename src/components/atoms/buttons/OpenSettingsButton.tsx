@@ -1,16 +1,19 @@
 import { IconButton, Modal } from '@mui/joy';
 import { useState } from 'react';
-import { SettingsPanel } from '../../organisms/SettingsPanel';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { SprocketTooltip } from '../SprocketTooltip';
+import { SettingsPanel } from '../../organisms/SettingsPanel';
 
 export function OpenSettingsButton() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
 		<>
-			<IconButton onClick={() => setIsOpen(true)}>
-				<SettingsIcon />
-			</IconButton>
+			<SprocketTooltip text="Settings">
+				<IconButton onClick={() => setIsOpen(true)}>
+					<SettingsIcon />
+				</IconButton>
+			</SprocketTooltip>
 			<Modal
 				open={isOpen}
 				onClose={(_event, reason) => {
