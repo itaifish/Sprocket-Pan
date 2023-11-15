@@ -12,7 +12,8 @@ interface RequestScriptProps {
 }
 
 export function RequestScript(props: RequestScriptProps) {
-	const { mode } = useColorScheme();
+	const { mode, systemMode } = useColorScheme();
+	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [editorText, setEditorText] = useState(props.scriptText ?? '');
 	const latestText = useRef(editorText);
 	const [copied, setCopied] = useState(false);
@@ -62,7 +63,7 @@ export function RequestScript(props: RequestScriptProps) {
 					latestText.current = value ?? '';
 				}}
 				language={'typescript'}
-				theme={mode === 'dark' ? 'vs-dark' : mode}
+				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 				options={{ tabSize: 2, insertSpaces: false }}
 				onMount={handleEditorDidMount}
 			/>

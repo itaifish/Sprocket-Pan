@@ -29,7 +29,7 @@ export function InputSlider({ label, value, setValue, endDecorator, icon, range 
 	};
 
 	return (
-		<Box sx={{ width: 250 }}>
+		<Box sx={{ width: 350 }}>
 			<Typography id={`input-slider-${label}`} gutterBottom>
 				{label}
 			</Typography>

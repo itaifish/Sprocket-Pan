@@ -18,26 +18,33 @@ class EnvironmentContextResolver {
 		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
-		return this.snippetsToTypography(snippets, typographyProps);
+		return this.snippetsToTypography(snippets, data.settings.displayVariableNames, typographyProps);
 	}
 
 	public stringWithEnvironmentToTypography(
 		text: string,
 		env: Environment,
+		displayVariableNames: boolean,
 		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
 		const snippets = this.parseStringWithEnvironment(text, env);
-		return this.snippetsToTypography(snippets, typographyProps);
+		return this.snippetsToTypography(snippets, displayVariableNames, typographyProps);
 	}
 
-	private snippetsToTypography(snippets: Snippet[], typographyProps?: React.ComponentProps<typeof Typography>) {
+	private snippetsToTypography(
+		snippets: Snippet[],
+		displayVariableNames: boolean,
+		typographyProps?: React.ComponentProps<typeof Typography>,
+	) {
 		return (
 			<Typography {...typographyProps}>
 				{snippets.map((snippet, index) => {
 					if (snippet.variableName) {
+						const valueText = snippet.value ?? 'unknown';
+						const displayText = displayVariableNames ? `${snippet.variableName}: ${valueText}` : valueText;
 						return (
 							<Typography variant="outlined" color={snippet.value ? 'success' : 'danger'} key={index}>
-								{`${snippet.variableName}`}: {snippet.value ?? 'unknown'}
+								{displayText}
 							</Typography>
 						);
 					} else {

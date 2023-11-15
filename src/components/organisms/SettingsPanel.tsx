@@ -47,7 +47,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 		<>
 			<Box>
 				<Sheet sx={style}>
-					<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, height: 160 }}>
+					<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
 						<TabList>
 							<Tab>General</Tab>
 							<Tab>Requests</Tab>
@@ -92,6 +92,32 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 										<Option value="light">Light Mode</Option>
 										<Option value="dark">Dark Mode</Option>
 										<Option value="system-default">System Default</Option>
+									</Select>
+								</FormControl>
+								<FormControl sx={{ width: 240, mt: '20px' }}>
+									<FormLabel id="select-default-theme-label" htmlFor="select-default-theme-button">
+										Display Variable Names
+									</FormLabel>
+									<Select
+										value={unsavedSettings.displayVariableNames}
+										onChange={(_e, value) => {
+											if (value != null) {
+												setUnsavedSettings((currSettings) => {
+													return { ...currSettings, displayVariableNames: value };
+												});
+											}
+										}}
+										slotProps={{
+											button: {
+												id: 'select-display-names-button',
+												// TODO: Material UI set aria-labelledby correctly & automatically
+												// but Base UI and Joy UI don't yet.
+												'aria-labelledby': 'select-display-names-label select-display-names-button',
+											},
+										}}
+									>
+										<Option value={true}>Key and Value</Option>
+										<Option value={false}>Value Only</Option>
 									</Select>
 								</FormControl>
 							</Stack>
