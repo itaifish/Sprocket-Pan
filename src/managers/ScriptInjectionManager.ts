@@ -1,10 +1,19 @@
-import { ApplicationData, EndpointRequest, EndpointResponse } from '../types/application-data/application-data';
+import { EndpointResponse } from '../types/application-data/application-data';
 import { applicationDataManager } from './ApplicationDataManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { networkRequestManager } from './NetworkRequestManager';
 
-export function getScriptInjectionCode(request: EndpointRequest, data: ApplicationData, response?: EndpointResponse) {
+export function getScriptInjectionCode(requestId: string, response?: EndpointResponse) {
+	const getRequestAndData = () => {
+		const data = applicationDataManager.getApplicationData();
+		return {
+			request: data.requests[requestId],
+			data,
+		};
+	};
+
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
+		const { data, request } = getRequestAndData();
 		if (level === 'request') {
 			applicationDataManager.update('request', request.id, {
 				environmentOverride: { ...request.environmentOverride, [key]: value },
@@ -32,6 +41,7 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 	};
 
 	const setQueryParam = (key: string, value: string) => {
+		const { request } = getRequestAndData();
 		const newValue = request.queryParams[key] ? [...request.queryParams[key], value] : [value];
 		applicationDataManager.update('request', request.id, {
 			queryParams: { ...request.queryParams, [key]: newValue },
@@ -39,34 +49,32 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 	};
 
 	const setQueryParams = (key: string, values: string[]) => {
+		const { request } = getRequestAndData();
 		applicationDataManager.update('request', request.id, {
 			queryParams: { ...request.queryParams, [key]: values },
 		});
 	};
 
 	const setHeader = (key: string, value: string) => {
+		const { request } = getRequestAndData();
 		applicationDataManager.update('request', request.id, {
 			headers: { ...request.headers, [key]: value },
 		});
 	};
 
 	const getEnvironment = () => {
+		const { data, request } = getRequestAndData();
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
 		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
 	};
 
 	const sendRequest = async (requestId: string) => {
-		const request = data.requests[requestId];
-		if (request) {
-			await networkRequestManager.sendRequest(request, data);
-		}
+		const { data } = getRequestAndData();
+		await networkRequestManager.sendRequest(requestId);
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
-	const readonlyData = structuredClone(data);
-	const latestResponse =
-		response ?? (request.history && request.history.length > 0) ? request.history[request.history.length - 1] : null;
 	return {
 		setEnvironmentVariable,
 		setQueryParam,
@@ -74,7 +82,16 @@ export function getScriptInjectionCode(request: EndpointRequest, data: Applicati
 		setHeader,
 		getEnvironment,
 		sendRequest,
-		data: readonlyData,
-		response: latestResponse,
+		get data() {
+			return structuredClone(applicationDataManager.getApplicationData());
+		},
+		get response() {
+			const { request } = getRequestAndData();
+			const latestResponse =
+				response ?? (request.history && request.history.length > 0)
+					? request.history[request.history.length - 1]
+					: null;
+			return latestResponse;
+		},
 	};
 }
