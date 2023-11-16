@@ -9,11 +9,6 @@ import { Constants } from '../utils/constants';
 import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
 
-export type NetworkCallResponse = {
-	responseText: string;
-	contentType?: string | null;
-};
-
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -95,10 +90,17 @@ class NetworkRequestManager {
 			if (queryParamStr) {
 				queryParamStr = `?${queryParamStr}`;
 			}
-			const networkCall = fetch(`${url}${queryParamStr}`, {
+
+			const networkRequest = {
+				url: `${url}${queryParamStr}`,
 				method: endpoint.verb,
-				body: body ? Body.json(body) : undefined,
+				body: body ?? {},
 				headers: headers,
+			};
+			const networkCall = fetch(networkRequest.url, {
+				method: networkRequest.method,
+				body: body ? Body.json(body) : undefined,
+				headers: networkRequest.headers,
 				responseType: ResponseType.Text,
 			});
 			const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
@@ -116,7 +118,7 @@ class NetworkRequestManager {
 				body: responseText,
 			};
 
-			applicationDataManager.addResponseToHistory(request.id, response);
+			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);
 			// Run post-request scripts
 			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
 			for (const postRequestScript of postRequestScripts) {

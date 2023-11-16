@@ -10,6 +10,7 @@ import {
 	EndpointResponse,
 	Environment,
 	HistoricalEndpointResponse,
+	NetworkFetchRequest,
 	Service,
 } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
@@ -168,16 +169,15 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public addResponseToHistory(requestId: string, response: EndpointResponse) {
+	public addResponseToHistory(requestId: string, networkRequest: NetworkFetchRequest, response: EndpointResponse) {
 		const reqToUpdate = this.data.requests[requestId];
 		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
 			return;
 		}
-		const copiedRequest: any = structuredClone(reqToUpdate);
-		delete copiedRequest.history;
+
 		reqToUpdate.history.push({
-			request: copiedRequest,
+			request: networkRequest,
 			response,
 			dateTime: new Date(),
 		});

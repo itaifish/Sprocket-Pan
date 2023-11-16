@@ -1,12 +1,12 @@
 import { IconButton, Stack, Tooltip, useColorScheme } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
-import { NetworkCallResponse } from '../../../../managers/NetworkRequestManager';
 import { useEffect, useRef, useState } from 'react';
 import { log } from '../../../../utils/logging';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
+import { EndpointResponse } from '../../../../types/application-data/application-data';
 
-export function ResponseBody({ response }: { response: NetworkCallResponse }) {
+export function ResponseBody({ response }: { response: EndpointResponse }) {
 	const editorRef = useRef<any>(null);
 	const [copied, setCopied] = useState(false);
 	const { mode, systemMode } = useColorScheme();
@@ -29,15 +29,15 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 	};
 
 	let editorType = 'text';
-	if (response.contentType?.toLowerCase()?.includes('json')) {
+	if (response.bodyType?.toLowerCase()?.includes('json')) {
 		editorType = 'json';
-	} else if (response.contentType?.toLowerCase()?.includes('html')) {
+	} else if (response.bodyType?.toLowerCase()?.includes('html')) {
 		editorType = 'html';
 	}
 
 	useEffect(() => {
 		format();
-	}, [response.responseText, editorRef.current]);
+	}, [response.body, editorRef.current]);
 
 	return (
 		<div>
@@ -52,7 +52,7 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 								setTimeout(() => {
 									setCopied(false);
 								}, 800);
-								navigator.clipboard.writeText(response.responseText);
+								navigator.clipboard.writeText(response.body);
 							}}
 						>
 							<ContentCopyIcon />
@@ -61,7 +61,7 @@ export function ResponseBody({ response }: { response: NetworkCallResponse }) {
 				</Stack>
 				<Editor
 					height={'45vh'}
-					value={response.responseText}
+					value={response.body}
 					language={editorType}
 					theme={resolvedMode === 'dark' ? 'vs-dark' : mode}
 					options={{ readOnly: true, domReadOnly: true, tabSize: 2, insertSpaces: false }}

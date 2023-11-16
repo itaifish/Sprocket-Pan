@@ -14,7 +14,7 @@ import {
 	Switch,
 	Tooltip,
 } from '@mui/joy';
-import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { HistoricalEndpointResponse, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import EditIcon from '@mui/icons-material/Edit';
@@ -25,7 +25,6 @@ import { environmentContextResolver } from '../../../managers/EnvironmentContext
 import { EditableText } from '../../atoms/EditableText';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
-import { ResponseBody } from './request/ResponseBody';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
@@ -37,10 +36,30 @@ import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
+import { ResponseInfo } from './request/ResponseInfo';
 
-const defaultResponse = {
-	responseText: 'View the response here',
-	contentType: 'text',
+const defaultResponse: HistoricalEndpointResponse = {
+	response: {
+		statusCode: 200,
+		body: 'View the response here',
+		bodyType: 'Text',
+		headers: {},
+	},
+	dateTime: new Date(),
+	request: {
+		method: 'GET',
+		url: '',
+		headers: {},
+		body: {},
+	},
+};
+
+const getError = (error: string): HistoricalEndpointResponse => {
+	const errorRes = structuredClone(defaultResponse);
+	errorRes.response.statusCode = 400;
+	errorRes.response.body = error;
+	errorRes.response.bodyType = 'JSON';
+	return errorRes;
 };
 
 export function RequestTab(props: TabProps) {
@@ -57,7 +76,7 @@ export function RequestTab(props: TabProps) {
 	const hexColor = rgbToHex(colorRgb);
 	const [isAnimating, setIsAnimating] = useState(false);
 	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
-	const [lastError, setLastError] = useState({ responseText: '', contentType: 'text' });
+	const [lastError, setLastError] = useState(defaultResponse);
 	const [isLoading, setLoading] = useState(false);
 	const isDefault = endpointData.defaultRequest === requestData.id;
 	const [copied, setCopied] = useState(false);
@@ -65,16 +84,10 @@ export function RequestTab(props: TabProps) {
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
-	let responseData;
+	let responseData: HistoricalEndpointResponse;
 	if (response != 'error') {
 		const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
-		responseData =
-			responseIndex >= requestData.history.length
-				? defaultResponse
-				: {
-						responseText: requestData.history[responseIndex].response.body,
-						contentType: requestData.history[responseIndex].response.bodyType,
-				  };
+		responseData = responseIndex >= requestData.history.length ? defaultResponse : requestData.history[responseIndex];
 	} else {
 		responseData = lastError;
 	}
@@ -143,7 +156,7 @@ export function RequestTab(props: TabProps) {
 									setLoading(true);
 									const result = await networkRequestManager.sendRequest(requestData.id);
 									if (result) {
-										setLastError({ contentType: 'json', responseText: result });
+										setLastError(getError(result));
 										setResponse('error');
 									} else {
 										setResponse('latest');
@@ -282,7 +295,7 @@ export function RequestTab(props: TabProps) {
 								<ArrowRightIcon />
 							</IconButton>
 						</Stack>
-						<ResponseBody response={responseData} />
+						<ResponseInfo response={responseData} />
 					</Card>
 				</Grid>
 			</Grid>

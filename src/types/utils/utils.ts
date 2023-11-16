@@ -5,3 +5,5 @@ export type RecursivePartial<T> = {
 		? RecursivePartial<T[P]>
 		: T[P];
 };
+
+export type ValuesOf<T extends readonly unknown[]> = T[number];
