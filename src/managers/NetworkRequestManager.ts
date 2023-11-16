@@ -1,10 +1,4 @@
-import {
-	ApplicationData,
-	EndpointRequest,
-	EndpointResponse,
-	RawBodyType,
-	RawBodyTypes,
-} from '../types/application-data/application-data';
+import { EndpointResponse, RawBodyType, RawBodyTypes } from '../types/application-data/application-data';
 import { queryParamsToStringReplaceVars } from '../utils/application';
 import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
@@ -25,8 +19,10 @@ class NetworkRequestManager {
 
 	private constructor() {}
 
-	public async sendRequest(request: EndpointRequest, data: ApplicationData): Promise<string | null> {
+	public async sendRequest(requestId: string): Promise<string | null> {
 		try {
+			const data = applicationDataManager.getApplicationData();
+			const request = data.requests[requestId];
 			const endpointId = request.endpointId;
 			const endpoint = data.endpoints[endpointId];
 			const service = data.services[endpoint.serviceId];
@@ -34,7 +30,7 @@ class NetworkRequestManager {
 			// Run pre-request scripts
 			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
 			for (const preRequestScript of preRequestScripts) {
-				const res = await this.runScript(preRequestScript, request, data);
+				const res = await this.runScript(preRequestScript, requestId);
 				// if an error, return it
 				if (res) {
 					return res;
@@ -109,7 +105,7 @@ class NetworkRequestManager {
 			// Run post-request scripts
 			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
 			for (const postRequestScript of postRequestScripts) {
-				const res = await this.runScript(postRequestScript, request, data, response);
+				const res = await this.runScript(postRequestScript, requestId, response);
 				// if an error, return it
 				if (res) {
 					return res;
@@ -125,13 +121,12 @@ class NetworkRequestManager {
 
 	private async runScript(
 		script: string | undefined,
-		request: EndpointRequest,
-		data: ApplicationData,
+		requestId: string,
 		response?: EndpointResponse | undefined,
 	): Promise<string | undefined> {
 		if (script && script != '') {
 			try {
-				const sprocketPan = getScriptInjectionCode(request, data, response);
+				const sprocketPan = getScriptInjectionCode(requestId, response);
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
 				_this.sprocketPan = sprocketPan;

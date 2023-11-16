@@ -141,7 +141,7 @@ export function RequestTab(props: TabProps) {
 							onClick={async () => {
 								if (!isLoading) {
 									setLoading(true);
-									const result = await networkRequestManager.sendRequest(requestData, data);
+									const result = await networkRequestManager.sendRequest(requestData.id);
 									if (result) {
 										setLastError({ contentType: 'json', responseText: result });
 										setResponse('error');
