@@ -59,6 +59,21 @@ class NetworkRequestManager {
 				});
 			}
 			const headers: Record<string, string> = {};
+			// endpoint headers and then request headers
+			Object.keys(endpoint.baseHeaders).forEach((headerKey) => {
+				const parsedKey = environmentContextResolver.resolveVariablesForString(
+					headerKey,
+					data,
+					endpoint.serviceId,
+					request.id,
+				);
+				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
+					request.headers[headerKey],
+					data,
+					endpoint.serviceId,
+					request.id,
+				);
+			});
 			Object.keys(request.headers).forEach((headerKey) => {
 				const parsedKey = environmentContextResolver.resolveVariablesForString(
 					headerKey,
