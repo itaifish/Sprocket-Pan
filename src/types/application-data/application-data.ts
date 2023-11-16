@@ -32,8 +32,15 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	history: HistoricalEndpointResponse[];
 };
 
+export type NetworkFetchRequest = {
+	method: RESTfulRequestVerb;
+	url: string;
+	headers: Record<string, string>;
+	body: Record<string, unknown>;
+};
+
 export type HistoricalEndpointResponse = {
-	request: Omit<EndpointRequest, 'history'>;
+	request: NetworkFetchRequest;
 	response: EndpointResponse;
 	dateTime: Date;
 };

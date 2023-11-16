@@ -10,6 +10,7 @@ import {
 	EndpointResponse,
 	Environment,
 	HistoricalEndpointResponse,
+	NetworkFetchRequest,
 	Service,
 } from '../types/application-data/application-data';
 import swaggerParseManager from './SwaggerParseManager';
@@ -168,16 +169,15 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public addResponseToHistory(requestId: string, response: EndpointResponse) {
+	public addResponseToHistory(requestId: string, networkRequest: NetworkFetchRequest, response: EndpointResponse) {
 		const reqToUpdate = this.data.requests[requestId];
 		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
 			return;
 		}
-		const copiedRequest: any = structuredClone(reqToUpdate);
-		delete copiedRequest.history;
+
 		reqToUpdate.history.push({
-			request: copiedRequest,
+			request: networkRequest,
 			response,
 			dateTime: new Date(),
 		});
@@ -260,7 +260,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			settings: {
 				debugLogs: true,
 				zoomLevel: 100,
-				timeoutDurationMS: 1_000 * 60 * 10,
+				timeoutDurationMS: 1_000 * 30,
 				defaultTheme: 'system-default',
 				maxHistoryLength: -1,
 				displayVariableNames: true,

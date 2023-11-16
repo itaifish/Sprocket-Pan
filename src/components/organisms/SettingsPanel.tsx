@@ -11,6 +11,7 @@ import {
 	Option,
 	FormControl,
 	FormLabel,
+	Input,
 } from '@mui/joy';
 import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
@@ -20,6 +21,7 @@ import { InputSlider } from '../atoms/input/InputSlider';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 
 const style = {
 	position: 'absolute' as const,
@@ -123,7 +125,32 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 							</Stack>
 						</TabPanel>
 						<TabPanel value={1}>
-							<b>Second</b> tab panel
+							<Stack spacing={3}>
+								<FormControl sx={{ width: 200 }}>
+									<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
+										Network Call Timeout Duration
+									</FormLabel>
+									<Input
+										value={unsavedSettings.timeoutDurationMS / 1000}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const value = +e.target.value;
+											setUnsavedSettings((currSettings) => {
+												return { ...currSettings, timeoutDurationMS: value * 1000 };
+											});
+										}}
+										slotProps={{
+											input: {
+												id: 'network-timeout-input',
+												// TODO: Material UI set aria-labelledby correctly & automatically
+												// but Base UI and Joy UI don't yet.
+												'aria-labelledby': 'network-timeout-label network-timeout-input',
+											},
+										}}
+										startDecorator={<HourglassBottomIcon />}
+										endDecorator={'Seconds'}
+									/>
+								</FormControl>
+							</Stack>
 						</TabPanel>
 					</Tabs>
 					<Box

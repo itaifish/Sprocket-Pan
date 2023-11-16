@@ -38,57 +38,66 @@ export function initMonaco(monaco: Monaco) {
 			environmentOverride: Record<string, string>;
 			history: HistoricalEndpointResponse[];
 		};
-		type HistoricalEndpointResponse = {
-				request: Omit<EndpointRequest, 'history'>;
-				response: EndpointResponse;
-				dateTime: Date;
+
+		type NetworkFetchRequest = {
+			method: RESTfulRequestVerb;
+			url: string;
+			headers: Record<string, string>;
+			body: Record<string, unknown>;
 		};
+
+		type HistoricalEndpointResponse = {
+			request: NetworkFetchRequest;
+			response: EndpointResponse;
+			dateTime: Date;
+		};
+
 		type Endpoint<TUrlBase extends string = string> = {
-				id: string;
-				url: string;
-				verb: RESTfulRequestVerb;
-				baseHeaders: Record<string, string>;
-				baseQueryParams: Record<string, string[]>;
-				preRequestScript?: string;
-				postRequestScript?: string;
-				name: string;
-				description: string;
-				serviceId: string;
-				requestIds: string[];
-				defaultRequest: string | null;
+			id: string;
+			url: string;
+			verb: RESTfulRequestVerb;
+			baseHeaders: Record<string, string>;
+			baseQueryParams: Record<string, string[]>;
+			preRequestScript?: string;
+			postRequestScript?: string;
+			name: string;
+			description: string;
+			serviceId: string;
+			requestIds: string[];
+			defaultRequest: string | null;
 		};
 		type Environment = {
-				__name: string;
-				__id: string;
-				[key: string]: string;
+			__name: string;
+			__id: string;
+			[key: string]: string;
 		};
 		type Service<TBaseUrl extends string = string> = {
-				id: string;
-				name: string;
-				description: string;
-				version: string;
-				baseUrl: TBaseUrl;
-				localEnvironments: {
-						[environmentName: string]: Environment;
-				};
-				selectedEnvironment?: string;
-				endpointIds: string[];
-				preRequestScript?: string;
+			id: string;
+			name: string;
+			description: string;
+			version: string;
+			baseUrl: TBaseUrl;
+			localEnvironments: {
+					[environmentName: string]: Environment;
+			};
+			selectedEnvironment?: string;
+			endpointIds: string[];
+			preRequestScript?: string;
 		};
 		type ApplicationData = {
-				services: Record<string, Service>;
-				endpoints: Record<string, Endpoint>;
-				requests: Record<string, EndpointRequest>;
-				environments: Record<string, Environment>;
-				selectedEnvironment?: string;
-				settings: Settings;
+			services: Record<string, Service>;
+			endpoints: Record<string, Endpoint>;
+			requests: Record<string, EndpointRequest>;
+			environments: Record<string, Environment>;
+			selectedEnvironment?: string;
+			settings: Settings;
 		};
 		type EndpointResponse = {
-				statusCode: number;
-				body: string;
-				bodyType: RawBodyType;
-				headers: Record<string, string>;
-		};
+			statusCode: number;
+			body: string;
+			bodyType: RawBodyType;
+			headers: Record<string, string>;
+	};
 
 		type SprocketPan = {
 			setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
