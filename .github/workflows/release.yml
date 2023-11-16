@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: 'Install & Build'
         run: |
+          pwd
+          ls
           yarn
           yarn run build:executable
       - name: 'Zip Built Bundle'
