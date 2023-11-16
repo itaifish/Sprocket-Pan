@@ -68,7 +68,7 @@ class NetworkRequestManager {
 					request.id,
 				);
 				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
-					request.headers[headerKey],
+					endpoint.baseHeaders[headerKey],
 					data,
 					endpoint.serviceId,
 					request.id,
@@ -103,7 +103,7 @@ class NetworkRequestManager {
 			});
 			const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
 				networkCall,
-				Constants.networkRequestTimeoutMS,
+				data.settings.timeoutDurationMS,
 			);
 			const responseText = res.data as string;
 			const response = {

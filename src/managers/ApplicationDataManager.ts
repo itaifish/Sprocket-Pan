@@ -260,7 +260,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			settings: {
 				debugLogs: true,
 				zoomLevel: 100,
-				timeoutDurationMS: 1_000 * 60 * 10,
+				timeoutDurationMS: 1_000 * 30,
 				defaultTheme: 'system-default',
 				maxHistoryLength: -1,
 				displayVariableNames: true,
