@@ -1,25 +1,59 @@
-name: "tagged-release"
+name: 'tagged-release'
 
 on:
   push:
     tags:
-      - "v[0-9]+\\.[0-9]+\\.[0-9]+"
+      - '*'
 
 jobs:
-  tagged-release:
-    name: "Tagged Release"
-    runs-on: "ubuntu-latest"
+  tagged-release-linux:
+    name: 'Tagged Release Linux'
+    runs-on: 'ubuntu-latest'
     steps:
-      - name: "Install & Build"
+      - name: 'Install & Build'
         run: |
           yarn
           yarn run build:executable
-      - name: "Zip Built Bundle"
+      - name: 'Zip Built Bundle'
         run: |
           tar -czvf linux-bundle.tar.gz ./src-tauri/target/release/bundle
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: 'marvinpinto/action-automatic-releases@latest'
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
           prerelease: false
           files: |
             linux-bundle.tar.gz
+  tagged-release-windows:
+    name: 'Tagged Release Windows'
+    runs-on: 'windows-latest'
+    steps:
+      - name: 'Install & Build'
+        run: |
+          yarn
+          yarn run build:executable
+      - name: 'Zip Built Bundle'
+        run: |
+          Compress-Archive ./src-tauri/target/release/bundle windows-bundle.zip
+      - uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
+          files: |
+            windows-bundle.zip
+  tagged-release-macos:
+    name: 'Tagged Release MacOs'
+    runs-on: 'macos-latest'
+    steps:
+      - name: 'Install & Build'
+        run: |
+          yarn
+          yarn run build:executable
+      - name: 'Zip Built Bundle'
+        run: |
+          zip -vr mac-bundle.zip ./src-tauri/target/release/bundle/ -x "*.DS_Store"
+      - uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
+          files: |
+            mac-bundle.zip
