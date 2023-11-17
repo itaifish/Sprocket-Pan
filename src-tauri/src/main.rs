@@ -1,10 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-#[cfg(target_os = "macos")]
-#[macro_use]
-use objc::msg_send;
-
 use tauri::{Manager, Window};
 use tauri_plugin_log::LogTarget;
 
@@ -54,7 +50,8 @@ fn zoom(window: Window, amount: f64) -> bool {
 
             #[cfg(target_os = "macos")]
             unsafe {
-                let () = msg_send![webview.inner(), setPageZoom: amount];
+                use objc::{msg_send, sel};
+                let _: () = msg_send![webview.inner(), setPageZoom: amount];
             }
         });
     match res {
