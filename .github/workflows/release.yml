@@ -24,7 +24,6 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: get changes
         run: |
-          echo ${{ github.event.head_commit.message }}
           echo "CHANGES_STR='${{ github.event.head_commit.message }}'" >> $GITHUB_ENV
       - name: create release
         id: create-release
@@ -44,7 +43,7 @@ jobs:
                 MacOS: x64.dmg, x64.app.tar.gz 
 
                 ## What Changed
-                ${CHANGES_STR}
+                ${process.env.CHANGES_STR}
               `,
               draft: true,
               prerelease: false
