@@ -39,33 +39,35 @@ jobs:
   #         prerelease: false
   #         files: |
   #           linux-bundle.tar.gz
-  # tagged-release-windows:
-  #   name: 'Tagged Release Windows'
-  #   runs-on: 'windows-latest'
-  #   steps:
-  #     - uses: actions-rust-lang/setup-rust-toolchain@v1
-  #     - name: 'Checkout source code'
-  #       uses: 'actions/checkout@v3'
-  #     - name: 'Install & Build'
-  #       run: |
-  #         yarn
-  #         yarn run build:executable
-  #     - name: 'Zip Built Bundle'
-  #       run: |
-  #         Compress-Archive ./src-tauri/target/release/bundle windows-bundle.zip
-  #     - uses: 'marvinpinto/action-automatic-releases@latest'
-  #       with:
-  #         repo_token: '${{ secrets.GITHUB_TOKEN }}'
-  #         prerelease: false
-  #         files: |
-  #           windows-bundle.zip
+  tagged-release-windows:
+    name: 'Tagged Release Windows'
+    runs-on: 'windows-latest'
+    steps:
+      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - name: 'Checkout source code'
+        uses: 'actions/checkout@v3'
+      - name: 'Install & Build'
+        run: |
+          yarn
+          yarn run build:executable
+      - name: 'Zip Built Bundle'
+        run: |
+          Compress-Archive ./src-tauri/target/release/bundle windows-bundle.zip
+      - uses: 'marvinpinto/action-automatic-releases@latest'
+        with:
+          repo_token: '${{ secrets.GITHUB_TOKEN }}'
+          prerelease: false
+          files: |
+            windows-bundle.zip
   tagged-release-macos:
     name: 'Tagged Release MacOs'
     runs-on: 'macos-latest'
     steps:
       - name: 'Install Pre-reqs'
         run: |
-          brew install gtk+3
+          brew install gtk+3 \
+            libsoup@2.4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: 'Checkout source code'
         uses: 'actions/checkout@v3'
