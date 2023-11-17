@@ -11,6 +11,8 @@ jobs:
     name: 'Tagged Release Linux'
     runs-on: 'ubuntu-latest'
     steps:
+      - name: 'Checkout source code'
+        uses: 'actions/checkout@v3'
       - name: 'Install & Build'
         run: |
           pwd
@@ -30,6 +32,8 @@ jobs:
     name: 'Tagged Release Windows'
     runs-on: 'windows-latest'
     steps:
+      - name: 'Checkout source code'
+        uses: 'actions/checkout@v3'
       - name: 'Install & Build'
         run: |
           yarn
@@ -47,6 +51,8 @@ jobs:
     name: 'Tagged Release MacOs'
     runs-on: 'macos-latest'
     steps:
+      - name: 'Checkout source code'
+        uses: 'actions/checkout@v3'
       - name: 'Install & Build'
         run: |
           yarn
