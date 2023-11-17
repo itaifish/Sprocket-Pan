@@ -3,7 +3,7 @@
 
 #[cfg(target_os = "macos")]
 #[macro_use]
-extern crate objc;
+use objc::msg_send;
 
 use tauri::{Manager, Window};
 use tauri_plugin_log::LogTarget;
