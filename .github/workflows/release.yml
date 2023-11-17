@@ -11,13 +11,23 @@ jobs:
     name: 'Tagged Release Linux'
     runs-on: 'ubuntu-latest'
     steps:
+      - name: 'Install Pre-reqs'
+        run: |
+          sudo apt update
+          sudo apt install libwebkit2gtk-4.0-dev \
+              build-essential \
+              curl \
+              wget \
+              file \
+              libssl-dev \
+              libgtk-3-dev \
+              libayatana-appindicator3-dev \
+              librsvg2-dev
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: 'Checkout source code'
         uses: 'actions/checkout@v3'
       - name: 'Install & Build'
         run: |
-          pwd
-          ls
           yarn
           yarn run build:executable
       - name: 'Zip Built Bundle'
@@ -29,30 +39,33 @@ jobs:
           prerelease: false
           files: |
             linux-bundle.tar.gz
-  tagged-release-windows:
-    name: 'Tagged Release Windows'
-    runs-on: 'windows-latest'
-    steps:
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - name: 'Checkout source code'
-        uses: 'actions/checkout@v3'
-      - name: 'Install & Build'
-        run: |
-          yarn
-          yarn run build:executable
-      - name: 'Zip Built Bundle'
-        run: |
-          Compress-Archive ./src-tauri/target/release/bundle windows-bundle.zip
-      - uses: 'marvinpinto/action-automatic-releases@latest'
-        with:
-          repo_token: '${{ secrets.GITHUB_TOKEN }}'
-          prerelease: false
-          files: |
-            windows-bundle.zip
+  # tagged-release-windows:
+  #   name: 'Tagged Release Windows'
+  #   runs-on: 'windows-latest'
+  #   steps:
+  #     - uses: actions-rust-lang/setup-rust-toolchain@v1
+  #     - name: 'Checkout source code'
+  #       uses: 'actions/checkout@v3'
+  #     - name: 'Install & Build'
+  #       run: |
+  #         yarn
+  #         yarn run build:executable
+  #     - name: 'Zip Built Bundle'
+  #       run: |
+  #         Compress-Archive ./src-tauri/target/release/bundle windows-bundle.zip
+  #     - uses: 'marvinpinto/action-automatic-releases@latest'
+  #       with:
+  #         repo_token: '${{ secrets.GITHUB_TOKEN }}'
+  #         prerelease: false
+  #         files: |
+  #           windows-bundle.zip
   tagged-release-macos:
     name: 'Tagged Release MacOs'
     runs-on: 'macos-latest'
     steps:
+      - name: 'Install Pre-reqs'
+        run: |
+          xcode-select --install
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: 'Checkout source code'
         uses: 'actions/checkout@v3'
