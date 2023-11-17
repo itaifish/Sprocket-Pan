@@ -37,12 +37,12 @@ export type NetworkFetchRequest = {
 	url: string;
 	headers: Record<string, string>;
 	body: Record<string, unknown>;
+	dateTime: Date;
 };
 
 export type HistoricalEndpointResponse = {
 	request: NetworkFetchRequest;
 	response: EndpointResponse;
-	dateTime: Date;
 };
 
 export type Endpoint<TUrlBase extends string = string> = {
@@ -95,4 +95,5 @@ export type EndpointResponse = {
 	body: string;
 	bodyType: RawBodyType;
 	headers: Record<string, string>;
+	dateTime: Date;
 };

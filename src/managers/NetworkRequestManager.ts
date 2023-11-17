@@ -96,6 +96,7 @@ class NetworkRequestManager {
 				method: endpoint.verb,
 				body: body ?? {},
 				headers: headers,
+				dateTime: new Date(),
 			};
 			const networkCall = fetch(networkRequest.url, {
 				method: networkRequest.method,
@@ -110,12 +111,13 @@ class NetworkRequestManager {
 			const responseText = res.data as string;
 			const response = {
 				statusCode: res.status,
-				headers: [...Object.entries(res.headers)].reduce<Record<string, string>>((obj, [keyValuePair]) => {
+				headers: [...Object.entries(res.headers)].reduce<Record<string, string>>((obj, keyValuePair) => {
 					obj[keyValuePair[0]] = keyValuePair[1];
 					return obj;
 				}, {}),
 				bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 				body: responseText,
+				dateTime: new Date(),
 			};
 
 			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);

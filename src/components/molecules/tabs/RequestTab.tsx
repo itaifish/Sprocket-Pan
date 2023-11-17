@@ -44,13 +44,14 @@ const defaultResponse: HistoricalEndpointResponse = {
 		body: 'View the response here',
 		bodyType: 'Text',
 		headers: {},
+		dateTime: new Date(),
 	},
-	dateTime: new Date(),
 	request: {
 		method: 'GET',
 		url: '',
 		headers: {},
 		body: {},
+		dateTime: new Date(),
 	},
 };
 
