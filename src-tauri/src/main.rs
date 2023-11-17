@@ -50,7 +50,7 @@ fn zoom(window: Window, amount: f64) -> bool {
 
             #[cfg(target_os = "macos")]
             unsafe {
-                use objc::{msg_send, sel};
+                use objc::{msg_send, sel, sel_impl};
                 let _: () = msg_send![webview.inner(), setPageZoom: amount];
             }
         });
