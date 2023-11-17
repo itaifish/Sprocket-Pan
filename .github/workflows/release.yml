@@ -46,7 +46,8 @@ jobs:
               ${process.env.CHANGES_STR}
               `,
               draft: true,
-              prerelease: false
+              prerelease: false,
+              generate_release_notes: true,
             })
             return data.id
 

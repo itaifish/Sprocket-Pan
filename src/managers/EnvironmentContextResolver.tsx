@@ -43,7 +43,12 @@ class EnvironmentContextResolver {
 						const valueText = snippet.value ?? 'unknown';
 						const displayText = displayVariableNames ? `${snippet.variableName}: ${valueText}` : valueText;
 						return (
-							<Typography variant="outlined" color={snippet.value ? 'success' : 'danger'} key={index}>
+							<Typography
+								variant="outlined"
+								color={snippet.value ? 'success' : 'danger'}
+								key={index}
+								sx={{ overflowWrap: 'break-word' }}
+							>
 								{displayText}
 							</Typography>
 						);
