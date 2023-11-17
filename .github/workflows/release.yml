@@ -90,4 +90,3 @@ jobs:
               draft: false,
               prerelease: false
             })
-            mac-bundle.zip
