@@ -23,7 +23,9 @@ jobs:
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
       - name: get changes
-        run: echo "CHANGES_STR=\"${{ github.event.head_commit.message }}\"" >> $GITHUB_ENV
+        run: |
+          echo ${{ github.event.head_commit.message }}
+          echo "CHANGES_STR='${{ github.event.head_commit.message }}'" >> $GITHUB_ENV
       - name: create release
         id: create-release
         uses: actions/github-script@v6
