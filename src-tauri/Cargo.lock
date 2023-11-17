@@ -2811,12 +2811,14 @@ name = "sprocket_pan"
 version = "1.0.0"
 dependencies = [
  "log",
+ "objc",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-log",
  "tauri-plugin-window-state",
+ "webkit2gtk",
 ]
 
 [[package]]

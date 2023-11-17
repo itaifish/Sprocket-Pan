@@ -13,7 +13,8 @@ edition = "2021"
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
-tauri = { version = "1.4", features = [ "http-all",
+tauri = { version = "1.4", features = [
+	"http-all",
 	"dialog-all",
 	"os-all",
 	"path-all",
@@ -26,6 +27,8 @@ serde_json = "1.0"
 tauri-plugin-window-state = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 log = "^0.4"
 tauri-plugin-log = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+webkit2gtk = { version = "^0.18.2" }
+objc = "0.2.7"
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
 # DO NOT REMOVE!!
