@@ -22,9 +22,6 @@ jobs:
           node-version: 20
       - name: get version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-      - name: get changes
-        run: |
-          echo "CHANGES_STR='${{ github.event.head_commit.message }}'" >> $GITHUB_ENV
       - name: create release
         id: create-release
         uses: actions/github-script@v6
@@ -41,9 +38,6 @@ jobs:
               Windows: setup.exe, en-US.msi 
               Linux: amd64.deb, amd64.AppImage 
               MacOS: x64.dmg, x64.app.tar.gz 
-
-              ## What Changed
-              ${process.env.CHANGES_STR}
               `,
               draft: true,
               prerelease: false,
