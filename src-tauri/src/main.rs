@@ -14,7 +14,7 @@ fn open_devtools(window: &Window) {
 }
 
 #[cfg(not(debug_assertions))]
-fn open_devtools(window: &Window) {}
+fn open_devtools(_window: &Window) {}
 
 #[tauri::command]
 async fn close_splashscreen(window: Window) {

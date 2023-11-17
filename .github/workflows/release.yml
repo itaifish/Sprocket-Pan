@@ -63,6 +63,10 @@ jobs:
     name: 'Tagged Release MacOs'
     runs-on: 'macos-latest'
     steps:
+      - name: 'Install Pre-reqs'
+        run: |
+          sudo rm -rf /Library/Developer/CommandLineTools
+          xcode-select --install
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: 'Checkout source code'
         uses: 'actions/checkout@v3'
