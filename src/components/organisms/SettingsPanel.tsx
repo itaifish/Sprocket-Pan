@@ -26,6 +26,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import invoke from '../../utils/invoke';
 import { appLocalDataDir } from '@tauri-apps/api/path';
 import { log } from '../../utils/logging';
+import DeleteForever from '@mui/icons-material/DeleteForever';
 
 const style = {
 	position: 'absolute' as const,
@@ -170,6 +171,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									}}
 								>
 									Open Data Folder
+								</Button>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<DeleteForever />}
+									color="danger"
+									onClick={() => {
+										Object.keys(data.requests).forEach((requestId) => {
+											applicationDataManager.update('request', requestId, { history: [] });
+										});
+									}}
+								>
+									Delete All History
 								</Button>
 							</Stack>
 						</TabPanel>
