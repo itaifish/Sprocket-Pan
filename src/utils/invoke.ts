@@ -11,6 +11,12 @@ type InvokeMap = {
 			amount: number;
 		};
 	};
+	show_in_explorer: {
+		returnType: void;
+		args: {
+			path: string;
+		};
+	};
 };
 
 type InvocationName = keyof InvokeMap;

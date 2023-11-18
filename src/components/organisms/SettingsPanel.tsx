@@ -20,8 +20,12 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { InputSlider } from '../atoms/input/InputSlider';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import { ApplicationDataManager, applicationDataManager } from '../../managers/ApplicationDataManager';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import invoke from '../../utils/invoke';
+import { appLocalDataDir } from '@tauri-apps/api/path';
+import { log } from '../../utils/logging';
 
 const style = {
 	position: 'absolute' as const,
@@ -53,6 +57,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						<TabList>
 							<Tab>General</Tab>
 							<Tab>Requests</Tab>
+							<Tab>Data</Tab>
 						</TabList>
 						<TabPanel value={0}>
 							<Stack spacing={3}>
@@ -150,6 +155,22 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 										endDecorator={'Seconds'}
 									/>
 								</FormControl>
+							</Stack>
+						</TabPanel>
+						<TabPanel value={2}>
+							<Stack spacing={3}>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<FolderOpenIcon />}
+									onClick={async () => {
+										const localDir = await appLocalDataDir();
+										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
+										log.info(`data path: ${data}`);
+										invoke('show_in_explorer', { path: data });
+									}}
+								>
+									Open Data Folder
+								</Button>
 							</Stack>
 						</TabPanel>
 					</Tabs>

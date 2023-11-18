@@ -35,7 +35,7 @@ export default defineConfig(async () => ({
 		getCustomNoNullDefaultsPlugin(),
 	],
 	build: {
-		minify: false,
+		minify: true,
 		rollupOptions: {
 			input: {
 				main: path.resolve(__dirname, 'index.html'),
