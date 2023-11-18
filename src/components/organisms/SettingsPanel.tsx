@@ -27,6 +27,7 @@ import invoke from '../../utils/invoke';
 import { appLocalDataDir } from '@tauri-apps/api/path';
 import { log } from '../../utils/logging';
 import DeleteForever from '@mui/icons-material/DeleteForever';
+import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 
 const style = {
 	position: 'absolute' as const,
@@ -47,6 +48,7 @@ interface SettingsPanelProps {
 export const SettingsPanel = (props: SettingsPanelProps) => {
 	const data = useContext(ApplicationDataContext);
 	const [unsavedSettings, setUnsavedSettings] = useState(data.settings);
+	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(data.settings) !== JSON.stringify(unsavedSettings);
 	}, [data.settings, unsavedSettings]);
@@ -176,11 +178,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									sx={{ width: '200px' }}
 									startDecorator={<DeleteForever />}
 									color="danger"
-									onClick={() => {
-										Object.keys(data.requests).forEach((requestId) => {
-											applicationDataManager.update('request', requestId, { history: [] });
-										});
-									}}
+									onClick={() => setDeleteHistoryModalOpen(true)}
 								>
 									Delete All History
 								</Button>
@@ -211,6 +209,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					</Box>
 				</Sheet>
 			</Box>
+			<AreYouSureModal
+				open={deleteHistoryModalOpen}
+				closeFunc={function (): void {
+					setDeleteHistoryModalOpen(false);
+				}}
+				action={'Delete All History'}
+				actionFunc={() => {
+					Object.keys(data.requests).forEach((requestId) => {
+						applicationDataManager.update('request', requestId, { history: [] });
+					});
+				}}
+			/>
 		</>
 	);
 };
