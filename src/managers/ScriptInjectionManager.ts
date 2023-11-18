@@ -29,8 +29,12 @@ export function getScriptInjectionCode(requestId: string, response?: EndpointRes
 			}
 			const selectedEnvironment = service.selectedEnvironment;
 			if (selectedEnvironment) {
-				// TODO: Deal with updating service-level environments in application data manager - also let it be edited within service
-				// applicationDataManager.update('service', endpoint.serviceId, {localEnvironments: {...service.localEnvironments, []} })
+				applicationDataManager.update('service', endpoint.serviceId, {
+					localEnvironments: {
+						...service.localEnvironments,
+						[selectedEnvironment]: { ...service.localEnvironments[selectedEnvironment], [key]: value },
+					},
+				});
 			}
 		} else if (level === 'global') {
 			const selectedEnvironment = data.selectedEnvironment;

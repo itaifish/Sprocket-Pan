@@ -12,6 +12,7 @@ import {
 	FormControl,
 	FormLabel,
 	Input,
+	FormHelperText,
 } from '@mui/joy';
 import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
@@ -20,8 +21,15 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { InputSlider } from '../atoms/input/InputSlider';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import { ApplicationDataManager, applicationDataManager } from '../../managers/ApplicationDataManager';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import invoke from '../../utils/invoke';
+import { appLocalDataDir } from '@tauri-apps/api/path';
+import { log } from '../../utils/logging';
+import DeleteForever from '@mui/icons-material/DeleteForever';
+import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 
 const style = {
 	position: 'absolute' as const,
@@ -42,6 +50,7 @@ interface SettingsPanelProps {
 export const SettingsPanel = (props: SettingsPanelProps) => {
 	const data = useContext(ApplicationDataContext);
 	const [unsavedSettings, setUnsavedSettings] = useState(data.settings);
+	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(data.settings) !== JSON.stringify(unsavedSettings);
 	}, [data.settings, unsavedSettings]);
@@ -53,6 +62,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						<TabList>
 							<Tab>General</Tab>
 							<Tab>Requests</Tab>
+							<Tab>Data</Tab>
 						</TabList>
 						<TabPanel value={0}>
 							<Stack spacing={3}>
@@ -126,17 +136,20 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						</TabPanel>
 						<TabPanel value={1}>
 							<Stack spacing={3}>
-								<FormControl sx={{ width: 200 }}>
+								<FormControl sx={{ width: 300 }}>
 									<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
 										Network Call Timeout Duration
 									</FormLabel>
 									<Input
+										sx={{ width: 200 }}
 										value={unsavedSettings.timeoutDurationMS / 1000}
 										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 											const value = +e.target.value;
-											setUnsavedSettings((currSettings) => {
-												return { ...currSettings, timeoutDurationMS: value * 1000 };
-											});
+											if (!isNaN(value)) {
+												setUnsavedSettings((currSettings) => {
+													return { ...currSettings, timeoutDurationMS: value * 1000 };
+												});
+											}
 										}}
 										slotProps={{
 											input: {
@@ -150,6 +163,58 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 										endDecorator={'Seconds'}
 									/>
 								</FormControl>
+								<FormControl sx={{ width: 300 }}>
+									<FormLabel id="maximum-history-label" htmlFor="maximum-history-input">
+										Maximum Number of History Records
+									</FormLabel>
+									<Input
+										sx={{ width: 200 }}
+										value={unsavedSettings.maxHistoryLength}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const value = +e.target.value;
+											if (!isNaN(value)) {
+												setUnsavedSettings((currSettings) => {
+													return { ...currSettings, maxHistoryLength: value };
+												});
+											}
+										}}
+										slotProps={{
+											input: {
+												id: 'maximum-history-input',
+												// TODO: Material UI set aria-labelledby correctly & automatically
+												// but Base UI and Joy UI don't yet.
+												'aria-labelledby': 'maximum-history-label maximum-history-input',
+											},
+										}}
+										startDecorator={<ManageHistoryIcon />}
+										endDecorator={'Records'}
+									/>
+									<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
+								</FormControl>
+							</Stack>
+						</TabPanel>
+						<TabPanel value={2}>
+							<Stack spacing={3}>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<FolderOpenIcon />}
+									onClick={async () => {
+										const localDir = await appLocalDataDir();
+										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
+										log.info(`data path: ${data}`);
+										invoke('show_in_explorer', { path: data });
+									}}
+								>
+									Open Data Folder
+								</Button>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<DeleteForever />}
+									color="danger"
+									onClick={() => setDeleteHistoryModalOpen(true)}
+								>
+									Delete All History
+								</Button>
 							</Stack>
 						</TabPanel>
 					</Tabs>
@@ -177,6 +242,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					</Box>
 				</Sheet>
 			</Box>
+			<AreYouSureModal
+				open={deleteHistoryModalOpen}
+				closeFunc={function (): void {
+					setDeleteHistoryModalOpen(false);
+				}}
+				action={'Delete All History'}
+				actionFunc={() => {
+					Object.keys(data.requests).forEach((requestId) => {
+						applicationDataManager.update('request', requestId, { history: [] });
+					});
+				}}
+			/>
 		</>
 	);
 };

@@ -39,8 +39,8 @@ type AdditionalContextType<TTabType> = TTabType extends 'request'
 
 export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
-	private static readonly DATA_FOLDER_NAME = 'data' as const;
-	private static readonly DATA_FILE_NAME = 'data' as const;
+	public static readonly DATA_FOLDER_NAME = 'data' as const;
+	public static readonly DATA_FILE_NAME = 'data' as const;
 	private static readonly PATH =
 		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
 	private static readonly HISTORY_PATH =
@@ -179,8 +179,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		reqToUpdate.history.push({
 			request: networkRequest,
 			response,
-			dateTime: new Date(),
 		});
+		if (this.data.settings.maxHistoryLength > 0 && reqToUpdate.history.length > this.data.settings.maxHistoryLength) {
+			reqToUpdate.history.shift();
+		}
 	}
 
 	public delete(deleteType: TabType, id: string, tabsContext: TabsContextType, emitUpdate = true) {

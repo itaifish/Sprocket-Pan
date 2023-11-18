@@ -1,18 +1,37 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
-import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Stack, Typography } from '@mui/joy';
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionGroup,
+	AccordionSummary,
+	Box,
+	IconButton,
+	Stack,
+	Typography,
+} from '@mui/joy';
 import { EditableTextArea } from '../../atoms/EditableTextArea';
 import Table from '@mui/joy/Table';
-import { Service } from '../../../types/application-data/application-data';
+import { Environment, Service } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { RequestScript } from '../scripts/RequestScript';
 import { TabProps } from './tab-props';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
+import { EnvironmentEditableTable } from '../editing/EnvironmentEditableTable';
+import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
+import { v4 } from 'uuid';
+import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import DeleteIcon from '@mui/icons-material/Delete';
+import FileCopyIcon from '@mui/icons-material/FileCopy';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
+import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const serviceData = data.services[props.id];
+	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
 	return (
 		<div>
@@ -38,6 +57,7 @@ export function ServiceTab(props: TabProps) {
 							/>
 						</AccordionDetails>
 					</Accordion>
+
 					<Accordion defaultExpanded={true}>
 						<AccordionSummary>Information</AccordionSummary>
 						<AccordionDetails>
@@ -61,6 +81,98 @@ export function ServiceTab(props: TabProps) {
 									))}
 								</tbody>
 							</Table>
+						</AccordionDetails>
+					</Accordion>
+					<Accordion defaultExpanded={true}>
+						<AccordionSummary>Environments</AccordionSummary>
+						<AccordionDetails>
+							<Box>
+								<SprocketTooltip text="Add New Service Environment">
+									<IconButton
+										onClick={() => {
+											const newEnv: Environment = {
+												__id: v4(),
+												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
+											};
+											applicationDataManager.update('service', serviceData.id, {
+												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+											});
+										}}
+									>
+										<PlaylistAddIcon />
+									</IconButton>
+								</SprocketTooltip>
+								<Stack spacing={4}>
+									{Object.values(serviceData.localEnvironments).map((env) => (
+										<Box key={env.__id}>
+											<EditableText
+												text={env.__name}
+												setText={(text) =>
+													applicationDataManager.update('service', serviceData.id, {
+														localEnvironments: {
+															...serviceData.localEnvironments,
+															[env.__id]: { ...env, __name: text },
+														},
+													})
+												}
+												isValidFunc={function (text: string): boolean {
+													return text != '';
+												}}
+												isTitle
+											></EditableText>
+											<SprocketTooltip text={serviceData.selectedEnvironment === env.__id ? 'Unselect' : 'Select'}>
+												<IconButton
+													onClick={() => {
+														applicationDataManager.update('service', serviceData.id, {
+															selectedEnvironment: serviceData.selectedEnvironment === env.__id ? undefined : env.__id,
+														});
+													}}
+												>
+													{serviceData.selectedEnvironment === env.__id ? (
+														<RadioButtonCheckedIcon />
+													) : (
+														<RadioButtonUncheckedIcon />
+													)}
+												</IconButton>
+											</SprocketTooltip>
+											<SprocketTooltip
+												text="Duplicate"
+												onClick={() => {
+													const newEnv = structuredClone(env);
+													newEnv.__id = v4();
+													newEnv.__name += ' (Copy)';
+													applicationDataManager.update('service', serviceData.id, {
+														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+													});
+												}}
+											>
+												<IconButton>
+													<FileCopyIcon />
+												</IconButton>
+											</SprocketTooltip>
+											<SprocketTooltip
+												text="Delete"
+												onClick={() => {
+													setEnvToDelete(env.__id);
+												}}
+											>
+												<IconButton>
+													<DeleteIcon />
+												</IconButton>
+											</SprocketTooltip>
+
+											<EnvironmentEditableTable
+												environment={env}
+												setNewEnvironment={(newEnv) =>
+													applicationDataManager.update('service', serviceData.id, {
+														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+													})
+												}
+											/>
+										</Box>
+									))}
+								</Stack>
+							</Box>
 						</AccordionDetails>
 					</Accordion>
 					<Accordion defaultExpanded>
@@ -89,6 +201,19 @@ export function ServiceTab(props: TabProps) {
 					</Accordion>
 				</AccordionGroup>
 			</Stack>
+			<AreYouSureModal
+				open={!!envToDelete}
+				closeFunc={() => setEnvToDelete(null)}
+				action={`delete ${serviceData.localEnvironments[envToDelete ?? '']?.__name ?? envToDelete}`}
+				actionFunc={() => {
+					if (envToDelete) {
+						delete serviceData.localEnvironments[envToDelete];
+						applicationDataManager.update('service', serviceData.id, {
+							localEnvironments: { ...serviceData.localEnvironments },
+						});
+					}
+				}}
+			></AreYouSureModal>
 		</div>
 	);
 }
