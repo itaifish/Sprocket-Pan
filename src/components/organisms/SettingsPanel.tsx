@@ -12,6 +12,7 @@ import {
 	FormControl,
 	FormLabel,
 	Input,
+	FormHelperText,
 } from '@mui/joy';
 import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
@@ -28,6 +29,7 @@ import { appLocalDataDir } from '@tauri-apps/api/path';
 import { log } from '../../utils/logging';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 
 const style = {
 	position: 'absolute' as const,
@@ -134,17 +136,20 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						</TabPanel>
 						<TabPanel value={1}>
 							<Stack spacing={3}>
-								<FormControl sx={{ width: 200 }}>
+								<FormControl sx={{ width: 300 }}>
 									<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
 										Network Call Timeout Duration
 									</FormLabel>
 									<Input
+										sx={{ width: 200 }}
 										value={unsavedSettings.timeoutDurationMS / 1000}
 										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 											const value = +e.target.value;
-											setUnsavedSettings((currSettings) => {
-												return { ...currSettings, timeoutDurationMS: value * 1000 };
-											});
+											if (!isNaN(value)) {
+												setUnsavedSettings((currSettings) => {
+													return { ...currSettings, timeoutDurationMS: value * 1000 };
+												});
+											}
 										}}
 										slotProps={{
 											input: {
@@ -157,6 +162,34 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 										startDecorator={<HourglassBottomIcon />}
 										endDecorator={'Seconds'}
 									/>
+								</FormControl>
+								<FormControl sx={{ width: 300 }}>
+									<FormLabel id="maximum-history-label" htmlFor="maximum-history-input">
+										Maximum Number of History Records
+									</FormLabel>
+									<Input
+										sx={{ width: 200 }}
+										value={unsavedSettings.maxHistoryLength}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const value = +e.target.value;
+											if (!isNaN(value)) {
+												setUnsavedSettings((currSettings) => {
+													return { ...currSettings, maxHistoryLength: value };
+												});
+											}
+										}}
+										slotProps={{
+											input: {
+												id: 'maximum-history-input',
+												// TODO: Material UI set aria-labelledby correctly & automatically
+												// but Base UI and Joy UI don't yet.
+												'aria-labelledby': 'maximum-history-label maximum-history-input',
+											},
+										}}
+										startDecorator={<ManageHistoryIcon />}
+										endDecorator={'Records'}
+									/>
+									<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
 								</FormControl>
 							</Stack>
 						</TabPanel>

@@ -180,6 +180,9 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			request: networkRequest,
 			response,
 		});
+		if (this.data.settings.maxHistoryLength > 0 && reqToUpdate.history.length > this.data.settings.maxHistoryLength) {
+			reqToUpdate.history.shift();
+		}
 	}
 
 	public delete(deleteType: TabType, id: string, tabsContext: TabsContextType, emitUpdate = true) {
