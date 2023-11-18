@@ -318,11 +318,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									sx={{ width: '200px' }}
 									startDecorator={<DeleteForever />}
 									color="danger"
-									onClick={() => {
-										Object.keys(data.requests).forEach((requestId) => {
-											applicationDataManager.update('request', requestId, { history: [] });
-										});
-									}}
+									onClick={() => setDeleteHistoryModalOpen(true)}
 								>
 									Delete All History
 								</Button>
