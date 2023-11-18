@@ -6,6 +6,7 @@ import { environmentContextResolver } from '../../../managers/EnvironmentContext
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
+import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 
 interface EditableTableProps {
 	tableData: {
@@ -28,17 +29,19 @@ export function EditableTable(props: EditableTableProps) {
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
 	return (
 		<>
-			<IconButton
-				onClick={() => {
-					if (mode === 'edit') {
-						setMode('view');
-					} else {
-						setMode('edit');
-					}
-				}}
-			>
-				{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
-			</IconButton>
+			<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
+				<IconButton
+					onClick={() => {
+						if (mode === 'edit') {
+							setMode('view');
+						} else {
+							setMode('edit');
+						}
+					}}
+				>
+					{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
+				</IconButton>
+			</SprocketTooltip>
 			{props.tableData.map((tableData, index) => {
 				return (
 					<div key={index}>
