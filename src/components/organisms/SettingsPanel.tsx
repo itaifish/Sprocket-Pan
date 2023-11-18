@@ -314,6 +314,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 								>
 									Open Data Folder
 								</Button>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<DeleteForever />}
+									color="danger"
+									onClick={() => {
+										Object.keys(data.requests).forEach((requestId) => {
+											applicationDataManager.update('request', requestId, { history: [] });
+										});
+									}}
+								>
+									Delete All History
+								</Button>
 							</Stack>
 						</TabPanel>
 					</Tabs>
