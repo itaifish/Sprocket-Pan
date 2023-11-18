@@ -300,6 +300,22 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 								</Button>
 							</Stack>
 						</TabPanel>
+						<TabPanel value={2}>
+							<Stack spacing={3}>
+								<Button
+									sx={{ width: '200px' }}
+									startDecorator={<FolderOpenIcon />}
+									onClick={async () => {
+										const localDir = await appLocalDataDir();
+										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
+										log.info(`data path: ${data}`);
+										invoke('show_in_explorer', { path: data });
+									}}
+								>
+									Open Data Folder
+								</Button>
+							</Stack>
+						</TabPanel>
 					</Tabs>
 					<Box
 						sx={{
