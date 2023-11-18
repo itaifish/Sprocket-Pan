@@ -41,7 +41,8 @@ class EnvironmentContextResolver {
 				{snippets.map((snippet, index) => {
 					if (snippet.variableName) {
 						const valueText = snippet.value ?? 'unknown';
-						const displayText = displayVariableNames ? `${snippet.variableName}: ${valueText}` : valueText;
+						const shouldDisplayVariable = displayVariableNames || snippet.value == null;
+						const displayText = shouldDisplayVariable ? `${snippet.variableName}: ${valueText}` : valueText;
 						return (
 							<Typography
 								variant="outlined"
