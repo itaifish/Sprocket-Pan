@@ -16,11 +16,11 @@ class NetworkRequestManager {
 
 	public async sendRequest(requestId: string): Promise<string | null> {
 		try {
-			const data = applicationDataManager.getApplicationData();
-			const request = data.requests[requestId];
+			let data = applicationDataManager.getApplicationData();
+			let request = data.requests[requestId];
 			const endpointId = request.endpointId;
-			const endpoint = data.endpoints[endpointId];
-			const service = data.services[endpoint.serviceId];
+			let endpoint = data.endpoints[endpointId];
+			let service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			// Run pre-request scripts
 			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
@@ -31,7 +31,11 @@ class NetworkRequestManager {
 					return res;
 				}
 			}
-
+			// re-grab application data now that scripts have ran
+			data = applicationDataManager.getApplicationData();
+			request = data.requests[requestId];
+			endpoint = data.endpoints[endpointId];
+			service = data.services[endpoint.serviceId];
 			const url = environmentContextResolver.resolveVariablesForString(
 				unparsedUrl,
 				data,

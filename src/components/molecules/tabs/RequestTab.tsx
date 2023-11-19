@@ -137,6 +137,7 @@ export function RequestTab(props: TabProps) {
 						}}
 						sx={{
 							'--Card-padding': '6px',
+							overflowWrap: 'break-word',
 						}}
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
