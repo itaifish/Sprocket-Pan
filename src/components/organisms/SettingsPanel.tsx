@@ -191,6 +191,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									/>
 									<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
 								</FormControl>
+								<Box>Script Strategy Order</Box>
 							</Stack>
 						</TabPanel>
 						<TabPanel value={2}>

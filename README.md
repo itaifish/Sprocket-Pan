@@ -34,4 +34,5 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
   - Secret encryption when stored locally? idk
 - Inputs/outputs besides JSON
 - Command Pallete
-- Run Sprocket Pan in CLI 
+- Run Sprocket Pan in CLI
+- Automatic Updates (No need to redownload the program)

@@ -23,7 +23,10 @@ class NetworkRequestManager {
 			let service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			// Run pre-request scripts
-			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
+			let scriptObjs = { service, endpoint, request };
+			const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map(
+				(strat) => scriptObjs[strat]?.preRequestScript,
+			);
 			for (const preRequestScript of preRequestScripts) {
 				const res = await this.runScript(preRequestScript, requestId);
 				// if an error, return it
@@ -126,7 +129,10 @@ class NetworkRequestManager {
 
 			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);
 			// Run post-request scripts
-			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
+			scriptObjs = { service, endpoint, request };
+			const postRequestScripts = data.settings.scriptRunnerStrategy.post.map(
+				(strat) => scriptObjs[strat]?.postRequestScript,
+			);
 			for (const postRequestScript of postRequestScripts) {
 				const res = await this.runScript(postRequestScript, requestId, response);
 				// if an error, return it

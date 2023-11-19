@@ -266,6 +266,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				defaultTheme: 'system-default',
 				maxHistoryLength: -1,
 				displayVariableNames: true,
+				scriptRunnerStrategy: {
+					pre: ['service', 'endpoint', 'request'],
+					post: ['request', 'endpoint', 'service'],
+				},
 			},
 		};
 	}
