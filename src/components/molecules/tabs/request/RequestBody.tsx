@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { log } from '../../../../utils/logging';
 import { Constants } from '../../../../utils/constants';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
+import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const { mode, systemMode } = useColorScheme();
@@ -132,7 +133,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 						}}
 						language={editor}
 						theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
-						options={{ tabSize: 2, insertSpaces: false }}
+						options={defaultEditorOptions}
 						onMount={handleEditorDidMount}
 					/>
 				)}

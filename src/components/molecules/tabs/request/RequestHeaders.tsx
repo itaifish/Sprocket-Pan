@@ -5,6 +5,7 @@ import { applicationDataManager } from '../../../../managers/ApplicationDataMana
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { Editor } from '@monaco-editor/react';
 import { useEffect, useState } from 'react';
+import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
 
 export function RequestHeaders({ requestData }: { requestData: EndpointRequest }) {
 	const { mode, systemMode } = useColorScheme();
@@ -104,7 +105,7 @@ export function RequestHeaders({ requestData }: { requestData: EndpointRequest }
 						onChange={(value) => setEditorText(value ?? '')}
 						language={editor}
 						theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
-						options={{ tabSize: 2, insertSpaces: false }}
+						options={defaultEditorOptions}
 					/>
 				)}
 			</Stack>

@@ -1,5 +1,13 @@
 import { Monaco } from '@monaco-editor/react';
 
+export const defaultEditorOptions = {
+	tabSize: 2,
+	insertSpaces: false,
+	wordWrap: 'bounded',
+	wrappingIndent: 'same',
+	wordWrapColumn: 9999,
+};
+
 export function initMonaco(monaco: Monaco) {
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
 		noSemanticValidation: false,
@@ -108,6 +116,7 @@ export function initMonaco(monaco: Monaco) {
 			sendRequest: (requestId: string) => Promise<EndpointResponse>;
 			readonly data: ApplicationData;
 			readonly response: HistoricalEndpointResponse | null;
+			readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
 		}
 		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 		const sp = sprocketPan;

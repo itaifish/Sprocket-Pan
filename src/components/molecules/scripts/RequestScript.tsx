@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Constants } from '../../../utils/constants';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
+import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;
@@ -64,7 +65,7 @@ export function RequestScript(props: RequestScriptProps) {
 				}}
 				language={'typescript'}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
-				options={{ tabSize: 2, insertSpaces: false }}
+				options={defaultEditorOptions}
 				onMount={handleEditorDidMount}
 			/>
 		</Stack>

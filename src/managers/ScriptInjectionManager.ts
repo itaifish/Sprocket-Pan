@@ -89,6 +89,9 @@ export function getScriptInjectionCode(requestId: string, response?: EndpointRes
 		get data() {
 			return structuredClone(applicationDataManager.getApplicationData());
 		},
+		get activeRequest() {
+			return structuredClone(applicationDataManager.getApplicationData().requests[requestId]);
+		},
 		get response() {
 			const { request } = getRequestAndData();
 			const latestResponse =
