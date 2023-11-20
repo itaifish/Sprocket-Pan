@@ -11,13 +11,14 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { Environment } from '../../../types/application-data/application-data';
 import TableChartIcon from '@mui/icons-material/TableChart';
+import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 
-const iconFromTabType: Record<TabType, JSX.Element> = {
+export const iconFromTabType: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
 	environment: <TableChartIcon />,
 	request: <TextSnippetIcon />,
-	service: <FolderOpenIcon />,
+	service: <FolderOpenSharpIcon />,
 };
 
 export function TabHeader() {

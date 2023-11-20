@@ -10,8 +10,8 @@ import {
 	MenuButton,
 	MenuItem,
 } from '@mui/joy';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import FolderIcon from '@mui/icons-material/Folder';
+import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
+import FolderSharpIcon from '@mui/icons-material/FolderSharp';
 import { useState, useContext } from 'react';
 import { tabsManager } from '../../../managers/TabsManager';
 import { Service } from '../../../types/application-data/application-data';
@@ -102,7 +102,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 							e.stopPropagation();
 						}}
 					>
-						{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
+						{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
 					</IconButton>
 				</ListItemDecorator>
 				<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
