@@ -17,14 +17,21 @@ class TabsManager {
 	}
 
 	closeTab(tabContext: TabsContextType, tabId: string) {
-		const { tabs, setTabs } = tabContext;
-		const newTabs = structuredClone(tabs.tabs);
-		delete newTabs[tabId];
-		const newTabsKeys = Object.keys(newTabs);
-		if (tabs.selected === tabId && newTabsKeys.length > 0) {
-			tabs.selected = newTabsKeys[0];
-		}
-		setTabs({ tabs: newTabs, selected: tabs.selected });
+		const { setTabs } = tabContext;
+		setTabs((tabs) => {
+			const newTabs = structuredClone(tabs.tabs);
+			delete newTabs[tabId];
+			const newTabsKeys = Object.keys(newTabs);
+			let selected = tabs.selected;
+			if (tabs.selected === tabId) {
+				if (newTabsKeys.length > 0) {
+					selected = newTabsKeys[0];
+				} else {
+					selected = null;
+				}
+			}
+			return { tabs: newTabs, selected };
+		});
 	}
 
 	getMapFromTabType(data: ApplicationData, tabType: TabType) {

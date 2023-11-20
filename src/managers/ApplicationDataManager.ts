@@ -187,6 +187,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public delete(deleteType: TabType, id: string, tabsContext: TabsContextType, emitUpdate = true) {
 		let _exaustive: never;
+		tabsManager.closeTab(tabsContext, id);
 		switch (deleteType) {
 			case 'environment':
 				delete this.data.environments[id];
@@ -201,10 +202,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			case 'endpoint':
 				const endpoint = this.data.endpoints[id];
 				if (endpoint) {
+					endpoint.requestIds.forEach((requestId) => this.delete('request', requestId, tabsContext, false));
 					this.data.services[endpoint.serviceId].endpointIds = this.data.services[
 						endpoint.serviceId
 					].endpointIds.filter((endId) => endId != id);
-					endpoint.requestIds.forEach((requestId) => this.delete('request', requestId, tabsContext, false));
 				}
 				delete this.data.endpoints[id];
 				break;
@@ -221,7 +222,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				_exaustive = deleteType;
 				break;
 		}
-		tabsManager.closeTab(tabsContext, id);
+
 		if (emitUpdate) {
 			this.data = { ...this.data };
 			this.emit('update');
