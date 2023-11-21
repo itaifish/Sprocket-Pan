@@ -27,17 +27,13 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { log } from '../../../utils/logging';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const serviceData = data.services[props.id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
-	if (!serviceData) {
-		log.info(`No service data for ${props.id}`);
-		return <></>;
-	}
+
 	return (
 		<div>
 			<Stack direction={'column'}>
