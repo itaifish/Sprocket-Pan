@@ -5,6 +5,7 @@ import { log } from '../../../../utils/logging';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 import { EndpointResponse } from '../../../../types/application-data/application-data';
+import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	const editorRef = useRef<any>(null);
@@ -64,7 +65,7 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 					value={response.body}
 					language={editorType}
 					theme={resolvedMode === 'dark' ? 'vs-dark' : mode}
-					options={{ readOnly: true, domReadOnly: true, tabSize: 2, insertSpaces: false }}
+					options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 					onMount={handleEditorDidMount}
 				/>
 			</Stack>

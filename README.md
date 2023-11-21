@@ -1,6 +1,6 @@
-# Tauri + React + Typescript
+# Sprocket Pan
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+A tool for sending HTTP(S) requests over the internet. Similar to [Postman](https://www.postman.com/) and [Insomnia](https://insomnia.rest/).
 
 ## Recommended IDE Setup
 
@@ -13,6 +13,26 @@ This template should help get you started developing with Tauri, React and Types
 ## How to run
 
 1. `yarn`
-2. `yarn run build:types`
-This is for the pre-request script editor's type definitions
-3. `yarn run start`
+2. `yarn run start`
+
+## Roadmap
+
+- Add workspaces
+- Import / Export work
+  - Imports from:
+    - Sprocket Pan
+    - Postman
+    - Insomnia
+- Refactor global state
+- Refactor Environment input/output (Janky)
+- Show debug logs option in settings
+- Scratchpad (Requests / Scripts not associated with a service)
+- Secrets Handling
+  - Let certain fields in environments be secrets
+  - Don't export secrets in exports
+  - Maybe put secrets in a seperate file that can be gitignored?
+  - Secret encryption when stored locally? idk
+- Inputs/outputs besides JSON
+- Command Pallete
+- Run Sprocket Pan in CLI
+- Automatic Updates (No need to redownload the program)

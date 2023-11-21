@@ -1,7 +1,7 @@
 {
 	"name": "sprocket_pan",
 	"private": true,
-	"version": "0.4.0",
+	"version": "0.4.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -19,6 +19,7 @@
 		"@emotion/react": "^11.11.1",
 		"@emotion/styled": "^11.11.0",
 		"@fontsource/inter": "^5.0.8",
+		"@formkit/auto-animate": "^0.8.1",
 		"@monaco-editor/react": "^4.6.0",
 		"@mui/icons-material": "^5.14.11",
 		"@mui/joy": "^5.0.0-beta.8",

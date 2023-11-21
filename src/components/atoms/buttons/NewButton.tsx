@@ -1,7 +1,7 @@
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, MenuItem } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useState } from 'react';
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { SprocketTooltip } from '../SprocketTooltip';
@@ -27,7 +27,7 @@ export function NewButton() {
 						>
 							<ListItemDecorator>
 								<IconButton aria-label="Create new service" size="sm">
-									<CreateNewFolderIcon fontSize="small" />
+									<CreateNewFolderSharpIcon fontSize="small" />
 								</IconButton>
 								New Service
 							</ListItemDecorator>

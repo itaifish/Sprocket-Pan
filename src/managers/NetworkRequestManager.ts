@@ -16,14 +16,17 @@ class NetworkRequestManager {
 
 	public async sendRequest(requestId: string): Promise<string | null> {
 		try {
-			const data = applicationDataManager.getApplicationData();
-			const request = data.requests[requestId];
+			let data = applicationDataManager.getApplicationData();
+			let request = data.requests[requestId];
 			const endpointId = request.endpointId;
-			const endpoint = data.endpoints[endpointId];
-			const service = data.services[endpoint.serviceId];
+			let endpoint = data.endpoints[endpointId];
+			let service = data.services[endpoint.serviceId];
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			// Run pre-request scripts
-			const preRequestScripts = [service.preRequestScript, endpoint.preRequestScript, request.preRequestScript];
+			let scriptObjs = { service, endpoint, request };
+			const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map(
+				(strat) => scriptObjs[strat]?.preRequestScript,
+			);
 			for (const preRequestScript of preRequestScripts) {
 				const res = await this.runScript(preRequestScript, requestId);
 				// if an error, return it
@@ -31,7 +34,11 @@ class NetworkRequestManager {
 					return res;
 				}
 			}
-
+			// re-grab application data now that scripts have ran
+			data = applicationDataManager.getApplicationData();
+			request = data.requests[requestId];
+			endpoint = data.endpoints[endpointId];
+			service = data.services[endpoint.serviceId];
 			const url = environmentContextResolver.resolveVariablesForString(
 				unparsedUrl,
 				data,
@@ -122,7 +129,10 @@ class NetworkRequestManager {
 
 			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);
 			// Run post-request scripts
-			const postRequestScripts = [service.postRequestScript, endpoint.postRequestScript, request.postRequestScript];
+			scriptObjs = { service, endpoint, request };
+			const postRequestScripts = data.settings.scriptRunnerStrategy.post.map(
+				(strat) => scriptObjs[strat]?.postRequestScript,
+			);
 			for (const postRequestScript of postRequestScripts) {
 				const res = await this.runScript(postRequestScript, requestId, response);
 				// if an error, return it

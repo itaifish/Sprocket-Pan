@@ -13,6 +13,9 @@ import {
 	FormLabel,
 	Input,
 	FormHelperText,
+	IconButton,
+	Chip,
+	Typography,
 } from '@mui/joy';
 import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
@@ -30,6 +33,11 @@ import { log } from '../../utils/logging';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+import WestIcon from '@mui/icons-material/West';
+import EastIcon from '@mui/icons-material/East';
+import { iconFromTabType } from '../molecules/tabs/TabHeader';
+import { Settings } from '../../types/settings/settings';
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 
 const style = {
 	position: 'absolute' as const,
@@ -46,6 +54,65 @@ const style = {
 interface SettingsPanelProps {
 	closePanel: () => void;
 }
+
+const ScriptChips = ({
+	preOrPost,
+	unsavedSettings,
+	setUnsavedSettings,
+}: {
+	preOrPost: 'pre' | 'post';
+	unsavedSettings: Settings;
+	setUnsavedSettings: React.Dispatch<React.SetStateAction<Settings>>;
+}) => {
+	const [parent] = useAutoAnimate();
+	return (
+		<span ref={parent}>
+			{unsavedSettings.scriptRunnerStrategy[preOrPost].map((strategyItem, index) => (
+				<span key={`${preOrPost}${index}`}>
+					{index !== 0 && (
+						<IconButton
+							sx={{ verticalAlign: 'middle' }}
+							size="sm"
+							onClick={() => {
+								const copy = structuredClone(unsavedSettings.scriptRunnerStrategy[preOrPost]);
+								const temp = copy[index];
+								copy[index] = copy[index - 1];
+								copy[index - 1] = temp;
+								setUnsavedSettings((currSettings) => ({
+									...currSettings,
+									scriptRunnerStrategy: { ...currSettings.scriptRunnerStrategy, [preOrPost]: copy },
+								}));
+							}}
+						>
+							<WestIcon />
+						</IconButton>
+					)}
+					<Chip sx={{ verticalAlign: 'middle' }} startDecorator={iconFromTabType[strategyItem]}>
+						{preOrPost}-{strategyItem}
+					</Chip>
+					{index !== 2 && (
+						<IconButton
+							size="sm"
+							sx={{ verticalAlign: 'middle' }}
+							onClick={() => {
+								const copy = structuredClone(unsavedSettings.scriptRunnerStrategy[preOrPost]);
+								const temp = copy[index];
+								copy[index] = copy[index + 1];
+								copy[index + 1] = temp;
+								setUnsavedSettings((currSettings) => ({
+									...currSettings,
+									scriptRunnerStrategy: { ...currSettings.scriptRunnerStrategy, [preOrPost]: copy },
+								}));
+							}}
+						>
+							<EastIcon />
+						</IconButton>
+					)}
+				</span>
+			))}
+		</span>
+	);
+};
 
 export const SettingsPanel = (props: SettingsPanelProps) => {
 	const data = useContext(ApplicationDataContext);
@@ -191,6 +258,24 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									/>
 									<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
 								</FormControl>
+								<Box>
+									<Typography>Script Strategy Order</Typography>
+									<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
+										<ScriptChips
+											preOrPost="pre"
+											setUnsavedSettings={setUnsavedSettings}
+											unsavedSettings={unsavedSettings}
+										/>
+										<Chip sx={{ verticalAlign: 'middle' }} color="primary" startDecorator={iconFromTabType['request']}>
+											Request
+										</Chip>
+										<ScriptChips
+											preOrPost="post"
+											setUnsavedSettings={setUnsavedSettings}
+											unsavedSettings={unsavedSettings}
+										/>
+									</Sheet>
+								</Box>
 							</Stack>
 						</TabPanel>
 						<TabPanel value={2}>

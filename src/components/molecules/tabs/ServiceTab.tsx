@@ -33,6 +33,7 @@ export function ServiceTab(props: TabProps) {
 	const serviceData = data.services[props.id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
+
 	return (
 		<div>
 			<Stack direction={'column'}>

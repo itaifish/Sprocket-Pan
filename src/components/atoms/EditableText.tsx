@@ -65,7 +65,7 @@ export function EditableText(props: EditableTextProps) {
 				setIsEditing(true);
 			}}
 		>
-			{!props.isTitle && <ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
+			{<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
 			{keepStringLengthReasonable(props.text, props.isTitle ? 100 : 30)}
 		</Typography>
 	);
