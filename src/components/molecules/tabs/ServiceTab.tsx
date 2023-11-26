@@ -92,10 +92,11 @@ export function ServiceTab(props: TabProps) {
 								<SprocketTooltip text="Add New Service Environment">
 									<IconButton
 										onClick={() => {
-											const newEnv: Environment = {
+											const newEnv = {
 												__id: v4(),
 												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
-											};
+												__data: [],
+											} as unknown as Environment;
 											applicationDataManager.update('service', serviceData.id, {
 												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 											});
@@ -113,7 +114,7 @@ export function ServiceTab(props: TabProps) {
 													applicationDataManager.update('service', serviceData.id, {
 														localEnvironments: {
 															...serviceData.localEnvironments,
-															[env.__id]: { ...env, __name: text },
+															[env.__id]: { ...env, __name: text } as Environment,
 														},
 													})
 												}

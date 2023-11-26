@@ -68,7 +68,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					__name: 'New Environment',
 					...(data as UpdateType['environment']),
 					__id: newId,
-				};
+					__data: structuredClone((data as UpdateType['environment']).__data ?? []),
+				} as Environment;
 				newDatum = this.data.environments[newId] as unknown as Required<UpdateType[TTabType]>;
 				break;
 			case 'service':

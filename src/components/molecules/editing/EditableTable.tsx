@@ -12,9 +12,9 @@ interface EditableTableProps {
 	tableData: {
 		key: string;
 		value: string;
-		id: string;
+		id: number;
 	}[];
-	changeTableData: (id: string, newKey?: string, newValue?: string) => void;
+	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
 	addNewData: (key: string, value: string) => void;
 	environment?: Environment;
 }

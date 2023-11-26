@@ -60,11 +60,13 @@ export type Endpoint<TUrlBase extends string = string> = {
 	defaultRequest: string | null;
 };
 
+export type OrderedKeyValuePair = {
+	__data: { key: string; value: string }[];
+} & Record<string, string>;
 export type Environment = {
 	__name: string;
 	__id: string;
-	[key: string]: string;
-};
+} & OrderedKeyValuePair;
 
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
