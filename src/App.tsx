@@ -3,7 +3,7 @@ import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { log } from './utils/logging';
 import { TabHeader } from './components/molecules/tabs/TabHeader';
-import { Box, Grid, useColorScheme } from '@mui/joy';
+import { Box, Card, Grid, Typography, useColorScheme } from '@mui/joy';
 import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
 import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
 import { useMonaco } from '@monaco-editor/react';
@@ -16,6 +16,7 @@ import {
 	TabsType,
 } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
+import { SearchInputField } from './components/atoms/SearchInputField';
 
 export function App() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
@@ -68,7 +69,13 @@ export function App() {
 									<Grid xs={'auto'}>
 										{drawerOpen && (
 											<SideDrawer>
-												<SideDrawerActionButtons />
+												<Card sx={{ position: 'fixed', zIndex: 120 }}>
+													<SideDrawerActionButtons />
+													<SearchInputField searchText={searchText} setSearchText={setSearchText} />
+												</Card>
+												<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
+													Sprocket Pan
+												</Typography>
 												<NavigableServicesFileSystem />
 											</SideDrawer>
 										)}

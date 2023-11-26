@@ -1,7 +1,6 @@
 import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
 import { useContext, useMemo, useState } from 'react';
 import { getValidIdsFromSearchTerm } from '../../../utils/search';
-import { SearchInputField } from '../../atoms/SearchInputField';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
@@ -12,7 +11,7 @@ export function NavigableServicesFileSystem() {
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
 	const applicationData = useContext(ApplicationDataContext);
-	const { searchText, setSearchText } = useContext(ServicesSearchContext);
+	const { searchText } = useContext(ServicesSearchContext);
 	const validIds = useMemo(() => {
 		return getValidIdsFromSearchTerm(searchText, applicationData);
 	}, [applicationData, searchText]);
@@ -20,9 +19,6 @@ export function NavigableServicesFileSystem() {
 	return (
 		<>
 			<List size="sm" sx={{ '--ListItem-radius': '8px', '--List-gap': '4px', '--List-nestedInsetStart': '1rem' }}>
-				<ListItem>
-					<SearchInputField searchText={searchText} setSearchText={setSearchText} />
-				</ListItem>
 				<ListItem nested>
 					<ListSubheader>
 						Environments
