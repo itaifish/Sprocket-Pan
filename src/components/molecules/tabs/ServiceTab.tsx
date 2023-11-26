@@ -27,6 +27,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
+import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -169,6 +170,7 @@ export function ServiceTab(props: TabProps) {
 														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 													})
 												}
+												varsEnv={environmentContextResolver.buildEnvironmentVariables(data, serviceData.id)}
 											/>
 										</Box>
 									))}

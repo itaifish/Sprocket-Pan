@@ -4,6 +4,7 @@ import { EditableTable } from './EditableTable';
 interface EnvironmentEditableTableProps {
 	environment: Environment;
 	setNewEnvironment: (newEnvironment: Environment) => void;
+	varsEnv?: Environment;
 }
 
 export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
@@ -29,5 +30,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 		props.setNewEnvironment(newEnv);
 	};
 	const addNewData = (key: string, value: string) => changeData(key, key, value);
-	return <EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} />;
+	return (
+		<EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} environment={props.varsEnv} />
+	);
 }

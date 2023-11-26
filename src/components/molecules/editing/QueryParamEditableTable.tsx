@@ -1,8 +1,10 @@
+import { Environment } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
 
 interface QueryParamEditableTableProps {
 	queryParams: Record<string, string[]>;
 	setNewQueryParams: (queryParams: Record<string, string[]>) => void;
+	varsEnv: Environment;
 }
 
 export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
@@ -39,5 +41,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		props.queryParams[key]?.push(value) ?? (props.queryParams[key] = [value]);
 		props.setNewQueryParams(props.queryParams);
 	};
-	return <EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} />;
+	return (
+		<EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} environment={props.varsEnv} />
+	);
 }
