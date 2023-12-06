@@ -1,5 +1,3 @@
-// TODO:
-// When this is finished, continue copying https://codesandbox.io/s/dnyzyx?file=/components/Navigation.tsx
 import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
