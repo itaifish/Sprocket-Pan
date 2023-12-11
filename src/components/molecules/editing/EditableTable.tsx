@@ -8,17 +8,17 @@ import EditIcon from '@mui/icons-material/Edit';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 
-interface EditableTableProps {
+interface EditableTableProps<TID extends string | number> {
 	tableData: {
 		key: string;
 		value: string;
-		id: number;
+		id: TID;
 	}[];
-	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
+	changeTableData: (id: TID, newKey?: string, newValue?: string) => void;
 	addNewData: (key: string, value: string) => void;
 	environment?: Environment;
 }
-export function EditableTable(props: EditableTableProps) {
+export function EditableTable<TID extends string | number>(props: EditableTableProps<TID>) {
 	const [newRowValueText, setNewRowValueText] = useState('');
 	const [selected, setSelected] = useState<string | null>(null);
 	const data = useContext(ApplicationDataContext);

@@ -3,6 +3,7 @@ import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import {
 	ApplicationData,
+	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
@@ -16,7 +17,7 @@ import { EventEmitter } from '@tauri-apps/api/shell';
 import { v4 } from 'uuid';
 import { TabType } from '../types/state/state';
 import { tabsManager } from './TabsManager';
-import { noHistoryReplacer } from '../utils/functions';
+import { getDataArrayFromEnvKeys, noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
 import { Settings } from '../types/settings/settings';
 
@@ -94,7 +95,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					verb: 'GET',
 					baseHeaders: {},
 					name: 'New Endpoint',
-					baseQueryParams: {},
+					baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					description: 'This is a new endpoint',
 					...data,
 					serviceId,
@@ -114,7 +115,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				this.data.requests[newId] = {
 					name: 'New Request',
 					headers: {},
-					queryParams: {},
+					queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
@@ -156,12 +157,13 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		}
 		dataToUpdate = { ...dataToUpdate, ...updateObj } as any;
 		if (updateType === 'environment') {
+			const envDataToUpdate = dataToUpdate as Environment;
 			Object.keys(dataToUpdate).forEach((key) => {
-				const envDataToUpdate = dataToUpdate as Environment;
 				if (envDataToUpdate[key] === undefined) {
 					delete envDataToUpdate[key];
 				}
 			});
+			envDataToUpdate.__data = getDataArrayFromEnvKeys(envDataToUpdate);
 		}
 		this.data[`${updateType}s`][updateId] = dataToUpdate;
 		this.data = { ...this.data };

@@ -1,6 +1,7 @@
 import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
 import { applicationDataManager } from './ApplicationDataManager';
+import { getDataArrayFromEnvKeys } from '../utils/functions';
 
 type Snippet = {
 	value: string;
@@ -152,7 +153,7 @@ class EnvironmentContextResolver {
 		serviceId?: string,
 		requestId?: string,
 	) {
-		let env: Environment = { __name: '', __id: '' };
+		let env: Environment = { __name: '', __id: '', __data: [] } as unknown as Environment;
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
 		}
@@ -168,6 +169,8 @@ class EnvironmentContextResolver {
 				env = { ...env, ...request.environmentOverride };
 			}
 		}
+		env.__data = getDataArrayFromEnvKeys(env);
+
 		return env;
 	}
 }

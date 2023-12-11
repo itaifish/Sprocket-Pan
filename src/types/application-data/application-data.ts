@@ -12,7 +12,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	endpointId: string;
 	name: string;
 	headers: Record<string, string>;
-	queryParams: Record<string, string[]>;
+	queryParams: QueryParams;
 	bodyType: TRequestBodyType;
 	body: TRequestBodyType extends 'none'
 		? undefined
@@ -50,7 +50,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	url: `${TUrlBase}${string}`;
 	verb: RESTfulRequestVerb;
 	baseHeaders: Record<string, string>;
-	baseQueryParams: Record<string, string[]>;
+	baseQueryParams: QueryParams;
 	preRequestScript?: string;
 	postRequestScript?: string;
 	name: string;
@@ -60,13 +60,18 @@ export type Endpoint<TUrlBase extends string = string> = {
 	defaultRequest: string | null;
 };
 
-export type OrderedKeyValuePair = {
-	__data: { key: string; value: string }[];
-} & Record<string, string>;
+export type OrderedKeyValuePair<TKey extends string | number = string, TVal = string> = {
+	__data: { key: TKey; value: TVal }[];
+} & Record<TKey, TVal>;
 export type Environment = {
 	__name: string;
 	__id: string;
 } & OrderedKeyValuePair;
+export type QueryParams = OrderedKeyValuePair<string, string[]>;
+
+export const EMPTY_QUERY_PARAMS: QueryParams = {
+	__data: [],
+} as unknown as QueryParams;
 
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
