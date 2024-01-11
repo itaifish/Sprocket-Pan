@@ -23,9 +23,8 @@ export function EditableTable<TID extends string | number>(props: EditableTableP
 	const [selected, setSelected] = useState<string | null>(null);
 	const data = useContext(ApplicationDataContext);
 	const environment =
-		props.environment ?? data.selectedEnvironment
-			? data.environments[data.selectedEnvironment as string]
-			: ({} as Environment);
+		props.environment ??
+		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : ({} as Environment));
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
 	return (
 		<>

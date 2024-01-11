@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Environment, QueryParams } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
+import { log } from '../../../utils/logging';
 
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
@@ -35,6 +36,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 			});
 		});
 		setDisplayData(data);
+		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
 	const changeData = (id: string, newKey?: string, newValue?: string) => {
