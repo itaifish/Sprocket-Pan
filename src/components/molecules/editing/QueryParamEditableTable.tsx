@@ -20,6 +20,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 	useEffect(() => {
 		const data = QueryParamUtils.toTableData<QueryParams>(localDataState);
 		setDisplayData(data);
+		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
 	const changeData = (id: number, newKey?: string, newValue?: string) => {
