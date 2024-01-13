@@ -4,6 +4,8 @@ import { Environment, QueryParams } from '../../../types/application-data/applic
 import { EditableTable, TableData } from './EditableTable';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
+type TwoNumbersInStr = `${number}_${number}`;
+
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;
@@ -33,11 +35,26 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 				QueryParamUtils.updateKey(newQueryParams, dataId, newKey);
 			}
 		} else {
+			const dataEl = newQueryParams.__data[+dataId];
+			const queryKey = dataEl.key;
 			if (!newValue) {
 				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId);
 			} else {
 				QueryParamUtils.updateValue(newQueryParams, dataId, newValue);
 			}
+		}
+		if (recurse) {
+			// delete everything with an empty value that isnt the current key being edited
+			const toDelete = newQueryParams.__data
+				.flatMap((x, index) =>
+					x.value.map((value, innerIndex) => ({
+						key: x.key,
+						value,
+						id: `${index}_${innerIndex}` as const,
+					})),
+				)
+				.filter((x) => x.value === '' && x.key != newKey);
+			toDelete.forEach((delEl) => changeData(delEl.id, undefined, undefined, false));
 		}
 		setLocalDataState(newQueryParams);
 	};
