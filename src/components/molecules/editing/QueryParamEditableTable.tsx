@@ -3,6 +3,7 @@ import { useDebounce } from '../../../hooks/useDebounce';
 import { Environment, QueryParams } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
 import { log } from '../../../utils/logging';
+import { QueryParamUtils } from '../../../utils/data-utils';
 
 type TwoNumbersInStr = `${number}_${number}`;
 
@@ -25,79 +26,43 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		}[]
 	>([]);
 	useEffect(() => {
-		const data = localDataState.__data.flatMap(({ key, value }, index) =>
-			value.map((item, innerIndex) => ({
-				id: `${index}_${innerIndex}` as const,
-				key: key,
-				value: item,
-			})),
-		);
+		const data = Object.entries(localDataState)
+			.map((x) => ({ key: x[0], value: x[1] as string[] }))
+			.filter((x) => !x.key.startsWith('__'))
+			.flatMap(({ key, value }, index) =>
+				value.map((item, innerIndex) => ({
+					id: `${index}_${innerIndex}` as const,
+					key: key,
+					value: item,
+				})),
+			);
 
 		setDisplayData(data);
 		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
-	const changeData = (id: TwoNumbersInStr, newKey?: string, newValue?: string, recurse = true) => {
+	const changeData = (id: TwoNumbersInStr, newKey?: string, newValue?: string) => {
 		const newQueryParams = structuredClone(localDataState);
-		const [dataId, arrayIndex] = id.split('_');
-		const queryItem = newQueryParams.__data[+dataId];
+		const [dataId, arrayIndex] = id.split('_').map((x) => +x);
 		if (newKey != undefined) {
-			const updateVal = newValue ?? queryItem.value[+arrayIndex];
-			queryItem.value.splice(+arrayIndex, 1);
-			if (queryItem.value.length === 0) {
-				newQueryParams.__data.splice(+dataId, 1);
-			}
-			delete newQueryParams[queryItem.key];
-			if (newKey !== '') {
-				newQueryParams[newKey]?.push(updateVal) ?? (newQueryParams[newKey] = [updateVal]);
-				const dataEl = newQueryParams.__data.find((x) => x.key === newKey);
-				if (dataEl) {
-					dataEl.value.push(updateVal);
-				} else {
-					newQueryParams.__data.push({ key: newKey, value: [updateVal] });
-				}
+			if (newKey === '') {
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId, arrayIndex);
+			} else {
+				QueryParamUtils.updateKey(newQueryParams, dataId, newKey, arrayIndex);
 			}
 		} else {
-			const dataEl = newQueryParams.__data[+dataId];
-			const queryKey = dataEl.key;
 			if (!newValue) {
-				dataEl.value.splice(+arrayIndex, 1);
-				const dataToDelete = newQueryParams[queryKey];
-				dataToDelete?.splice(+arrayIndex, 1);
-				if (newQueryParams[queryKey].length === 0) {
-					delete newQueryParams[queryKey];
-					newQueryParams.__data = newQueryParams.__data.filter((x) => x.key !== queryKey);
-				}
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId, arrayIndex);
 			} else {
-				newQueryParams[queryKey][+arrayIndex] = newValue;
-				const dataEl = newQueryParams.__data.find((x) => x.key === newKey);
-				if (dataEl) {
-					dataEl.value.push(newValue);
-				} else {
-					newQueryParams.__data.push({ key: queryKey, value: [newValue] });
-				}
+				QueryParamUtils.updateValue(newQueryParams, dataId, newValue);
 			}
-		}
-		if (recurse) {
-			// delete everything with an empty value that isnt the current key being edited
-			const toDelete = newQueryParams.__data
-				.flatMap((x, index) =>
-					x.value.map((value, innerIndex) => ({
-						key: x.key,
-						value,
-						id: `${index}_${innerIndex}` as const,
-					})),
-				)
-				.filter((x) => x.value === '' && x.key != newKey);
-			toDelete.forEach((delEl) => changeData(delEl.id, undefined, undefined, false));
 		}
 		setLocalDataState(newQueryParams);
 	};
 
 	const addNewData = (key: string, value: string) => {
 		const newQueryParams = structuredClone(localDataState);
-		newQueryParams[key]?.push(value) ?? (newQueryParams[key] = [value]);
-		newQueryParams.__data.push({ key, value: [value] });
+		QueryParamUtils.add(newQueryParams, key, value);
 		setLocalDataState(newQueryParams);
 	};
 	return (
