@@ -60,14 +60,18 @@ export type Endpoint<TUrlBase extends string = string> = {
 	defaultRequest: string | null;
 };
 
-export type OrderedKeyValuePair<TKey extends string | number = string, TVal = string> = {
+export type OrderedKeyValuePair<
+	TKey extends string | number = string,
+	TVal = string,
+	IsUnique extends boolean = true,
+> = {
 	__data: { key: TKey; value: TVal }[];
-} & Record<TKey, TVal>;
+} & Record<TKey, IsUnique extends true ? TVal : TVal[]>;
 export type Environment = {
 	__name: string;
 	__id: string;
 } & OrderedKeyValuePair;
-export type QueryParams = OrderedKeyValuePair<string, string[]>;
+export type QueryParams = OrderedKeyValuePair<string, string, false>;
 
 export const EMPTY_QUERY_PARAMS: QueryParams = {
 	__data: [],

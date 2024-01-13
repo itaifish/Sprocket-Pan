@@ -4,6 +4,8 @@ import { Environment, QueryParams } from '../../../types/application-data/applic
 import { EditableTable } from './EditableTable';
 import { log } from '../../../utils/logging';
 
+type TwoNumbersInStr = `${number}_${number}`;
+
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;
@@ -19,32 +21,33 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		{
 			key: string;
 			value: string;
-			id: string;
+			id: TwoNumbersInStr;
 		}[]
 	>([]);
 	useEffect(() => {
-		const data = Object.keys(localDataState).flatMap((queryKey) => {
-			if (queryKey.startsWith('__')) {
-				return [];
-			}
-			return localDataState[queryKey].map((queryValue, index) => {
-				return {
-					id: `${queryKey}_${index}`,
-					value: queryValue,
-					key: queryKey,
-				};
-			});
-		});
+		const data = localDataState.__data.flatMap(({ key, value }, index) =>
+			value.map((item, innerIndex) => ({
+				id: `${index}_${innerIndex}` as const,
+				key: key,
+				value: item,
+			})),
+		);
+
 		setDisplayData(data);
 		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
-	const changeData = (id: string, newKey?: string, newValue?: string) => {
+	const changeData = (id: TwoNumbersInStr, newKey?: string, newValue?: string, recurse = true) => {
 		const newQueryParams = structuredClone(localDataState);
-		const [queryKey, arrayIndex] = id.split('_');
+		const [dataId, arrayIndex] = id.split('_');
+		const queryItem = newQueryParams.__data[+dataId];
 		if (newKey != undefined) {
-			const updateVal = newValue ?? newQueryParams[queryKey][+arrayIndex];
-			newQueryParams[queryKey].splice(+arrayIndex, 1);
+			const updateVal = newValue ?? queryItem.value[+arrayIndex];
+			queryItem.value.splice(+arrayIndex, 1);
+			if (queryItem.value.length === 0) {
+				newQueryParams.__data.splice(+dataId, 1);
+			}
+			delete newQueryParams[queryItem.key];
 			if (newKey !== '') {
 				newQueryParams[newKey]?.push(updateVal) ?? (newQueryParams[newKey] = [updateVal]);
 				const dataEl = newQueryParams.__data.find((x) => x.key === newKey);
@@ -55,17 +58,38 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 				}
 			}
 		} else {
+			const dataEl = newQueryParams.__data[+dataId];
+			const queryKey = dataEl.key;
 			if (!newValue) {
-				newQueryParams[queryKey].splice(+arrayIndex, 1);
-				const dataEl = newQueryParams.__data.find((x) => x.key === queryKey);
-				dataEl?.value.splice(+arrayIndex, 1);
+				dataEl.value.splice(+arrayIndex, 1);
+				const dataToDelete = newQueryParams[queryKey];
+				dataToDelete?.splice(+arrayIndex, 1);
 				if (newQueryParams[queryKey].length === 0) {
 					delete newQueryParams[queryKey];
 					newQueryParams.__data = newQueryParams.__data.filter((x) => x.key !== queryKey);
 				}
 			} else {
 				newQueryParams[queryKey][+arrayIndex] = newValue;
+				const dataEl = newQueryParams.__data.find((x) => x.key === newKey);
+				if (dataEl) {
+					dataEl.value.push(newValue);
+				} else {
+					newQueryParams.__data.push({ key: queryKey, value: [newValue] });
+				}
 			}
+		}
+		if (recurse) {
+			// delete everything with an empty value that isnt the current key being edited
+			const toDelete = newQueryParams.__data
+				.flatMap((x, index) =>
+					x.value.map((value, innerIndex) => ({
+						key: x.key,
+						value,
+						id: `${index}_${innerIndex}` as const,
+					})),
+				)
+				.filter((x) => x.value === '' && x.key != newKey);
+			toDelete.forEach((delEl) => changeData(delEl.id, undefined, undefined, false));
 		}
 		setLocalDataState(newQueryParams);
 	};
