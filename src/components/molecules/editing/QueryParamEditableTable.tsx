@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Environment, QueryParams } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
-import { log } from '../../../utils/logging';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
 interface QueryParamEditableTableProps {
@@ -26,7 +25,6 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 	useEffect(() => {
 		const data = localDataState.__data.map((datum, index) => ({ ...datum, id: index }));
 		setDisplayData(data);
-		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
 	const changeData = (id: number, newKey?: string, newValue?: string) => {

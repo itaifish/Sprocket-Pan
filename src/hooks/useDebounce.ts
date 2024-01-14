@@ -12,7 +12,9 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 
 	// When the state changes, set the local state to the state
 	useEffect(() => {
-		setLocalDataState(structuredClone(props.state));
+		if (JSON.stringify(localDataState) !== JSON.stringify(props.state)) {
+			setLocalDataState(structuredClone(props.state));
+		}
 	}, [props.state]);
 	// when the local state changes, if it is different from the state, update the state
 	useEffect(() => {
