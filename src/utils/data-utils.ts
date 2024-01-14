@@ -1,5 +1,4 @@
 import { QueryParams } from '../types/application-data/application-data';
-import { log } from './logging';
 
 export class QueryParamUtils {
 	private constructor() {}
@@ -23,7 +22,6 @@ export class QueryParamUtils {
 	};
 
 	static updateKey = (queryParams: QueryParams, dataId: number, newKey: string, valueId?: number) => {
-		log.info(JSON.stringify({ dataId, newKey, valueId }));
 		const datumToUpdate = queryParams.__data[dataId];
 		if (!datumToUpdate) {
 			return;

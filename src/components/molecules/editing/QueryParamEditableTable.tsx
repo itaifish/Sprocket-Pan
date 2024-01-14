@@ -5,8 +5,6 @@ import { EditableTable } from './EditableTable';
 import { log } from '../../../utils/logging';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
-type TwoNumbersInStr = `${number}_${number}`;
-
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;
@@ -22,37 +20,27 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		{
 			key: string;
 			value: string;
-			id: TwoNumbersInStr;
+			id: number;
 		}[]
 	>([]);
 	useEffect(() => {
-		const data = Object.entries(localDataState)
-			.map((x) => ({ key: x[0], value: x[1] as string[] }))
-			.filter((x) => !x.key.startsWith('__'))
-			.flatMap(({ key, value }, index) =>
-				value.map((item, innerIndex) => ({
-					id: `${index}_${innerIndex}` as const,
-					key: key,
-					value: item,
-				})),
-			);
-
+		const data = localDataState.__data.map((datum, index) => ({ ...datum, id: index }));
 		setDisplayData(data);
 		log.info(JSON.stringify(localDataState));
 	}, [localDataState]);
 
-	const changeData = (id: TwoNumbersInStr, newKey?: string, newValue?: string) => {
+	const changeData = (id: number, newKey?: string, newValue?: string) => {
 		const newQueryParams = structuredClone(localDataState);
-		const [dataId, arrayIndex] = id.split('_').map((x) => +x);
+		const dataId = id;
 		if (newKey != undefined) {
 			if (newKey === '') {
-				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId, arrayIndex);
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId);
 			} else {
-				QueryParamUtils.updateKey(newQueryParams, dataId, newKey, arrayIndex);
+				QueryParamUtils.updateKey(newQueryParams, dataId, newKey);
 			}
 		} else {
 			if (!newValue) {
-				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId, arrayIndex);
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId);
 			} else {
 				QueryParamUtils.updateValue(newQueryParams, dataId, newValue);
 			}
