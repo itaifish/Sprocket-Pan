@@ -1,4 +1,7 @@
 export function keepStringLengthReasonable(string: string, reasonableLength = 30) {
+	if (string == null) {
+		return '';
+	}
 	if (string.length <= reasonableLength) {
 		return string;
 	}

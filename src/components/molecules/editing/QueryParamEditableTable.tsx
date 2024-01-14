@@ -1,43 +1,62 @@
+import { useEffect, useState } from 'react';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Environment, QueryParams } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
+import { QueryParamUtils } from '../../../utils/data-utils';
 
 interface QueryParamEditableTableProps {
-	queryParams: Record<string, string[]>;
-	setNewQueryParams: (queryParams: Record<string, string[]>) => void;
+	queryParams: QueryParams;
+	setNewQueryParams: (queryParams: QueryParams) => void;
+	varsEnv: Environment;
 }
 
 export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
-	const data = Object.keys(props.queryParams).flatMap((queryKey) => {
-		return props.queryParams[queryKey].map((queryValue, index) => {
-			return {
-				id: `${queryKey}_${index}`,
-				value: queryValue,
-				key: queryKey,
-			};
-		});
+	const { localDataState, setLocalDataState } = useDebounce<QueryParams>({
+		state: props.queryParams,
+		setState: (newState: QueryParams) => props.setNewQueryParams(newState),
 	});
-	const changeData = (id: string, newKey?: string, newValue?: string) => {
-		const [queryKey, arrayIndex] = id.split('_');
+	const [displayData, setDisplayData] = useState<
+		{
+			key: string;
+			value: string;
+			id: number;
+		}[]
+	>([]);
+	useEffect(() => {
+		const data = localDataState.__data.map((datum, index) => ({ ...datum, id: index }));
+		setDisplayData(data);
+	}, [localDataState]);
+
+	const changeData = (id: number, newKey?: string, newValue?: string) => {
+		const newQueryParams = structuredClone(localDataState);
+		const dataId = id;
 		if (newKey != undefined) {
-			const updateVal = newValue ?? props.queryParams[queryKey][+arrayIndex];
-			props.queryParams[queryKey].splice(+arrayIndex, 1);
-			if (newKey !== '') {
-				props.queryParams[newKey]?.push(updateVal) ?? (props.queryParams[newKey] = [updateVal]);
+			if (newKey === '') {
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId);
+			} else {
+				QueryParamUtils.updateKey(newQueryParams, dataId, newKey);
 			}
 		} else {
 			if (!newValue) {
-				props.queryParams[queryKey].splice(+arrayIndex, 1);
-				if (props.queryParams[queryKey].length === 0) {
-					delete props.queryParams[queryKey];
-				}
+				QueryParamUtils.deleteKeyValuePair(newQueryParams, dataId);
 			} else {
-				props.queryParams[queryKey][+arrayIndex] = newValue as string;
+				QueryParamUtils.updateValue(newQueryParams, dataId, newValue);
 			}
 		}
-		props.setNewQueryParams(props.queryParams);
+		setLocalDataState(newQueryParams);
 	};
+
 	const addNewData = (key: string, value: string) => {
-		props.queryParams[key]?.push(value) ?? (props.queryParams[key] = [value]);
-		props.setNewQueryParams(props.queryParams);
+		const newQueryParams = structuredClone(localDataState);
+		QueryParamUtils.add(newQueryParams, key, value);
+		setLocalDataState(newQueryParams);
 	};
-	return <EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} />;
+	return (
+		<EditableTable
+			tableData={displayData}
+			changeTableData={changeData}
+			addNewData={addNewData}
+			environment={props.varsEnv}
+		/>
+	);
 }

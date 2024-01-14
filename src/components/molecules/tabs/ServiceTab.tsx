@@ -27,6 +27,7 @@ import FileCopyIcon from '@mui/icons-material/FileCopy';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
+import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -91,10 +92,11 @@ export function ServiceTab(props: TabProps) {
 								<SprocketTooltip text="Add New Service Environment">
 									<IconButton
 										onClick={() => {
-											const newEnv: Environment = {
+											const newEnv = {
 												__id: v4(),
 												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
-											};
+												__data: [],
+											} as unknown as Environment;
 											applicationDataManager.update('service', serviceData.id, {
 												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 											});
@@ -112,7 +114,7 @@ export function ServiceTab(props: TabProps) {
 													applicationDataManager.update('service', serviceData.id, {
 														localEnvironments: {
 															...serviceData.localEnvironments,
-															[env.__id]: { ...env, __name: text },
+															[env.__id]: { ...env, __name: text } as Environment,
 														},
 													})
 												}
@@ -169,6 +171,7 @@ export function ServiceTab(props: TabProps) {
 														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 													})
 												}
+												varsEnv={environmentContextResolver.buildEnvironmentVariables(data, serviceData.id)}
 											/>
 										</Box>
 									))}
