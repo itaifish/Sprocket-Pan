@@ -4,8 +4,6 @@ import { Environment, QueryParams } from '../../../types/application-data/applic
 import { EditableTable, TableData } from './EditableTable';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
-type TwoNumbersInStr = `${number}_${number}`;
-
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;

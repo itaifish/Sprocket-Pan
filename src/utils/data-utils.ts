@@ -115,7 +115,6 @@ export class QueryParamUtils extends KeyValuePairUtils {
 	};
 
 	static updateKey = (queryParams: QueryParams, dataId: number, newKey: string, valueId?: number) => {
-		log.info(JSON.stringify({ dataId, newKey, valueId }));
 		const datumToUpdate = queryParams.__data[dataId];
 		if (!datumToUpdate) {
 			return;
