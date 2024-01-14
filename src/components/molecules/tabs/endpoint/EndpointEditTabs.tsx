@@ -1,17 +1,21 @@
 import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { Endpoint, Environment } from '../../../../types/application-data/application-data';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
 import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 import { EndpointScripts } from './EndpointScripts';
+import { environmentContextResolver } from '../../../../managers/EnvironmentContextResolver';
+import { ApplicationDataContext } from '../../../../managers/GlobalContextManager';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
 type EndpointTabType = (typeof endpointTabs)[number];
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const [tab, setTab] = useState<EndpointTabType>('headers');
+	const data = useContext(ApplicationDataContext);
+	const varsEnv = environmentContextResolver.buildEnvironmentVariables(data, endpoint.serviceId);
 	return (
 		<Tabs
 			aria-label="tabs"
@@ -36,6 +40,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 					setNewEnvironment={(newEnvironment: Environment) =>
 						applicationDataManager.update('endpoint', endpoint.id, { baseHeaders: newEnvironment })
 					}
+					varsEnv={varsEnv}
 				/>
 			</TabPanel>
 			<TabPanel value="queryParams">
@@ -44,6 +49,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 					setNewQueryParams={(newQueryParams: Record<string, string[]>) => {
 						applicationDataManager.update('endpoint', endpoint.id, { baseQueryParams: newQueryParams });
 					}}
+					varsEnv={varsEnv}
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">

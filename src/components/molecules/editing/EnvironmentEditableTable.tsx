@@ -1,33 +1,71 @@
+import { useEffect, useState } from 'react';
 import { Environment } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 interface EnvironmentEditableTableProps {
 	environment: Environment;
 	setNewEnvironment: (newEnvironment: Environment) => void;
+	varsEnv?: Environment;
 }
 
 export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
-	const envKeys = Object.keys(props.environment).filter((envKey) => !envKey.startsWith('__'));
-	const data = envKeys.map((envKey) => {
-		return {
-			id: envKey,
-			value: props.environment[envKey],
-			key: envKey,
-		};
+	const { localDataState, setLocalDataState } = useDebounce<Environment>({
+		state: props.environment,
+		setState: (newState: Environment) => props.setNewEnvironment(newState),
 	});
-	const changeData = (id: string, newKey?: string, newValue?: string) => {
-		const newEnv = { ...props.environment };
-		if (newKey != undefined) {
-			const updateVal = newValue ?? props.environment[id];
-			delete newEnv[id];
+	const [displayData, setDisplayData] = useState<
+		{
+			key: string;
+			value: string;
+			id: number;
+		}[]
+	>([]);
+
+	useEffect(() => {
+		setDisplayData(
+			(localDataState.__data ?? []).map((datum, index) => {
+				return {
+					id: index,
+					value: datum.value,
+					key: datum.key,
+				};
+			}),
+		);
+	}, [localDataState]);
+
+	const changeData = (id: number, newKey?: string, newValue?: string) => {
+		const oldKVP = localDataState.__data[id];
+		const newEnv = { ...localDataState, __data: structuredClone(localDataState.__data) } as Environment;
+		if (!oldKVP) {
+			if (id === -1) {
+				newEnv.__data.push({ key: newKey as string, value: newValue as string });
+				newEnv[newKey as string] = newValue as string;
+			} else {
+				return;
+			}
+		} else if (newKey != undefined) {
+			const updateVal = newValue ?? localDataState[id];
+			delete newEnv[oldKVP.key];
 			if (newKey !== '') {
 				newEnv[newKey] = updateVal;
+				newEnv.__data[id].key = newKey;
+			} else {
+				newEnv.__data.splice(id, 1);
 			}
 		} else {
-			newEnv[id] = newValue ?? '';
+			newEnv[oldKVP.key] = newValue ?? '';
+			newEnv.__data[id].value = newValue ?? '';
 		}
-		props.setNewEnvironment(newEnv);
+		setLocalDataState(newEnv);
 	};
-	const addNewData = (key: string, value: string) => changeData(key, key, value);
-	return <EditableTable tableData={data} changeTableData={changeData} addNewData={addNewData} />;
+	const addNewData = (key: string, value: string) => changeData(-1, key, value);
+	return (
+		<EditableTable
+			tableData={displayData}
+			changeTableData={changeData}
+			addNewData={addNewData}
+			environment={props.varsEnv}
+		/>
+	);
 }

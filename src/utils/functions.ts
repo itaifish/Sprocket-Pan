@@ -1,3 +1,5 @@
+import { Environment } from '../types/application-data/application-data';
+
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
  * @param asyncPromise An asynchronous promise to resolve
@@ -29,4 +31,10 @@ export const noHistoryReplacer = (key: string, value: unknown) => {
 		return [];
 	}
 	return value;
+};
+
+export const getDataArrayFromEnvKeys = (env: Environment) => {
+	return Object.keys(env)
+		.filter((envKey) => !envKey.startsWith('__'))
+		.map((envKey) => ({ key: envKey, value: env[envKey] }));
 };
