@@ -15,6 +15,7 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
+import { QueryParamUtils } from '../utils/data-utils';
 
 type ParsedServiceApplicationData = {
 	services: Service[];
@@ -167,10 +168,9 @@ class SwaggerParseManager {
 								break;
 							case 'query':
 								if (typedParam.name) {
-									if (schema?.type !== 'array') {
-										defaultEndpointData.baseQueryParams[typedParam.name] = [type];
-									} else {
-										defaultEndpointData.baseQueryParams[typedParam.name] = [type, type];
+									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, type);
+									if (schema?.type === 'array') {
+										QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, `${type}2`);
 									}
 								}
 								break;
@@ -313,10 +313,9 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								if (typedParam.type !== 'array') {
-									defaultEndpointData.baseQueryParams[typedParam.name] = ['string'];
-								} else {
-									defaultEndpointData.baseQueryParams[typedParam.name] = ['string', 'string2'];
+								QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string');
+								if (typedParam.type === 'array') {
+									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string2');
 								}
 							}
 							break;
