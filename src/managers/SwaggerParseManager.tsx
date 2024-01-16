@@ -1,4 +1,6 @@
 import {
+	EMPTY_ENVIRONMENT,
+	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
@@ -129,7 +131,7 @@ class SwaggerParseManager {
 						serviceId: service.id,
 						verb: method,
 						url: `${pathsUri}`,
-						baseHeaders: {},
+						baseHeaders: structuredClone(EMPTY_HEADERS),
 						baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 						description: pathData.description ?? 'This is a new endpoint',
 						name: `${method}: ${pathsUri}`,
@@ -143,13 +145,13 @@ class SwaggerParseManager {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
 						name: defaultEndpointData.name,
-						headers: {},
+						headers: structuredClone(EMPTY_HEADERS),
 						queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 						body: undefined,
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: {},
+						environmentOverride: structuredClone(EMPTY_ENVIRONMENT),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -251,7 +253,7 @@ class SwaggerParseManager {
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: {},
+					baseHeaders: structuredClone(EMPTY_HEADERS),
 					baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
@@ -274,13 +276,13 @@ class SwaggerParseManager {
 					id: v4(),
 					endpointId: defaultEndpointData.id,
 					name: defaultEndpointData.name,
-					headers: {},
+					headers: structuredClone(EMPTY_HEADERS),
 					queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: {},
+					environmentOverride: EMPTY_ENVIRONMENT,
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {

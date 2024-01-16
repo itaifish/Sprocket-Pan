@@ -11,7 +11,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	id: string;
 	endpointId: string;
 	name: string;
-	headers: Record<string, string>;
+	headers: Headers;
 	queryParams: QueryParams;
 	bodyType: TRequestBodyType;
 	body: TRequestBodyType extends 'none'
@@ -28,14 +28,14 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 		: RawBodyType | undefined;
 	preRequestScript?: string;
 	postRequestScript?: string;
-	environmentOverride: Record<string, string>;
+	environmentOverride: Environment;
 	history: HistoricalEndpointResponse[];
 };
 
 export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
 	url: string;
-	headers: Record<string, string>;
+	headers: Headers;
 	body: Record<string, unknown>;
 	dateTime: Date;
 };
@@ -49,7 +49,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	id: string;
 	url: `${TUrlBase}${string}`;
 	verb: RESTfulRequestVerb;
-	baseHeaders: Record<string, string>;
+	baseHeaders: Headers;
 	baseQueryParams: QueryParams;
 	preRequestScript?: string;
 	postRequestScript?: string;
@@ -72,10 +72,19 @@ export type Environment = {
 	__id: string;
 } & OrderedKeyValuePair;
 export type QueryParams = OrderedKeyValuePair<string, string, false>;
+export type Headers = OrderedKeyValuePair;
 
 export const EMPTY_QUERY_PARAMS: QueryParams = {
 	__data: [],
 } as unknown as QueryParams;
+
+export const EMPTY_ENVIRONMENT: Environment = {
+	__data: [],
+} as unknown as Environment;
+
+export const EMPTY_HEADERS: Headers = {
+	__data: [],
+} as unknown as Headers;
 
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
@@ -105,6 +114,6 @@ export type EndpointResponse = {
 	statusCode: number;
 	body: string;
 	bodyType: RawBodyType;
-	headers: Record<string, string>;
+	headers: Headers;
 	dateTime: Date;
 };

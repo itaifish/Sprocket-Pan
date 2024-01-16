@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Environment } from '../../../types/application-data/application-data';
 import { EditableTable } from './EditableTable';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { log } from '../../../utils/logging';
 
 interface EnvironmentEditableTableProps {
 	environment: Environment;
@@ -35,6 +36,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 	}, [localDataState]);
 
 	const changeData = (id: number, newKey?: string, newValue?: string) => {
+		log.info(localDataState);
 		const oldKVP = localDataState.__data[id];
 		const newEnv = { ...localDataState, __data: structuredClone(localDataState.__data) } as Environment;
 		if (!oldKVP) {

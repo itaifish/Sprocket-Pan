@@ -27,6 +27,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import { verbColors } from '../../../utils/style';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
@@ -94,16 +95,18 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 				selected={tabs.selected === endpoint.id}
 			>
 				<ListItemDecorator>
-					<IconButton
-						size="sm"
-						onClick={(e) => {
-							setCollapsed((wasCollapsed) => !wasCollapsed);
-							e.preventDefault();
-							e.stopPropagation();
-						}}
-					>
-						{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
-					</IconButton>
+					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
+						<IconButton
+							size="sm"
+							onClick={(e) => {
+								setCollapsed((wasCollapsed) => !wasCollapsed);
+								e.preventDefault();
+								e.stopPropagation();
+							}}
+						>
+							{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
+						</IconButton>
+					</SprocketTooltip>
 				</ListItemDecorator>
 				<ListItemContent>{keepStringLengthReasonable(endpoint.name)}</ListItemContent>
 				<ListSubheader>
