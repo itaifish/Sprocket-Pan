@@ -32,7 +32,6 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 	}, [localDataState]);
 
 	const changeData = (id: number, newKey?: string, newValue?: string) => {
-		log.info(localDataState);
 		const oldKVP = localDataState.__data[id];
 		const newEnv = { ...localDataState, __data: structuredClone(localDataState.__data) } as Environment;
 		if (!oldKVP) {
