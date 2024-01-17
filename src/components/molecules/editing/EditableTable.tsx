@@ -1,5 +1,5 @@
-import { Card, IconButton, Input, Stack } from '@mui/joy';
-import { useState, useContext } from 'react';
+import { Card, IconButton, Input, Stack, useColorScheme } from '@mui/joy';
+import { useState, useContext, useRef } from 'react';
 import { log } from '../../../utils/logging';
 import { Environment } from '../../../types/application-data/application-data';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -7,25 +7,61 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import { Editor, Monaco } from '@monaco-editor/react';
+import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { clamp } from '../../../utils/math';
+import { safeJsonParse } from '../../../utils/functions';
+
+export type TableData<TID extends string | number> = {
+	key: string;
+	value: string;
+	id: TID;
+}[];
+
+const tableDataToString = <TID extends string | number>(tableData: TableData<TID>) => {
+	return JSON.stringify(
+		tableData
+			.map((x) => ({ [x.key]: x.value }))
+			.reduce((prev, acc) => ({ ...acc, ...prev }), {} as Record<string, string>),
+	);
+};
+
+const stringToTableData = <TID extends string | number>(str: string) => {
+	return safeJsonParse<TableData<TID>>(str)[1];
+};
 
 interface EditableTableProps<TID extends string | number> {
-	tableData: {
-		key: string;
-		value: string;
-		id: TID;
-	}[];
+	tableData: TableData<TID>;
 	changeTableData: (id: TID, newKey?: string, newValue?: string) => void;
 	addNewData: (key: string, value: string) => void;
+	setTableData: (newData: TableData<TID>) => void;
 	environment?: Environment;
 }
 export function EditableTable<TID extends string | number>(props: EditableTableProps<TID>) {
+	const colorScheme = useColorScheme();
+	const selectedMode = colorScheme.mode;
+	const systemMode = colorScheme.systemMode;
+	const resolvedMode = selectedMode === 'system' ? systemMode : selectedMode;
 	const [newRowValueText, setNewRowValueText] = useState('');
 	const [selected, setSelected] = useState<string | null>(null);
 	const data = useContext(ApplicationDataContext);
 	const environment =
 		props.environment ??
 		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : ({} as Environment));
+	const [editorText, setEditorText] = useState(tableDataToString(props.tableData));
+	const latestText = useRef(editorText);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
+	const editorRef = useRef<any>(null);
+	const format = () => {
+		if (editorRef.current) {
+			editorRef.current.getAction('editor.action.formatDocument').run();
+		}
+	};
+	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
+		editorRef.current = editor;
+		format();
+	};
+
 	return (
 		<>
 			<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
@@ -41,6 +77,26 @@ export function EditableTable<TID extends string | number>(props: EditableTableP
 					{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
 				</IconButton>
 			</SprocketTooltip>
+			<Editor
+				height={`${clamp(props.tableData.length * 3, 3, 21)}vh`}
+				value={editorText}
+				onChange={(value) => {
+					setEditorText(value ?? '');
+					latestText.current = value ?? '';
+					if (value == undefined) {
+						return;
+					}
+					const tableData = stringToTableData<TID>(value);
+					if (tableData == null) {
+						return;
+					}
+					props.setTableData(tableData);
+				}}
+				language={'json'}
+				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				options={defaultEditorOptions}
+				onMount={handleEditorDidMount}
+			/>
 			{props.tableData.map((tableData, index) => {
 				return (
 					<div key={index}>

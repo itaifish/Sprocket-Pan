@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Environment } from '../../../types/application-data/application-data';
-import { EditableTable } from './EditableTable';
+import { EditableTable, TableData } from './EditableTable';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { log } from '../../../utils/logging';
+import { QueryParamUtils } from '../../../utils/data-utils';
 
 interface EnvironmentEditableTableProps {
 	environment: Environment;
@@ -15,13 +15,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 		state: props.environment,
 		setState: (newState: Environment) => props.setNewEnvironment(newState),
 	});
-	const [displayData, setDisplayData] = useState<
-		{
-			key: string;
-			value: string;
-			id: number;
-		}[]
-	>([]);
+	const [displayData, setDisplayData] = useState<TableData<number>>([]);
 
 	useEffect(() => {
 		setDisplayData(
@@ -36,7 +30,6 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 	}, [localDataState]);
 
 	const changeData = (id: number, newKey?: string, newValue?: string) => {
-		log.info(localDataState);
 		const oldKVP = localDataState.__data[id];
 		const newEnv = { ...localDataState, __data: structuredClone(localDataState.__data) } as Environment;
 		if (!oldKVP) {
@@ -62,6 +55,10 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 		setLocalDataState(newEnv);
 	};
 	const addNewData = (key: string, value: string) => changeData(-1, key, value);
+	const setTableData = (newData: TableData<number>) => {
+		
+		setLocalDataState(newData);
+	};
 	return (
 		<EditableTable
 			tableData={displayData}

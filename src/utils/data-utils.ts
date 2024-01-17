@@ -1,7 +1,28 @@
-import { QueryParams } from '../types/application-data/application-data';
+import { TableData } from '../components/molecules/editing/EditableTable';
+import { EMPTY_QUERY_PARAMS, OrderedKeyValuePair, QueryParams } from '../types/application-data/application-data';
 
-export class QueryParamUtils {
-	private constructor() {}
+export abstract class KeyValuePairUtils {
+	static toTableData<TKVP extends OrderedKeyValuePair<string | number, any, boolean>>(kvp: TKVP) {
+		return (kvp.__data ?? []).map((datum, index) => {
+			return {
+				id: index,
+				value: datum.value,
+				key: datum.key,
+			};
+		});
+	}
+}
+
+export class QueryParamUtils extends KeyValuePairUtils {
+	private constructor() {
+		super();
+	}
+
+	static fromTableData<TID extends string | number>(tableData: TableData<TID>) {
+		const initialData = structuredClone(EMPTY_QUERY_PARAMS);
+		tableData.forEach((td) => this.add(initialData, td.key, td.value));
+		return initialData;
+	}
 
 	static add = (queryParams: QueryParams, newKey: string, newValue: string) => {
 		if (queryParams[newKey]) {
