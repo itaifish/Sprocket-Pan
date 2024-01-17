@@ -1,5 +1,5 @@
 import { Card, IconButton, Input, Stack, useColorScheme } from '@mui/joy';
-import { useState, useContext, useRef } from 'react';
+import { useState, useContext, useRef, useEffect } from 'react';
 import { log } from '../../../utils/logging';
 import { Environment } from '../../../types/application-data/application-data';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -11,6 +11,7 @@ import { Editor, Monaco } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { clamp } from '../../../utils/math';
 import { safeJsonParse } from '../../../utils/functions';
+import { Constants } from '../../../utils/constants';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -18,26 +19,51 @@ export type TableData<TID extends string | number> = {
 	id: TID;
 }[];
 
-const tableDataToString = <TID extends string | number>(tableData: TableData<TID>) => {
-	return JSON.stringify(
-		tableData
-			.map((x) => ({ [x.key]: x.value }))
-			.reduce((prev, acc) => ({ ...acc, ...prev }), {} as Record<string, string>),
-	);
+const tableDataToString = (tableData: TableData<number>) => {
+	const tdObject = {} as Record<string, string | string[]>;
+	tableData.forEach((x) => {
+		if (tdObject[x.key] == undefined) {
+			tdObject[x.key] = x.value;
+		} else if (typeof tdObject[x.key] === 'string') {
+			tdObject[x.key] = [];
+			(tdObject[x.key] as string[])[x.id] = x.value;
+		} else {
+			(tdObject[x.key] as string[])[x.id] = x.value;
+		}
+	});
+	return JSON.stringify(tdObject);
 };
 
-const stringToTableData = <TID extends string | number>(str: string) => {
-	return safeJsonParse<TableData<TID>>(str)[1];
+const stringToTableData = (str: string) => {
+	const res = safeJsonParse<Record<string, string | string[]>>(str)[1];
+	if (res == null) {
+		return null;
+	}
+	return Object.entries(res).flatMap(([key, value]) => {
+		if (typeof value === 'string') {
+			return {
+				key,
+				value,
+				id: 0,
+			};
+		} else {
+			return value.map((valueItem, index) => ({
+				key,
+				value: valueItem,
+				id: index,
+			}));
+		}
+	});
 };
 
-interface EditableTableProps<TID extends string | number> {
-	tableData: TableData<TID>;
-	changeTableData: (id: TID, newKey?: string, newValue?: string) => void;
+interface EditableTableProps {
+	tableData: TableData<number>;
+	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
 	addNewData: (key: string, value: string) => void;
-	setTableData: (newData: TableData<TID>) => void;
+	setTableData: (newData: TableData<number>) => void;
 	environment?: Environment;
 }
-export function EditableTable<TID extends string | number>(props: EditableTableProps<TID>) {
+export function EditableTable(props: EditableTableProps) {
 	const colorScheme = useColorScheme();
 	const selectedMode = colorScheme.mode;
 	const systemMode = colorScheme.systemMode;
@@ -49,7 +75,6 @@ export function EditableTable<TID extends string | number>(props: EditableTableP
 		props.environment ??
 		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : ({} as Environment));
 	const [editorText, setEditorText] = useState(tableDataToString(props.tableData));
-	const latestText = useRef(editorText);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
 	const editorRef = useRef<any>(null);
 	const format = () => {
@@ -61,6 +86,30 @@ export function EditableTable<TID extends string | number>(props: EditableTableP
 		editorRef.current = editor;
 		format();
 	};
+
+	useEffect(() => {
+		const delayDebounceFunc = setTimeout(() => {
+			if (editorText == undefined) {
+				return;
+			}
+			const tableData = stringToTableData(editorText);
+			if (tableData == null) {
+				return;
+			}
+			log.info('tableData');
+			log.info(tableData);
+			props.setTableData(tableData);
+		}, Constants.debounceTimeMS);
+
+		return () => clearTimeout(delayDebounceFunc);
+	}, [editorText]);
+
+	useEffect(() => {
+		setEditorText((_oldText) => {
+			const newText = tableDataToString(props.tableData);
+			return newText;
+		});
+	}, [props.tableData]);
 
 	return (
 		<>
@@ -78,19 +127,10 @@ export function EditableTable<TID extends string | number>(props: EditableTableP
 				</IconButton>
 			</SprocketTooltip>
 			<Editor
-				height={`${clamp(props.tableData.length * 3, 3, 21)}vh`}
+				height={`${clamp((props.tableData.length + 2) * 3, 7, 21)}vh`}
 				value={editorText}
 				onChange={(value) => {
 					setEditorText(value ?? '');
-					latestText.current = value ?? '';
-					if (value == undefined) {
-						return;
-					}
-					const tableData = stringToTableData<TID>(value);
-					if (tableData == null) {
-						return;
-					}
-					props.setTableData(tableData);
 				}}
 				language={'json'}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}

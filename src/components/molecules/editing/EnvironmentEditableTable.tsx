@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { Environment } from '../../../types/application-data/application-data';
 import { EditableTable, TableData } from './EditableTable';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { QueryParamUtils } from '../../../utils/data-utils';
+import { EnvironmentUtils } from '../../../utils/data-utils';
+import { log } from '../../../utils/logging';
 
 interface EnvironmentEditableTableProps {
 	environment: Environment;
@@ -56,14 +57,20 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 	};
 	const addNewData = (key: string, value: string) => changeData(-1, key, value);
 	const setTableData = (newData: TableData<number>) => {
-		
-		setLocalDataState(newData);
+		try {
+			const newEnvironment = EnvironmentUtils.fromTableData(newData);
+			log.info(newEnvironment);
+			setLocalDataState(newEnvironment);
+		} catch (e) {
+			log.error(e);
+		}
 	};
 	return (
 		<EditableTable
 			tableData={displayData}
 			changeTableData={changeData}
 			addNewData={addNewData}
+			setTableData={setTableData}
 			environment={props.varsEnv}
 		/>
 	);

@@ -17,7 +17,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 	});
 	const [displayData, setDisplayData] = useState<TableData<number>>([]);
 	useEffect(() => {
-		const data = localDataState.__data.map((datum, index) => ({ ...datum, id: index }));
+		const data = QueryParamUtils.toTableData<QueryParams>(localDataState);
 		setDisplayData(data);
 	}, [localDataState]);
 

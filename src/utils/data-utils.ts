@@ -1,8 +1,13 @@
 import { TableData } from '../components/molecules/editing/EditableTable';
-import { EMPTY_QUERY_PARAMS, OrderedKeyValuePair, QueryParams } from '../types/application-data/application-data';
+import {
+	EMPTY_ENVIRONMENT,
+	EMPTY_QUERY_PARAMS,
+	Environment,
+	QueryParams,
+} from '../types/application-data/application-data';
 
 export abstract class KeyValuePairUtils {
-	static toTableData<TKVP extends OrderedKeyValuePair<string | number, any, boolean>>(kvp: TKVP) {
+	static toTableData<TKVP extends QueryParams | Environment>(kvp: TKVP) {
 		return (kvp.__data ?? []).map((datum, index) => {
 			return {
 				id: index,
@@ -10,6 +15,46 @@ export abstract class KeyValuePairUtils {
 				key: datum.key,
 			};
 		});
+	}
+}
+
+export class EnvironmentUtils extends KeyValuePairUtils {
+	private constructor() {
+		super();
+	}
+
+	static set(environment: Environment, key: string, value: string) {
+		const oldValue = environment[key];
+		if (!oldValue) {
+			environment.__data.push({ key, value });
+		} else {
+			const index = environment.__data.findIndex((x) => x.key === key);
+			if (index >= 0) {
+				environment.__data[index].value = value;
+			} else {
+				return;
+			}
+		}
+		environment[key] = value;
+	}
+
+	static delete(environment: Environment, key: string) {
+		if (!environment[key]) {
+			return;
+		}
+		const index = environment.__data.findIndex((x) => x.key === key);
+		if (index >= 0) {
+			environment.__data.splice(index, 1);
+		} else {
+			return;
+		}
+		delete environment[key];
+	}
+
+	static fromTableData<TID extends string | number>(tableData: TableData<TID>) {
+		const initialData = structuredClone(EMPTY_ENVIRONMENT);
+		tableData.forEach((td) => this.set(initialData, td.key, td.value));
+		return initialData;
 	}
 }
 
