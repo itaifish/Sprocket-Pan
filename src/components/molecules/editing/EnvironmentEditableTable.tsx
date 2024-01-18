@@ -59,7 +59,6 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 	const setTableData = (newData: TableData<number>) => {
 		try {
 			const newEnvironment = EnvironmentUtils.fromTableData(newData);
-			log.info(newEnvironment);
 			setLocalDataState(newEnvironment);
 		} catch (e) {
 			log.error(e);

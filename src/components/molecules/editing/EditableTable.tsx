@@ -1,4 +1,4 @@
-import { Badge, IconButton, Tooltip, useColorScheme } from '@mui/joy';
+import { Badge, IconButton, useColorScheme } from '@mui/joy';
 import { useState, useContext, useRef, useEffect } from 'react';
 import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -11,10 +11,10 @@ import { clamp } from '../../../utils/math';
 import { safeJsonParse } from '../../../utils/functions';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { CopyToClipboardButton } from '../../atoms/buttons/CopyToClipboardButton';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -142,22 +142,7 @@ export function EditableTable(props: EditableTableProps) {
 					{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
 				</IconButton>
 			</SprocketTooltip>
-			<SprocketTooltip text={'Copy to clipboard'} disabled={copied}>
-				<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-					<IconButton
-						disabled={copied}
-						onClick={() => {
-							setCopied(true);
-							setTimeout(() => {
-								setCopied(false);
-							}, 800);
-							navigator.clipboard.writeText(editorText);
-						}}
-					>
-						<ContentCopyIcon />
-					</IconButton>
-				</Tooltip>
-			</SprocketTooltip>
+			<CopyToClipboardButton copied={copied} setCopied={setCopied} text={editorText} />
 			<FormatIcon actionFunction={() => format()} />
 			<SprocketTooltip text="Clear Changes">
 				<IconButton
