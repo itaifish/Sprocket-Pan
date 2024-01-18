@@ -1,6 +1,6 @@
 import { Badge, IconButton, Tooltip, useColorScheme } from '@mui/joy';
 import { useState, useContext, useRef, useEffect } from 'react';
-import { Environment } from '../../../types/application-data/application-data';
+import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
@@ -14,6 +14,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
+import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -76,8 +77,9 @@ export function EditableTable(props: EditableTableProps) {
 	const data = useContext(ApplicationDataContext);
 	const environment =
 		props.environment ??
-		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : ({} as Environment));
+		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : EMPTY_ENVIRONMENT);
 	const [editorText, setEditorText] = useState(tableDataToString(props.tableData));
+	const [backupEditorText, setBackupEditorText] = useState(editorText);
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
 	const [hasChanged, setChanged] = useState(false);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
@@ -99,15 +101,41 @@ export function EditableTable(props: EditableTableProps) {
 		setRunningTableData(props.tableData);
 	}, [props.tableData]);
 
+	const getEnvParsedRunningTableData = () => {
+		if (runningTableData == null) {
+			return 'null';
+		}
+		return tableDataToString(
+			runningTableData.map((tdItem) => ({
+				key: environmentContextResolver
+					.parseStringWithEnvironment(tdItem.key, environment)
+					.map((x) => x.value)
+					.join(''),
+				value: environmentContextResolver
+					.parseStringWithEnvironment(tdItem.value, environment)
+					.map((x) => x.value)
+					.join(''),
+				id: tdItem.id,
+			})),
+		);
+	};
+
 	return (
 		<>
 			<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
 				<IconButton
+					disabled={runningTableData == null}
 					onClick={() => {
 						if (mode === 'edit') {
 							setMode('view');
+							setBackupEditorText(editorText);
+							setEditorText(getEnvParsedRunningTableData());
+							editorRef.current?.updateOptions({ readOnly: true });
 						} else {
 							setMode('edit');
+							setEditorText(backupEditorText);
+							editorRef.current?.updateOptions({ readOnly: false });
+							editorRef.current?.setValue(backupEditorText);
 						}
 					}}
 				>
