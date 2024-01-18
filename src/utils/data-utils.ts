@@ -8,9 +8,12 @@ import {
 
 export abstract class KeyValuePairUtils {
 	static toTableData<TKVP extends QueryParams | Environment>(kvp: TKVP) {
-		return (kvp.__data ?? []).map((datum, index) => {
+		const keyIndex = new Map<string, number>();
+		return (kvp.__data ?? []).map((datum) => {
+			const idValue = keyIndex.get(datum.key) ?? 0;
+			keyIndex.set(datum.key, idValue + 1);
 			return {
-				id: index,
+				id: idValue,
 				value: datum.value,
 				key: datum.key,
 			};
