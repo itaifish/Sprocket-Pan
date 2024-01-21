@@ -86,6 +86,7 @@ interface EditableTableProps {
 	setTableData: (newData: TableData<number>) => void;
 	environment?: Environment;
 	unique: boolean;
+	fullSize?: boolean;
 }
 export function EditableTable(props: EditableTableProps) {
 	const colorScheme = useColorScheme();
@@ -193,7 +194,7 @@ export function EditableTable(props: EditableTableProps) {
 				</IconButton>
 			</SprocketTooltip>
 			<Editor
-				height={`${clamp((props.tableData.length + 2) * 3, 7, 33)}vh`}
+				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 7, 33)}vh`}
 				value={editorText}
 				onChange={(value) => {
 					setEditorText(value ?? '');

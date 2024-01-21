@@ -9,6 +9,7 @@ interface EnvironmentEditableTableProps {
 	environment: Environment;
 	setNewEnvironment: (newEnvironment: Environment) => void;
 	varsEnv?: Environment;
+	fullSize?: boolean;
 }
 
 export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
@@ -72,6 +73,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 			setTableData={setTableData}
 			environment={props.varsEnv}
 			unique={true}
+			fullSize={props.fullSize}
 		/>
 	);
 }

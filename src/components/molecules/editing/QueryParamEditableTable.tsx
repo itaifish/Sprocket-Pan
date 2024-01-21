@@ -8,6 +8,7 @@ interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;
 	varsEnv: Environment;
+	fullSize?: boolean;
 }
 
 export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
@@ -58,6 +59,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 			setTableData={setTableData}
 			environment={props.varsEnv}
 			unique={false}
+			fullSize={props.fullSize}
 		/>
 	);
 }

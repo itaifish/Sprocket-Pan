@@ -172,6 +172,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
+	public setEnvironment(updateId: string, newEnvironment: Environment) {
+		this.data['environments'][updateId] = newEnvironment;
+		this.data = { ...this.data };
+		this.emit('update');
+	}
+
 	public addResponseToHistory(requestId: string, networkRequest: NetworkFetchRequest, response: EndpointResponse) {
 		const reqToUpdate = this.data.requests[requestId];
 		if (reqToUpdate == null) {
