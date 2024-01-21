@@ -194,7 +194,7 @@ export function EditableTable(props: EditableTableProps) {
 				</IconButton>
 			</SprocketTooltip>
 			<Editor
-				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 7, 33)}vh`}
+				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
 				value={editorText}
 				onChange={(value) => {
 					setEditorText(value ?? '');
