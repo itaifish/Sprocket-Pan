@@ -57,6 +57,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 			addNewData={addNewData}
 			setTableData={setTableData}
 			environment={props.varsEnv}
+			unique={false}
 		/>
 	);
 }

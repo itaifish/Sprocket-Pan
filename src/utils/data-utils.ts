@@ -3,6 +3,7 @@ import {
 	EMPTY_ENVIRONMENT,
 	EMPTY_QUERY_PARAMS,
 	Environment,
+	OrderedKeyValuePair,
 	QueryParams,
 } from '../types/application-data/application-data';
 
@@ -21,12 +22,8 @@ export abstract class KeyValuePairUtils {
 	}
 }
 
-export class EnvironmentUtils extends KeyValuePairUtils {
-	private constructor() {
-		super();
-	}
-
-	static set(environment: Environment, key: string, value: string) {
+export abstract class UniqueKeyValuePairUtils extends KeyValuePairUtils {
+	static set(environment: OrderedKeyValuePair, key: string, value: string) {
 		const oldValue = environment[key];
 		if (!oldValue) {
 			environment.__data.push({ key, value });
@@ -41,7 +38,7 @@ export class EnvironmentUtils extends KeyValuePairUtils {
 		environment[key] = value;
 	}
 
-	static delete(environment: Environment, key: string) {
+	static delete(environment: OrderedKeyValuePair, key: string) {
 		if (!environment[key]) {
 			return;
 		}
@@ -61,6 +58,18 @@ export class EnvironmentUtils extends KeyValuePairUtils {
 	}
 }
 
+export class EnvironmentUtils extends UniqueKeyValuePairUtils {
+	private constructor() {
+		super();
+	}
+}
+
+export class HeaderUtils extends UniqueKeyValuePairUtils {
+	private constructor() {
+		super();
+	}
+}
+
 export class QueryParamUtils extends KeyValuePairUtils {
 	private constructor() {
 		super();
@@ -71,6 +80,12 @@ export class QueryParamUtils extends KeyValuePairUtils {
 		tableData.forEach((td) => this.add(initialData, td.key, td.value));
 		return initialData;
 	}
+
+	static set = (queryParams: QueryParams, key: string, values: string[]) => {
+		queryParams.__data = queryParams.__data.filter((x) => x.key != key);
+		delete queryParams[key];
+		values.forEach((value) => this.add(queryParams, key, value));
+	};
 
 	static add = (queryParams: QueryParams, newKey: string, newValue: string) => {
 		if (queryParams[newKey]) {

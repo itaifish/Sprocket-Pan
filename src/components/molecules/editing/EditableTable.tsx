@@ -22,27 +22,44 @@ export type TableData<TID extends string | number> = {
 	id: TID;
 }[];
 
-const tableDataToString = (tableData: TableData<number>) => {
+const tableDataToString = (tableData: TableData<number>, uniqueValues: boolean) => {
 	const tdObject = {} as Record<string, string | string[]>;
-	tableData.forEach((x) => {
-		if (tdObject[x.key] == undefined) {
-			tdObject[x.key] = [];
-		}
-		(tdObject[x.key] as string[])[x.id] = x.value;
-	});
+	if (uniqueValues) {
+		tableData.forEach((x) => {
+			tdObject[x.key] = x.value;
+		});
+	} else {
+		tableData.forEach((x) => {
+			if (tdObject[x.key] == undefined) {
+				tdObject[x.key] = [];
+			}
+			(tdObject[x.key] as string[])[x.id] = x.value;
+		});
 
-	Object.entries(tdObject).forEach(([key, value]) => {
-		if (value.length === 1) {
-			tdObject[key] = value[0];
-		}
-	});
+		Object.entries(tdObject).forEach(([key, value]) => {
+			if (value.length === 1) {
+				tdObject[key] = value[0];
+			}
+		});
+	}
+
 	return JSON.stringify(tdObject, null, 2);
 };
 
-const stringToTableData = (str: string) => {
+const stringToTableData = (str: string, uniqueValues: boolean): TableData<number> | null => {
 	const res = safeJsonParse<Record<string, string | string[]>>(str)[1];
 	if (res == null) {
 		return null;
+	}
+	if (uniqueValues) {
+		const tableData: TableData<number> = [];
+		for (const [key, value] of Object.entries(res)) {
+			if (typeof value !== 'string') {
+				return null;
+			}
+			tableData.push({ key, value, id: 0 });
+		}
+		return tableData;
 	}
 	const td = Object.entries(res).flatMap(([key, value]) => {
 		if (typeof value === 'string') {
@@ -68,6 +85,7 @@ interface EditableTableProps {
 	addNewData: (key: string, value: string) => void;
 	setTableData: (newData: TableData<number>) => void;
 	environment?: Environment;
+	unique: boolean;
 }
 export function EditableTable(props: EditableTableProps) {
 	const colorScheme = useColorScheme();
@@ -78,7 +96,7 @@ export function EditableTable(props: EditableTableProps) {
 	const environment =
 		props.environment ??
 		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : EMPTY_ENVIRONMENT);
-	const [editorText, setEditorText] = useState(tableDataToString(props.tableData));
+	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
 	const [backupEditorText, setBackupEditorText] = useState(editorText);
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
 	const [hasChanged, setChanged] = useState(false);
@@ -96,7 +114,7 @@ export function EditableTable(props: EditableTableProps) {
 	};
 
 	useEffect(() => {
-		setEditorText(tableDataToString(props.tableData));
+		setEditorText(tableDataToString(props.tableData, props.unique));
 		setChanged(false);
 		setRunningTableData(props.tableData);
 	}, [props.tableData]);
@@ -117,6 +135,7 @@ export function EditableTable(props: EditableTableProps) {
 					.join(''),
 				id: tdItem.id,
 			})),
+			props.unique,
 		);
 	};
 
@@ -148,7 +167,7 @@ export function EditableTable(props: EditableTableProps) {
 				<IconButton
 					disabled={!hasChanged}
 					onClick={() => {
-						setEditorText(tableDataToString(props.tableData));
+						setEditorText(tableDataToString(props.tableData, props.unique));
 						setChanged(false);
 						setRunningTableData(props.tableData);
 						format();
@@ -161,7 +180,7 @@ export function EditableTable(props: EditableTableProps) {
 				<IconButton
 					disabled={!hasChanged || runningTableData == null}
 					onClick={() => {
-						const tableData = stringToTableData(editorText);
+						const tableData = stringToTableData(editorText, props.unique);
 						if (tableData != null) {
 							props.setTableData(tableData);
 							setChanged(false);
@@ -179,7 +198,7 @@ export function EditableTable(props: EditableTableProps) {
 				onChange={(value) => {
 					setEditorText(value ?? '');
 					setChanged(true);
-					setRunningTableData(value ? stringToTableData(value) : null);
+					setRunningTableData(value ? stringToTableData(value, props.unique) : null);
 				}}
 				language={'json'}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}

@@ -71,6 +71,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 			addNewData={addNewData}
 			setTableData={setTableData}
 			environment={props.varsEnv}
+			unique={true}
 		/>
 	);
 }
