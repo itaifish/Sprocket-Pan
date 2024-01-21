@@ -122,6 +122,7 @@ export function ServiceTab(props: TabProps) {
 													return text != '';
 												}}
 												isTitle
+												color={serviceData.selectedEnvironment === env.__id ? 'primary' : 'neutral'}
 											></EditableText>
 											<SprocketTooltip text={serviceData.selectedEnvironment === env.__id ? 'Unselect' : 'Select'}>
 												<IconButton
