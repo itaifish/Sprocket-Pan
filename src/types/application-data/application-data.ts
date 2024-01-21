@@ -114,6 +114,6 @@ export type EndpointResponse = {
 	statusCode: number;
 	body: string;
 	bodyType: RawBodyType;
-	headers: Headers;
+	headers: Record<string, string>;
 	dateTime: Date;
 };
