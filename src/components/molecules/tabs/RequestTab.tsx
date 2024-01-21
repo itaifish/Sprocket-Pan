@@ -278,8 +278,21 @@ export function RequestTab(props: TabProps) {
 								<ArrowLeftIcon />
 							</IconButton>
 							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
-								{response === 'latest' || response === 'error' ? requestData.history.length : response + 1} /{' '}
-								{requestData.history.length}
+								<EditableText
+									sx={{ display: 'flex', alignItems: 'center' }}
+									text={
+										response === 'latest' || response === 'error' ? `${requestData.history.length}` : `${response + 1}`
+									}
+									setText={(text: string) => {
+										const num = Number.parseInt(text);
+										setResponse(num - 1);
+									}}
+									isValidFunc={(text: string) => {
+										const num = Number.parseInt(text);
+										return !isNaN(num) && num >= 1 && num <= requestData.history.length;
+									}}
+								/>
+								/{requestData.history.length}
 							</Typography>
 							<IconButton
 								aria-label="nextHistory"
