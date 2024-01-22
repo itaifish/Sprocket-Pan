@@ -169,7 +169,10 @@ export function ServiceTab(props: TabProps) {
 												environment={env}
 												setNewEnvironment={(newEnv) =>
 													applicationDataManager.update('service', serviceData.id, {
-														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+														localEnvironments: {
+															...serviceData.localEnvironments,
+															[env.__id]: { ...newEnv, __name: env.__name, __id: env.__id } as Environment,
+														},
 													})
 												}
 												varsEnv={environmentContextResolver.buildEnvironmentVariables(data, serviceData.id)}
