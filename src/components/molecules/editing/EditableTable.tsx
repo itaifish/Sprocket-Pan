@@ -197,9 +197,11 @@ export function EditableTable(props: EditableTableProps) {
 				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
 				value={editorText}
 				onChange={(value) => {
-					setEditorText(value ?? '');
-					setChanged(true);
-					setRunningTableData(value ? stringToTableData(value, props.unique) : null);
+					if (value != editorText) {
+						setEditorText(value ?? '');
+						setChanged(true);
+						setRunningTableData(value ? stringToTableData(value, props.unique) : null);
+					}
 				}}
 				language={'json'}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
