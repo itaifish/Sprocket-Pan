@@ -3,6 +3,8 @@ import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import {
 	ApplicationData,
+	EMPTY_ENVIRONMENT,
+	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
@@ -93,7 +95,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				this.data.endpoints[newId] = {
 					url: '',
 					verb: 'GET',
-					baseHeaders: {},
+					baseHeaders: structuredClone(EMPTY_HEADERS),
 					name: 'New Endpoint',
 					baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					description: 'This is a new endpoint',
@@ -114,12 +116,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				const { endpointId } = additionalContext as { endpointId: string };
 				this.data.requests[newId] = {
 					name: 'New Request',
-					headers: {},
+					headers: structuredClone(EMPTY_HEADERS),
 					queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
-					environmentOverride: {},
+					environmentOverride: structuredClone(EMPTY_ENVIRONMENT),
 					...data,
 					endpointId: endpointId,
 					id: newId,
@@ -166,6 +168,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			envDataToUpdate.__data = getDataArrayFromEnvKeys(envDataToUpdate);
 		}
 		this.data[`${updateType}s`][updateId] = dataToUpdate;
+		this.data = { ...this.data };
+		this.emit('update');
+	}
+
+	public setEnvironment(updateId: string, newEnvironment: Environment) {
+		this.data['environments'][updateId] = newEnvironment;
 		this.data = { ...this.data };
 		this.emit('update');
 	}

@@ -1,4 +1,4 @@
-import { IconButton, Input, Typography } from '@mui/joy';
+import { IconButton, Input, Typography, TypographyProps } from '@mui/joy';
 import { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -11,7 +11,7 @@ interface EditableTextProps {
 	isTitle?: boolean;
 }
 
-export function EditableText(props: EditableTextProps) {
+export function EditableText(props: EditableTextProps & Partial<TypographyProps>) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [typingText, setTypingText] = useState(props.text);
 	const [isValid, setIsValid] = useState(true);
@@ -64,6 +64,7 @@ export function EditableText(props: EditableTextProps) {
 				setTypingText(props.text);
 				setIsEditing(true);
 			}}
+			{...props}
 		>
 			{<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
 			{keepStringLengthReasonable(props.text, props.isTitle ? 100 : 30)}

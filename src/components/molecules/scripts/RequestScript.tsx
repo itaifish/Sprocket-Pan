@@ -1,10 +1,10 @@
 import { Monaco, Editor } from '@monaco-editor/react';
-import { useColorScheme, Stack, IconButton, Tooltip } from '@mui/joy';
+import { useColorScheme, Stack } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
 import { Constants } from '../../../utils/constants';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { CopyToClipboardButton } from '../../atoms/buttons/CopyToClipboardButton';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;
@@ -40,20 +40,7 @@ export function RequestScript(props: RequestScriptProps) {
 		<Stack>
 			<Stack direction={'row'} spacing={2}>
 				<FormatIcon actionFunction={() => format()} />
-				<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-					<IconButton
-						disabled={copied}
-						onClick={() => {
-							setCopied(true);
-							setTimeout(() => {
-								setCopied(false);
-							}, 800);
-							navigator.clipboard.writeText(latestText.current);
-						}}
-					>
-						<ContentCopyIcon />
-					</IconButton>
-				</Tooltip>
+				<CopyToClipboardButton copied={copied} setCopied={setCopied} text={latestText.current} />
 			</Stack>
 
 			<Editor

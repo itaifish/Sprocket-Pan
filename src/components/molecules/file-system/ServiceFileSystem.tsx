@@ -24,6 +24,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
@@ -95,15 +96,17 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 				selected={tabs.selected === service.id}
 			>
 				<ListItemDecorator>
-					<IconButton
-						onClick={(e) => {
-							setCollapsed((wasCollapsed) => !wasCollapsed);
-							e.preventDefault();
-							e.stopPropagation();
-						}}
-					>
-						{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
-					</IconButton>
+					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
+						<IconButton
+							onClick={(e) => {
+								setCollapsed((wasCollapsed) => !wasCollapsed);
+								e.preventDefault();
+								e.stopPropagation();
+							}}
+						>
+							{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
+						</IconButton>
+					</SprocketTooltip>
 				</ListItemDecorator>
 				<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
 			</ListItemButton>

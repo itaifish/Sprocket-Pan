@@ -17,22 +17,23 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
 
 ## Roadmap
 
-- Add workspaces
-- Import / Export work
+- Add workspaces ☐
+- Import / Export work ❗
   - Imports from:
-    - Sprocket Pan
-    - Postman
-    - Insomnia
-- Refactor global state
-- Refactor Environment input/output (Janky)
-- Show debug logs option in settings
-- Scratchpad (Requests / Scripts not associated with a service)
-- Secrets Handling
-  - Let certain fields in environments be secrets
-  - Don't export secrets in exports
-  - Maybe put secrets in a seperate file that can be gitignored?
-  - Secret encryption when stored locally? idk
-- Inputs/outputs besides JSON
-- Command Pallete
-- Run Sprocket Pan in CLI
-- Automatic Updates (No need to redownload the program)
+    - Sprocket Pan ☐
+    - Postman ☐
+    - Insomnia ☐
+    - Swagger / OpenAPI ❗
+- Refactor global state ☐
+- Refactor Environment input/output (Janky) ✅
+- Show debug logs option in settings ☐
+- Scratchpad (Requests / Scripts not associated with a service) ☐
+- Secrets Handling ☐
+  - Let certain fields in environments be secrets ☐
+  - Don't export secrets in exports ☐
+  - Maybe put secrets in a seperate file that can be gitignored? ☐
+  - Secret encryption when stored locally? idk ☐
+- Inputs/outputs besides JSON ☐
+- Command Pallete ☐
+- Run Sprocket Pan in CLI ☐
+- Automatic Updates (No need to redownload the program) ☐

@@ -1,4 +1,6 @@
 import {
+	EMPTY_ENVIRONMENT,
+	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
@@ -13,6 +15,7 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
+import { QueryParamUtils } from '../utils/data-utils';
 
 type ParsedServiceApplicationData = {
 	services: Service[];
@@ -129,7 +132,7 @@ class SwaggerParseManager {
 						serviceId: service.id,
 						verb: method,
 						url: `${pathsUri}`,
-						baseHeaders: {},
+						baseHeaders: structuredClone(EMPTY_HEADERS),
 						baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 						description: pathData.description ?? 'This is a new endpoint',
 						name: `${method}: ${pathsUri}`,
@@ -143,13 +146,13 @@ class SwaggerParseManager {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
 						name: defaultEndpointData.name,
-						headers: {},
+						headers: structuredClone(EMPTY_HEADERS),
 						queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 						body: undefined,
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: {},
+						environmentOverride: structuredClone(EMPTY_ENVIRONMENT),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -165,10 +168,9 @@ class SwaggerParseManager {
 								break;
 							case 'query':
 								if (typedParam.name) {
-									if (schema?.type !== 'array') {
-										defaultEndpointData.baseQueryParams[typedParam.name] = [type];
-									} else {
-										defaultEndpointData.baseQueryParams[typedParam.name] = [type, type];
+									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, type);
+									if (schema?.type === 'array') {
+										QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, `${type}2`);
 									}
 								}
 								break;
@@ -251,7 +253,7 @@ class SwaggerParseManager {
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: {},
+					baseHeaders: structuredClone(EMPTY_HEADERS),
 					baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
@@ -274,13 +276,13 @@ class SwaggerParseManager {
 					id: v4(),
 					endpointId: defaultEndpointData.id,
 					name: defaultEndpointData.name,
-					headers: {},
+					headers: structuredClone(EMPTY_HEADERS),
 					queryParams: structuredClone(EMPTY_QUERY_PARAMS),
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: {},
+					environmentOverride: EMPTY_ENVIRONMENT,
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {
@@ -311,10 +313,9 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								if (typedParam.type !== 'array') {
-									defaultEndpointData.baseQueryParams[typedParam.name] = ['string'];
-								} else {
-									defaultEndpointData.baseQueryParams[typedParam.name] = ['string', 'string2'];
+								QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string');
+								if (typedParam.type === 'array') {
+									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string2');
 								}
 							}
 							break;

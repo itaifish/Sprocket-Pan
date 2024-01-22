@@ -1,11 +1,11 @@
-import { IconButton, Stack, Tooltip, useColorScheme } from '@mui/joy';
+import { Stack, useColorScheme } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
 import { log } from '../../../../utils/logging';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 import { EndpointResponse } from '../../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
+import { CopyToClipboardButton } from '../../../atoms/buttons/CopyToClipboardButton';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	const editorRef = useRef<any>(null);
@@ -45,20 +45,7 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 			<Stack>
 				<Stack direction={'row'} spacing={2}>
 					<FormatIcon actionFunction={() => format()} />
-					<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-						<IconButton
-							disabled={copied}
-							onClick={() => {
-								setCopied(true);
-								setTimeout(() => {
-									setCopied(false);
-								}, 800);
-								navigator.clipboard.writeText(response.body);
-							}}
-						>
-							<ContentCopyIcon />
-						</IconButton>
-					</Tooltip>
+					<CopyToClipboardButton copied={copied} setCopied={setCopied} text={response.body} />
 				</Stack>
 				<Editor
 					height={'45vh'}
