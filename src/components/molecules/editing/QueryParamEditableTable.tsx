@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Environment, QueryParams } from '../../../types/application-data/application-data';
-import { EditableTable } from './EditableTable';
+import { EditableTable, TableData } from './EditableTable';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
 interface QueryParamEditableTableProps {
 	queryParams: QueryParams;
 	setNewQueryParams: (queryParams: QueryParams) => void;
 	varsEnv: Environment;
+	fullSize?: boolean;
 }
 
 export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
@@ -15,15 +16,9 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		state: props.queryParams,
 		setState: (newState: QueryParams) => props.setNewQueryParams(newState),
 	});
-	const [displayData, setDisplayData] = useState<
-		{
-			key: string;
-			value: string;
-			id: number;
-		}[]
-	>([]);
+	const [displayData, setDisplayData] = useState<TableData<number>>([]);
 	useEffect(() => {
-		const data = localDataState.__data.map((datum, index) => ({ ...datum, id: index }));
+		const data = QueryParamUtils.toTableData<QueryParams>(localDataState);
 		setDisplayData(data);
 	}, [localDataState]);
 
@@ -51,12 +46,20 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		QueryParamUtils.add(newQueryParams, key, value);
 		setLocalDataState(newQueryParams);
 	};
+
+	const setTableData = (newData: TableData<number>) => {
+		const newQueryParams = QueryParamUtils.fromTableData(newData);
+		setLocalDataState(newQueryParams);
+	};
 	return (
 		<EditableTable
 			tableData={displayData}
 			changeTableData={changeData}
 			addNewData={addNewData}
+			setTableData={setTableData}
 			environment={props.varsEnv}
+			unique={false}
+			fullSize={props.fullSize}
 		/>
 	);
 }

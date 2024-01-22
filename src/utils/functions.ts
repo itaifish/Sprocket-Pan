@@ -38,3 +38,11 @@ export const getDataArrayFromEnvKeys = (env: Environment) => {
 		.filter((envKey) => !envKey.startsWith('__'))
 		.map((envKey) => ({ key: envKey, value: env[envKey] }));
 };
+
+export function safeJsonParse<T>(str: string) {
+	try {
+		return [null, JSON.parse(str) as T] as const;
+	} catch (err) {
+		return [err, null] as const;
+	}
+}

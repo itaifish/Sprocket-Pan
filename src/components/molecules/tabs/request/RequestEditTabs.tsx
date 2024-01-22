@@ -1,5 +1,10 @@
 import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
-import { EndpointRequest, Environment } from '../../../../types/application-data/application-data';
+import {
+	EMPTY_ENVIRONMENT,
+	EndpointRequest,
+	Environment,
+	QueryParams,
+} from '../../../../types/application-data/application-data';
 import { useState, useContext } from 'react';
 import { RequestBody } from './RequestBody';
 import { camelCaseToTitle } from '../../../../utils/string';
@@ -50,7 +55,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			<TabPanel value="queryParams">
 				<QueryParamEditableTable
 					queryParams={request.queryParams}
-					setNewQueryParams={(newQueryParams: Record<string, string[]>) => {
+					setNewQueryParams={(newQueryParams: QueryParams) => {
 						applicationDataManager.update('request', request.id, { queryParams: newQueryParams });
 					}}
 					varsEnv={varsEnv}
@@ -61,7 +66,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			</TabPanel>
 			<TabPanel value="environment">
 				<EnvironmentEditableTable
-					environment={(request.environmentOverride ?? {}) as Environment}
+					environment={(request.environmentOverride ?? EMPTY_ENVIRONMENT) as Environment}
 					setNewEnvironment={(newEnvironment: Environment) =>
 						applicationDataManager.update('request', request.id, { environmentOverride: newEnvironment })
 					}

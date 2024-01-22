@@ -29,7 +29,6 @@ import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import invoke from '../../utils/invoke';
 import { appLocalDataDir } from '@tauri-apps/api/path';
-import { log } from '../../utils/logging';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
@@ -286,7 +285,6 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									onClick={async () => {
 										const localDir = await appLocalDataDir();
 										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
-										log.info(`data path: ${data}`);
 										invoke('show_in_explorer', { path: data });
 									}}
 								>

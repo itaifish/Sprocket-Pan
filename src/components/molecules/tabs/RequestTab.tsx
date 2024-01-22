@@ -14,7 +14,11 @@ import {
 	Switch,
 	Tooltip,
 } from '@mui/joy';
-import { HistoricalEndpointResponse, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import {
+	EMPTY_HEADERS,
+	HistoricalEndpointResponse,
+	RESTfulRequestVerbs,
+} from '../../../types/application-data/application-data';
 import { useContext, useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import EditIcon from '@mui/icons-material/Edit';
@@ -43,13 +47,13 @@ const defaultResponse: HistoricalEndpointResponse = {
 		statusCode: 200,
 		body: 'View the response here',
 		bodyType: 'Text',
-		headers: {},
+		headers: structuredClone(EMPTY_HEADERS),
 		dateTime: new Date(),
 	},
 	request: {
 		method: 'GET',
 		url: '',
-		headers: {},
+		headers: structuredClone(EMPTY_HEADERS),
 		body: {},
 		dateTime: new Date(),
 	},
@@ -204,26 +208,25 @@ export function RequestTab(props: TabProps) {
 									<EditIcon />
 								</IconButton>
 							</SprocketTooltip>
-							<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-								<SprocketTooltip text={copied ? '' : 'Copy Request ID'}>
-									<IconButton
-										sx={{ ml: '5px' }}
-										variant="outlined"
-										color="primary"
-										disabled={copied}
-										onClick={() => {
-											setCopied(true);
-											setTimeout(() => {
-												setCopied(false);
-											}, 800);
-											navigator.clipboard.writeText(requestData.id);
-										}}
-									>
-										<FingerprintIcon />
-									</IconButton>
-								</SprocketTooltip>
-							</Tooltip>
 						</ParticleEffectButton>
+						<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
+							<SprocketTooltip text={copied ? '' : 'Copy Request ID'}>
+								<IconButton
+									variant="outlined"
+									color="primary"
+									disabled={copied}
+									onClick={() => {
+										setCopied(true);
+										setTimeout(() => {
+											setCopied(false);
+										}, 800);
+										navigator.clipboard.writeText(requestData.id);
+									}}
+								>
+									<FingerprintIcon />
+								</IconButton>
+							</SprocketTooltip>
+						</Tooltip>
 						<Switch
 							checked={isDefault}
 							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
@@ -275,8 +278,21 @@ export function RequestTab(props: TabProps) {
 								<ArrowLeftIcon />
 							</IconButton>
 							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
-								{response === 'latest' || response === 'error' ? requestData.history.length : response + 1} /{' '}
-								{requestData.history.length}
+								<EditableText
+									sx={{ display: 'flex', alignItems: 'center' }}
+									text={
+										response === 'latest' || response === 'error' ? `${requestData.history.length}` : `${response + 1}`
+									}
+									setText={(text: string) => {
+										const num = Number.parseInt(text);
+										setResponse(num - 1);
+									}}
+									isValidFunc={(text: string) => {
+										const num = Number.parseInt(text);
+										return !isNaN(num) && num >= 1 && num <= requestData.history.length;
+									}}
+								/>
+								/{requestData.history.length}
 							</Typography>
 							<IconButton
 								aria-label="nextHistory"

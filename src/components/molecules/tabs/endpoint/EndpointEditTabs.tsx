@@ -1,5 +1,5 @@
 import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
-import { Endpoint, Environment } from '../../../../types/application-data/application-data';
+import { Endpoint, Environment, QueryParams } from '../../../../types/application-data/application-data';
 import { useState, useContext } from 'react';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
@@ -46,7 +46,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 			<TabPanel value="queryParams">
 				<QueryParamEditableTable
 					queryParams={endpoint.baseQueryParams}
-					setNewQueryParams={(newQueryParams: Record<string, string[]>) => {
+					setNewQueryParams={(newQueryParams: QueryParams) => {
 						applicationDataManager.update('endpoint', endpoint.id, { baseQueryParams: newQueryParams });
 					}}
 					varsEnv={varsEnv}

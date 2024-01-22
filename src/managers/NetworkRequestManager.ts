@@ -1,4 +1,10 @@
-import { EndpointResponse, RawBodyType, RawBodyTypes } from '../types/application-data/application-data';
+import {
+	EMPTY_HEADERS,
+	EndpointResponse,
+	RawBodyType,
+	RawBodyTypes,
+	SPHeaders,
+} from '../types/application-data/application-data';
 import { queryParamsToStringReplaceVars } from '../utils/application';
 import { log } from '../utils/logging';
 import { applicationDataManager } from './ApplicationDataManager';
@@ -8,6 +14,7 @@ import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { Constants } from '../utils/constants';
 import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
+import { HeaderUtils } from '../utils/data-utils';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
@@ -60,34 +67,42 @@ class NetworkRequestManager {
 					requestId: request.id,
 				});
 			}
-			const headers: Record<string, string> = {};
+			const headers: SPHeaders = structuredClone(EMPTY_HEADERS);
 			// endpoint headers and then request headers
-			Object.keys(endpoint.baseHeaders).forEach((headerKey) => {
+			endpoint.baseHeaders.__data.forEach((header) => {
 				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					headerKey,
+					header.key,
 					data,
 					endpoint.serviceId,
 					request.id,
 				);
-				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
-					endpoint.baseHeaders[headerKey],
-					data,
-					endpoint.serviceId,
-					request.id,
+				HeaderUtils.set(
+					headers,
+					parsedKey,
+					environmentContextResolver.resolveVariablesForString(
+						endpoint.baseHeaders[header.key],
+						data,
+						endpoint.serviceId,
+						request.id,
+					),
 				);
 			});
-			Object.keys(request.headers).forEach((headerKey) => {
+			request.headers.__data.forEach((header) => {
 				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					headerKey,
+					header.key,
 					data,
 					endpoint.serviceId,
 					request.id,
 				);
-				headers[parsedKey] = environmentContextResolver.resolveVariablesForString(
-					request.headers[headerKey],
-					data,
-					endpoint.serviceId,
-					request.id,
+				HeaderUtils.set(
+					headers,
+					parsedKey,
+					environmentContextResolver.resolveVariablesForString(
+						request.headers[header.key],
+						data,
+						endpoint.serviceId,
+						request.id,
+					),
 				);
 			});
 			const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
@@ -105,10 +120,11 @@ class NetworkRequestManager {
 				headers: headers,
 				dateTime: new Date(),
 			};
+			const { __data, ...headersToSend } = networkRequest.headers;
 			const networkCall = fetch(networkRequest.url, {
 				method: networkRequest.method,
 				body: body ? Body.json(body) : undefined,
-				headers: networkRequest.headers,
+				headers: headersToSend,
 				responseType: ResponseType.Text,
 			});
 			const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(

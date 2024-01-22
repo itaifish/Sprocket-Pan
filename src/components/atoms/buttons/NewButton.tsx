@@ -9,7 +9,7 @@ import { SprocketTooltip } from '../SprocketTooltip';
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	return (
-		<SprocketTooltip text="Create New">
+		<SprocketTooltip text="Create New" disabled={menuOpen}>
 			<Box>
 				<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
 					<MenuButton
