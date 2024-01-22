@@ -37,3 +37,4 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
 - Command Pallete ☐
 - Run Sprocket Pan in CLI ☐
 - Automatic Updates (No need to redownload the program) ☐
+- Audit trail for requests
