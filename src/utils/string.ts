@@ -8,9 +8,13 @@ export function keepStringLengthReasonable(string: string, reasonableLength = 30
 	return `${string.slice(0, reasonableLength - 3)}...`;
 }
 
+export function capitalizeWord<T extends string>(word: T): Capitalize<T> {
+	return (word.charAt(0).toUpperCase() + word.slice(1)) as Capitalize<T>;
+}
+
 export function camelCaseToTitle(text: string) {
 	const firstCapital = text.replace(/([A-Z])/g, ' $1');
-	return firstCapital.charAt(0).toUpperCase() + firstCapital.slice(1);
+	return capitalizeWord(firstCapital);
 }
 
 const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {

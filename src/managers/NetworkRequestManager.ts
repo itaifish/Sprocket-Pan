@@ -15,13 +15,15 @@ import { Constants } from '../utils/constants';
 import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
 import { HeaderUtils } from '../utils/data-utils';
+import { capitalizeWord } from '../utils/string';
+import { AuditLog, RequestEvent, addToAuditLog } from './AuditLogManager';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
 	private constructor() {}
 
-	public async sendRequest(requestId: string): Promise<string | null> {
+	public async sendRequest(requestId: string, auditLog: AuditLog = []): Promise<string | null> {
 		try {
 			let data = applicationDataManager.getApplicationData();
 			let request = data.requests[requestId];
@@ -31,11 +33,17 @@ class NetworkRequestManager {
 			const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 			// Run pre-request scripts
 			let scriptObjs = { service, endpoint, request };
-			const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map(
-				(strat) => scriptObjs[strat]?.preRequestScript,
-			);
+			const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map((strat) => ({
+				script: scriptObjs[strat]?.preRequestScript,
+				name: `pre${capitalizeWord(strat)}Script` as const,
+				id: scriptObjs[strat]?.id,
+			}));
 			for (const preRequestScript of preRequestScripts) {
-				const res = await this.runScript(preRequestScript, requestId);
+				const res = await this.runScript(preRequestScript.script, requestId, undefined, {
+					log: auditLog,
+					scriptType: preRequestScript.name,
+					associatedId: preRequestScript.id,
+				});
 				// if an error, return it
 				if (res) {
 					return res;
@@ -121,6 +129,7 @@ class NetworkRequestManager {
 				dateTime: new Date(),
 			};
 			const { __data, ...headersToSend } = networkRequest.headers;
+			addToAuditLog(auditLog, 'before', 'request', request?.id);
 			const networkCall = fetch(networkRequest.url, {
 				method: networkRequest.method,
 				body: body ? Body.json(body) : undefined,
@@ -131,6 +140,7 @@ class NetworkRequestManager {
 				networkCall,
 				data.settings.timeoutDurationMS,
 			);
+			addToAuditLog(auditLog, 'after', 'request', request?.id);
 			const responseText = res.data as string;
 			const response = {
 				statusCode: res.status,
@@ -146,11 +156,17 @@ class NetworkRequestManager {
 			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);
 			// Run post-request scripts
 			scriptObjs = { service, endpoint, request };
-			const postRequestScripts = data.settings.scriptRunnerStrategy.post.map(
-				(strat) => scriptObjs[strat]?.postRequestScript,
-			);
+			const postRequestScripts = data.settings.scriptRunnerStrategy.post.map((strat) => ({
+				script: scriptObjs[strat]?.postRequestScript,
+				name: `post${capitalizeWord(strat)}Script` as const,
+				id: scriptObjs[strat]?.id,
+			}));
 			for (const postRequestScript of postRequestScripts) {
-				const res = await this.runScript(postRequestScript, requestId, response);
+				const res = await this.runScript(postRequestScript.script, requestId, response, {
+					log: auditLog,
+					scriptType: postRequestScript.name,
+					associatedId: postRequestScript.id,
+				});
 				// if an error, return it
 				if (res) {
 					return res;
@@ -161,6 +177,7 @@ class NetworkRequestManager {
 			log.warn(errorStr);
 			return errorStr;
 		}
+		log.info(JSON.stringify(auditLog));
 		return null;
 	}
 
@@ -168,10 +185,16 @@ class NetworkRequestManager {
 		script: string | undefined,
 		requestId: string,
 		response?: EndpointResponse | undefined,
+		auditInfo?: {
+			log: AuditLog;
+			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
+			associatedId: string;
+		},
 	): Promise<string | undefined> {
 		if (script && script != '') {
 			try {
-				const sprocketPan = getScriptInjectionCode(requestId, response);
+				auditInfo && addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
+				const sprocketPan = getScriptInjectionCode(requestId, response, auditInfo?.log);
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
 				_this.sprocketPan = sprocketPan;
@@ -179,12 +202,15 @@ class NetworkRequestManager {
 				const jsScript = ts.transpile(script);
 				const scriptTask = evalAsync(jsScript);
 				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
+				auditInfo && addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
 			} catch (e) {
 				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-				return JSON.stringify({
+				const returnError = JSON.stringify({
 					...JSON.parse(errorStr),
 					errorType: `Invalid ${response != undefined ? 'Post' : 'Pre'}-request Script`,
 				});
+				auditInfo && addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId, returnError);
+				return returnError;
 			}
 		}
 	}
