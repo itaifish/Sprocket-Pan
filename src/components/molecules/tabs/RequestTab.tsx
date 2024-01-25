@@ -313,7 +313,7 @@ export function RequestTab(props: TabProps) {
 								<ArrowRightIcon />
 							</IconButton>
 						</Stack>
-						<ResponseInfo response={responseData} />
+						<ResponseInfo response={responseData} requestId={props.id} />
 					</Card>
 				</Grid>
 			</Grid>

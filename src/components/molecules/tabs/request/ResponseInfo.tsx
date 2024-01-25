@@ -5,6 +5,7 @@ import {
 	AccordionSummary,
 	Box,
 	Divider,
+	IconButton,
 	List,
 	ListItem,
 	ListItemContent,
@@ -32,10 +33,14 @@ import SendIcon from '@mui/icons-material/Send';
 import CodeIcon from '@mui/icons-material/Code';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { ApplicationDataContext } from '../../../../managers/GlobalContextManager';
+import { ApplicationDataContext, TabsContext } from '../../../../managers/GlobalContextManager';
 import TimerIcon from '@mui/icons-material/Timer';
 import AnchorIcon from '@mui/icons-material/Anchor';
 import BadgeIcon from '@mui/icons-material/Badge';
+import LaunchIcon from '@mui/icons-material/Launch';
+import { SprocketTooltip } from '../../../atoms/SprocketTooltip';
+import { tabsManager } from '../../../../managers/TabsManager';
+import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 
 const responseTabs = ['responseBody', 'details', 'eventLog'] as const;
 type ResponseTabType = ValuesOf<typeof responseTabs>;
@@ -133,17 +138,15 @@ const HoverBox = styled(Box)(({ theme }) => {
 	const color = theme.vars.palette.neutral.darkChannel;
 	return {
 		'&:hover': {
-			cursor: 'pointer',
 			backgroundColor: `rgb(${color.replaceAll(' ', ', ')})`,
-			bgColor: `rgb(${color.replaceAll(' ', ', ')})`,
 		},
 	};
 });
 
-export function VisualEventLog(props: { auditLog: AuditLog }) {
+export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
 	const data = useContext(ApplicationDataContext);
-
-	function VisualEventLogInner(props: { transformedLog: TransformedAuditLog }) {
+	const tabsContext = useContext(TabsContext);
+	function VisualEventLogInner(props: { transformedLog: TransformedAuditLog; requestId: string }) {
 		const requestEvent = props.transformedLog.before;
 		const icons = (
 			<>
@@ -178,9 +181,38 @@ export function VisualEventLog(props: { auditLog: AuditLog }) {
 								)}
 							</Stack>
 							{dataType && requestEvent.associatedId && (
-								<Stack direction="row" alignContent={'center'} gap={1}>
+								<Stack direction="row" alignItems={'center'} gap={1}>
 									<BadgeIcon />
 									{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
+									{requestEvent.associatedId != props.requestId ? (
+										<SprocketTooltip
+											text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
+												dataType,
+											)}`}
+										>
+											<IconButton
+												size="sm"
+												color="primary"
+												onClick={() => {
+													tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
+												}}
+											>
+												<LaunchIcon />
+											</IconButton>
+										</SprocketTooltip>
+									) : (
+										<SprocketTooltip
+											text={
+												requestEvent.eventType === 'request'
+													? 'This is the current request'
+													: `This is the ${camelCaseToTitle(
+															requestEvent.eventType,
+													  ).toLocaleLowerCase()} for this request`
+											}
+										>
+											<WhereToVoteIcon color="success" />
+										</SprocketTooltip>
+									)}
 								</Stack>
 							)}
 						</Typography>
@@ -191,7 +223,7 @@ export function VisualEventLog(props: { auditLog: AuditLog }) {
 						{props.transformedLog.innerEvents.map((event, index) => (
 							<Box key={index}>
 								<Divider sx={{ my: '10px' }} />
-								<VisualEventLogInner transformedLog={event} />
+								<VisualEventLogInner transformedLog={event} requestId={props.requestId} />
 							</Box>
 						))}
 					</ListItem>
@@ -200,10 +232,12 @@ export function VisualEventLog(props: { auditLog: AuditLog }) {
 		);
 	}
 	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
-	return <List>{transformedLog && <VisualEventLogInner transformedLog={transformedLog} />}</List>;
+	return (
+		<List>{transformedLog && <VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} />}</List>
+	);
 }
 
-export function ResponseInfo({ response }: { response: HistoricalEndpointResponse }) {
+export function ResponseInfo({ response, requestId }: { response: HistoricalEndpointResponse; requestId: string }) {
 	const [tab, setTab] = useState<ResponseTabType>('responseBody');
 	const timeDifference =
 		(new Date(response.response.dateTime).getTime() - new Date(response.request.dateTime).getTime()) / 1000;
@@ -276,7 +310,7 @@ export function ResponseInfo({ response }: { response: HistoricalEndpointRespons
 				<TabPanel value="eventLog">
 					{response.auditLog ? (
 						<>
-							<VisualEventLog auditLog={response.auditLog} />
+							<VisualEventLog auditLog={response.auditLog} requestId={requestId} />
 						</>
 					) : (
 						<>No Events Found.</>

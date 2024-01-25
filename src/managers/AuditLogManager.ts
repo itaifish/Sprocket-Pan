@@ -48,7 +48,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 	}
 
 	getEventDataType(event: RequestEvent) {
-		const dataTypes = ['Service', 'Endpoint', 'Request'] as const;
+		const dataTypes = ['Service', 'Endpoint', 'Request', 'request'] as const;
 		for (const dt of dataTypes) {
 			if (event.eventType.includes(dt)) {
 				return dt.toLocaleLowerCase() as Lowercase<typeof dt>;
