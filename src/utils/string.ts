@@ -35,6 +35,10 @@ export function formatDate(date: Date | string) {
 	return defaultDateTimeFormatter.format(date);
 }
 
+export function formatMilliseconds(ms: number) {
+	return `${(ms / 1000).toFixed(3)} seconds`;
+}
+
 export const statusCodes: Record<number, string> = {
 	100: 'Continue',
 	101: 'Switching Protocols',

@@ -34,7 +34,6 @@ import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import WestIcon from '@mui/icons-material/West';
 import EastIcon from '@mui/icons-material/East';
-import { iconFromTabType } from '../molecules/tabs/TabHeader';
 import { Settings } from '../../types/settings/settings';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { log } from '../../utils/logging';

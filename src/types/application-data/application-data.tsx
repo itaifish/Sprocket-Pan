@@ -1,4 +1,11 @@
+import { AuditLog } from '../../managers/AuditLogManager';
 import { Settings } from '../settings/settings';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
+import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import { TabType } from '../state/state';
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
 export const RESTfulRequestVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'] as const;
@@ -43,6 +50,7 @@ export type NetworkFetchRequest = {
 export type HistoricalEndpointResponse = {
 	request: NetworkFetchRequest;
 	response: EndpointResponse;
+	auditLog?: AuditLog;
 };
 
 export type Endpoint<TUrlBase extends string = string> = {
@@ -116,4 +124,11 @@ export type EndpointResponse = {
 	bodyType: RawBodyType;
 	headers: Record<string, string>;
 	dateTime: Date;
+};
+
+export const iconFromTabType: Record<TabType, JSX.Element> = {
+	endpoint: <FolderOpenIcon />,
+	environment: <TableChartIcon />,
+	request: <TextSnippetIcon />,
+	service: <FolderOpenSharpIcon />,
 };

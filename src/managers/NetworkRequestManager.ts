@@ -16,7 +16,7 @@ import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
 import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
-import { AuditLog, RequestEvent, addToAuditLog } from './AuditLogManager';
+import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
@@ -129,7 +129,7 @@ class NetworkRequestManager {
 				dateTime: new Date(),
 			};
 			const { __data, ...headersToSend } = networkRequest.headers;
-			addToAuditLog(auditLog, 'before', 'request', request?.id);
+			auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
 			const networkCall = fetch(networkRequest.url, {
 				method: networkRequest.method,
 				body: body ? Body.json(body) : undefined,
@@ -140,7 +140,7 @@ class NetworkRequestManager {
 				networkCall,
 				data.settings.timeoutDurationMS,
 			);
-			addToAuditLog(auditLog, 'after', 'request', request?.id);
+			auditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
 			const responseText = res.data as string;
 			const response = {
 				statusCode: res.status,
@@ -153,7 +153,7 @@ class NetworkRequestManager {
 				dateTime: new Date(),
 			};
 
-			applicationDataManager.addResponseToHistory(request.id, networkRequest, response);
+			applicationDataManager.addResponseToHistory(request.id, networkRequest, response, auditLog);
 			// Run post-request scripts
 			scriptObjs = { service, endpoint, request };
 			const postRequestScripts = data.settings.scriptRunnerStrategy.post.map((strat) => ({
@@ -177,7 +177,6 @@ class NetworkRequestManager {
 			log.warn(errorStr);
 			return errorStr;
 		}
-		log.info(JSON.stringify(auditLog));
 		return null;
 	}
 
@@ -193,7 +192,8 @@ class NetworkRequestManager {
 	): Promise<string | undefined> {
 		if (script && script != '') {
 			try {
-				auditInfo && addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
+				auditInfo &&
+					auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
 				const sprocketPan = getScriptInjectionCode(requestId, response, auditInfo?.log);
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
@@ -202,14 +202,22 @@ class NetworkRequestManager {
 				const jsScript = ts.transpile(script);
 				const scriptTask = evalAsync(jsScript);
 				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
-				auditInfo && addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
+				auditInfo &&
+					auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
 			} catch (e) {
 				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 				const returnError = JSON.stringify({
 					...JSON.parse(errorStr),
 					errorType: `Invalid ${response != undefined ? 'Post' : 'Pre'}-request Script`,
 				});
-				auditInfo && addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId, returnError);
+				auditInfo &&
+					auditLogManager.addToAuditLog(
+						auditInfo.log,
+						'after',
+						auditInfo.scriptType,
+						auditInfo.associatedId,
+						returnError,
+					);
 				return returnError;
 			}
 		}

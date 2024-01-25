@@ -22,6 +22,7 @@ import { tabsManager } from './TabsManager';
 import { getDataArrayFromEnvKeys, noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
 import { Settings } from '../types/settings/settings';
+import { AuditLog } from './AuditLogManager';
 
 type DataEvent = 'update' | 'saved';
 
@@ -178,7 +179,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public addResponseToHistory(requestId: string, networkRequest: NetworkFetchRequest, response: EndpointResponse) {
+	public addResponseToHistory(
+		requestId: string,
+		networkRequest: NetworkFetchRequest,
+		response: EndpointResponse,
+		auditLog?: AuditLog,
+	) {
 		const reqToUpdate = this.data.requests[requestId];
 		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
@@ -188,6 +194,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		reqToUpdate.history.push({
 			request: networkRequest,
 			response,
+			auditLog,
 		});
 		if (this.data.settings.maxHistoryLength > 0 && reqToUpdate.history.length > this.data.settings.maxHistoryLength) {
 			reqToUpdate.history.shift();
