@@ -40,7 +40,7 @@ import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
-import { ResponseInfo } from './request/ResponseInfo';
+import { ResponseInfo } from './request/response/ResponseInfo';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
