@@ -58,7 +58,6 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 	}
 
 	transformAuditLog(auditLog: AuditLog): TransformedAuditLog | null {
-		// log.info(`transforming: ${JSON.stringify(auditLog)}`);
 		if (auditLog.length == 0) {
 			return null;
 		}

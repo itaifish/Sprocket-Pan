@@ -23,6 +23,7 @@ import { getDataArrayFromEnvKeys, noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
 import { Settings } from '../types/settings/settings';
 import { AuditLog } from './AuditLogManager';
+import { dateTimeReviver } from '../utils/json-parse';
 
 type DataEvent = 'update' | 'saved';
 
@@ -301,8 +302,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			});
 			const contents = await contentsTask;
 
-			const data = JSON.parse(contents) as ApplicationData;
-			const parsedHistory = JSON.parse(history) as { id: string; history: HistoricalEndpointResponse[] }[];
+			const data = JSON.parse(contents, dateTimeReviver) as ApplicationData;
+			const parsedHistory = JSON.parse(history, dateTimeReviver) as {
+				id: string;
+				history: HistoricalEndpointResponse[];
+			}[];
 			parsedHistory.forEach((responseHistory) => {
 				data.requests[responseHistory.id].history = responseHistory?.history ?? [];
 			});
