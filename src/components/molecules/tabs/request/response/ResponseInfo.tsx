@@ -23,8 +23,7 @@ type ResponseTabType = ValuesOf<typeof responseTabs>;
 
 export function ResponseInfo({ response, requestId }: { response: HistoricalEndpointResponse; requestId: string }) {
 	const [tab, setTab] = useState<ResponseTabType>('responseBody');
-	const timeDifference =
-		(new Date(response.response.dateTime).getTime() - new Date(response.request.dateTime).getTime()) / 1000;
+	const timeDifference = (response.response.dateTime.getTime() - response.request.dateTime.getTime()) / 1000;
 	return (
 		<>
 			<Typography level="h2" textAlign={'center'}>
