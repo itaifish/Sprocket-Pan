@@ -9,8 +9,9 @@ import {
 	styled,
 	Box,
 	Stack,
+	ListItemButton,
 } from '@mui/joy';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { AuditLog, TransformedAuditLog, auditLogManager } from '../../../../../managers/AuditLogManager';
 import { ApplicationDataContext, TabsContext } from '../../../../../managers/GlobalContextManager';
 import { tabsManager } from '../../../../../managers/TabsManager';
@@ -26,6 +27,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
+import { CollapseExpandButton } from '../../../../atoms/buttons/CollapseExpandButton';
 
 const eventStrIconsMap = {
 	Service: (
@@ -63,7 +65,7 @@ const HoverBox = styled(Box)(({ theme }) => {
 	const color = theme.vars.palette.neutral.darkChannel;
 	return {
 		'&:hover': {
-			backgroundColor: `rgb(${color.replaceAll(' ', ', ')})`,
+			// backgroundColor: `rgb(${color.replaceAll(' ', ', ')})`,
 		},
 	};
 });
@@ -72,6 +74,7 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 	const data = useContext(ApplicationDataContext);
 	const tabsContext = useContext(TabsContext);
 	function VisualEventLogInner(props: { transformedLog: TransformedAuditLog; requestId: string }) {
+		const [collapsed, setCollapsed] = useState(false);
 		const requestEvent = props.transformedLog.before;
 		const icons = (
 			<>
@@ -95,55 +98,60 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 							requestEvent.associatedId &&
 							data.requests[requestEvent.associatedId].name}{' '}
 						{camelCaseToTitle(requestEvent.eventType)}
+						{props.transformedLog.innerEvents.length > 0 && (
+							<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						)}
 					</ListItemDecorator>
-					<ListItemContent>
-						<Typography level="title-sm"></Typography>
-						<Typography level="body-sm">
-							<Stack direction="row" alignItems="center" gap={1}>
-								<TimerIcon />
-								{formatMilliseconds(
-									props.transformedLog.after.timestamp.getTime() - props.transformedLog.before.timestamp.getTime(),
-								)}
-							</Stack>
-							{dataType && requestEvent.associatedId && (
-								<Stack direction="row" alignItems={'center'} gap={1}>
-									<BadgeIcon />
-									{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
-									{requestEvent.associatedId != props.requestId ? (
-										<SprocketTooltip
-											text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
-												dataType,
-											)}`}
-										>
-											<IconButton
-												size="sm"
-												color="primary"
-												onClick={() => {
-													tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
-												}}
-											>
-												<LaunchIcon />
-											</IconButton>
-										</SprocketTooltip>
-									) : (
-										<SprocketTooltip
-											text={
-												requestEvent.eventType === 'request'
-													? 'This is the current request'
-													: `This is the ${camelCaseToTitle(
-															requestEvent.eventType,
-													  ).toLocaleLowerCase()} for this request`
-											}
-										>
-											<WhereToVoteIcon color="success" />
-										</SprocketTooltip>
+					<ListItemButton>
+						<ListItemContent>
+							<Typography level="title-sm"></Typography>
+							<Typography level="body-sm">
+								<Stack direction="row" alignItems="center" gap={1}>
+									<TimerIcon />
+									{formatMilliseconds(
+										props.transformedLog.after.timestamp.getTime() - props.transformedLog.before.timestamp.getTime(),
 									)}
 								</Stack>
-							)}
-						</Typography>
-					</ListItemContent>
+								{dataType && requestEvent.associatedId && (
+									<Stack direction="row" alignItems={'center'} gap={1}>
+										<BadgeIcon />
+										{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
+										{requestEvent.associatedId != props.requestId ? (
+											<SprocketTooltip
+												text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
+													dataType,
+												)}`}
+											>
+												<IconButton
+													size="sm"
+													color="primary"
+													onClick={() => {
+														tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
+													}}
+												>
+													<LaunchIcon />
+												</IconButton>
+											</SprocketTooltip>
+										) : (
+											<SprocketTooltip
+												text={
+													requestEvent.eventType === 'request'
+														? 'This is the current request'
+														: `This is the ${camelCaseToTitle(
+																requestEvent.eventType,
+														  ).toLocaleLowerCase()} for this request`
+												}
+											>
+												<WhereToVoteIcon color="success" />
+											</SprocketTooltip>
+										)}
+									</Stack>
+								)}
+							</Typography>
+						</ListItemContent>
+					</ListItemButton>
 				</HoverBox>
-				{props.transformedLog.innerEvents.length > 0 && (
+				{props.transformedLog.innerEvents.length > 0 && !collapsed && (
 					<ListItem nested>
 						{props.transformedLog.innerEvents.map((event, index) => (
 							<Box key={index}>
@@ -158,6 +166,8 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 	}
 	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
 	return (
-		<List>{transformedLog && <VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} />}</List>
+		<List sx={{ '--List-nestedInsetStart': '10rem' }}>
+			{transformedLog && <VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} />}
+		</List>
 	);
 }
