@@ -6,7 +6,6 @@ import {
 	ListItem,
 	Divider,
 	List,
-	styled,
 	Box,
 	Stack,
 	ListItemButton,
@@ -61,15 +60,6 @@ const eventStrIconsMap = {
 	),
 };
 
-const HoverBox = styled(Box)(({ theme }) => {
-	const color = theme.vars.palette.neutral.darkChannel;
-	return {
-		'&:hover': {
-			// backgroundColor: `rgb(${color.replaceAll(' ', ', ')})`,
-		},
-	};
-});
-
 export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
 	const data = useContext(ApplicationDataContext);
 	const tabsContext = useContext(TabsContext);
@@ -91,7 +81,7 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 		const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
 		return (
 			<>
-				<HoverBox>
+				<Box>
 					<ListItemDecorator>
 						<Box sx={{ mr: '5px' }}>{icons}</Box>
 						{requestEvent.eventType === 'request' &&
@@ -150,7 +140,7 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 							</Typography>
 						</ListItemContent>
 					</ListItemButton>
-				</HoverBox>
+				</Box>
 				{props.transformedLog.innerEvents.length > 0 && !collapsed && (
 					<ListItem nested>
 						{props.transformedLog.innerEvents.map((event, index) => (
