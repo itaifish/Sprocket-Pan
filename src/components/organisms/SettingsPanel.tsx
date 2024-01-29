@@ -37,6 +37,7 @@ import EastIcon from '@mui/icons-material/East';
 import { Settings } from '../../types/settings/settings';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { log } from '../../utils/logging';
+import { iconFromTabType } from '../../types/application-data/application-data';
 
 const style = {
 	position: 'absolute' as const,
