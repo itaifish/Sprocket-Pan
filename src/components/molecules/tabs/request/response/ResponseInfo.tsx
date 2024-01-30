@@ -92,9 +92,7 @@ export function ResponseInfo({ response, requestId }: { response: HistoricalEndp
 				</TabPanel>
 				<TabPanel value="eventLog">
 					{response.auditLog ? (
-						<>
-							<VisualEventLog auditLog={response.auditLog} requestId={requestId} />
-						</>
+						<VisualEventLog auditLog={response.auditLog} requestId={requestId} />
 					) : (
 						<>No Events Found.</>
 					)}

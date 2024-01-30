@@ -53,107 +53,104 @@ const eventStrIconsMap = {
 			<SendIcon />
 		</>
 	),
-	root: (
-		<>
-			<AnchorIcon />
-		</>
-	),
+	root: <AnchorIcon />,
 };
 
-export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
+function VisualEventLogInner(props: { transformedLog: TransformedAuditLog; requestId: string }) {
 	const data = useContext(ApplicationDataContext);
 	const tabsContext = useContext(TabsContext);
-	function VisualEventLogInner(props: { transformedLog: TransformedAuditLog; requestId: string }) {
-		const [collapsed, setCollapsed] = useState(false);
-		const requestEvent = props.transformedLog.before;
-		const icons = (
-			<>
-				{requestEvent.eventType.includes('pre') && <ArrowDropUpIcon />}
-				{requestEvent.eventType.includes('post') && <ArrowDropDownIcon />}
-				{
-					eventStrIconsMap[
-						(Object.keys(eventStrIconsMap).find((event) => requestEvent.eventType.includes(event)) ??
-							'request') as keyof typeof eventStrIconsMap
-					]
-				}
-			</>
-		);
-		const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
-		return (
-			<>
-				<Box>
-					<ListItemDecorator>
-						<Box sx={{ mr: '5px' }}>{icons}</Box>
-						{requestEvent.eventType === 'request' &&
-							requestEvent.associatedId &&
-							data.requests[requestEvent.associatedId].name}{' '}
-						{camelCaseToTitle(requestEvent.eventType)}
-						{props.transformedLog.innerEvents.length > 0 && (
-							<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
-						)}
-					</ListItemDecorator>
-					<ListItemButton>
-						<ListItemContent>
-							<Typography level="title-sm"></Typography>
-							<Typography level="body-sm">
-								<Stack direction="row" alignItems="center" gap={1}>
-									<TimerIcon />
-									{formatMilliseconds(
-										props.transformedLog.after.timestamp.getTime() - props.transformedLog.before.timestamp.getTime(),
+	const [collapsed, setCollapsed] = useState(false);
+	const requestEvent = props.transformedLog.before;
+	const icons = (
+		<>
+			{requestEvent.eventType.includes('pre') && <ArrowDropUpIcon />}
+			{requestEvent.eventType.includes('post') && <ArrowDropDownIcon />}
+			{
+				eventStrIconsMap[
+					(Object.keys(eventStrIconsMap).find((event) => requestEvent.eventType.includes(event)) ??
+						'request') as keyof typeof eventStrIconsMap
+				]
+			}
+		</>
+	);
+	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
+	return (
+		<>
+			<Box>
+				<ListItemDecorator>
+					<Box sx={{ mr: '5px' }}>{icons}</Box>
+					{requestEvent.eventType === 'request' &&
+						requestEvent.associatedId &&
+						data.requests[requestEvent.associatedId].name}{' '}
+					{camelCaseToTitle(requestEvent.eventType)}
+					{props.transformedLog.innerEvents.length > 0 && (
+						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+					)}
+				</ListItemDecorator>
+				<ListItemButton>
+					<ListItemContent>
+						<Typography level="title-sm"></Typography>
+						<Typography level="body-sm">
+							<Stack direction="row" alignItems="center" gap={1}>
+								<TimerIcon />
+								{formatMilliseconds(
+									props.transformedLog.after.timestamp.getTime() - props.transformedLog.before.timestamp.getTime(),
+								)}
+							</Stack>
+							{dataType && requestEvent.associatedId && (
+								<Stack direction="row" alignItems={'center'} gap={1}>
+									<BadgeIcon />
+									{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
+									{requestEvent.associatedId != props.requestId ? (
+										<SprocketTooltip
+											text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
+												dataType,
+											)}`}
+										>
+											<IconButton
+												size="sm"
+												color="primary"
+												onClick={() => {
+													tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
+												}}
+											>
+												<LaunchIcon />
+											</IconButton>
+										</SprocketTooltip>
+									) : (
+										<SprocketTooltip
+											text={
+												requestEvent.eventType === 'request'
+													? 'This is the current request'
+													: `This is the ${camelCaseToTitle(
+															requestEvent.eventType,
+													  ).toLocaleLowerCase()} for this request`
+											}
+										>
+											<WhereToVoteIcon color="success" />
+										</SprocketTooltip>
 									)}
 								</Stack>
-								{dataType && requestEvent.associatedId && (
-									<Stack direction="row" alignItems={'center'} gap={1}>
-										<BadgeIcon />
-										{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
-										{requestEvent.associatedId != props.requestId ? (
-											<SprocketTooltip
-												text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
-													dataType,
-												)}`}
-											>
-												<IconButton
-													size="sm"
-													color="primary"
-													onClick={() => {
-														tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
-													}}
-												>
-													<LaunchIcon />
-												</IconButton>
-											</SprocketTooltip>
-										) : (
-											<SprocketTooltip
-												text={
-													requestEvent.eventType === 'request'
-														? 'This is the current request'
-														: `This is the ${camelCaseToTitle(
-																requestEvent.eventType,
-														  ).toLocaleLowerCase()} for this request`
-												}
-											>
-												<WhereToVoteIcon color="success" />
-											</SprocketTooltip>
-										)}
-									</Stack>
-								)}
-							</Typography>
-						</ListItemContent>
-					</ListItemButton>
-				</Box>
-				{props.transformedLog.innerEvents.length > 0 && !collapsed && (
-					<ListItem nested>
-						{props.transformedLog.innerEvents.map((event, index) => (
-							<Box key={index}>
-								<Divider sx={{ my: '10px' }} />
-								<VisualEventLogInner transformedLog={event} requestId={props.requestId} />
-							</Box>
-						))}
-					</ListItem>
-				)}
-			</>
-		);
-	}
+							)}
+						</Typography>
+					</ListItemContent>
+				</ListItemButton>
+			</Box>
+			{props.transformedLog.innerEvents.length > 0 && !collapsed && (
+				<ListItem nested>
+					{props.transformedLog.innerEvents.map((event, index) => (
+						<Box key={index}>
+							<Divider sx={{ my: '10px' }} />
+							<VisualEventLogInner transformedLog={event} requestId={props.requestId} />
+						</Box>
+					))}
+				</ListItem>
+			)}
+		</>
+	);
+}
+
+export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
 	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
 	return (
 		<List sx={{ '--List-nestedInsetStart': '10rem' }}>

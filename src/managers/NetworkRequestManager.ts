@@ -190,10 +190,12 @@ class NetworkRequestManager {
 			associatedId: string;
 		},
 	): Promise<string | undefined> {
-		if (script && script != '') {
+		if (script) {
 			try {
-				auditInfo &&
+				if (auditInfo) {
 					auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
+				}
+
 				const sprocketPan = getScriptInjectionCode(requestId, response, auditInfo?.log);
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
@@ -202,15 +204,16 @@ class NetworkRequestManager {
 				const jsScript = ts.transpile(script);
 				const scriptTask = evalAsync(jsScript);
 				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
-				auditInfo &&
+				if (auditInfo) {
 					auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
+				}
 			} catch (e) {
 				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 				const returnError = JSON.stringify({
 					...JSON.parse(errorStr),
-					errorType: `Invalid ${response != undefined ? 'Post' : 'Pre'}-request Script`,
+					errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
 				});
-				auditInfo &&
+				if (auditInfo) {
 					auditLogManager.addToAuditLog(
 						auditInfo.log,
 						'after',
@@ -218,6 +221,7 @@ class NetworkRequestManager {
 						auditInfo.associatedId,
 						returnError,
 					);
+				}
 				return returnError;
 			}
 		}

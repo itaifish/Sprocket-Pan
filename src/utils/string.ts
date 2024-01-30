@@ -36,7 +36,7 @@ export function formatDate(date: Date | string) {
 }
 
 export function formatMilliseconds(ms: number) {
-	return `${(ms / 1000).toFixed(3)} seconds`;
+	return `${(ms / 1000).toFixed(3)} second${ms === 1000 ? '' : 's'}`;
 }
 
 export const statusCodes: Record<number, string> = {
