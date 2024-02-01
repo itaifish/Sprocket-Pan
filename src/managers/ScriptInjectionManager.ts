@@ -1,10 +1,11 @@
 import { EndpointResponse } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
 import { applicationDataManager } from './ApplicationDataManager';
+import { AuditLog } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { networkRequestManager } from './NetworkRequestManager';
 
-export function getScriptInjectionCode(requestId: string, response?: EndpointResponse) {
+export function getScriptInjectionCode(requestId: string, response?: EndpointResponse, auditLog?: AuditLog) {
 	const getRequestAndData = () => {
 		const data = applicationDataManager.getApplicationData();
 		return {
@@ -80,7 +81,7 @@ export function getScriptInjectionCode(requestId: string, response?: EndpointRes
 
 	const sendRequest = async (requestId: string) => {
 		const { data } = getRequestAndData();
-		await networkRequestManager.sendRequest(requestId);
+		await networkRequestManager.sendRequest(requestId, auditLog);
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 

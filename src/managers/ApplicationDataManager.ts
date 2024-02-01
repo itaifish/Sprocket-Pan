@@ -22,6 +22,8 @@ import { tabsManager } from './TabsManager';
 import { getDataArrayFromEnvKeys, noHistoryReplacer } from '../utils/functions';
 import { TabsContextType } from './GlobalContextManager';
 import { Settings } from '../types/settings/settings';
+import { AuditLog } from './AuditLogManager';
+import { dateTimeReviver } from '../utils/json-parse';
 
 type DataEvent = 'update' | 'saved';
 
@@ -178,7 +180,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		this.emit('update');
 	}
 
-	public addResponseToHistory(requestId: string, networkRequest: NetworkFetchRequest, response: EndpointResponse) {
+	public addResponseToHistory(
+		requestId: string,
+		networkRequest: NetworkFetchRequest,
+		response: EndpointResponse,
+		auditLog?: AuditLog,
+	) {
 		const reqToUpdate = this.data.requests[requestId];
 		if (reqToUpdate == null) {
 			log.warn(`Can't find request ${requestId}`);
@@ -188,6 +195,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		reqToUpdate.history.push({
 			request: networkRequest,
 			response,
+			auditLog,
 		});
 		if (this.data.settings.maxHistoryLength > 0 && reqToUpdate.history.length > this.data.settings.maxHistoryLength) {
 			reqToUpdate.history.shift();
@@ -294,8 +302,11 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			});
 			const contents = await contentsTask;
 
-			const data = JSON.parse(contents) as ApplicationData;
-			const parsedHistory = JSON.parse(history) as { id: string; history: HistoricalEndpointResponse[] }[];
+			const data = JSON.parse(contents, dateTimeReviver) as ApplicationData;
+			const parsedHistory = JSON.parse(history, dateTimeReviver) as {
+				id: string;
+				history: HistoricalEndpointResponse[];
+			}[];
 			parsedHistory.forEach((responseHistory) => {
 				data.requests[responseHistory.id].history = responseHistory?.history ?? [];
 			});
