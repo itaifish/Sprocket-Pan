@@ -4,7 +4,6 @@ import { Stack, IconButton } from '@mui/joy';
 import { useContext, useEffect, useState } from 'react';
 import { tabsManager } from '../../../managers/TabsManager';
 import { TabsContext } from '../../../managers/GlobalContextManager';
-import { log } from '../../../utils/logging';
 import { SprocketTooltip } from '../SprocketTooltip';
 
 export function UndoRedoTabsButton() {
@@ -16,7 +15,6 @@ export function UndoRedoTabsButton() {
 		const onTabSelected = () => {
 			setGoBackIndex(tabsManager.peekHistoryPrevious());
 			setGoForwardIndex(tabsManager.peekHistoryNext());
-			log.info('Tab Selected');
 		};
 		tabsManager.on('TabSelected', onTabSelected);
 		return () => {
