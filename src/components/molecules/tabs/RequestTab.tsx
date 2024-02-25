@@ -40,7 +40,7 @@ import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
-import { ResponseInfo } from './request/ResponseInfo';
+import { ResponseInfo } from './request/response/ResponseInfo';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -313,7 +313,7 @@ export function RequestTab(props: TabProps) {
 								<ArrowRightIcon />
 							</IconButton>
 						</Stack>
-						<ResponseInfo response={responseData} />
+						<ResponseInfo response={responseData} requestId={props.id} />
 					</Card>
 				</Grid>
 			</Grid>

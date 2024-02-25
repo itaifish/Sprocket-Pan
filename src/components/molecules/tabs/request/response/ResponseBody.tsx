@@ -1,11 +1,11 @@
 import { Stack, useColorScheme } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
-import { log } from '../../../../utils/logging';
-import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
-import { EndpointResponse } from '../../../../types/application-data/application-data';
-import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
-import { CopyToClipboardButton } from '../../../atoms/buttons/CopyToClipboardButton';
+import { log } from '../../../../../utils/logging';
+import { FormatIcon } from '../../../../atoms/buttons/FormatIcon';
+import { EndpointResponse } from '../../../../../types/application-data/application-data';
+import { defaultEditorOptions } from '../../../../../managers/MonacoInitManager';
+import { CopyToClipboardButton } from '../../../../atoms/buttons/CopyToClipboardButton';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	const editorRef = useRef<any>(null);

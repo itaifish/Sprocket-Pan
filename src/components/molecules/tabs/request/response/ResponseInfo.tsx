@@ -7,80 +7,23 @@ import {
 	Tab,
 	TabList,
 	TabPanel,
-	Table,
 	Tabs,
 	Typography,
 } from '@mui/joy';
-import { HistoricalEndpointResponse, SPHeaders } from '../../../../types/application-data/application-data';
+import { HistoricalEndpointResponse } from '../../../../../types/application-data/application-data';
 import { ResponseBody } from './ResponseBody';
-import { camelCaseToTitle, formatDate, statusCodes } from '../../../../utils/string';
+import { camelCaseToTitle, formatDate, statusCodes } from '../../../../../utils/string';
 import { useState } from 'react';
-import { ValuesOf } from '../../../../types/utils/utils';
+import { ValuesOf } from '../../../../../types/utils/utils';
+import { HeadersDisplayTable } from './HeadersDisplayTable';
+import { VisualEventLog } from './VisualEventLog';
 
-const responseTabs = ['responseBody', 'details'] as const;
+const responseTabs = ['responseBody', 'details', 'eventLog'] as const;
 type ResponseTabType = ValuesOf<typeof responseTabs>;
 
-function HeadersDisplayTable({
-	headers,
-	label,
-}: {
-	headers: Record<string, string> | SPHeaders;
-	label: 'request' | 'response';
-}) {
-	let display = <></>;
-	if (headers.__data && typeof headers.__data != 'string') {
-		if (headers.__data.length == 0) {
-			return <></>;
-		}
-		display = (
-			<>
-				{headers.__data.map(({ key, value }, index) => (
-					<tr key={index}>
-						<td>{key}</td>
-						<td>{value}</td>
-					</tr>
-				))}
-			</>
-		);
-	} else {
-		if (Object.keys(headers).length == 0) {
-			return <></>;
-		}
-		display = (
-			<>
-				{Object.entries(headers as Record<string, string>).map(([headerKey, headerVal], index) => (
-					<tr key={index}>
-						<td>{headerKey}</td>
-						<td>{headerVal}</td>
-					</tr>
-				))}
-			</>
-		);
-	}
-	return (
-		<AccordionGroup>
-			<Accordion defaultExpanded>
-				<AccordionSummary>Headers</AccordionSummary>
-				<AccordionDetails>
-					<Table aria-label={`Headers table for ${label}`} variant="outlined" sx={{ overflowWrap: 'break-word' }}>
-						<thead>
-							<tr>
-								<th>Key</th>
-								<th>Value</th>
-							</tr>
-						</thead>
-						<tbody>{display}</tbody>
-					</Table>
-				</AccordionDetails>
-			</Accordion>
-		</AccordionGroup>
-	);
-}
-
-export function ResponseInfo({ response }: { response: HistoricalEndpointResponse }) {
+export function ResponseInfo({ response, requestId }: { response: HistoricalEndpointResponse; requestId: string }) {
 	const [tab, setTab] = useState<ResponseTabType>('responseBody');
-	const timeDifference =
-		(new Date(response.response.dateTime).getTime() - new Date(response.request.dateTime).getTime()) / 1000;
+	const timeDifference = (response.response.dateTime.getTime() - response.request.dateTime.getTime()) / 1000;
 	return (
 		<>
 			<Typography level="h2" textAlign={'center'}>
@@ -146,6 +89,13 @@ export function ResponseInfo({ response }: { response: HistoricalEndpointRespons
 						response was recieved.
 					</Typography>
 					<HeadersDisplayTable headers={response.response.headers} label="response" />
+				</TabPanel>
+				<TabPanel value="eventLog">
+					{response.auditLog ? (
+						<VisualEventLog auditLog={response.auditLog} requestId={requestId} />
+					) : (
+						<>No Events Found.</>
+					)}
 				</TabPanel>
 			</Tabs>
 		</>

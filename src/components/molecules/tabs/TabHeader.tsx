@@ -2,24 +2,12 @@ import { useCallback, useContext, useEffect, useState } from 'react';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
-import { TabType } from '../../../types/state/state';
-import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
-import { Environment } from '../../../types/application-data/application-data';
-import TableChartIcon from '@mui/icons-material/TableChart';
-import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
+import { Environment, iconFromTabType } from '../../../types/application-data/application-data';
 import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
-
-export const iconFromTabType: Record<TabType, JSX.Element> = {
-	endpoint: <FolderOpenIcon />,
-	environment: <TableChartIcon />,
-	request: <TextSnippetIcon />,
-	service: <FolderOpenSharpIcon />,
-};
 
 export function TabHeader() {
 	const tabsContext = useContext(TabsContext);
