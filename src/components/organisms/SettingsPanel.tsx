@@ -36,7 +36,6 @@ import WestIcon from '@mui/icons-material/West';
 import EastIcon from '@mui/icons-material/East';
 import { Settings } from '../../types/settings/settings';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
-import { log } from '../../utils/logging';
 import { iconFromTabType } from '../../types/application-data/application-data';
 
 const style = {
@@ -286,30 +285,6 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 									onClick={async () => {
 										const localDir = await appLocalDataDir();
 										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
-										invoke('show_in_explorer', { path: data });
-									}}
-								>
-									Open Data Folder
-								</Button>
-								<Button
-									sx={{ width: '200px' }}
-									startDecorator={<DeleteForever />}
-									color="danger"
-									onClick={() => setDeleteHistoryModalOpen(true)}
-								>
-									Delete All History
-								</Button>
-							</Stack>
-						</TabPanel>
-						<TabPanel value={2}>
-							<Stack spacing={3}>
-								<Button
-									sx={{ width: '200px' }}
-									startDecorator={<FolderOpenIcon />}
-									onClick={async () => {
-										const localDir = await appLocalDataDir();
-										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
-										log.info(`data path: ${data}`);
 										invoke('show_in_explorer', { path: data });
 									}}
 								>
