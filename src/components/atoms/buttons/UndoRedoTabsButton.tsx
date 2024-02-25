@@ -5,6 +5,7 @@ import { useContext, useEffect, useState } from 'react';
 import { tabsManager } from '../../../managers/TabsManager';
 import { TabsContext } from '../../../managers/GlobalContextManager';
 import { log } from '../../../utils/logging';
+import { SprocketTooltip } from '../SprocketTooltip';
 
 export function UndoRedoTabsButton() {
 	const [goBackIndex, setGoBackIndex] = useState<number | null>(null);
@@ -25,20 +26,24 @@ export function UndoRedoTabsButton() {
 
 	return (
 		<Stack direction={'row'} spacing={0} justifyContent={'flex-end'}>
-			<IconButton
-				variant="outlined"
-				disabled={goBackIndex == null}
-				onClick={() => goBackIndex != null && tabsManager.selectTabFromHistory(tabsContext, goBackIndex)}
-			>
-				<UndoRoundedIcon />
-			</IconButton>
-			<IconButton
-				variant="outlined"
-				disabled={goForwardIndex == null}
-				onClick={() => goForwardIndex != null && tabsManager.selectTabFromHistory(tabsContext, goForwardIndex)}
-			>
-				<RedoRoundedIcon />
-			</IconButton>
+			<SprocketTooltip text="Previous Tab">
+				<IconButton
+					variant="outlined"
+					disabled={goBackIndex == null}
+					onClick={() => goBackIndex != null && tabsManager.selectTabFromHistory(tabsContext, goBackIndex)}
+				>
+					<UndoRoundedIcon />
+				</IconButton>
+			</SprocketTooltip>
+			<SprocketTooltip text="Next Tab">
+				<IconButton
+					variant="outlined"
+					disabled={goForwardIndex == null}
+					onClick={() => goForwardIndex != null && tabsManager.selectTabFromHistory(tabsContext, goForwardIndex)}
+				>
+					<RedoRoundedIcon />
+				</IconButton>
+			</SprocketTooltip>
 		</Stack>
 	);
 }
