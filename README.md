@@ -17,6 +17,11 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
 
 ## Roadmap
 
+Key:
+☐: Ready to start
+❗: Work in progress
+✅: Complete
+
 - Add workspaces ☐
 - Import / Export work ❗
   - Imports from:
@@ -37,4 +42,9 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
 - Command Pallete ☐
 - Run Sprocket Pan in CLI ☐
 - Automatic Updates (No need to redownload the program) ☐
-- Audit trail for requests
+- Audit trail for requests ☐
+- Tabs ❗
+  - Dragging and Dropping ☐
+  - Favorites ☐
+  - Close all / all to the right/left ☐
+  - Selection History ✅
