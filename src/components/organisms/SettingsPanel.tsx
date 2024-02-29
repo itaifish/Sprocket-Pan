@@ -16,8 +16,9 @@ import {
 	IconButton,
 	Chip,
 	Typography,
+	Grid,
 } from '@mui/joy';
-import { ApplicationDataContext } from '../../managers/GlobalContextManager';
+import { ApplicationDataContext, GoToWorkspaceSelectionContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -37,6 +38,7 @@ import EastIcon from '@mui/icons-material/East';
 import { Settings } from '../../types/settings/settings';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { iconFromTabType } from '../../types/application-data/application-data';
+import SaveIcon from '@mui/icons-material/Save';
 
 const style = {
 	position: 'absolute' as const,
@@ -115,8 +117,10 @@ const ScriptChips = ({
 
 export const SettingsPanel = (props: SettingsPanelProps) => {
 	const data = useContext(ApplicationDataContext);
+	const goToWorkspaceSelection = useContext(GoToWorkspaceSelectionContext);
 	const [unsavedSettings, setUnsavedSettings] = useState(data.settings);
 	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
+	const [quitWithoutSavingModalOpen, setQuitWithoutSavingModalOpen] = useState(false);
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(data.settings) !== JSON.stringify(unsavedSettings);
 	}, [data.settings, unsavedSettings]);
@@ -278,27 +282,62 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 							</Stack>
 						</TabPanel>
 						<TabPanel value={2}>
-							<Stack spacing={3}>
-								<Button
-									sx={{ width: '200px' }}
-									startDecorator={<FolderOpenIcon />}
-									onClick={async () => {
-										const localDir = await appLocalDataDir();
-										const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
-										invoke('show_in_explorer', { path: data });
-									}}
-								>
-									Open Data Folder
-								</Button>
-								<Button
-									sx={{ width: '200px' }}
-									startDecorator={<DeleteForever />}
-									color="danger"
-									onClick={() => setDeleteHistoryModalOpen(true)}
-								>
-									Delete All History
-								</Button>
-							</Stack>
+							<Box sx={{ width: '500px' }}>
+								<Grid container justifyContent={'left'} spacing={4}>
+									<Grid xs={6}>
+										<Button
+											sx={{ width: '200px' }}
+											startDecorator={<FolderOpenIcon />}
+											onClick={async () => {
+												const localDir = await appLocalDataDir();
+												const data = `${localDir}${ApplicationDataManager.DATA_FOLDER_NAME}`;
+												invoke('show_in_explorer', { path: data });
+											}}
+											variant="outlined"
+										>
+											Open Data Folder
+										</Button>
+									</Grid>
+									<Grid xs={6}>
+										<Button
+											sx={{ width: '200px' }}
+											startDecorator={<DeleteForever />}
+											color="danger"
+											onClick={() => setDeleteHistoryModalOpen(true)}
+											variant="outlined"
+										>
+											Delete All History
+										</Button>
+									</Grid>
+									<Grid xs={6}>
+										<Button
+											sx={{ width: '200px' }}
+											startDecorator={<SaveIcon />}
+											color="success"
+											variant="outlined"
+											onClick={async () => {
+												await applicationDataManager.saveApplicationData(data);
+												goToWorkspaceSelection();
+											}}
+										>
+											Save & Select Another Workspace
+										</Button>
+									</Grid>
+									<Grid xs={6}>
+										<Button
+											sx={{ width: '200px' }}
+											startDecorator={<SaveIcon />}
+											color="danger"
+											variant="outlined"
+											onClick={() => {
+												setQuitWithoutSavingModalOpen(true);
+											}}
+										>
+											Leave Without Saving & Select Another Workspace
+										</Button>
+									</Grid>
+								</Grid>
+							</Box>
 						</TabPanel>
 					</Tabs>
 					<Box
@@ -335,6 +374,16 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					Object.keys(data.requests).forEach((requestId) => {
 						applicationDataManager.update('request', requestId, { history: [] });
 					});
+				}}
+			/>
+			<AreYouSureModal
+				open={quitWithoutSavingModalOpen}
+				closeFunc={() => {
+					setQuitWithoutSavingModalOpen(false);
+				}}
+				action="Quit Without Saving"
+				actionFunc={() => {
+					goToWorkspaceSelection();
 				}}
 			/>
 		</>

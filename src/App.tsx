@@ -4,7 +4,7 @@ import { log } from './utils/logging';
 import { useColorScheme } from '@mui/joy';
 import { useMonaco } from '@monaco-editor/react';
 import { initMonaco } from './managers/MonacoInitManager';
-import { ApplicationDataContext } from './managers/GlobalContextManager';
+import { ApplicationDataContext, GoToWorkspaceSelectionContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
 import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
 import { Workspace } from './components/organisms/Workspace';
@@ -49,7 +49,13 @@ export function App() {
 	return (
 		<div className="container" style={{ height: '100vh' }}>
 			<ApplicationDataContext.Provider value={data}>
-				{workspaceState === 'noneSelected' ? <WorkspaceSelector selectWorkspace={selectWorkspace} /> : <Workspace />}
+				<GoToWorkspaceSelectionContext.Provider
+					value={() => {
+						setWorkspaceState('noneSelected');
+					}}
+				>
+					{workspaceState === 'noneSelected' ? <WorkspaceSelector selectWorkspace={selectWorkspace} /> : <Workspace />}
+				</GoToWorkspaceSelectionContext.Provider>
 			</ApplicationDataContext.Provider>
 		</div>
 	);
