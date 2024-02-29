@@ -41,7 +41,7 @@ type AdditionalContextType<TTabType> = TTabType extends 'request'
 	: undefined;
 
 export class ApplicationDataManager extends EventEmitter<DataEvent> {
-	private static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
+	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	public static readonly DATA_FOLDER_NAME = 'data' as const;
 	public static readonly DATA_FILE_NAME = 'data' as const;
 	private static readonly PATH =
@@ -51,9 +51,12 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	public static readonly INSTANCE = new ApplicationDataManager();
 
 	private data: ApplicationData;
+	private workspace?: string;
+
 	private constructor() {
 		super();
 		this.data = ApplicationDataManager.getDefaultData();
+		this.workspace = undefined;
 		this.init();
 	}
 
@@ -292,12 +295,22 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		};
 	}
 
+	/**
+	 * Sets the workspace and reloads everything from disk
+	 * @param workspace Either the workspace name, or undefined if you want the default workspace
+	 */
+	public setWorkspace(workspace?: string) {
+		this.workspace = workspace;
+		this.init();
+	}
+
 	private loadDataFromFile = async () => {
+		const paths = ApplicationDataManager.getWorkspacePath();
 		try {
-			const contentsTask = readTextFile(ApplicationDataManager.PATH, {
+			const contentsTask = readTextFile(paths.data, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
-			const history = await readTextFile(ApplicationDataManager.HISTORY_PATH, {
+			const history = await readTextFile(paths.history, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
 			const contents = await contentsTask;
@@ -323,13 +336,16 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	 */
 	private createDataFolderIfNotExists = async () => {
 		log.trace(`createDataFolderIfNotExists called`);
+		const dataFolderLocalPath = this.workspace
+			? `${this.workspace}${path.sep}${ApplicationDataManager.DATA_FOLDER_NAME}`
+			: ApplicationDataManager.DATA_FOLDER_NAME;
 		try {
-			const doesExist = await exists(`${ApplicationDataManager.DATA_FOLDER_NAME}`, {
+			const doesExist = await exists(dataFolderLocalPath, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
 			if (!doesExist) {
 				log.debug(`Folder does not exist, creating...`);
-				await createDir(ApplicationDataManager.DATA_FOLDER_NAME, {
+				await createDir(dataFolderLocalPath, {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 					recursive: true,
 				});
@@ -349,8 +365,8 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	 */
 	private createDataFileIfNotExists = async (fileContents: Record<string, unknown>) => {
 		log.trace(`createDataFolderIfNotExists called`);
-
-		const pathsToCreate = [ApplicationDataManager.PATH, ApplicationDataManager.HISTORY_PATH];
+		const paths = ApplicationDataManager.getWorkspacePath();
+		const pathsToCreate = [paths.data, paths.history];
 		const createIfNotExistsPromises = pathsToCreate.map((path) => {
 			const action = async () => {
 				try {
@@ -380,16 +396,17 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	};
 
 	public saveApplicationData = async (applicationData: ApplicationData) => {
+		const paths = ApplicationDataManager.getWorkspacePath();
 		try {
 			const saveData = async () => {
-				const doesExist = await exists(ApplicationDataManager.PATH, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+				const doesExist = await exists(paths.data, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
 				if (!doesExist) {
 					log.warn(`File does not exist, exiting...`);
 					return 'doesNotExist' as const;
 				} else {
 					log.trace(`File already exists, updating...`);
 					await writeFile(
-						{ contents: JSON.stringify(applicationData, noHistoryReplacer, 4), path: ApplicationDataManager.PATH },
+						{ contents: JSON.stringify(applicationData, noHistoryReplacer, 4), path: paths.data },
 						{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 					);
 					this.emit('saved');
@@ -397,7 +414,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				}
 			};
 			const saveHistory = async () => {
-				const doesExist = await exists(ApplicationDataManager.HISTORY_PATH, {
+				const doesExist = await exists(paths.history, {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 				});
 				if (!doesExist) {
@@ -411,7 +428,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					await writeFile(
 						{
 							contents: JSON.stringify(historyOnly, undefined, 4),
-							path: ApplicationDataManager.HISTORY_PATH,
+							path: paths.history,
 						},
 						{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 					);
@@ -445,6 +462,17 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		} finally {
 			this.emit('update');
 		}
+	}
+
+	private static getWorkspacePath(workspace?: string) {
+		if (workspace == undefined) {
+			return { data: ApplicationDataManager.PATH, history: ApplicationDataManager.HISTORY_PATH };
+		}
+		return {
+			data: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspace}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const,
+			history:
+				`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspace}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const,
+		};
 	}
 }
 
