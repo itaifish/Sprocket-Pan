@@ -7,8 +7,10 @@ import { initMonaco } from './managers/MonacoInitManager';
 import { ApplicationDataContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
 import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
+import { Workspace } from './components/organisms/Workspace';
 
 export function App() {
+	const [workspaceState, setWorkspaceState] = useState<'noneSelected' | 'oneSelected'>('noneSelected');
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
 	const { setMode } = useColorScheme();
@@ -39,11 +41,15 @@ export function App() {
 		}
 	}, [monaco]);
 
+	const selectWorkspace = (workspace: string | undefined) => {
+		applicationDataManager.setWorkspace(workspace);
+		setWorkspaceState('oneSelected');
+	};
+
 	return (
 		<div className="container" style={{ height: '100vh' }}>
 			<ApplicationDataContext.Provider value={data}>
-				<WorkspaceSelector />
-				{/* <Workspace /> */}
+				{workspaceState === 'noneSelected' ? <WorkspaceSelector selectWorkspace={selectWorkspace} /> : <Workspace />}
 			</ApplicationDataContext.Provider>
 		</div>
 	);
