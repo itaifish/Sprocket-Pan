@@ -6,13 +6,16 @@ import { NavigableServicesFileSystem } from '../molecules/file-system/NavigableS
 import { SideDrawer } from '../molecules/file-system/SideDrawer';
 import { SideDrawerActionButtons } from '../molecules/file-system/SideDrawerActionButtons';
 import { TabHeader } from '../molecules/tabs/TabHeader';
+import { applicationDataManager } from '../../managers/ApplicationDataManager';
 
 export function Workspace() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
 	const [searchText, setSearchText] = useState('');
-
+	useEffect(() => {
+		console.log(applicationDataManager.getApplicationData().workspaceMetadata?.name ?? 'No data');
+	}, []);
 	return (
 		<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
 			<TabsContext.Provider value={{ tabs, setTabs }}>
@@ -32,7 +35,7 @@ export function Workspace() {
 											<SearchInputField searchText={searchText} setSearchText={setSearchText} />
 										</Card>
 										<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
-											Sprocket Pan
+											{applicationDataManager.getWorkspace() ?? 'Sprocket Pan'}
 										</Typography>
 										<NavigableServicesFileSystem />
 									</SideDrawer>

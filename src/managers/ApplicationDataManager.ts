@@ -349,9 +349,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 	 */
 	private createDataFolderIfNotExists = async () => {
 		log.trace(`createDataFolderIfNotExists called`);
-		const dataFolderLocalPath = this.workspace
-			? `${this.workspace}${path.sep}${ApplicationDataManager.DATA_FOLDER_NAME}`
-			: ApplicationDataManager.DATA_FOLDER_NAME;
+		const dataFolderLocalPath = ApplicationDataManager.DATA_FOLDER_NAME;
 		try {
 			const doesExist = await exists(dataFolderLocalPath, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
@@ -389,7 +387,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 					if (!doesExist) {
 						log.debug(`File does not exist, creating...`);
 						const content =
-							path === paths.data ? fileContents : path === paths.metadata ? fileContents.workspaceMetadata : {};
+							path === paths.data ? fileContents : path === paths.metadata ? fileContents.workspaceMetadata : [];
 						await writeFile(
 							{ contents: JSON.stringify(content), path },
 							{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
@@ -508,11 +506,14 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		}
 	}
 
-	public getWorkspacePath(workspace?: string) {
-		const workspaceToUse = workspace ?? this.workspace;
+	public getWorkspacePath(workspace?: string, overrideUndefined = false) {
+		let workspaceToUse = workspace ?? this.workspace;
+		if (overrideUndefined && workspace === undefined) {
+			workspaceToUse = undefined;
+		}
 		if (workspaceToUse == undefined) {
 			return {
-				root: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}`,
+				root: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}` as const,
 				data: ApplicationDataManager.PATH,
 				history: ApplicationDataManager.HISTORY_PATH,
 				metadata: ApplicationDataManager.METADATA_PATH,
@@ -525,6 +526,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 			history: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const,
 			metadata: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_metadata.json` as const,
 		};
+	}
+
+	public getWorkspace() {
+		return this.workspace;
 	}
 }
 

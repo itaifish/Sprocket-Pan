@@ -58,7 +58,7 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 		const workspaceMetadataTasks: Promise<null | WorkspaceMetadataWithPath>[] = [];
 		for (const workspaceName of workspaceFolders) {
 			const action = async () => {
-				const paths = applicationDataManager.getWorkspacePath(workspaceName);
+				const paths = applicationDataManager.getWorkspacePath(workspaceName, true);
 				const doesExist = await exists(paths.metadata, {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 				});
