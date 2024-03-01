@@ -1,25 +1,16 @@
 import { useEffect, useState } from 'react';
-import { SideDrawer } from './components/molecules/file-system/SideDrawer';
 import { applicationDataManager } from './managers/ApplicationDataManager';
 import { log } from './utils/logging';
-import { TabHeader } from './components/molecules/tabs/TabHeader';
-import { Box, Card, Grid, Typography, useColorScheme } from '@mui/joy';
-import { SideDrawerActionButtons } from './components/molecules/file-system/SideDrawerActionButtons';
-import { NavigableServicesFileSystem } from './components/molecules/file-system/NavigableServicesFileSystem';
+import { useColorScheme } from '@mui/joy';
 import { useMonaco } from '@monaco-editor/react';
 import { initMonaco } from './managers/MonacoInitManager';
-import {
-	ApplicationDataContext,
-	DrawerContext,
-	ServicesSearchContext,
-	TabsContext,
-	TabsType,
-} from './managers/GlobalContextManager';
+import { ApplicationDataContext, GoToWorkspaceSelectionContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
-import { SearchInputField } from './components/atoms/SearchInputField';
+import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
+import { Workspace } from './components/organisms/Workspace';
 
 export function App() {
-	const [drawerOpen, setDrawerOpen] = useState(true);
+	const [workspaceState, setWorkspaceState] = useState<'noneSelected' | 'oneSelected'>('noneSelected');
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
 	const { setMode } = useColorScheme();
@@ -50,45 +41,22 @@ export function App() {
 		}
 	}, [monaco]);
 
-	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
-	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
-	const [searchText, setSearchText] = useState('');
+	const selectWorkspace = (workspace: string | undefined) => {
+		applicationDataManager.setWorkspace(workspace);
+		setWorkspaceState('oneSelected');
+	};
+
 	return (
 		<div className="container" style={{ height: '100vh' }}>
-			<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
-				<ApplicationDataContext.Provider value={data}>
-					<TabsContext.Provider value={{ tabs, setTabs }}>
-						<ServicesSearchContext.Provider value={{ searchText, setSearchText }}>
-							<Box
-								sx={{
-									minHeight: '100vh',
-									maxWidth: '100vw',
-								}}
-							>
-								<Grid container spacing={0}>
-									<Grid xs={'auto'}>
-										{drawerOpen && (
-											<SideDrawer>
-												<Card sx={{ position: 'fixed', zIndex: 120 }}>
-													<SideDrawerActionButtons />
-													<SearchInputField searchText={searchText} setSearchText={setSearchText} />
-												</Card>
-												<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
-													Sprocket Pan
-												</Typography>
-												<NavigableServicesFileSystem />
-											</SideDrawer>
-										)}
-									</Grid>
-									<Grid xs={true}>
-										<TabHeader />
-									</Grid>
-								</Grid>
-							</Box>
-						</ServicesSearchContext.Provider>
-					</TabsContext.Provider>
-				</ApplicationDataContext.Provider>
-			</DrawerContext.Provider>
+			<ApplicationDataContext.Provider value={data}>
+				<GoToWorkspaceSelectionContext.Provider
+					value={() => {
+						setWorkspaceState('noneSelected');
+					}}
+				>
+					{workspaceState === 'noneSelected' ? <WorkspaceSelector selectWorkspace={selectWorkspace} /> : <Workspace />}
+				</GoToWorkspaceSelectionContext.Provider>
+			</ApplicationDataContext.Provider>
 		</div>
 	);
 }

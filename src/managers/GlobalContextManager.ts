@@ -7,6 +7,7 @@ export const DrawerContext = createContext<StateContext<boolean, 'drawerOpen'>>(
 	drawerOpen: true,
 	setDrawerOpen: null as unknown as React.Dispatch<React.SetStateAction<boolean>>,
 });
+export const GoToWorkspaceSelectionContext = createContext<() => void>(() => undefined);
 export const ApplicationDataContext = createContext<ApplicationData>({
 	services: {},
 	endpoints: {},
