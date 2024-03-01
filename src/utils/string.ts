@@ -19,7 +19,7 @@ export function camelCaseToTitle(text: string) {
 
 const folderRegex = new RegExp('^[a-zA-Z_0-9][a-zA-Z_0-9.-]*$');
 export function isValidFolderName(text: string) {
-	return text.length < 15 && folderRegex.test(text);
+	return text.length < 25 && folderRegex.test(text);
 }
 
 const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {

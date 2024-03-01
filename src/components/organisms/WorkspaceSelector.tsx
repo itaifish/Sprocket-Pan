@@ -77,7 +77,9 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 								<SprocketTooltip text="Description">
 									<InfoIcon></InfoIcon>
 								</SprocketTooltip>
-								<Typography level="body-sm">{workspace.description}</Typography>
+								<Typography level="body-sm" sx={{ wordBreak: 'break-all' }}>
+									{workspace.description}
+								</Typography>
 							</CardContent>
 							<CardContent orientation="horizontal" sx={{ gap: 1 }}>
 								<Button

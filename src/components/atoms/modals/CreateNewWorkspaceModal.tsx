@@ -1,5 +1,6 @@
 import {
 	Button,
+	CircularProgress,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
@@ -14,7 +15,7 @@ import {
 import { useState } from 'react';
 import { fileSystemManager } from '../../../managers/FileSystemManager';
 import { isValidFolderName } from '../../../utils/string';
-
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;
@@ -50,7 +51,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 					</FormControl>
 				</DialogContent>
 				<DialogActions>
-					<Button variant="plain" color="danger" onClick={() => closeFunc()}>
+					<Button variant="plain" color="danger" onClick={() => closeFunc()} disabled={loading}>
 						Cancel
 					</Button>
 					<Button
@@ -67,8 +68,10 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 							setWorkspaceName('');
 							closeFunc();
 						}}
+						startDecorator={loading ? <CircularProgress /> : <AddCircleIcon />}
+						disabled={loading}
 					>
-						Save
+						Create
 					</Button>
 				</DialogActions>
 			</ModalDialog>

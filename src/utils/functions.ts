@@ -27,8 +27,11 @@ export const evalAsync = async (codeToEval: string) => {
 };
 
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
-	if (key === 'history' || key === 'workspaceMetadata') {
+	if (key === 'history') {
 		return [];
+	}
+	if (key === 'workspaceMetadata') {
+		return undefined;
 	}
 	return value;
 };
