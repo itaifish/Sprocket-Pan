@@ -1,4 +1,4 @@
-const dateKeys = ['dateTime', 'timestamp'];
+const dateKeys = ['dateTime', 'timestamp', 'lastModified'];
 
 export const dateTimeReviver = (key: string, value: unknown) => {
 	if (dateKeys.includes(key) && typeof value === 'string') {

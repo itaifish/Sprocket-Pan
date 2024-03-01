@@ -96,15 +96,6 @@ export class QueryParamUtils extends KeyValuePairUtils {
 		queryParams.__data.push({ key: newKey, value: newValue });
 	};
 
-	static add = (queryParams: QueryParams, newKey: string, newValue: string) => {
-		if (queryParams[newKey]) {
-			queryParams[newKey].push(newValue);
-		} else {
-			queryParams[newKey] = [newValue];
-		}
-		queryParams.__data.push({ key: newKey, value: newValue });
-	};
-
 	static updateValue = (queryParams: QueryParams, dataId: number, newValue: string) => {
 		const datumToUpdate = queryParams.__data[dataId];
 		const updateIndex = queryParams[datumToUpdate.key].findIndex((x) => x == datumToUpdate.value);

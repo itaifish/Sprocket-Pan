@@ -109,6 +109,12 @@ export type Service<TBaseUrl extends string = string> = {
 	postRequestScript?: string;
 };
 
+export type WorkspaceMetadata = {
+	name: string;
+	description: string;
+	lastModified: Date;
+};
+
 export type ApplicationData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
@@ -116,6 +122,7 @@ export type ApplicationData = {
 	environments: Record<string, Environment>;
 	selectedEnvironment?: string;
 	settings: Settings;
+	workspaceMetadata?: WorkspaceMetadata;
 };
 
 export type EndpointResponse = {

@@ -17,6 +17,11 @@ export function camelCaseToTitle(text: string) {
 	return capitalizeWord(firstCapital);
 }
 
+const folderRegex = new RegExp('^[a-zA-Z_0-9][a-zA-Z_0-9.-]*$');
+export function isValidFolderName(text: string) {
+	return text.length < 25 && folderRegex.test(text);
+}
+
 const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
 	year: 'numeric',
 	month: 'long',

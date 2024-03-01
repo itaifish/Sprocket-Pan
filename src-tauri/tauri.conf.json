@@ -19,7 +19,7 @@
 			},
 			"fs": {
 				"all": true,
-				"scope": ["$APPLOCALDATA/**", "$APPDATA/**"]
+				"scope": ["$APPDATA/**", "$APPLOCALDATA/**", "$APPLOCALDATA", "$APPLOCALDATA"]
 			},
 			"path": {
 				"all": true

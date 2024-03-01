@@ -1,7 +1,7 @@
 {
 	"name": "sprocket_pan",
 	"private": true,
-	"version": "0.7.0",
+	"version": "0.8.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -26,6 +26,7 @@
 		"@mui/material": "^5.14.11",
 		"@tauri-apps/api": "^1.4.0",
 		"js-yaml": "^4.1.0",
+		"minidenticons": "^4.2.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-markdown": "^9.0.0",
