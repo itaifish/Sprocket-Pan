@@ -13,9 +13,7 @@ export function Workspace() {
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
 	const [searchText, setSearchText] = useState('');
-	useEffect(() => {
-		console.log(applicationDataManager.getApplicationData().workspaceMetadata?.name ?? 'No data');
-	}, []);
+
 	return (
 		<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
 			<TabsContext.Provider value={{ tabs, setTabs }}>

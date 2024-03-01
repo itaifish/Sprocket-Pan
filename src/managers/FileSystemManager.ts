@@ -1,4 +1,4 @@
-import { createDir, exists, readDir, readTextFile, writeFile } from '@tauri-apps/api/fs';
+import { createDir, exists, readDir, readTextFile, removeDir, writeFile } from '@tauri-apps/api/fs';
 import { ApplicationDataManager, applicationDataManager } from './ApplicationDataManager';
 import { log } from '../utils/logging';
 import { WorkspaceMetadata } from '../types/application-data/application-data';
@@ -78,6 +78,21 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 			.map((x) => (x.status === 'fulfilled' ? x.value : null))
 			.filter((x) => x != null) as WorkspaceMetadataWithPath[];
 		return filteredResult;
+	}
+
+	async deleteWorkspace(workspace: string) {
+		const paths = applicationDataManager.getWorkspacePath(workspace);
+		const doesExist = await exists(paths.metadata, {
+			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+		});
+		if (!doesExist) {
+			return null;
+		}
+		await removeDir(paths.root, {
+			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			recursive: true,
+		});
+		this.emit('workspacesChanged');
 	}
 }
 

@@ -74,7 +74,6 @@ class SwaggerParseManager {
 			baseUrl ??= swaggerV3?.servers![0].url;
 		}
 		baseUrl ??= '';
-		console.log(baseUrl);
 		const services: Service[] = [
 			{
 				id: v4(),

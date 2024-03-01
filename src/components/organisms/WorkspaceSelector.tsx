@@ -8,6 +8,9 @@ import { SprocketTooltip } from '../atoms/SprocketTooltip';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { CreateNewWorkspaceModal } from '../atoms/modals/CreateNewWorkspaceModal';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
+import { applicationDataManager } from '../../managers/ApplicationDataManager';
 
 interface WorkspaceSelectorProps {
 	selectWorkspace: (workspace: string | undefined) => void;
@@ -16,6 +19,8 @@ interface WorkspaceSelectorProps {
 export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 	const [workspaces, setWorkspaces] = useState<WorkspaceMetadataWithPath[]>([]);
 	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [workspaceToDelete, setWorkspaceToDelete] = useState('');
 	const theme = useTheme();
 	async function loadDirectories() {
 		const newWorkspaces = await fileSystemManager.getWorkspaces();
@@ -82,6 +87,19 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 								</Typography>
 							</CardContent>
 							<CardContent orientation="horizontal" sx={{ gap: 1 }}>
+								{workspace.path != undefined && (
+									<Button
+										variant="outlined"
+										color="danger"
+										startDecorator={<DeleteIcon />}
+										onClick={() => {
+											setWorkspaceToDelete(workspace.path as string);
+											setDeleteModalOpen(true);
+										}}
+									>
+										Delete
+									</Button>
+								)}
 								<Button
 									variant="outlined"
 									startDecorator={<OpenInNewIcon />}
@@ -161,6 +179,18 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 				</Grid>
 			</Grid>
 			<CreateNewWorkspaceModal open={createNewModalOpen} closeFunc={() => setCreateNewModalOpen(false)} />
+			<AreYouSureModal
+				action={`Delete the "${workspaceToDelete}" workspace`}
+				open={deleteModalOpen}
+				closeFunc={() => setDeleteModalOpen(false)}
+				actionFunc={async () => {
+					await fileSystemManager.deleteWorkspace(workspaceToDelete);
+					// if we're deleting the current data, set to default workspace's data
+					if (workspaceToDelete == applicationDataManager.getWorkspace()) {
+						applicationDataManager.setWorkspace(undefined);
+					}
+				}}
+			/>
 		</>
 	);
 }
