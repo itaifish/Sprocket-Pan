@@ -26,14 +26,17 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	const [workspaceName, setWorkspaceName] = useState('');
 	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
 	const [loading, setLoading] = useState(false);
+	const onClose = () => {
+		setLoading(false);
+		closeFunc();
+	};
 	return (
 		<Modal
 			open={open}
 			onClose={() => {
-				setLoading(false);
 				setWorkspaceName('');
 				setWorkspaceDescription('A SprocketPan Workspace');
-				closeFunc();
+				onClose();
 			}}
 		>
 			<ModalDialog variant="outlined" role="alertdialog">
@@ -59,7 +62,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 					</FormControl>
 				</DialogContent>
 				<DialogActions>
-					<Button variant="plain" color="danger" onClick={() => closeFunc()} disabled={loading}>
+					<Button variant="plain" color="danger" onClick={() => onClose()} disabled={loading}>
 						Cancel
 					</Button>
 					<Button
@@ -74,7 +77,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 							});
 							setWorkspaceDescription('A SprocketPan Workspace');
 							setWorkspaceName('');
-							closeFunc();
+							onClose();
 						}}
 						startDecorator={loading ? <CircularProgress /> : <AddCircleIcon />}
 						disabled={loading}
