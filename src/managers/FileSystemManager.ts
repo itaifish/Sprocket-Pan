@@ -1,14 +1,19 @@
-import { exists, readDir, readTextFile } from '@tauri-apps/api/fs';
+import { createDir, exists, readDir, readTextFile, writeFile } from '@tauri-apps/api/fs';
 import { ApplicationDataManager, applicationDataManager } from './ApplicationDataManager';
 import { log } from '../utils/logging';
 import { WorkspaceMetadata } from '../types/application-data/application-data';
 import { dateTimeReviver } from '../utils/json-parse';
+import { EventEmitter } from '@tauri-apps/api/shell';
 
 export type WorkspaceMetadataWithPath = WorkspaceMetadata & { path?: string };
-class FileSystemManager {
+
+export type FileSystemEvent = 'workspacesChanged';
+class FileSystemManager extends EventEmitter<FileSystemEvent> {
 	public static INSTANCE = new FileSystemManager();
 
-	private constructor() {}
+	private constructor() {
+		super();
+	}
 
 	async getDirectories(rootFolder: string): Promise<string[]> {
 		try {
@@ -20,6 +25,30 @@ class FileSystemManager {
 		} catch (e) {
 			log.error(e);
 			return [];
+		}
+	}
+
+	async createWorkspace(workspace: WorkspaceMetadata) {
+		try {
+			const paths = applicationDataManager.getWorkspacePath(workspace.name);
+			const doesExist = await exists(paths.metadata, {
+				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			});
+			if (doesExist) {
+				return;
+			}
+			await createDir(paths.root, {
+				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+				recursive: true,
+			});
+			// write metadata
+			await writeFile(
+				{ contents: JSON.stringify(workspace), path: paths.metadata },
+				{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+			);
+			this.emit('workspacesChanged');
+		} catch (e) {
+			log.error(e);
 		}
 	}
 

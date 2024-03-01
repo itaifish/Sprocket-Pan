@@ -394,6 +394,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 							{ contents: JSON.stringify(content), path },
 							{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 						);
+						// we only care if we had to create a new metadata file as to whether or not to use default data
+						if (path !== paths.metadata) {
+							return 'alreadyExists' as const;
+						}
 						return 'created' as const;
 					} else {
 						log.trace(`File already exists, no need to create`);
@@ -462,6 +466,9 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				} else {
 					log.trace(`File already exists, updating...`);
 					const metadata = applicationData.workspaceMetadata;
+					if (metadata) {
+						metadata.lastModified = new Date();
+					}
 					await writeFile(
 						{
 							contents: JSON.stringify(metadata, undefined, 4),
@@ -505,17 +512,18 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 		const workspaceToUse = workspace ?? this.workspace;
 		if (workspaceToUse == undefined) {
 			return {
+				root: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}`,
 				data: ApplicationDataManager.PATH,
 				history: ApplicationDataManager.HISTORY_PATH,
 				metadata: ApplicationDataManager.METADATA_PATH,
 			};
 		}
+		const root = `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspaceToUse}` as const;
 		return {
-			data: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspaceToUse}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const,
-			history:
-				`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspaceToUse}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const,
-			metadata:
-				`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspaceToUse}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_metadata.json` as const,
+			root,
+			data: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const,
+			history: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const,
+			metadata: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_metadata.json` as const,
 		};
 	}
 }

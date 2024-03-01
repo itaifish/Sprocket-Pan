@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { WorkspaceMetadataWithPath, fileSystemManager } from '../../managers/FileSystemManager';
-import { Box, Button, Card, CardContent, Grid, Typography } from '@mui/joy';
+import { Box, Button, Card, CardContent, Grid, Link, Typography, useTheme } from '@mui/joy';
 import { TextAvatar } from '../atoms/TextAvatar';
 import { formatDate } from '../../utils/string';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import { SprocketTooltip } from '../atoms/SprocketTooltip';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { CreateNewWorkspaceModal } from '../atoms/modals/CreateNewWorkspaceModal';
 
 interface WorkspaceSelectorProps {
 	selectWorkspace: (workspace: string | undefined) => void;
@@ -14,13 +15,18 @@ interface WorkspaceSelectorProps {
 
 export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 	const [workspaces, setWorkspaces] = useState<WorkspaceMetadataWithPath[]>([]);
-
+	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
+	const theme = useTheme();
+	async function loadDirectories() {
+		const newWorkspaces = await fileSystemManager.getWorkspaces();
+		setWorkspaces(newWorkspaces.sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime()));
+	}
 	useEffect(() => {
-		async function saveDirectories() {
-			const newWorkspaces = await fileSystemManager.getWorkspaces();
-			setWorkspaces(newWorkspaces);
-		}
-		saveDirectories();
+		loadDirectories();
+		fileSystemManager.on('workspacesChanged', loadDirectories);
+		return () => {
+			fileSystemManager.removeListener('workspacesChanged', loadDirectories);
+		};
 	}, []);
 
 	return (
@@ -28,13 +34,11 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 			<Typography sx={{ paddingY: '30px', textAlign: 'center' }} level="h1">
 				Select a Workspace
 			</Typography>
-			<Grid container spacing={6} justifyContent="center">
-				<Grid xs={4}>
-					{workspaces.map((workspace, index) => (
+			<Grid container spacing={6} columnSpacing={6} justifyContent="center">
+				{workspaces.map((workspace, index) => (
+					<Grid xs={3.5} key={index}>
 						<Card
-							key={index}
 							sx={{
-								minWidth: 200,
 								'--Card-radius': (theme) => theme.vars.radius.xs,
 							}}
 						>
@@ -87,9 +91,74 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 								</Button>
 							</CardContent>
 						</Card>
-					))}
+					</Grid>
+				))}
+				<Grid xs={4}>
+					<Card
+						sx={{
+							minHeight: 200,
+							'--Card-radius': (theme) => theme.vars.radius.xs,
+							'&:hover': {
+								cursor: 'pointer',
+								backgroundColor: `${theme.palette.background.level1}`,
+							},
+						}}
+					>
+						<CardContent>
+							<Link
+								overlay
+								underline="none"
+								href="#interactive-card"
+								onClick={() => {
+									setCreateNewModalOpen(true);
+								}}
+							></Link>
+							<Box sx={{ display: 'block', mx: 'auto' }}>
+								<Box
+									sx={{
+										borderRadius: '50%',
+										width: '150px',
+										height: '150px',
+										backgroundColor: `rgba(${theme.palette.primary.darkChannel})`,
+									}}
+								>
+									<Box
+										sx={{
+											position: 'relative',
+											backgroundColor: '#FFFFFF',
+											width: '50%',
+											height: '12.5%',
+											left: '25%',
+											top: '43.75%',
+										}}
+									></Box>
+									<Box
+										sx={{
+											position: 'relative',
+											backgroundColor: '#FFFFFF',
+											height: '50%',
+											width: '12.5%',
+											top: '12.5%',
+											left: '43.75%',
+										}}
+									>
+										{' '}
+										<Link
+											overlay
+											underline="none"
+											href="#interactive-card"
+											onClick={() => {
+												setCreateNewModalOpen(true);
+											}}
+										></Link>
+									</Box>
+								</Box>
+							</Box>
+						</CardContent>
+					</Card>
 				</Grid>
 			</Grid>
+			<CreateNewWorkspaceModal open={createNewModalOpen} closeFunc={() => setCreateNewModalOpen(false)} />
 		</>
 	);
 }
