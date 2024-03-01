@@ -27,7 +27,15 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
 	const [loading, setLoading] = useState(false);
 	return (
-		<Modal open={open} onClose={() => closeFunc()}>
+		<Modal
+			open={open}
+			onClose={() => {
+				setLoading(false);
+				setWorkspaceName('');
+				setWorkspaceDescription('A SprocketPan Workspace');
+				closeFunc();
+			}}
+		>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>Create a new workspace</DialogTitle>
 				<Divider />
