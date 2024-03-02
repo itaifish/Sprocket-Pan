@@ -299,6 +299,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				name: 'Default Workspace',
 				description: 'The default workspace in SprocketPan',
 				lastModified: new Date(),
+				fileName: undefined,
 			},
 		};
 	}

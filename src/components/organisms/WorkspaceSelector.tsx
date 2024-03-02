@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { WorkspaceMetadataWithPath, fileSystemManager } from '../../managers/FileSystemManager';
+import { fileSystemManager } from '../../managers/FileSystemManager';
 import { Box, Button, Card, CardContent, Grid, Link, Typography, useTheme } from '@mui/joy';
 import { TextAvatar } from '../atoms/TextAvatar';
 import { formatDate } from '../../utils/string';
@@ -11,13 +11,14 @@ import { CreateNewWorkspaceModal } from '../atoms/modals/CreateNewWorkspaceModal
 import DeleteIcon from '@mui/icons-material/Delete';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import { WorkspaceMetadata } from '../../types/application-data/application-data';
 
 interface WorkspaceSelectorProps {
 	selectWorkspace: (workspace: string | undefined) => void;
 }
 
 export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
-	const [workspaces, setWorkspaces] = useState<WorkspaceMetadataWithPath[]>([]);
+	const [workspaces, setWorkspaces] = useState<WorkspaceMetadata[]>([]);
 	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [workspaceToDelete, setWorkspaceToDelete] = useState('');
@@ -87,13 +88,13 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 								</Typography>
 							</CardContent>
 							<CardContent orientation="horizontal" sx={{ gap: 1 }}>
-								{workspace.path != undefined && (
+								{workspace.fileName != undefined && (
 									<Button
 										variant="outlined"
 										color="danger"
 										startDecorator={<DeleteIcon />}
 										onClick={() => {
-											setWorkspaceToDelete(workspace.path as string);
+											setWorkspaceToDelete(workspace.fileName as string);
 											setDeleteModalOpen(true);
 										}}
 									>
@@ -104,7 +105,7 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 									variant="outlined"
 									startDecorator={<OpenInNewIcon />}
 									onClick={() => {
-										selectWorkspace(workspace.path);
+										selectWorkspace(workspace.fileName);
 									}}
 								>
 									Open

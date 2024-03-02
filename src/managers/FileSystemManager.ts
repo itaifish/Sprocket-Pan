@@ -5,8 +5,6 @@ import { WorkspaceMetadata } from '../types/application-data/application-data';
 import { dateTimeReviver } from '../utils/json-parse';
 import { EventEmitter } from '@tauri-apps/api/shell';
 
-export type WorkspaceMetadataWithPath = WorkspaceMetadata & { path?: string };
-
 export type FileSystemEvent = 'workspacesChanged';
 class FileSystemManager extends EventEmitter<FileSystemEvent> {
 	public static INSTANCE = new FileSystemManager();
@@ -55,7 +53,7 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 	async getWorkspaces() {
 		// undefined represents the default workspace
 		const workspaceFolders = [undefined, ...(await this.getDirectories(ApplicationDataManager.DATA_FOLDER_NAME))];
-		const workspaceMetadataTasks: Promise<null | WorkspaceMetadataWithPath>[] = [];
+		const workspaceMetadataTasks: Promise<null | WorkspaceMetadata>[] = [];
 		for (const workspaceName of workspaceFolders) {
 			const action = async () => {
 				const paths = applicationDataManager.getWorkspacePath(workspaceName, true);
@@ -69,14 +67,14 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 				});
 				const metadata = JSON.parse(metadataStr, dateTimeReviver) as WorkspaceMetadata;
-				return { ...metadata, path: workspaceName };
+				return { ...metadata, fileName: workspaceName };
 			};
 			workspaceMetadataTasks.push(action());
 		}
 		const result = await Promise.allSettled(workspaceMetadataTasks);
 		const filteredResult = result
 			.map((x) => (x.status === 'fulfilled' ? x.value : null))
-			.filter((x) => x != null) as WorkspaceMetadataWithPath[];
+			.filter((x) => x != null) as WorkspaceMetadata[];
 		return filteredResult;
 	}
 
