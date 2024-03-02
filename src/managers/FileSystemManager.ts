@@ -28,7 +28,7 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 
 	async createWorkspace(workspace: WorkspaceMetadata) {
 		try {
-			const paths = applicationDataManager.getWorkspacePath(workspace.name);
+			const paths = applicationDataManager.getWorkspacePath(workspace.fileName);
 			const doesExist = await exists(paths.metadata, {
 				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 			});
