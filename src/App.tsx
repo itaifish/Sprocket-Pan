@@ -41,8 +41,8 @@ export function App() {
 		}
 	}, [monaco]);
 
-	const selectWorkspace = (workspace: string | undefined) => {
-		applicationDataManager.setWorkspace(workspace);
+	const selectWorkspace = (workspace: string | undefined, workspaceName: string | undefined) => {
+		applicationDataManager.setWorkspace(workspace, workspaceName);
 		setWorkspaceState('oneSelected');
 	};
 

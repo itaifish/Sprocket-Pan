@@ -33,7 +33,7 @@ export function Workspace() {
 											<SearchInputField searchText={searchText} setSearchText={setSearchText} />
 										</Card>
 										<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
-											{applicationDataManager.getWorkspace() ?? 'Sprocket Pan'}
+											{applicationDataManager.getWorkspaceName() ?? 'Sprocket Pan'}
 										</Typography>
 										<NavigableServicesFileSystem />
 									</SideDrawer>

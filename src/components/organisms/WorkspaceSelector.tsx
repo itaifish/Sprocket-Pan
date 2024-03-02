@@ -14,7 +14,7 @@ import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 
 interface WorkspaceSelectorProps {
-	selectWorkspace: (workspace: string | undefined) => void;
+	selectWorkspace: (workspace: string | undefined, workspaceName: string | undefined) => void;
 }
 
 export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
@@ -105,7 +105,7 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 									variant="outlined"
 									startDecorator={<OpenInNewIcon />}
 									onClick={() => {
-										selectWorkspace(workspace.fileName);
+										selectWorkspace(workspace.fileName, workspace.name);
 									}}
 								>
 									Open
@@ -188,7 +188,7 @@ export function WorkspaceSelector({ selectWorkspace }: WorkspaceSelectorProps) {
 					await fileSystemManager.deleteWorkspace(workspaceToDelete);
 					// if we're deleting the current data, set to default workspace's data
 					if (workspaceToDelete == applicationDataManager.getWorkspace()) {
-						applicationDataManager.setWorkspace(undefined);
+						applicationDataManager.setWorkspace(undefined, undefined);
 					}
 				}}
 			/>
