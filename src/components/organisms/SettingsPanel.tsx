@@ -18,7 +18,7 @@ import {
 	Typography,
 	Grid,
 } from '@mui/joy';
-import { ApplicationDataContext, GoToWorkspaceSelectionContext } from '../../managers/GlobalContextManager';
+import { ApplicationDataContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -39,6 +39,8 @@ import { Settings } from '../../types/settings/settings';
 import { useAutoAnimate } from '@formkit/auto-animate/react';
 import { iconFromTabType } from '../../types/application-data/application-data';
 import SaveIcon from '@mui/icons-material/Save';
+import { useAppDispatch } from '../../state/store';
+import { setWorkspace } from '../../state/workspaces/slice';
 
 const style = {
 	position: 'absolute' as const,
@@ -117,13 +119,16 @@ const ScriptChips = ({
 
 export const SettingsPanel = (props: SettingsPanelProps) => {
 	const data = useContext(ApplicationDataContext);
-	const goToWorkspaceSelection = useContext(GoToWorkspaceSelectionContext);
+	const dispatch = useAppDispatch();
 	const [unsavedSettings, setUnsavedSettings] = useState(data.settings);
 	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
 	const [quitWithoutSavingModalOpen, setQuitWithoutSavingModalOpen] = useState(false);
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(data.settings) !== JSON.stringify(unsavedSettings);
 	}, [data.settings, unsavedSettings]);
+	function goToWorkspaceSelection() {
+		dispatch(setWorkspace(undefined));
+	}
 	return (
 		<>
 			<Box>

@@ -8,8 +8,9 @@ import { ApplicationDataContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
 import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
 import { Workspace } from './components/organisms/Workspace';
-import { useSelector } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { selectActiveWorkspace } from './state/workspaces/selectors';
+import { store } from './state/store';
 
 export function App() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -45,9 +46,11 @@ export function App() {
 
 	return (
 		<div className="container" style={{ height: '100vh' }}>
-			<ApplicationDataContext.Provider value={data}>
-				{activeWorkspace == null ? <WorkspaceSelector /> : <Workspace />}
-			</ApplicationDataContext.Provider>
+			<Provider store={store}>
+				<ApplicationDataContext.Provider value={data}>
+					{activeWorkspace == null ? <WorkspaceSelector /> : <Workspace />}
+				</ApplicationDataContext.Provider>
+			</Provider>
 		</div>
 	);
 }
