@@ -55,6 +55,7 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	private data: ApplicationData;
 	private workspace?: string;
+	private workspaceName?: string;
 
 	private constructor() {
 		super();
@@ -299,16 +300,19 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 				name: 'Default Workspace',
 				description: 'The default workspace in SprocketPan',
 				lastModified: new Date(),
+				fileName: undefined,
 			},
 		};
 	}
 
 	/**
 	 * Sets the workspace and reloads everything from disk
-	 * @param workspace Either the workspace name, or undefined if you want the default workspace
+	 * @param workspace Either the workspace filename, or undefined if you want the default workspace
+	 * @param workspaceName The name of the workspace, or undefined for default
 	 */
-	public setWorkspace(workspace?: string) {
+	public setWorkspace(workspace?: string, workspaceName?: string) {
 		this.workspace = workspace;
+		this.workspaceName = workspaceName;
 		this.init();
 	}
 
@@ -530,6 +534,10 @@ export class ApplicationDataManager extends EventEmitter<DataEvent> {
 
 	public getWorkspace() {
 		return this.workspace;
+	}
+
+	public getWorkspaceName() {
+		return this.workspaceName;
 	}
 }
 
