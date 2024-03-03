@@ -4,13 +4,15 @@ import { log } from './utils/logging';
 import { useColorScheme } from '@mui/joy';
 import { useMonaco } from '@monaco-editor/react';
 import { initMonaco } from './managers/MonacoInitManager';
-import { ApplicationDataContext, GoToWorkspaceSelectionContext } from './managers/GlobalContextManager';
+import { ApplicationDataContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
 import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
 import { Workspace } from './components/organisms/Workspace';
+import { useSelector } from 'react-redux';
+import { selectActiveWorkspace } from './state/workspaces/selectors';
 
 export function App() {
-	const [workspaceState, setWorkspaceState] = useState<'noneSelected' | 'oneSelected'>('noneSelected');
+	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
 	const { setMode } = useColorScheme();
@@ -41,21 +43,10 @@ export function App() {
 		}
 	}, [monaco]);
 
-	const selectWorkspace = (workspace: string | undefined, workspaceName: string | undefined) => {
-		applicationDataManager.setWorkspace(workspace, workspaceName);
-		setWorkspaceState('oneSelected');
-	};
-
 	return (
 		<div className="container" style={{ height: '100vh' }}>
 			<ApplicationDataContext.Provider value={data}>
-				<GoToWorkspaceSelectionContext.Provider
-					value={() => {
-						setWorkspaceState('noneSelected');
-					}}
-				>
-					{workspaceState === 'noneSelected' ? <WorkspaceSelector selectWorkspace={selectWorkspace} /> : <Workspace />}
-				</GoToWorkspaceSelectionContext.Provider>
+				{activeWorkspace == null ? <WorkspaceSelector /> : <Workspace />}
 			</ApplicationDataContext.Provider>
 		</div>
 	);
