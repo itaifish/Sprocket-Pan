@@ -27,7 +27,7 @@ export const workspaceSlice = createSlice({
 			state.selected = action.payload;
 		},
 		addWorkspace: (state, action: PayloadAction<WorkspaceMetadata>) => {
-			state.list.push(action.payload);
+			state.list = state.list.concat([action.payload]);
 		},
 		deleteWorkspace: (state, action: PayloadAction<WorkspaceMetadata>) => {
 			const fileName = action.payload.fileName;

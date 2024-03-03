@@ -4,16 +4,13 @@ import { log } from './utils/logging';
 import { useColorScheme } from '@mui/joy';
 import { useMonaco } from '@monaco-editor/react';
 import { initMonaco } from './managers/MonacoInitManager';
-import { ApplicationDataContext } from './managers/GlobalContextManager';
 import invoke from './utils/invoke';
-import { WorkspaceSelector } from './components/organisms/WorkspaceSelector';
-import { Workspace } from './components/organisms/Workspace';
-import { Provider, useSelector } from 'react-redux';
-import { selectActiveWorkspace } from './state/workspaces/selectors';
+import { Provider } from 'react-redux';
 import { store } from './state/store';
+import { Root } from './components/organisms/Root';
+import { ApplicationDataContext } from './managers/GlobalContextManager';
 
 export function App() {
-	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const [data, setData] = useState(applicationDataManager.getApplicationData());
 	const monaco = useMonaco();
 	const { setMode } = useColorScheme();
@@ -48,7 +45,7 @@ export function App() {
 		<div className="container" style={{ height: '100vh' }}>
 			<Provider store={store}>
 				<ApplicationDataContext.Provider value={data}>
-					{activeWorkspace == null ? <WorkspaceSelector /> : <Workspace />}
+					<Root />
 				</ApplicationDataContext.Provider>
 			</Provider>
 		</div>
