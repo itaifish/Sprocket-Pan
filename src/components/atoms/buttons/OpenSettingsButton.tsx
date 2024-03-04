@@ -1,4 +1,4 @@
-import { IconButton, Modal } from '@mui/joy';
+import { Box, IconButton, Modal } from '@mui/joy';
 import { useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { SprocketTooltip } from '../SprocketTooltip';
@@ -24,7 +24,9 @@ export function OpenSettingsButton() {
 				aria-labelledby="Settings"
 				aria-describedby="Setting popout panel"
 			>
-				<SettingsPanel closePanel={() => setIsOpen(false)} />
+				<Box>
+					<SettingsPanel closePanel={() => setIsOpen(false)} />
+				</Box>
 			</Modal>
 		</>
 	);
