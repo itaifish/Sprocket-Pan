@@ -14,9 +14,10 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { useEffect, useState } from 'react';
-import { fileSystemManager } from '../../../managers/FileSystemManager';
 import { toValidFolderName } from '../../../utils/string';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { useAppDispatch } from '../../../state/store';
+import { createWorkspace } from '../../../state/workspaces/thunks';
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;
@@ -29,6 +30,8 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
 	const [loading, setLoading] = useState(false);
 	const [isError, setError] = useState(true);
+	const dispatch = useAppDispatch();
+
 	useEffect(() => {
 		setWorkspaceFileName(toValidFolderName(workspaceName));
 	}, [workspaceName]);
@@ -42,10 +45,25 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 		setWorkspaceFileName('');
 		setLoading(false);
 	};
+
 	const onClose = () => {
 		reset();
 		closeFunc();
 	};
+
+	async function onCreate() {
+		setLoading(true);
+		await dispatch(
+			createWorkspace({
+				name: workspaceName,
+				description: workspaceDescription,
+				lastModified: new Date(),
+				fileName: workspaceFileName,
+			}),
+		).unwrap();
+		onClose();
+	}
+
 	return (
 		<Modal
 			open={open}
@@ -85,16 +103,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 					<Button
 						variant="solid"
 						color="primary"
-						onClick={async () => {
-							setLoading(true);
-							await fileSystemManager.createWorkspace({
-								name: workspaceName,
-								description: workspaceDescription,
-								lastModified: new Date(),
-								fileName: workspaceFileName,
-							});
-							onClose();
-						}}
+						onClick={onCreate}
 						startDecorator={loading ? <CircularProgress /> : <AddCircleIcon />}
 						disabled={loading || isError}
 					>

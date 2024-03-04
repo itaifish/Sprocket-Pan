@@ -6,9 +6,9 @@ import { useSelector } from 'react-redux';
 import { selectWorkspacesList } from '../../state/workspaces/selectors';
 import { useWorkspaceFileSystemSynchronization } from '../../hooks/useWorkspaceFileSystemSynchronization';
 import { useAppDispatch } from '../../state/store';
-import { deleteWorkspace } from '../../state/workspaces/slice';
 import { WorkspaceEntry } from '../molecules/WorkspaceEntry';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
+import { deleteWorkspace } from '../../state/workspaces/thunks';
 
 export function WorkspaceSelector() {
 	useWorkspaceFileSystemSynchronization();
@@ -101,7 +101,7 @@ export function WorkspaceSelector() {
 			</Grid>
 			<CreateNewWorkspaceModal open={createNewModalOpen} closeFunc={() => setCreateNewModalOpen(false)} />
 			<AreYouSureModal
-				action={`Delete the "${workspaceToDelete}" workspace`}
+				action={`Delete the "${workspaceToDelete?.name}" workspace`}
 				open={workspaceToDelete != null}
 				closeFunc={() => setWorkspaceToDelete(null)}
 				actionFunc={onConfirmDelete}

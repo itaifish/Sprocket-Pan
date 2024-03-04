@@ -1,6 +1,5 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { fileSystemManager } from '../../managers/FileSystemManager';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 
 export interface WorkspacesState {
@@ -12,10 +11,6 @@ const initialState: WorkspacesState = {
 	list: [],
 };
 
-function resetWorkspace() {
-	applicationDataManager.setWorkspace(undefined, undefined);
-}
-
 export const workspacesSlice = createSlice({
 	name: 'workspaces',
 	initialState,
@@ -25,22 +20,9 @@ export const workspacesSlice = createSlice({
 		},
 		setWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
 			state.selected = action.payload;
-		},
-		addWorkspace: (_, action: PayloadAction<WorkspaceMetadata>) => {
-			fileSystemManager.createWorkspace(action.payload);
-		},
-		deleteWorkspace: (state, action: PayloadAction<WorkspaceMetadata>) => {
-			const fileName = action.payload.fileName;
-			if (fileName == null) {
-				throw new Error('cannot delete a workspace without a fileName');
-			}
-			fileSystemManager.deleteWorkspace(fileName);
-			if (fileName === state.selected?.fileName) {
-				resetWorkspace();
-				state.selected = undefined;
-			}
+			applicationDataManager.setWorkspace(action.payload?.fileName, action.payload?.name);
 		},
 	},
 });
 
-export const { setWorkspaces, setWorkspace, deleteWorkspace, addWorkspace } = workspacesSlice.actions;
+export const { setWorkspaces, setWorkspace } = workspacesSlice.actions;
