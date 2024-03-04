@@ -3,7 +3,7 @@ import { Box, Card, CardContent, Grid, Link, Typography, useTheme } from '@mui/j
 import { CreateNewWorkspaceModal } from '../atoms/modals/CreateNewWorkspaceModal';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import { useSelector } from 'react-redux';
-import { selectWorkspaceList } from '../../state/workspaces/selectors';
+import { selectWorkspacesList } from '../../state/workspaces/selectors';
 import { useWorkspaceFileSystemSynchronization } from '../../hooks/useWorkspaceFileSystemSynchronization';
 import { useAppDispatch } from '../../state/store';
 import { deleteWorkspace } from '../../state/workspaces/slice';
@@ -13,7 +13,7 @@ import { WorkspaceMetadata } from '../../types/application-data/application-data
 export function WorkspaceSelector() {
 	useWorkspaceFileSystemSynchronization();
 
-	const workspaces = useSelector(selectWorkspaceList);
+	const workspaces = useSelector(selectWorkspacesList);
 	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
 	const [workspaceToDelete, setWorkspaceToDelete] = useState<WorkspaceMetadata | null>(null);
 	const theme = useTheme();
