@@ -1,6 +1,6 @@
 import { useContext, useMemo, useState } from 'react';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { EditableText } from '../../atoms/EditableText';
+import { applicationDataManager } from '../../../../../managers/ApplicationDataManager';
+import { EditableText } from '../../../../atoms/EditableText';
 import {
 	Accordion,
 	AccordionDetails,
@@ -9,45 +9,33 @@ import {
 	Box,
 	IconButton,
 	List,
-	ListDivider,
-	ListItem,
-	ListItemContent,
-	ListItemDecorator,
 	Stack,
 	Typography,
 } from '@mui/joy';
-import { EditableTextArea } from '../../atoms/EditableTextArea';
+import { EditableTextArea } from '../../../../atoms/EditableTextArea';
 import Table from '@mui/joy/Table';
-import {
-	EndpointRequest,
-	Environment,
-	Service,
-	iconFromTabType,
-} from '../../../types/application-data/application-data';
-import { camelCaseToTitle, formatDate } from '../../../utils/string';
-import { RequestScript } from '../scripts/RequestScript';
-import { TabProps } from './tab-props';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
-import { EnvironmentEditableTable } from '../editing/EnvironmentEditableTable';
+import { EndpointRequest, Environment, Service } from '../../../../../types/application-data/application-data';
+import { camelCaseToTitle } from '../../../../../utils/string';
+import { RequestScript } from '../../../scripts/RequestScript';
+import { TabProps } from '../../tab-props';
+import { ApplicationDataContext } from '../../../../../managers/GlobalContextManager';
+import { EnvironmentEditableTable } from '../../../editing/EnvironmentEditableTable';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { v4 } from 'uuid';
-import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import { SprocketTooltip } from '../../../../atoms/SprocketTooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import EventIcon from '@mui/icons-material/Event';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { tabsManager } from '../../../managers/TabsManager';
+import { AreYouSureModal } from '../../../../atoms/modals/AreYouSureModal';
+import { environmentContextResolver } from '../../../../../managers/EnvironmentContextResolver';
+import { RecentRequestListItem } from './RecentRequestListItem';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const serviceData = data.services[props.id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
-	const tabsContext = useContext(TabsContext);
 	const recentRequests = useMemo(() => {
 		const allRequests = serviceData.endpointIds.flatMap((endpointId) => {
 			const endpoint = data.endpoints[endpointId];
@@ -263,33 +251,7 @@ export function ServiceTab(props: TabProps) {
 							<List>
 								{recentRequests.map((request, index) => (
 									<Box key={index}>
-										<ListItem>
-											<ListItemDecorator sx={{ mr: '5px' }}>
-												<Box sx={{ mr: '5px' }}>{iconFromTabType.request}</Box>
-												{request.name}
-											</ListItemDecorator>
-											<ListItemContent>
-												<Stack direction="row" alignItems={'center'} gap={1}>
-													<EventIcon />
-													<Typography level="title-sm">
-														{request.history.length > 0
-															? formatDate(request.history[request.history.length - 1].request.dateTime)
-															: 'Never'}
-													</Typography>
-													<SprocketTooltip text={`Open "${request.name}" request`}>
-														<IconButton
-															color="primary"
-															onClick={() => {
-																tabsManager.selectTab(tabsContext, request.id, 'request');
-															}}
-														>
-															<OpenInNewIcon />
-														</IconButton>
-													</SprocketTooltip>
-												</Stack>
-											</ListItemContent>
-										</ListItem>
-										<ListDivider inset="gutter" />
+										<RecentRequestListItem request={request} />
 									</Box>
 								))}
 							</List>
