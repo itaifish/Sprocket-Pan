@@ -6,6 +6,7 @@ import { TabProps } from './tab-props';
 import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { EnvironmentEditableTable } from '../editing/EnvironmentEditableTable';
 import { Environment } from '../../../types/application-data/application-data';
+import { Box } from '@mui/joy';
 
 export function EnvironmentTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
@@ -34,7 +35,7 @@ export function EnvironmentTab(props: TabProps) {
 					}
 				}}
 			/>
-			<div style={{ height: '60vh' }}>
+			<Box sx={{ height: '70vh', pb: '5vh' }}>
 				<EnvironmentEditableTable
 					environment={environment}
 					setNewEnvironment={(newEnvironment: Environment) => {
@@ -46,7 +47,7 @@ export function EnvironmentTab(props: TabProps) {
 					}}
 					fullSize={true}
 				/>
-			</div>
+			</Box>
 		</>
 	);
 }
