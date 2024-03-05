@@ -22,7 +22,7 @@ Key:
 ❗: Work in progress
 ✅: Complete
 
-- Add workspaces ☐
+- Add workspaces ✅
 - Import / Export work ❗
   - Imports from:
     - Sprocket Pan ☐
@@ -42,7 +42,7 @@ Key:
 - Command Pallete ☐
 - Run Sprocket Pan in CLI ☐
 - Automatic Updates (No need to redownload the program) ☐
-- Audit trail for requests ☐
+- Audit trail for requests ✅
 - Tabs ❗
   - Dragging and Dropping ☐
   - Favorites ☐

@@ -112,6 +112,8 @@ export type Service<TBaseUrl extends string = string> = {
 export type WorkspaceMetadata = {
 	name: string;
 	description: string;
+	// undefined is the default workspace
+	fileName: string | undefined;
 	lastModified: Date;
 };
 

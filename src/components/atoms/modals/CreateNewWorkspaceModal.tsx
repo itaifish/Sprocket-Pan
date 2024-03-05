@@ -6,16 +6,18 @@ import {
 	DialogTitle,
 	Divider,
 	FormControl,
+	FormHelperText,
 	FormLabel,
 	Input,
 	Modal,
 	ModalDialog,
 	Textarea,
 } from '@mui/joy';
-import { useState } from 'react';
-import { fileSystemManager } from '../../../managers/FileSystemManager';
-import { isValidFolderName } from '../../../utils/string';
+import { useEffect, useState } from 'react';
+import { toValidFolderName } from '../../../utils/string';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { useAppDispatch } from '../../../state/store';
+import { createWorkspace } from '../../../state/workspaces/thunks';
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;
@@ -24,18 +26,48 @@ interface CreateNewWorkspaceModalProps {
 export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	const { open, closeFunc } = props;
 	const [workspaceName, setWorkspaceName] = useState('');
+	const [workspaceFileName, setWorkspaceFileName] = useState('');
 	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
 	const [loading, setLoading] = useState(false);
-	const onClose = () => {
+	const [isError, setError] = useState(true);
+	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		setWorkspaceFileName(toValidFolderName(workspaceName));
+	}, [workspaceName]);
+	useEffect(() => {
+		setError(workspaceFileName.length > 25 || workspaceFileName.length == 0);
+	}, [workspaceFileName]);
+
+	const reset = () => {
+		setWorkspaceDescription('A SprocketPan Workspace');
+		setWorkspaceName('');
+		setWorkspaceFileName('');
 		setLoading(false);
+	};
+
+	const onClose = () => {
+		reset();
 		closeFunc();
 	};
+
+	async function onCreate() {
+		setLoading(true);
+		await dispatch(
+			createWorkspace({
+				name: workspaceName,
+				description: workspaceDescription,
+				lastModified: new Date(),
+				fileName: workspaceFileName,
+			}),
+		).unwrap();
+		onClose();
+	}
+
 	return (
 		<Modal
 			open={open}
 			onClose={() => {
-				setWorkspaceName('');
-				setWorkspaceDescription('A SprocketPan Workspace');
 				onClose();
 			}}
 		>
@@ -49,8 +81,11 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 							placeholder="New Workspace Name"
 							value={workspaceName}
 							onChange={(e) => setWorkspaceName(e.target.value)}
-							error={!isValidFolderName(workspaceName)}
+							error={isError}
 						></Input>
+						{!isError && (
+							<FormHelperText>This will be saved in the &quot;{workspaceFileName}&quot; folder</FormHelperText>
+						)}
 					</FormControl>
 					<FormControl>
 						<FormLabel>Workspace Description</FormLabel>
@@ -68,19 +103,9 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 					<Button
 						variant="solid"
 						color="primary"
-						onClick={async () => {
-							setLoading(true);
-							await fileSystemManager.createWorkspace({
-								name: workspaceName,
-								description: workspaceDescription,
-								lastModified: new Date(),
-							});
-							setWorkspaceDescription('A SprocketPan Workspace');
-							setWorkspaceName('');
-							onClose();
-						}}
+						onClick={onCreate}
 						startDecorator={loading ? <CircularProgress /> : <AddCircleIcon />}
-						disabled={loading}
+						disabled={loading || isError}
 					>
 						Create
 					</Button>
