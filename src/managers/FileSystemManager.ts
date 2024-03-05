@@ -78,8 +78,8 @@ class FileSystemManager extends EventEmitter<FileSystemEvent> {
 		return filteredResult;
 	}
 
-	async deleteWorkspace(workspace: string) {
-		const paths = applicationDataManager.getWorkspacePath(workspace);
+	async deleteWorkspace(path: string) {
+		const paths = applicationDataManager.getWorkspacePath(path);
 		const doesExist = await exists(paths.metadata, {
 			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 		});

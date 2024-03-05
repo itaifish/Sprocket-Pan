@@ -8,8 +8,7 @@ interface AreYouSureModalProps {
 	actionFunc: () => void;
 }
 
-export function AreYouSureModal(props: AreYouSureModalProps) {
-	const { open, closeFunc, actionFunc, action } = props;
+export function AreYouSureModal({ open, closeFunc, actionFunc, action }: AreYouSureModalProps) {
 	return (
 		<Modal open={open} onClose={() => closeFunc()}>
 			<ModalDialog variant="outlined" role="alertdialog">
