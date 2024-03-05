@@ -18,7 +18,7 @@ import {
 	Typography,
 	Grid,
 } from '@mui/joy';
-import { ApplicationDataContext } from '../../managers/GlobalContextManager';
+import { ApplicationDataContext, GoToWorkspaceSelectionContext } from '../../managers/GlobalContextManager';
 import { useContext, useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
