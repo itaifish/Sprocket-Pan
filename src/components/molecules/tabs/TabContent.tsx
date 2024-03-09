@@ -2,7 +2,7 @@ import { FunctionComponent } from 'react';
 import { TabType } from '../../../types/state/state';
 import { RequestTab } from './RequestTab';
 import { EndpointTab } from './EndpointTab';
-import { ServiceTab } from './ServiceTab';
+import { ServiceTab } from './request/service/ServiceTab';
 import { EnvironmentTab } from './EnvironmentTab';
 import { TabProps } from './tab-props';
 

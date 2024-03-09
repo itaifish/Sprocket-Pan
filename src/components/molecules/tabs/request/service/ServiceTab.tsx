@@ -1,6 +1,6 @@
-import { useContext, useState } from 'react';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
-import { EditableText } from '../../atoms/EditableText';
+import { useContext, useMemo, useState } from 'react';
+import { applicationDataManager } from '../../../../../managers/ApplicationDataManager';
+import { EditableText } from '../../../../atoms/EditableText';
 import {
 	Accordion,
 	AccordionDetails,
@@ -8,33 +8,71 @@ import {
 	AccordionSummary,
 	Box,
 	IconButton,
+	List,
 	Stack,
 	Typography,
 } from '@mui/joy';
-import { EditableTextArea } from '../../atoms/EditableTextArea';
+import { EditableTextArea } from '../../../../atoms/EditableTextArea';
 import Table from '@mui/joy/Table';
-import { Environment, Service } from '../../../types/application-data/application-data';
-import { camelCaseToTitle } from '../../../utils/string';
-import { RequestScript } from '../scripts/RequestScript';
-import { TabProps } from './tab-props';
-import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
-import { EnvironmentEditableTable } from '../editing/EnvironmentEditableTable';
+import { EndpointRequest, Environment, Service } from '../../../../../types/application-data/application-data';
+import { camelCaseToTitle } from '../../../../../utils/string';
+import { RequestScript } from '../../../scripts/RequestScript';
+import { TabProps } from '../../tab-props';
+import { ApplicationDataContext } from '../../../../../managers/GlobalContextManager';
+import { EnvironmentEditableTable } from '../../../editing/EnvironmentEditableTable';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { v4 } from 'uuid';
-import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import { SprocketTooltip } from '../../../../atoms/SprocketTooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { AreYouSureModal } from '../../../../atoms/modals/AreYouSureModal';
+import { environmentContextResolver } from '../../../../../managers/EnvironmentContextResolver';
+import { RecentRequestListItem } from './RecentRequestListItem';
 
 export function ServiceTab(props: TabProps) {
 	const data = useContext(ApplicationDataContext);
 	const serviceData = data.services[props.id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
-
+	const recentRequests = useMemo(() => {
+		const allRequests = serviceData.endpointIds.flatMap((endpointId) => {
+			const endpoint = data.endpoints[endpointId];
+			if (endpoint != null) {
+				return endpoint.requestIds
+					.map((requestId) => {
+						const request = data.requests[requestId];
+						if (request == null) {
+							return null as unknown as EndpointRequest;
+						}
+						return request;
+					})
+					.filter((request) => request != null);
+			}
+			return [];
+		});
+		return allRequests
+			.sort((req1, req2) => {
+				if (req1.history.length == 0 && req2.history.length == 0) {
+					return req1.name.localeCompare(req2.name);
+				}
+				if (req1.history.length == 0) {
+					return 1;
+				}
+				if (req2.history.length == 0) {
+					return -1;
+				}
+				const req1MostRecent = req1.history[req1.history.length - 1].request.dateTime;
+				const req2MostRecent = req2.history[req2.history.length - 1].request.dateTime;
+				const difference = req2MostRecent.getTime() - req1MostRecent.getTime();
+				if (difference != 0) {
+					return difference;
+				}
+				return req2.history.length - req1.history.length;
+			})
+			.slice(0, 20);
+	}, [props.id]);
 	return (
 		<div>
 			<Stack direction={'column'}>
@@ -205,6 +243,18 @@ export function ServiceTab(props: TabProps) {
 									applicationDataManager.update('service', serviceData.id, { postRequestScript: scriptText });
 								}}
 							/>
+						</AccordionDetails>
+					</Accordion>
+					<Accordion defaultExpanded>
+						<AccordionSummary>Recent Requests</AccordionSummary>
+						<AccordionDetails>
+							<List>
+								{recentRequests.map((request, index) => (
+									<Box key={index}>
+										<RecentRequestListItem request={request} />
+									</Box>
+								))}
+							</List>
 						</AccordionDetails>
 					</Accordion>
 				</AccordionGroup>
