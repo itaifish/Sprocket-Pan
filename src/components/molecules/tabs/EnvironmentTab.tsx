@@ -7,6 +7,7 @@ import { selectEnvironments, selectSelectedEnvironment } from '../../../state/ac
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
+import { Typography } from '@mui/joy';
 
 export function EnvironmentTab({ id }: TabProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -16,6 +17,10 @@ export function EnvironmentTab({ id }: TabProps) {
 
 	function update(values: Partial<Environment>) {
 		dispatch(updateEnvironment({ ...values, id: id }));
+	}
+
+	if (environment == null) {
+		return <Typography>No Environment Found</Typography>;
 	}
 
 	return (

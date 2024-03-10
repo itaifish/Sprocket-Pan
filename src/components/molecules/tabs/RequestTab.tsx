@@ -75,7 +75,7 @@ const getError = (error: string): HistoricalEndpointResponse => {
 export function RequestTab({ id }: TabProps) {
 	const data = useSelector(selectActiveState);
 	const requestData = useSelector(selectRequests)[id];
-	const endpointData = useSelector(selectEndpoints)[requestData?.id];
+	const endpointData = useSelector(selectEndpoints)[requestData?.endpointId];
 	const serviceData = useSelector(selectServices)[endpointData?.serviceId];
 	const theme = useTheme();
 	const tabsContext = useContext(TabsContext);
@@ -88,21 +88,26 @@ export function RequestTab({ id }: TabProps) {
 	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
 	const [lastError, setLastError] = useState(defaultResponse);
 	const [isLoading, setLoading] = useState(false);
-	const isDefault = endpointData.defaultRequest === requestData.id;
 	const [copied, setCopied] = useState(false);
 	const dispatch = useAppDispatch();
 
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
+
+	const isDefault = endpointData.defaultRequest === requestData.id;
+
 	let responseData: HistoricalEndpointResponse;
+
 	if (response != 'error') {
 		const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
 		responseData = responseIndex >= requestData.history.length ? defaultResponse : requestData.history[responseIndex];
 	} else {
 		responseData = lastError;
 	}
+
 	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
+
 	let queryStr = queryParamsToString(fullQueryParams);
 	if (queryStr) {
 		queryStr = `?${queryStr}`;
