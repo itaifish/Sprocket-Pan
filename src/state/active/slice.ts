@@ -70,7 +70,7 @@ export const activeSlice = createSlice({
 		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
 			Object.assign(state.settings, action.payload);
 		},
-		selectEnvironment: (state, action: PayloadAction<string>) => {
+		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			state.selectedEnvironment = action.payload;
 		},
 		deleteServiceFromState: (state, action: PayloadAction<string>) => {

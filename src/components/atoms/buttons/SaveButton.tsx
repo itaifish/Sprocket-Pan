@@ -1,28 +1,15 @@
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CircularProgress, IconButton } from '@mui/joy';
 import SaveIcon from '@mui/icons-material/Save';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import Badge from '@mui/joy/Badge';
-import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { useAppDispatch } from '../../../state/store';
+import { saveActiveData } from '../../../state/active/thunks';
+
 export function SaveButton() {
-	const data = useContext(ApplicationDataContext);
 	const [loading, setLoading] = useState(false);
-	const [isModified, setIsModified] = useState(false);
-	useEffect(() => {
-		const updateListener = () => {
-			setIsModified(true);
-		};
-		const saveListener = () => {
-			setIsModified(false);
-		};
-		applicationDataManager.addListener('update', updateListener);
-		applicationDataManager.addListener('saved', saveListener);
-		return () => {
-			applicationDataManager.removeListener('update', updateListener);
-			applicationDataManager.removeListener('saved', saveListener);
-		};
-	}, []);
+	// todo: restore isModified behavior with dedicated selector
+	const dispatch = useAppDispatch();
 	return (
 		<>
 			{loading ? (
@@ -31,7 +18,7 @@ export function SaveButton() {
 				<SprocketTooltip text="Save">
 					<Badge
 						size="sm"
-						invisible={!isModified}
+						invisible={false}
 						anchorOrigin={{
 							vertical: 'top',
 							horizontal: 'right',
@@ -45,10 +32,10 @@ export function SaveButton() {
 							color="neutral"
 							onClick={async () => {
 								setLoading(true);
-								await applicationDataManager.saveApplicationData(data);
+								dispatch(saveActiveData());
 								setTimeout(() => setLoading(false), 200);
 							}}
-							disabled={!isModified}
+							disabled={false}
 						>
 							<SaveIcon />
 						</IconButton>

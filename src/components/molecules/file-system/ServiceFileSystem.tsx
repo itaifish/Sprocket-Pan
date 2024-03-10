@@ -18,24 +18,30 @@ import { Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { EndpointFileSystem } from './EndpointFileSystem';
 import { MoreVert } from '@mui/icons-material';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import { useSelector } from 'react-redux';
+import { selectActiveState } from '../../../state/active/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { addNewEndpoint, addNewService, deleteService } from '../../../state/active/thunks';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const tabsContext = useContext(TabsContext);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const { tabs } = tabsContext;
+	const dispatch = useAppDispatch();
+
 	if (service == null) {
 		return <></>;
 	}
+
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -46,7 +52,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('service', undefined, service);
+							dispatch(addNewService({ data: service }));
 						}}
 					>
 						<ListItemDecorator>
@@ -59,7 +65,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('endpoint', { serviceId: service.id });
+							dispatch(addNewEndpoint({ serviceId: service.id }));
 						}}
 					>
 						<ListItemDecorator>
@@ -129,7 +135,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 				action={`delete '${service.name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('service', service.id, tabsContext)}
+				actionFunc={() => dispatch(deleteService(service.id))}
 			/>
 		</ListItem>
 	);

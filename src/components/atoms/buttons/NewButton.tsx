@@ -3,11 +3,13 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { useAppDispatch } from '../../../state/store';
+import { addNewEnvironment, addNewService } from '../../../state/active/thunks';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
+	const dispatch = useAppDispatch();
 	return (
 		<SprocketTooltip text="Create New" disabled={menuOpen}>
 			<Box>
@@ -21,7 +23,7 @@ export function NewButton() {
 					<Menu>
 						<MenuItem
 							onClick={() => {
-								applicationDataManager.addNew('service', undefined);
+								dispatch(addNewService({}));
 								setMenuOpen(false);
 							}}
 						>
@@ -34,7 +36,7 @@ export function NewButton() {
 						</MenuItem>
 						<MenuItem
 							onClick={() => {
-								applicationDataManager.addNew('environment', undefined);
+								dispatch(addNewEnvironment({}));
 								setMenuOpen(false);
 							}}
 						>

@@ -1,9 +1,8 @@
 import { Badge, IconButton, useColorScheme } from '@mui/joy';
-import { useState, useContext, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
-import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
@@ -15,6 +14,8 @@ import SaveIcon from '@mui/icons-material/Save';
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { CopyToClipboardButton } from '../../atoms/buttons/CopyToClipboardButton';
+import { useSelector } from 'react-redux';
+import { selectActiveState } from '../../../state/active/selectors';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -93,7 +94,7 @@ export function EditableTable(props: EditableTableProps) {
 	const selectedMode = colorScheme.mode;
 	const systemMode = colorScheme.systemMode;
 	const resolvedMode = selectedMode === 'system' ? systemMode : selectedMode;
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const environment =
 		props.environment ??
 		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : EMPTY_ENVIRONMENT);

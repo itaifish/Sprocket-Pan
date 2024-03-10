@@ -15,19 +15,23 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { tabsManager } from '../../../managers/TabsManager';
 import { MoreVert } from '@mui/icons-material';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
+import { selectActiveState } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../state/store';
+import { addNewRequest, deleteRequest } from '../../../state/active/thunks';
 
 export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const tabsContext = useContext(TabsContext);
 	const { tabs } = tabsContext;
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const endpointData = data.endpoints[request.endpointId];
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const dispatch = useAppDispatch();
 
 	const menuButton = (
 		<>
@@ -39,7 +43,7 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('request', { endpointId: request.endpointId }, request);
+							dispatch(addNewRequest({ endpointId: request.endpointId, data: request }));
 						}}
 					>
 						<ListItemDecorator>
@@ -86,7 +90,7 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 				action={`delete '${request.name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('request', request.id, tabsContext)}
+				actionFunc={() => dispatch(deleteRequest(request.id))}
 			/>
 		</>
 	);

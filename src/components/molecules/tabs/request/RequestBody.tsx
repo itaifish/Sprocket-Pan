@@ -1,7 +1,6 @@
 import { Select, Stack, Option, FormControl, FormLabel, Grid, useColorScheme } from '@mui/joy';
 import { EndpointRequest, RawBodyTypes, RequestBodyTypes } from '../../../../types/application-data/application-data';
 import ListIcon from '@mui/icons-material/List';
-import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useEffect, useRef, useState } from 'react';
@@ -9,6 +8,8 @@ import { log } from '../../../../utils/logging';
 import { Constants } from '../../../../utils/constants';
 import { FormatIcon } from '../../../atoms/buttons/FormatIcon';
 import { defaultEditorOptions } from '../../../../managers/MonacoInitManager';
+import { useAppDispatch } from '../../../../state/store';
+import { updateRequest } from '../../../../state/active/slice';
 
 export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 	const { mode, systemMode } = useColorScheme();
@@ -26,10 +27,14 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 		editorRef.current = editor;
 		format();
 	};
+	const dispatch = useAppDispatch();
+	function update(values: Partial<EndpointRequest>) {
+		dispatch(updateRequest({ ...values, id: requestData.id }));
+	}
 	// We update the text only after the user stops typing
 	useEffect(() => {
 		const delayDebounceFunc = setTimeout(() => {
-			applicationDataManager.update('request', requestData.id, { body: latestText.current });
+			update({ body: latestText.current });
 			log.info('update triggered');
 		}, Constants.debounceTimeMS);
 
@@ -70,13 +75,13 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 								}}
 								onChange={(_e, value) => {
 									if (value) {
-										const update: Partial<EndpointRequest> = { bodyType: value };
+										const data: Partial<EndpointRequest> = { bodyType: value };
 										if (value === 'raw') {
-											update.rawType = 'JSON';
+											data.rawType = 'JSON';
 										} else {
-											update.rawType = undefined;
+											data.rawType = undefined;
 										}
-										applicationDataManager.update('request', requestData.id, update);
+										update(data);
 									}
 								}}
 							>
@@ -108,7 +113,7 @@ export function RequestBody({ requestData }: { requestData: EndpointRequest }) {
 									}}
 									onChange={(_e, value) => {
 										if (value) {
-											applicationDataManager.update('request', requestData.id, { rawType: value });
+											update({ rawType: value });
 										}
 									}}
 								>

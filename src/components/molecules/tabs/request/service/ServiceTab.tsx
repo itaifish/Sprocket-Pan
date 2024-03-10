@@ -1,5 +1,4 @@
-import { useContext, useMemo, useState } from 'react';
-import { applicationDataManager } from '../../../../../managers/ApplicationDataManager';
+import { useMemo, useState } from 'react';
 import { EditableText } from '../../../../atoms/EditableText';
 import {
 	Accordion,
@@ -18,7 +17,6 @@ import { EndpointRequest, Environment, Service } from '../../../../../types/appl
 import { camelCaseToTitle } from '../../../../../utils/string';
 import { RequestScript } from '../../../scripts/RequestScript';
 import { TabProps } from '../../tab-props';
-import { ApplicationDataContext } from '../../../../../managers/GlobalContextManager';
 import { EnvironmentEditableTable } from '../../../editing/EnvironmentEditableTable';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import { v4 } from 'uuid';
@@ -30,10 +28,15 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { AreYouSureModal } from '../../../../atoms/modals/AreYouSureModal';
 import { environmentContextResolver } from '../../../../../managers/EnvironmentContextResolver';
 import { RecentRequestListItem } from './RecentRequestListItem';
+import { selectActiveState, selectServices } from '../../../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../../../state/store';
+import { updateService } from '../../../../../state/active/slice';
 
-export function ServiceTab(props: TabProps) {
-	const data = useContext(ApplicationDataContext);
-	const serviceData = data.services[props.id];
+export function ServiceTab({ id }: TabProps) {
+	const dispatch = useAppDispatch();
+	const data = useSelector(selectActiveState);
+	const serviceData = useSelector(selectServices)[id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
 	const recentRequests = useMemo(() => {
@@ -72,13 +75,18 @@ export function ServiceTab(props: TabProps) {
 				return req2.history.length - req1.history.length;
 			})
 			.slice(0, 20);
-	}, [props.id]);
+	}, [id]);
+
+	function update(values: Partial<Service>) {
+		dispatch(updateService({ ...values, id }));
+	}
+
 	return (
 		<div>
 			<Stack direction={'column'}>
 				<EditableText
 					text={serviceData.name}
-					setText={(newText: string) => applicationDataManager.update('service', props.id, { name: newText })}
+					setText={(newText: string) => update({ name: newText })}
 					isValidFunc={(text: string) => text.length >= 1}
 					isTitle
 				/>
@@ -89,9 +97,7 @@ export function ServiceTab(props: TabProps) {
 							<EditableTextArea
 								label="Description"
 								text={serviceData.description}
-								setText={(newText: string) =>
-									applicationDataManager.update('service', props.id, { description: newText })
-								}
+								setText={(newText: string) => update({ description: newText })}
 								isValidFunc={(text: string) => text.length >= 1}
 								renderAsMarkdown={true}
 							/>
@@ -111,9 +117,7 @@ export function ServiceTab(props: TabProps) {
 											<td>
 												<EditableText
 													text={serviceData[serviceDataKey]}
-													setText={(newText: string) =>
-														applicationDataManager.update('service', props.id, { [serviceDataKey]: `${newText}` })
-													}
+													setText={(newText: string) => update({ [serviceDataKey]: `${newText}` })}
 													isValidFunc={(text: string) => text.length >= 1}
 												/>
 											</td>
@@ -135,7 +139,7 @@ export function ServiceTab(props: TabProps) {
 												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
 												__data: [],
 											} as unknown as Environment;
-											applicationDataManager.update('service', serviceData.id, {
+											update({
 												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 											});
 										}}
@@ -149,7 +153,7 @@ export function ServiceTab(props: TabProps) {
 											<EditableText
 												text={env.__name}
 												setText={(text) =>
-													applicationDataManager.update('service', serviceData.id, {
+													update({
 														localEnvironments: {
 															...serviceData.localEnvironments,
 															[env.__id]: { ...env, __name: text } as Environment,
@@ -165,7 +169,7 @@ export function ServiceTab(props: TabProps) {
 											<SprocketTooltip text={serviceData.selectedEnvironment === env.__id ? 'Unselect' : 'Select'}>
 												<IconButton
 													onClick={() => {
-														applicationDataManager.update('service', serviceData.id, {
+														update({
 															selectedEnvironment: serviceData.selectedEnvironment === env.__id ? undefined : env.__id,
 														});
 													}}
@@ -183,7 +187,7 @@ export function ServiceTab(props: TabProps) {
 													const newEnv = structuredClone(env);
 													newEnv.__id = v4();
 													newEnv.__name += ' (Copy)';
-													applicationDataManager.update('service', serviceData.id, {
+													update({
 														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 													});
 												}}
@@ -206,7 +210,7 @@ export function ServiceTab(props: TabProps) {
 											<EnvironmentEditableTable
 												environment={env}
 												setNewEnvironment={(newEnv) =>
-													applicationDataManager.update('service', serviceData.id, {
+													update({
 														localEnvironments: {
 															...serviceData.localEnvironments,
 															[env.__id]: { ...newEnv, __name: env.__name, __id: env.__id } as Environment,
@@ -228,7 +232,7 @@ export function ServiceTab(props: TabProps) {
 								scriptText={serviceData.preRequestScript}
 								scriptKey={'preRequestScript'}
 								updateScript={(scriptText: string) => {
-									applicationDataManager.update('service', serviceData.id, { preRequestScript: scriptText });
+									update({ preRequestScript: scriptText });
 								}}
 							/>
 						</AccordionDetails>
@@ -240,7 +244,7 @@ export function ServiceTab(props: TabProps) {
 								scriptText={serviceData.postRequestScript}
 								scriptKey={'postRequestScript'}
 								updateScript={(scriptText: string) => {
-									applicationDataManager.update('service', serviceData.id, { postRequestScript: scriptText });
+									update({ postRequestScript: scriptText });
 								}}
 							/>
 						</AccordionDetails>
@@ -266,7 +270,7 @@ export function ServiceTab(props: TabProps) {
 				actionFunc={() => {
 					if (envToDelete) {
 						delete serviceData.localEnvironments[envToDelete];
-						applicationDataManager.update('service', serviceData.id, {
+						update({
 							localEnvironments: { ...serviceData.localEnvironments },
 						});
 					}

@@ -24,21 +24,21 @@ import {
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 
 interface AddNewRequest {
-	data: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;
+	data?: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;
 	endpointId: string;
 }
 
 export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: RootState }>(
 	'active/addRequest',
-	async ({ endpointId, data }, thunk) => {
+	async ({ endpointId, data = {} }, thunk) => {
 		const newRequest = { ...createNewRequestObject(endpointId), ...data };
 		await thunk.dispatch(insertRequest(newRequest));
 		await thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
 	},
 );
 
-export const removeRequest = createAsyncThunk<void, string, { state: RootState }>(
-	'active/removeRequest',
+export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
+	'active/deleteRequest',
 	async (id, thunk) => {
 		await thunk.dispatch(removeRequestFromEndpoint(id));
 		await thunk.dispatch(deleteRequestFromState(id));
@@ -46,13 +46,13 @@ export const removeRequest = createAsyncThunk<void, string, { state: RootState }
 );
 
 interface AddNewEndpoint {
-	data: Partial<Omit<Endpoint, 'id' | 'serviceId'>>;
+	data?: Partial<Omit<Endpoint, 'id' | 'serviceId'>>;
 	serviceId: string;
 }
 
 export const addNewEndpoint = createAsyncThunk<void, AddNewEndpoint, { state: RootState }>(
 	'active/addEndpoint',
-	async ({ serviceId, data: { requestIds, ...data } }, thunk) => {
+	async ({ serviceId, data: { requestIds, ...data } = {} }, thunk) => {
 		const newEndpoint = { ...createNewEndpointObject(serviceId), ...structuredClone(data) };
 		await thunk.dispatch(insertEndpoint(newEndpoint));
 		await thunk.dispatch(addEndpointToService({ endpointId: newEndpoint.id, serviceId }));
@@ -65,8 +65,8 @@ export const addNewEndpoint = createAsyncThunk<void, AddNewEndpoint, { state: Ro
 	},
 );
 
-export const removeEndpoint = createAsyncThunk<void, string, { state: RootState }>(
-	'active/removeEndpoint',
+export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState }>(
+	'active/deleteEndpoint',
 	async (id, thunk) => {
 		const endpoint = thunk.getState().active.endpoints[id];
 		if (endpoint == null) {
@@ -81,12 +81,12 @@ export const removeEndpoint = createAsyncThunk<void, string, { state: RootState 
 );
 
 interface AddNewService {
-	data: Partial<Omit<Service, 'id'>>;
+	data?: Partial<Omit<Service, 'id'>>;
 }
 
 export const addNewService = createAsyncThunk<void, AddNewService, { state: RootState }>(
 	'active/addService',
-	async ({ data: { endpointIds, ...data } }, thunk) => {
+	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
 		const newService = { ...createNewServiceObject(), ...structuredClone(data) };
 		await thunk.dispatch(insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
@@ -97,8 +97,8 @@ export const addNewService = createAsyncThunk<void, AddNewService, { state: Root
 	},
 );
 
-export const removeService = createAsyncThunk<void, string, { state: RootState }>(
-	'active/removeService',
+export const deleteService = createAsyncThunk<void, string, { state: RootState }>(
+	'active/deleteService',
 	async (id, thunk) => {
 		const service = thunk.getState().active.services[id];
 		if (service == null) {
@@ -112,13 +112,13 @@ export const removeService = createAsyncThunk<void, string, { state: RootState }
 );
 
 interface AddNewEnvironment {
-	data: Partial<Omit<Environment, 'id'>>;
+	data?: Partial<Omit<Environment, 'id'>>;
 }
 
 // TODO: what is up with this and why is the typing broken
 export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { state: RootState }>(
 	'active/addEnvironment',
-	async ({ data }, thunk) => {
+	async ({ data = {} }, thunk) => {
 		const newEnvironment = {
 			...createNewEnvironmentObject(),
 			...data,
@@ -128,7 +128,7 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 	},
 );
 
-export const removeEnvironment = deleteEnvironmentFromState;
+export const deleteEnvironment = deleteEnvironmentFromState;
 
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	'active/saveData',

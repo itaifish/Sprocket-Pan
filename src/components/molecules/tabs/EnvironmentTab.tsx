@@ -1,4 +1,3 @@
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
 import Checkbox from '@mui/joy/Checkbox';
 import { TabProps } from './tab-props';
@@ -6,17 +5,24 @@ import { EnvironmentEditableTable } from '../editing/EnvironmentEditableTable';
 import { Environment } from '../../../types/application-data/application-data';
 import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../state/store';
+import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
 
 export function EnvironmentTab({ id }: TabProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment = environments[id];
+	const dispatch = useAppDispatch();
+
+	function update(values: Partial<Environment>) {
+		dispatch(updateEnvironment({ ...values, id: id }));
+	}
 
 	return (
 		<>
 			<EditableText
 				text={environment.__name}
-				setText={(newText: string) => applicationDataManager.update('environment', id, { __name: newText })}
+				setText={(newText: string) => update({ __name: newText })}
 				isValidFunc={(text: string) =>
 					text.length >= 1 &&
 					Object.values(environments)
@@ -28,26 +34,10 @@ export function EnvironmentTab({ id }: TabProps) {
 			<Checkbox
 				label="Selected"
 				checked={selectedEnvironment === id}
-				onChange={() => {
-					if (selectedEnvironment === id) {
-						applicationDataManager.setSelectedEnvironment(undefined);
-					} else {
-						applicationDataManager.setSelectedEnvironment(props.id);
-					}
-				}}
+				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
 			/>
 			<div style={{ height: '60vh' }}>
-				<EnvironmentEditableTable
-					environment={environment}
-					setNewEnvironment={(newEnvironment: Environment) => {
-						applicationDataManager.setEnvironment(id, {
-							...newEnvironment,
-							__name: environment.__name,
-							__id: environment.__id,
-						} as Environment);
-					}}
-					fullSize={true}
-				/>
+				<EnvironmentEditableTable environment={environment} setNewEnvironment={update} fullSize={true} />
 			</div>
 		</>
 	);

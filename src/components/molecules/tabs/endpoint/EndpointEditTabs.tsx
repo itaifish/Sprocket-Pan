@@ -1,21 +1,27 @@
 import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { Endpoint, Environment, QueryParams } from '../../../../types/application-data/application-data';
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
-import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 import { EndpointScripts } from './EndpointScripts';
 import { environmentContextResolver } from '../../../../managers/EnvironmentContextResolver';
-import { ApplicationDataContext } from '../../../../managers/GlobalContextManager';
+import { selectActiveState } from '../../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../../state/store';
+import { updateEndpoint } from '../../../../state/active/slice';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
 type EndpointTabType = (typeof endpointTabs)[number];
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const [tab, setTab] = useState<EndpointTabType>('headers');
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const varsEnv = environmentContextResolver.buildEnvironmentVariables(data, endpoint.serviceId);
+	const dispatch = useAppDispatch();
+	function update(values: Partial<Endpoint>) {
+		dispatch(updateEndpoint({ ...values, id: endpoint.id }));
+	}
 	return (
 		<Tabs
 			aria-label="tabs"
@@ -37,9 +43,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 			<TabPanel value="headers">
 				<EnvironmentEditableTable
 					environment={endpoint.baseHeaders as Environment}
-					setNewEnvironment={(newEnvironment: Environment) =>
-						applicationDataManager.update('endpoint', endpoint.id, { baseHeaders: newEnvironment })
-					}
+					setNewEnvironment={(newEnvironment: Environment) => update({ baseHeaders: newEnvironment })}
 					varsEnv={varsEnv}
 				/>
 			</TabPanel>
@@ -47,7 +51,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 				<QueryParamEditableTable
 					queryParams={endpoint.baseQueryParams}
 					setNewQueryParams={(newQueryParams: QueryParams) => {
-						applicationDataManager.update('endpoint', endpoint.id, { baseQueryParams: newQueryParams });
+						update({ baseQueryParams: newQueryParams });
 					}}
 					varsEnv={varsEnv}
 				/>
