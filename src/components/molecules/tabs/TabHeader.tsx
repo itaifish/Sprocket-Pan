@@ -7,11 +7,13 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { Environment, iconFromTabType } from '../../../types/application-data/application-data';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
+import { useSelector } from 'react-redux';
+import { selectActiveState } from '../../../state/active/selectors';
 
 export function TabHeader() {
 	const tabsContext = useContext(TabsContext);
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const { tabs } = tabsContext;
 	const [disabled, setDisabled] = useState({ left: false, right: false });
 	const getTabScroll = () => document.getElementById('tabScroll');

@@ -1,7 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { fileSystemManager } from '../../managers/FileSystemManager';
-import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 
 export const deleteWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state: RootState }>(
@@ -14,7 +13,6 @@ export const deleteWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state
 		}
 		await fileSystemManager.deleteWorkspace(path);
 		if (path === state.selected?.fileName) {
-			applicationDataManager.setWorkspace(undefined, undefined);
 			state.selected = undefined;
 		}
 	},

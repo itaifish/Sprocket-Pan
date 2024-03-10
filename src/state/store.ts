@@ -1,9 +1,11 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 import { workspacesSlice } from './workspaces/slice';
+import { activeSlice } from './active/slice';
 
 const rootReducer = combineReducers({
 	[workspacesSlice.name]: workspacesSlice.reducer,
+	[activeSlice.name]: activeSlice.reducer,
 });
 
 export function setupStore(preloadedState?: Partial<RootState>) {

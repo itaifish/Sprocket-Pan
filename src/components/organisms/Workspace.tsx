@@ -6,13 +6,15 @@ import { NavigableServicesFileSystem } from '../molecules/file-system/NavigableS
 import { SideDrawer } from '../molecules/file-system/SideDrawer';
 import { SideDrawerActionButtons } from '../molecules/file-system/SideDrawerActionButtons';
 import { TabHeader } from '../molecules/tabs/TabHeader';
-import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import { useSelector } from 'react-redux';
+import { selectActiveWorkspace } from '../../state/workspaces/selectors';
 
 export function Workspace() {
 	const [drawerOpen, setDrawerOpen] = useState(true);
 	const [tabs, setTabs] = useState<TabsType>({ tabs: {}, selected: null });
 	useEffect(() => document.getElementById(`tab_${tabs.selected}`)?.scrollIntoView(), [tabs]);
 	const [searchText, setSearchText] = useState('');
+	const activeWorkspace = useSelector(selectActiveWorkspace);
 
 	return (
 		<DrawerContext.Provider value={{ drawerOpen, setDrawerOpen }}>
@@ -33,7 +35,7 @@ export function Workspace() {
 											<SearchInputField searchText={searchText} setSearchText={setSearchText} />
 										</Card>
 										<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
-											{applicationDataManager.getWorkspaceName() ?? 'Sprocket Pan'}
+											{activeWorkspace?.name ?? 'Sprocket Pan'}
 										</Typography>
 										<NavigableServicesFileSystem />
 									</SideDrawer>

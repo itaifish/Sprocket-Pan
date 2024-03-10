@@ -16,6 +16,8 @@ import {
 } from '@mui/joy';
 import {
 	EMPTY_HEADERS,
+	Endpoint,
+	EndpointRequest,
 	HistoricalEndpointResponse,
 	RESTfulRequestVerbs,
 } from '../../../types/application-data/application-data';
@@ -27,7 +29,6 @@ import { rgbToHex } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
@@ -35,12 +36,16 @@ import { queryParamsToString } from '../../../utils/application';
 import { tabsManager } from '../../../managers/TabsManager';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
 import { ResponseInfo } from './request/response/ResponseInfo';
+import { useSelector } from 'react-redux';
+import { selectActiveState, selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { updateEndpoint, updateRequest } from '../../../state/active/slice';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -67,11 +72,11 @@ const getError = (error: string): HistoricalEndpointResponse => {
 	return errorRes;
 };
 
-export function RequestTab(props: TabProps) {
-	const data = useContext(ApplicationDataContext);
-	const requestData = data.requests[props.id];
-	const endpointData = data.endpoints[requestData.endpointId];
-	const serviceData = data.services[endpointData?.serviceId];
+export function RequestTab({ id }: TabProps) {
+	const data = useSelector(selectActiveState);
+	const requestData = useSelector(selectRequests)[id];
+	const endpointData = useSelector(selectEndpoints)[requestData?.id];
+	const serviceData = useSelector(selectServices)[endpointData?.serviceId];
 	const theme = useTheme();
 	const tabsContext = useContext(TabsContext);
 	const { mode } = useColorScheme();
@@ -85,6 +90,7 @@ export function RequestTab(props: TabProps) {
 	const [isLoading, setLoading] = useState(false);
 	const isDefault = endpointData.defaultRequest === requestData.id;
 	const [copied, setCopied] = useState(false);
+	const dispatch = useAppDispatch();
 
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
@@ -101,11 +107,20 @@ export function RequestTab(props: TabProps) {
 	if (queryStr) {
 		queryStr = `?${queryStr}`;
 	}
+
+	function update(values: Partial<EndpointRequest>) {
+		dispatch(updateRequest({ ...values, id: requestData.id }));
+	}
+
+	function updateAssociatedEndpoint(values: Partial<Endpoint>) {
+		dispatch(updateEndpoint({ ...values, id: requestData.endpointId }));
+	}
+
 	return (
 		<>
 			<EditableText
 				text={requestData.name}
-				setText={(newText: string) => applicationDataManager.update('request', props.id, { name: newText })}
+				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
 				isTitle
 			/>
@@ -230,7 +245,7 @@ export function RequestTab(props: TabProps) {
 						<Switch
 							checked={isDefault}
 							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
-								applicationDataManager.update('endpoint', endpointData.id, {
+								updateAssociatedEndpoint({
 									defaultRequest: isDefault ? null : requestData.id,
 								})
 							}
@@ -313,7 +328,7 @@ export function RequestTab(props: TabProps) {
 								<ArrowRightIcon />
 							</IconButton>
 						</Stack>
-						<ResponseInfo response={responseData} requestId={props.id} />
+						<ResponseInfo response={responseData} requestId={id} />
 					</Card>
 				</Grid>
 			</Grid>
