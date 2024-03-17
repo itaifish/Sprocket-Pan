@@ -18,3 +18,5 @@ export const selectSettings = createSelector(selectActiveState, (state) => state
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);
 
 export const selectDefaultTheme = createSelector(selectSettings, (state) => state.defaultTheme);
+
+export const selectIsModified = createSelector(selectActiveState, (state) => state.isModified);

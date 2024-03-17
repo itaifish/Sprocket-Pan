@@ -5,43 +5,42 @@ import Badge from '@mui/joy/Badge';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
 import { saveActiveData } from '../../../state/active/thunks';
+import { selectIsModified } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);
-	// todo: restore isModified behavior with dedicated selector
+	const isModified = useSelector(selectIsModified);
 	const dispatch = useAppDispatch();
+
+	async function save() {
+		setLoading(true);
+		await dispatch(saveActiveData()).unwrap();
+		setTimeout(() => setLoading(false), 500);
+	}
+
 	return (
-		<>
-			{loading ? (
-				<CircularProgress />
-			) : (
-				<SprocketTooltip text="Save">
-					<Badge
-						size="sm"
-						invisible={false}
-						anchorOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-						badgeInset="14%"
-					>
-						<IconButton
-							id="toggle-mode"
-							size="sm"
-							variant="soft"
-							color="neutral"
-							onClick={async () => {
-								setLoading(true);
-								dispatch(saveActiveData());
-								setTimeout(() => setLoading(false), 200);
-							}}
-							disabled={false}
-						>
-							<SaveIcon />
-						</IconButton>
-					</Badge>
-				</SprocketTooltip>
-			)}
-		</>
+		<SprocketTooltip text="Save">
+			<Badge
+				size="sm"
+				invisible={!isModified}
+				anchorOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+				badgeInset="14%"
+			>
+				<IconButton
+					id="toggle-mode"
+					size="sm"
+					variant="soft"
+					color="neutral"
+					onClick={save}
+					disabled={!isModified || loading}
+				>
+					{loading ? <CircularProgress /> : <SaveIcon />}
+				</IconButton>
+			</Badge>
+		</SprocketTooltip>
 	);
 }

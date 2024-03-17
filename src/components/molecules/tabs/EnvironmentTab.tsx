@@ -16,7 +16,7 @@ export function EnvironmentTab({ id }: TabProps) {
 	const dispatch = useAppDispatch();
 
 	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, id: id }));
+		dispatch(updateEnvironment({ ...values, __id: id }));
 	}
 
 	if (environment == null) {

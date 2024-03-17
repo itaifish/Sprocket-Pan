@@ -13,6 +13,7 @@ import {
 	insertEnvironment,
 	insertRequest,
 	insertService,
+	setIsModified,
 } from './slice';
 import { Endpoint, EndpointRequest, Environment, Service } from '../../types/application-data/application-data';
 import {
@@ -133,7 +134,8 @@ export const deleteEnvironment = deleteEnvironmentFromState;
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	'active/saveData',
 	async (_, thunk) => {
-		const data = thunk.getState().active;
-		applicationDataManager.saveData(data);
+		const { isModified, ...data } = thunk.getState().active;
+		await thunk.dispatch(setIsModified(false));
+		await applicationDataManager.saveData(data);
 	},
 );

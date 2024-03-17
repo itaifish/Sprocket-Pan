@@ -11,6 +11,15 @@ import {
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 
+export interface ActiveWorkspaceSlice extends ApplicationData {
+	isModified: boolean;
+}
+
+const initialState: ActiveWorkspaceSlice = {
+	...defaultApplicationData,
+	isModified: false,
+};
+
 interface AddResponseToHistory {
 	requestId: string;
 	networkRequest: NetworkFetchRequest;
@@ -32,8 +41,11 @@ type Update<T> = Partial<Omit<T, 'id'>> & { id: string };
 
 export const activeSlice = createSlice({
 	name: 'active',
-	initialState: defaultApplicationData,
+	initialState: initialState,
 	reducers: {
+		setIsModified: (state, action: PayloadAction<boolean>) => {
+			state.isModified = action.payload;
+		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
 			const service = action.payload;
@@ -61,11 +73,11 @@ export const activeSlice = createSlice({
 		},
 		insertEnvironment: (state, action: PayloadAction<Environment>) => {
 			const environment = action.payload;
-			Object.assign(state.environments, { [environment.id]: environment });
+			Object.assign(state.environments, { [environment.__id]: environment });
 		},
 		updateEnvironment: (state, action: PayloadAction<Update<Environment>>) => {
-			const { id, ...updateFields } = action.payload;
-			Object.assign(state.environments[id], updateFields);
+			const { __id, ...updateFields } = action.payload;
+			Object.assign(state.environments[__id], updateFields);
 		},
 		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
 			Object.assign(state.settings, action.payload);
@@ -133,6 +145,7 @@ export const activeSlice = createSlice({
 });
 
 export const {
+	setIsModified,
 	insertService,
 	updateService,
 	insertEndpoint,
