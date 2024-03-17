@@ -4,13 +4,18 @@ import { getValidIdsFromSearchTerm } from '../../../utils/search';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { ApplicationDataContext, ServicesSearchContext } from '../../../managers/GlobalContextManager';
+import { ServicesSearchContext } from '../../../managers/GlobalContextManager';
+import { selectActiveState, selectEnvironments, selectServices } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
 
 export function NavigableServicesFileSystem() {
 	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
-	const applicationData = useContext(ApplicationDataContext);
+	const applicationData = useSelector(selectActiveState);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+
 	const { searchText } = useContext(ServicesSearchContext);
 	const validIds = useMemo(() => {
 		return getValidIdsFromSearchTerm(searchText, applicationData);
@@ -31,7 +36,7 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!environmentsCollapsed &&
-							Object.values(applicationData.environments)
+							Object.values(environments)
 								.filter((env) => validIds.has(env.__id))
 								.sort((a, b) => a.__name.localeCompare(b.__name))
 								.map((env, index, arr) => (
@@ -55,7 +60,7 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!servicesCollapsed &&
-							Object.values(applicationData.services)
+							Object.values(services)
 								.filter((service) => validIds.has(service.id))
 								.sort((a, b) => a.name.localeCompare(b.name))
 								.map((service, index) => (

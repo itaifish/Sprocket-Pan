@@ -15,19 +15,23 @@ import { keepStringLengthReasonable } from '../../../utils/string';
 import { useContext, useState } from 'react';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { MoreVert } from '@mui/icons-material';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
+import { selectActiveState } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../state/store';
+import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const { tabs } = tabsContext;
 	const selected = tabs.selected === environment.__id;
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const dispatch = useAppDispatch();
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -38,7 +42,7 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('environment', undefined, environment);
+							dispatch(addNewEnvironment({ data: environment }));
 						}}
 					>
 						<ListItemDecorator>
@@ -85,7 +89,7 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 				action={`delete '${environment.__name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('environment', environment.__id, tabsContext)}
+				actionFunc={() => dispatch(deleteEnvironment(environment.__id))}
 			/>
 		</>
 	);

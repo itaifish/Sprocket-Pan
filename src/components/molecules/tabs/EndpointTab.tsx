@@ -1,31 +1,40 @@
 import { useContext } from 'react';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
 import { tabsManager } from '../../../managers/TabsManager';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
+import { selectActiveState, selectEndpoints, selectServices } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { updateEndpoint } from '../../../state/active/slice';
+import { useAppDispatch } from '../../../state/store';
 
-export function EndpointTab(props: TabProps) {
-	const data = useContext(ApplicationDataContext);
+export function EndpointTab({ id }: TabProps) {
 	const tabsContext = useContext(TabsContext);
-	const endpointData = data.endpoints[props.id];
-	const serviceData = data.services[endpointData.serviceId];
+	const data = useSelector(selectActiveState);
+	const endpointData = useSelector(selectEndpoints)[id];
+	const serviceData = useSelector(selectServices)[endpointData.serviceId];
+	const dispatch = useAppDispatch();
+
+	function update(values: Partial<Endpoint>) {
+		dispatch(updateEndpoint({ ...values, id }));
+	}
 
 	if (endpointData == null || serviceData == null) {
 		return <>Endpoint data not found</>;
 	}
+
 	return (
 		<>
 			<EditableText
 				text={endpointData.name}
-				setText={(newText: string) => applicationDataManager.update('endpoint', props.id, { name: newText })}
+				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
 				isTitle
 			/>
@@ -38,7 +47,7 @@ export function EndpointTab(props: TabProps) {
 						variant="soft"
 						onChange={(_e, newVerb) => {
 							if (newVerb) {
-								applicationDataManager.update('endpoint', props.id, { verb: newVerb });
+								update({ verb: newVerb });
 							}
 						}}
 					>
@@ -60,7 +69,7 @@ export function EndpointTab(props: TabProps) {
 						)}
 						value={endpointData.url}
 						onChange={(e) => {
-							applicationDataManager.update('endpoint', props.id, { url: e.target.value });
+							update({ url: e.target.value });
 						}}
 						color="primary"
 					></Input>

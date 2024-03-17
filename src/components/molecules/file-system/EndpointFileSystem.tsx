@@ -18,7 +18,6 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { useContext, useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { MoreVert } from '@mui/icons-material';
 import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
@@ -26,16 +25,21 @@ import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import { verbColors } from '../../../utils/style';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
+import { TabsContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
+import { useSelector } from 'react-redux';
+import { selectActiveState } from '../../../state/active/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { addNewEndpoint, addNewRequest, deleteEndpoint } from '../../../state/active/thunks';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
 	const { tabs } = tabsContext;
 	const [collapsed, setCollapsed] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const data = useContext(ApplicationDataContext);
+	const data = useSelector(selectActiveState);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const dispatch = useAppDispatch();
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -46,7 +50,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('endpoint', { serviceId: endpoint.serviceId }, endpoint);
+							dispatch(addNewEndpoint({ data: endpoint, serviceId: endpoint.serviceId }));
 						}}
 					>
 						<ListItemDecorator>
@@ -59,7 +63,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							applicationDataManager.addNew('request', { endpointId: endpoint.id });
+							dispatch(addNewRequest({ endpointId: endpoint.id }));
 						}}
 					>
 						<ListItemDecorator>
@@ -134,7 +138,7 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 				action={`delete '${endpoint.name}' and all its data`}
 				open={deleteModalOpen}
 				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => applicationDataManager.delete('endpoint', endpoint.id, tabsContext)}
+				actionFunc={() => dispatch(deleteEndpoint(endpoint.id))}
 			/>
 		</ListItem>
 	);

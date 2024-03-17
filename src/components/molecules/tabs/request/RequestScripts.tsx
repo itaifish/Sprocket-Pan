@@ -1,9 +1,14 @@
 import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails } from '@mui/joy';
 import { EndpointRequest } from '../../../../types/application-data/application-data';
 import { RequestScript } from '../../scripts/RequestScript';
-import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
+import { useAppDispatch } from '../../../../state/store';
+import { updateRequest } from '../../../../state/active/slice';
 
 export function RequestScripts({ request }: { request: EndpointRequest }) {
+	const dispatch = useAppDispatch();
+	function update(values: Partial<EndpointRequest>) {
+		dispatch(updateRequest({ ...values, id: request.id }));
+	}
 	return (
 		<>
 			<AccordionGroup>
@@ -13,10 +18,7 @@ export function RequestScripts({ request }: { request: EndpointRequest }) {
 						<RequestScript
 							scriptText={request.preRequestScript}
 							scriptKey={'preRequestScript'}
-							updateScript={(scriptText) => {
-								const updateObj = { preRequestScript: scriptText };
-								applicationDataManager.update('request', request.id, updateObj);
-							}}
+							updateScript={(scriptText) => update({ preRequestScript: scriptText })}
 						/>
 					</AccordionDetails>
 				</Accordion>
@@ -26,10 +28,7 @@ export function RequestScripts({ request }: { request: EndpointRequest }) {
 						<RequestScript
 							scriptText={request.postRequestScript}
 							scriptKey={'postRequestScript'}
-							updateScript={(scriptText) => {
-								const updateObj = { postRequestScript: scriptText };
-								applicationDataManager.update('request', request.id, updateObj);
-							}}
+							updateScript={(scriptText) => update({ postRequestScript: scriptText })}
 						/>
 					</AccordionDetails>
 				</Accordion>
