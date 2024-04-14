@@ -4,9 +4,9 @@ import SaveIcon from '@mui/icons-material/Save';
 import Badge from '@mui/joy/Badge';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
-import { saveActiveData } from '../../../state/active/thunks';
 import { selectHasBeenModifiedSinceLastSave } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { saveActiveData } from '../../../state/active/thunks/environments';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);

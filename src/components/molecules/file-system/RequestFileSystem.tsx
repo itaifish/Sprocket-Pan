@@ -22,7 +22,7 @@ import { TabsContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
-import { addNewRequest, deleteRequest } from '../../../state/active/thunks';
+import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
 
 export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const tabsContext = useContext(TabsContext);

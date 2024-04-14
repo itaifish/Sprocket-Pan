@@ -27,7 +27,8 @@ import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { addNewEndpoint, addNewService, deleteService } from '../../../state/active/thunks';
+import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
+import { addNewService, deleteService } from '../../../state/active/thunks/services';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);

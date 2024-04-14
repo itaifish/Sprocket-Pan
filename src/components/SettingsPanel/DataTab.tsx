@@ -8,8 +8,8 @@ import DeleteForever from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import SaveIcon from '@mui/icons-material/Save';
 import { useAppDispatch } from '../../state/store';
-import { saveActiveData } from '../../state/active/thunks';
 import { deleteAllHistory } from '../../state/active/slice';
+import { saveActiveData } from '../../state/active/thunks/environments';
 
 interface DataTabProps {
 	onQuit: () => void;

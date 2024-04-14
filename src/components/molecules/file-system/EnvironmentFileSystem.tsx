@@ -22,7 +22,7 @@ import { TabsContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
-import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks';
+import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks/environments';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);

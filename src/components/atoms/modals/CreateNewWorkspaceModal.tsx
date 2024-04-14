@@ -18,6 +18,7 @@ import { toValidFolderName } from '../../../utils/string';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppDispatch } from '../../../state/store';
 import { createWorkspace } from '../../../state/workspaces/thunks';
+
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;

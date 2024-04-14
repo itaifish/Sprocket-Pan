@@ -30,7 +30,8 @@ import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { addNewEndpoint, addNewRequest, deleteEndpoint } from '../../../state/active/thunks';
+import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/endpoints';
+import { addNewRequest } from '../../../state/active/thunks/requests';
 
 export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);

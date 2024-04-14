@@ -45,7 +45,7 @@ import { useSelector } from 'react-redux';
 import { selectActiveState, selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint, updateRequest } from '../../../state/active/slice';
-import { makeRequest } from '../../../state/active/thunks';
+import { makeRequest } from '../../../state/active/thunks/requests';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {

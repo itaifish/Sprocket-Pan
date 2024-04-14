@@ -7,7 +7,7 @@ import {
 	EndpointRequest,
 	Environment,
 	Service,
-} from '../../types/application-data/application-data';
+} from '../../../types/application-data/application-data';
 
 export function createNewRequestObject(endpointId: string): EndpointRequest {
 	const newId = v4();

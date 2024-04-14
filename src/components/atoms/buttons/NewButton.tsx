@@ -5,7 +5,8 @@ import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
-import { addNewEnvironment, addNewService } from '../../../state/active/thunks';
+import { addNewEnvironment } from '../../../state/active/thunks/environments';
+import { addNewService } from '../../../state/active/thunks/services';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
