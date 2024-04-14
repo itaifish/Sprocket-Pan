@@ -14,6 +14,7 @@ import {
 	insertRequest,
 	insertService,
 	setIsModified,
+	addResponseToHistory,
 } from './slice';
 import { Endpoint, EndpointRequest, Environment, Service } from '../../types/application-data/application-data';
 import {
@@ -23,6 +24,9 @@ import {
 	createNewServiceObject,
 } from './util';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
+import { networkRequestManager } from '../../managers/NetworkRequestManager';
+import { AuditLog } from '../../managers/AuditLogManager';
+
 
 interface AddNewRequest {
 	data?: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;
@@ -137,5 +141,19 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 		const { isModified, ...data } = thunk.getState().active;
 		await thunk.dispatch(setIsModified(false));
 		await applicationDataManager.saveData(data);
+	},
+);
+
+export const makeRequest = createAsyncThunk<void, { requestId: string; auditLog?: AuditLog }, { state: RootState }>(
+	'active/makeRequest',
+	async ({ requestId, auditLog = [] }, thunk) => {
+		await networkRequestManager.runPreScripts(requestId, thunk.getState().active, auditLog);
+		const { networkRequest, response } = await networkRequestManager.sendRequest(
+			requestId,
+			thunk.getState().active,
+			auditLog,
+		);
+		await networkRequestManager.runPostScripts(requestId, thunk.getState().active, response, auditLog);
+		thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest }));
 	},
 );

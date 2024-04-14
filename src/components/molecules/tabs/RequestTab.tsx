@@ -29,7 +29,6 @@ import { rgbToHex } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { EditableText } from '../../atoms/EditableText';
-import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
@@ -46,6 +45,7 @@ import { useSelector } from 'react-redux';
 import { selectActiveState, selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint, updateRequest } from '../../../state/active/slice';
+import { makeRequest } from '../../../state/active/thunks';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -121,6 +121,20 @@ export function RequestTab({ id }: TabProps) {
 		dispatch(updateEndpoint({ ...values, id: requestData.endpointId }));
 	}
 
+	async function sendRequest() {
+		setLoading(true);
+		try {
+			await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
+			setResponse('latest');
+		} catch (err) {
+			setLastError(getError(err));
+			setResponse('error');
+		} finally {
+			setLoading(false);
+		}
+		setLoading(false);
+	}
+
 	return (
 		<>
 			<EditableText
@@ -177,19 +191,7 @@ export function RequestTab({ id }: TabProps) {
 						<Button
 							color="primary"
 							startDecorator={isLoading ? <CircularProgress /> : <SendIcon />}
-							onClick={async () => {
-								if (!isLoading) {
-									setLoading(true);
-									const result = await networkRequestManager.sendRequest(requestData.id);
-									if (result) {
-										setLastError(getError(result));
-										setResponse('error');
-									} else {
-										setResponse('latest');
-									}
-									setLoading(false);
-								}
-							}}
+							onClick={sendRequest}
 						>
 							Send
 						</Button>
