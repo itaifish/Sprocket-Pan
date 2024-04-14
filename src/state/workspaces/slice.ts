@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 
-const defaultWorkspace: WorkspaceMetadata = {
+export const defaultWorkspace: WorkspaceMetadata = {
 	name: 'Default Workspace',
 	description: 'The default workspace in SprocketPan',
 	lastModified: new Date().getTime(),
@@ -25,7 +25,7 @@ export const workspacesSlice = createSlice({
 			state.list = action.payload;
 		},
 		setWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
-			const workspace = action.payload ?? defaultWorkspace;
+			const workspace = action.payload;
 			state.selected = workspace;
 		},
 	},
