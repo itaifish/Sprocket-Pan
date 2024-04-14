@@ -145,16 +145,25 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	},
 );
 
+/**
+ * Only exists until managers can be entirely migrated.
+ * @deprecated
+ */
+function extractStateAccess(thunk: any) {
+	return { getState: () => thunk.getState().active, dispatch: thunk.dispatch };
+}
+
 export const makeRequest = createAsyncThunk<void, { requestId: string; auditLog?: AuditLog }, { state: RootState }>(
 	'active/makeRequest',
 	async ({ requestId, auditLog = [] }, thunk) => {
-		await networkRequestManager.runPreScripts(requestId, thunk.getState().active, auditLog);
+		const stateAccess = extractStateAccess(thunk);
+		await networkRequestManager.runPreScripts(requestId, stateAccess, auditLog);
 		const { networkRequest, response } = await networkRequestManager.sendRequest(
 			requestId,
 			thunk.getState().active,
 			auditLog,
 		);
-		await networkRequestManager.runPostScripts(requestId, thunk.getState().active, response, auditLog);
+		await networkRequestManager.runPostScripts(requestId, stateAccess, response, auditLog);
 		thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest }));
 	},
 );

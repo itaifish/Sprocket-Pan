@@ -26,5 +26,5 @@ export const selectSaveStateTimestamps = createSelector(selectActiveState, (stat
 
 export const selectHasBeenModifiedSinceLastSave = createSelector(
 	selectSaveStateTimestamps,
-	(time) => time.modified.getTime() > time.saved.getTime(),
+	(time) => time.modified > time.saved,
 );

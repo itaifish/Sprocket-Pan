@@ -12,14 +12,14 @@ import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
-	lastModified: Date;
-	lastSaved: Date;
+	lastModified: number;
+	lastSaved: number;
 }
 
 const initialState: ActiveWorkspaceSlice = {
 	...defaultApplicationData,
-	lastModified: new Date(),
-	lastSaved: new Date(0),
+	lastModified: 0,
+	lastSaved: 0,
 };
 
 interface AddResponseToHistory {
@@ -46,10 +46,10 @@ export const activeSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		setSavedNow: (state) => {
-			state.lastSaved = new Date();
+			state.lastSaved = new Date().getTime();
 		},
 		setModifiedNow: (state) => {
-			state.lastModified = new Date();
+			state.lastModified = new Date().getTime();
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {

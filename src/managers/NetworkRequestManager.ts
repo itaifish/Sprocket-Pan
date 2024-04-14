@@ -16,13 +16,15 @@ import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
 import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
+import { StateAccess } from '../state/types';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
 	private constructor() {}
 
-	public async runPreScripts(requestId: string, data: ApplicationData, auditLog: AuditLog = []) {
+	public async runPreScripts(requestId: string, stateAccess: StateAccess, auditLog: AuditLog = []) {
+		const data = stateAccess.getState();
 		const request = data.requests[requestId];
 		const endpointId = request.endpointId;
 		const endpoint = data.endpoints[endpointId];
@@ -34,7 +36,7 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const preRequestScript of preRequestScripts) {
-			const res = await this.runScript(preRequestScript.script, requestId, undefined, {
+			const res = await this.runScript(preRequestScript.script, requestId, stateAccess, undefined, {
 				log: auditLog,
 				scriptType: preRequestScript.name,
 				associatedId: preRequestScript.id,
@@ -48,10 +50,11 @@ class NetworkRequestManager {
 
 	public async runPostScripts(
 		requestId: string,
-		data: ApplicationData,
+		stateAccess: StateAccess,
 		response: EndpointResponse,
 		auditLog: AuditLog = [],
 	) {
+		const data = stateAccess.getState();
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
@@ -62,7 +65,7 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const postRequestScript of postRequestScripts) {
-			const res = await this.runScript(postRequestScript.script, requestId, response, {
+			const res = await this.runScript(postRequestScript.script, requestId, stateAccess, response, {
 				log: auditLog,
 				scriptType: postRequestScript.name,
 				associatedId: postRequestScript.id,
@@ -178,6 +181,7 @@ class NetworkRequestManager {
 	private async runScript(
 		script: string | undefined,
 		requestId: string,
+		stateAccess: StateAccess,
 		response?: EndpointResponse | undefined,
 		auditInfo?: {
 			log: AuditLog;
@@ -191,7 +195,7 @@ class NetworkRequestManager {
 					auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
 				}
 
-				const sprocketPan = getScriptInjectionCode(requestId, response, auditInfo?.log);
+				const sprocketPan = getScriptInjectionCode(requestId, stateAccess, response, auditInfo?.log);
 				const _this = globalThis as any;
 				_this.sp = sprocketPan;
 				_this.sprocketPan = sprocketPan;

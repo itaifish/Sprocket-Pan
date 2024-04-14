@@ -57,7 +57,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 			createWorkspace({
 				name: workspaceName,
 				description: workspaceDescription,
-				lastModified: new Date(),
+				lastModified: new Date().getTime(),
 				fileName: workspaceFileName,
 			}),
 		).unwrap();

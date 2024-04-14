@@ -114,7 +114,7 @@ export type WorkspaceMetadata = {
 	description: string;
 	// undefined is the default workspace
 	fileName: string | undefined;
-	lastModified: Date;
+	lastModified: number;
 };
 
 export type ApplicationData = {

@@ -97,7 +97,7 @@ export class ApplicationDataManager {
 				log.trace(`File already exists, updating...`);
 				const metadata = data.workspaceMetadata;
 				if (metadata != null) {
-					metadata.lastModified = new Date();
+					metadata.lastModified = new Date().getTime();
 				}
 				await writeFile(
 					{

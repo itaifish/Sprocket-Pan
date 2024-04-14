@@ -58,7 +58,7 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 				<SprocketTooltip text="Last Modified">
 					<EditCalendarIcon></EditCalendarIcon>
 				</SprocketTooltip>
-				<Typography level="body-md"> {formatDate(workspace.lastModified)}</Typography>
+				<Typography level="body-md"> {formatDate(new Date(workspace.lastModified))}</Typography>
 			</CardContent>
 			<CardContent orientation="horizontal">
 				<SprocketTooltip text="Description">
