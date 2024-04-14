@@ -5,12 +5,12 @@ import Badge from '@mui/joy/Badge';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
 import { saveActiveData } from '../../../state/active/thunks';
-import { selectIsModified } from '../../../state/active/selectors';
+import { selectHasBeenModifiedSinceLastSave } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);
-	const isModified = useSelector(selectIsModified);
+	const isModified = useSelector(selectHasBeenModifiedSinceLastSave);
 	const dispatch = useAppDispatch();
 
 	async function save() {

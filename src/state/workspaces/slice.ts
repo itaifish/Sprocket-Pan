@@ -4,7 +4,7 @@ import { WorkspaceMetadata } from '../../types/application-data/application-data
 const defaultWorkspace: WorkspaceMetadata = {
 	name: 'Default Workspace',
 	description: 'The default workspace in SprocketPan',
-	lastModified: new Date().toISOString(),
+	lastModified: new Date(),
 	fileName: undefined,
 };
 

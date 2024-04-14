@@ -12,12 +12,14 @@ import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
-	isModified: boolean;
+	lastModified: Date;
+	lastSaved: Date;
 }
 
 const initialState: ActiveWorkspaceSlice = {
 	...defaultApplicationData,
-	isModified: false,
+	lastModified: new Date(),
+	lastSaved: new Date(0),
 };
 
 interface AddResponseToHistory {
@@ -43,8 +45,11 @@ export const activeSlice = createSlice({
 	name: 'active',
 	initialState: initialState,
 	reducers: {
-		setIsModified: (state, action: PayloadAction<boolean>) => {
-			state.isModified = action.payload;
+		setSavedNow: (state) => {
+			state.lastSaved = new Date();
+		},
+		setModifiedNow: (state) => {
+			state.lastModified = new Date();
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
@@ -77,6 +82,9 @@ export const activeSlice = createSlice({
 		},
 		updateEnvironment: (state, action: PayloadAction<Update<Environment>>) => {
 			const { __id, ...updateFields } = action.payload;
+			if (__id == null) {
+				throw new Error('attempted to update environment with null __id');
+			}
 			Object.assign(state.environments[__id], updateFields);
 		},
 		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
@@ -145,7 +153,8 @@ export const activeSlice = createSlice({
 });
 
 export const {
-	setIsModified,
+	setSavedNow,
+	setModifiedNow,
 	insertService,
 	updateService,
 	insertEndpoint,

@@ -13,8 +13,8 @@ import {
 	insertEnvironment,
 	insertRequest,
 	insertService,
-	setIsModified,
 	addResponseToHistory,
+	setSavedNow,
 } from './slice';
 import { Endpoint, EndpointRequest, Environment, Service } from '../../types/application-data/application-data';
 import {
@@ -26,7 +26,6 @@ import {
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { networkRequestManager } from '../../managers/NetworkRequestManager';
 import { AuditLog } from '../../managers/AuditLogManager';
-
 
 interface AddNewRequest {
 	data?: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;
@@ -96,6 +95,7 @@ export const addNewService = createAsyncThunk<void, AddNewService, { state: Root
 		await thunk.dispatch(insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
 		for (const endpointId of endpointIds ?? []) {
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { id, serviceId, ...endpoint } = structuredClone(endpoints[endpointId]);
 			await thunk.dispatch(addNewEndpoint({ data: endpoint, serviceId: newService.id }));
 		}
@@ -138,8 +138,9 @@ export const deleteEnvironment = deleteEnvironmentFromState;
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	'active/saveData',
 	async (_, thunk) => {
-		const { isModified, ...data } = thunk.getState().active;
-		await thunk.dispatch(setIsModified(false));
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { lastModified, lastSaved, ...data } = thunk.getState().active;
+		await thunk.dispatch(setSavedNow());
 		await applicationDataManager.saveData(data);
 	},
 );

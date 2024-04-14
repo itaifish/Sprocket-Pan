@@ -19,4 +19,12 @@ export const selectZoomLevel = createSelector(selectSettings, (state) => state.z
 
 export const selectDefaultTheme = createSelector(selectSettings, (state) => state.defaultTheme);
 
-export const selectIsModified = createSelector(selectActiveState, (state) => state.isModified);
+export const selectSaveStateTimestamps = createSelector(selectActiveState, (state) => ({
+	modified: state.lastModified,
+	saved: state.lastSaved,
+}));
+
+export const selectHasBeenModifiedSinceLastSave = createSelector(
+	selectSaveStateTimestamps,
+	(time) => time.modified.getTime() > time.saved.getTime(),
+);
