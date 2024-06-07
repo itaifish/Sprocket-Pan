@@ -45,6 +45,9 @@ export const activeSlice = createSlice({
 	name: 'active',
 	initialState: initialState,
 	reducers: {
+		setFullState: (state, action: PayloadAction<ApplicationData>) => {
+			state = { ...state, ...action.payload };
+		},
 		setSavedNow: (state) => {
 			state.lastSaved = new Date().getTime();
 		},
@@ -153,6 +156,7 @@ export const activeSlice = createSlice({
 });
 
 export const {
+	setFullState,
 	setSavedNow,
 	setModifiedNow,
 	insertService,

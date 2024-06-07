@@ -17,7 +17,7 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 			...createNewEnvironmentObject(),
 			...data,
 			__data: structuredClone(data.__data ?? []),
-		};
+		} as unknown as Environment;
 		await thunk.dispatch(insertEnvironment(newEnvironment));
 	},
 );

@@ -9,7 +9,7 @@ import { Settings } from '../../types/settings/settings';
 import { RequestsTab } from './RequestsTab';
 import { DataTab } from './DataTab';
 import { useAppDispatch } from '../../state/store';
-import { setWorkspace } from '../../state/workspaces/slice';
+import { setSelectedWorkspace } from '../../state/workspaces/slice';
 import { insertSettings } from '../../state/active/slice';
 import { useSelector } from 'react-redux';
 import { selectSettings } from '../../state/active/selectors';
@@ -42,7 +42,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	}
 	const dispatch = useAppDispatch();
 	function goToWorkspaceSelection() {
-		dispatch(setWorkspace(undefined));
+		dispatch(setSelectedWorkspace(undefined));
 	}
 	function saveSettings() {
 		dispatch(insertSettings(unsavedSettings));
