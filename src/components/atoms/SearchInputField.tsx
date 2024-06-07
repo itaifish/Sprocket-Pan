@@ -6,6 +6,7 @@ import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { Constants } from '../../utils/constants';
 import ClearIcon from '@mui/icons-material/Clear';
+import { SprocketTooltip } from './SprocketTooltip';
 
 export function SearchInputField({
 	searchText,
@@ -54,17 +55,19 @@ export function SearchInputField({
 					value={localDataState}
 					onChange={(e) => setLocalDataState(e.target.value)}
 				/>
-				<IconButton
-					size="sm"
-					variant="plain"
-					color={'danger'}
-					onClick={() => {
-						setLocalDataState('');
-						setTyping(false);
-					}}
-				>
-					<ClearIcon />
-				</IconButton>
+				<SprocketTooltip text="Clear Search">
+					<IconButton
+						size="sm"
+						variant="plain"
+						color={'danger'}
+						onClick={() => {
+							setSearchText('');
+							setTyping(false);
+						}}
+					>
+						<ClearIcon />
+					</IconButton>
+				</SprocketTooltip>
 			</Stack>
 		</>
 	);
