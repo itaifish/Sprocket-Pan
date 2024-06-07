@@ -57,7 +57,7 @@ export function getValidIdsFromSearchTerm(searchText: string, data: ApplicationD
 					typeof request.body === 'string'
 						? request.body
 						: request.body != undefined
-						? JSON.stringify([...request.body])
+						? JSON.stringify(request.body)
 						: '';
 				const bodyMatches = bodyStr.toLocaleLowerCase().includes(searchUncased);
 				if (nameMatches || bodyMatches) {

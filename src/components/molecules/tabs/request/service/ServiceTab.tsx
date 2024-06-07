@@ -32,6 +32,7 @@ import { selectActiveState, selectServices } from '../../../../../state/active/s
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../../../state/store';
 import { updateService } from '../../../../../state/active/slice';
+import { asEnv } from '../../../../../utils/types';
 
 export function ServiceTab({ id }: TabProps) {
 	const dispatch = useAppDispatch();
@@ -134,11 +135,11 @@ export function ServiceTab({ id }: TabProps) {
 								<SprocketTooltip text="Add New Service Environment">
 									<IconButton
 										onClick={() => {
-											const newEnv = {
+											const newEnv = asEnv({
 												__id: v4(),
 												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
 												__data: [],
-											} as unknown as Environment;
+											});
 											update({
 												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 											});

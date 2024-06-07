@@ -1,6 +1,7 @@
 import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
 import { getDataArrayFromEnvKeys } from '../utils/functions';
+import { asEnv } from '../utils/types';
 
 type Snippet = {
 	value: string;
@@ -148,7 +149,7 @@ class EnvironmentContextResolver {
 	}
 
 	public buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
-		let env: Environment = { __name: '', __id: '', __data: [] } as unknown as Environment;
+		let env: Environment = asEnv({ __name: '', __id: '', __data: [] });
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
 		}
