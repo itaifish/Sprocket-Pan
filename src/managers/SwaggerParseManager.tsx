@@ -37,7 +37,8 @@ class SwaggerParseManager {
 		inputValue: string,
 	): Promise<ParsedServiceApplicationData> {
 		try {
-			const input = this.parseSwaggerInput(await this.loadSwaggerFile(inputType, inputValue));
+			const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
+			const input = this.parseSwaggerInput(loadedFile);
 			const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
 			if (!api) {
 				log.warn(`parser is: ${JSON.stringify(this.parser)}`);

@@ -34,7 +34,6 @@ export const createWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state
 export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state: RootState }>(
 	`${root}/select`,
 	async (workspace, thunk) => {
-		console.log(`Initializing workspace ${workspace}`);
 		const data = await applicationDataManager.initializeWorkspace(workspace);
 		if (data) {
 			await Promise.all([

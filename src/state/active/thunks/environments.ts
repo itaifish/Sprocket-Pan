@@ -9,7 +9,6 @@ interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>>;
 }
 
-// TODO: what is up with this and why is the typing broken
 export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { state: RootState }>(
 	'active/addEnvironment',
 	async ({ data = {} }, thunk) => {

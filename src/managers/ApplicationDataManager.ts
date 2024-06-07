@@ -9,6 +9,8 @@ import {
 import swaggerParseManager from './SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
+import { setFullState } from '../state/active/slice';
+import { addNewService } from '../state/active/thunks/services';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},
@@ -45,8 +47,9 @@ export class ApplicationDataManager {
 
 	private constructor() {}
 
-	public loadSwaggerFile(url: string) {
-		return swaggerParseManager.parseSwaggerFile('filePath', url);
+	public async loadSwaggerFile(url: string) {
+		const newService = await swaggerParseManager.parseSwaggerFile('filePath', url);
+		dispatchEvent(addNewService(newService));
 	}
 
 	public async saveData(data: ApplicationData) {

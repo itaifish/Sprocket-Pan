@@ -15,6 +15,7 @@ export const addNewService = createAsyncThunk<void, AddNewService, { state: Root
 		const newService = { ...createNewServiceObject(), ...structuredClone(data) };
 		await thunk.dispatch(insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
+		// clone endpoints, if we're cloning the service
 		for (const endpointId of endpointIds ?? []) {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { id, serviceId, ...endpoint } = structuredClone(endpoints[endpointId]);
