@@ -39,7 +39,7 @@ interface AddEndpointToService {
 	serviceId: string;
 }
 
-type Update<T> = Partial<Omit<T, 'id'>> & { id: string };
+type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
 	name: 'active',
@@ -83,7 +83,7 @@ export const activeSlice = createSlice({
 			const environment = action.payload;
 			Object.assign(state.environments, { [environment.__id]: environment });
 		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment>>) => {
+		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
 			const { __id, ...updateFields } = action.payload;
 			if (__id == null) {
 				throw new Error('attempted to update environment with null __id');

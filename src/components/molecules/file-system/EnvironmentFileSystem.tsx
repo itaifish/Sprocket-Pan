@@ -18,17 +18,20 @@ import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks/environments';
+import { TabsContext } from '../../../managers/GlobalContextManager';
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
+import { selectEnvironment } from '../../../state/active/slice';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
 	const tabsContext = useContext(TabsContext);
 	const data = useSelector(selectActiveState);
 	const { tabs } = tabsContext;
 	const selected = tabs.selected === environment.__id;
+	const envSelected = data.selectedEnvironment === environment.__id;
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const dispatch = useAppDispatch();
@@ -39,6 +42,22 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 					<MoreVert />
 				</MenuButton>
 				<Menu>
+					<MenuItem
+						onClick={() => {
+							if (envSelected) {
+								dispatch(selectEnvironment(undefined));
+							} else {
+								dispatch(selectEnvironment(environment.__id));
+							}
+						}}
+					>
+						<ListItemDecorator>
+							<IconButton aria-label="Select" size="sm">
+								<CheckCircleOutlinedIcon fontSize="small" />
+							</IconButton>
+							{envSelected ? 'Deselect' : 'Select'}
+						</ListItemDecorator>
+					</MenuItem>
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
@@ -77,7 +96,7 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 						tabsManager.selectTab(tabsContext, environment.__id, 'environment');
 					}}
 					selected={selected}
-					color={data.selectedEnvironment === environment.__id ? 'success' : 'neutral'}
+					color={envSelected ? 'success' : 'neutral'}
 				>
 					<ListItemDecorator>
 						<TableChartIcon fontSize="small" />
