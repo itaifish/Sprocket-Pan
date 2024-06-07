@@ -17,7 +17,7 @@ import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
 import { QueryParamUtils } from '../utils/data-utils';
 
-type ParsedServiceApplicationData = {
+export type ParsedServiceApplicationData = {
 	services: Service[];
 	endpoints: Endpoint[];
 	requests: EndpointRequest[];

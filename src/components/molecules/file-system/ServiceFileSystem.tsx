@@ -28,7 +28,7 @@ import { useSelector } from 'react-redux';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
-import { addNewService, deleteService } from '../../../state/active/thunks/services';
+import { cloneService, deleteService } from '../../../state/active/thunks/services';
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
@@ -53,7 +53,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 					<MenuItem
 						onClick={() => {
 							setMenuOpen(false);
-							dispatch(addNewService({ data: service }));
+							dispatch(cloneService({ data: service }));
 						}}
 					>
 						<ListItemDecorator>

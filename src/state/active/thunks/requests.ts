@@ -44,15 +44,15 @@ export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: Root
 	'active/addRequest',
 	async ({ endpointId, data = {} }, thunk) => {
 		const newRequest = { ...createNewRequestObject(endpointId), ...data };
-		await thunk.dispatch(insertRequest(newRequest));
-		await thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
+		thunk.dispatch(insertRequest(newRequest));
+		thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
 	},
 );
 
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteRequest',
 	async (id, thunk) => {
-		await thunk.dispatch(removeRequestFromEndpoint(id));
-		await thunk.dispatch(deleteRequestFromState(id));
+		thunk.dispatch(removeRequestFromEndpoint(id));
+		thunk.dispatch(deleteRequestFromState(id));
 	},
 );

@@ -5,15 +5,15 @@ import { insertService, deleteEndpointFromState, deleteServiceFromState } from '
 import { createNewServiceObject } from './util';
 import { addNewEndpoint } from './endpoints';
 
-interface AddNewService {
+interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
 }
 
-export const addNewService = createAsyncThunk<void, AddNewService, { state: RootState }>(
-	'active/addService',
+export const cloneService = createAsyncThunk<void, CloneServiceInput, { state: RootState }>(
+	'active/cloneService',
 	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
 		const newService = { ...createNewServiceObject(), ...structuredClone(data) };
-		await thunk.dispatch(insertService(newService));
+		thunk.dispatch(insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
 		// clone endpoints, if we're cloning the service
 		for (const endpointId of endpointIds ?? []) {
@@ -32,8 +32,8 @@ export const deleteService = createAsyncThunk<void, string, { state: RootState }
 			throw new Error('attempted to delete service that does not exist');
 		}
 		for (const endpointId in service.endpointIds) {
-			await thunk.dispatch(deleteEndpointFromState(endpointId));
+			thunk.dispatch(deleteEndpointFromState(endpointId));
 		}
-		await thunk.dispatch(deleteServiceFromState(service.id));
+		thunk.dispatch(deleteServiceFromState(service.id));
 	},
 );

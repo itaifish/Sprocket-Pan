@@ -6,7 +6,7 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEnvironment } from '../../../state/active/thunks/environments';
-import { addNewService } from '../../../state/active/thunks/services';
+import { cloneService } from '../../../state/active/thunks/services';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -24,7 +24,7 @@ export function NewButton() {
 					<Menu>
 						<MenuItem
 							onClick={() => {
-								dispatch(addNewService({}));
+								dispatch(cloneService({}));
 								setMenuOpen(false);
 							}}
 						>
