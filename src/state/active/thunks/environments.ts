@@ -18,7 +18,7 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 			...data,
 			__data: structuredClone(data.__data ?? []),
 		} as unknown as Environment;
-		await thunk.dispatch(insertEnvironment(newEnvironment));
+		thunk.dispatch(insertEnvironment(newEnvironment));
 	},
 );
 
@@ -29,7 +29,7 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	async (_, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { lastModified, lastSaved, ...data } = thunk.getState().active;
-		await thunk.dispatch(setSavedNow());
+		thunk.dispatch(setSavedNow());
 		await applicationDataManager.saveData(data);
 	},
 );

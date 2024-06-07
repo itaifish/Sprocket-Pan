@@ -34,13 +34,13 @@ export const createWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state
 export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state: RootState }>(
 	`${root}/select`,
 	async (workspace, thunk) => {
+		console.log(`Initializing workspace ${workspace}`);
 		const data = await applicationDataManager.initializeWorkspace(workspace);
 		if (data) {
 			await Promise.all([
 				thunk.dispatch(setSelectedWorkspace(data.workspaceMetadata)),
 				thunk.dispatch(setFullState(data)),
 			]);
-			log.info('Saving workspace metadata: ' + JSON.stringify(thunk.getState().active.workspaceMetadata));
 		} else {
 			log.warn('Workspace failed to load');
 		}

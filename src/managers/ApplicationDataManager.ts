@@ -96,9 +96,9 @@ export class ApplicationDataManager {
 				return 'doesNotExist' as const;
 			} else {
 				log.trace(`File already exists, updating...`);
-				const metadata = data.workspaceMetadata;
+				let metadata = data.workspaceMetadata;
 				if (metadata != null) {
-					metadata.lastModified = new Date().getTime();
+					metadata = { ...metadata, lastModified: new Date().getTime() };
 				}
 				await writeFile(
 					{
@@ -169,8 +169,6 @@ export class ApplicationDataManager {
 			data.requests[responseHistory.id].history = responseHistory?.history ?? [];
 		});
 		data.workspaceMetadata = JSON.parse(metadata, dateTimeReviver) as WorkspaceMetadata;
-		// TODO: Clear logs
-		log.debug(`Data loaded from file ${paths.data}: ${Object.keys(data.services).length} services`);
 		return data;
 	}
 
