@@ -9,7 +9,6 @@ import {
 import swaggerParseManager from './SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
-import { store } from '../state/store';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},
@@ -51,7 +50,7 @@ export class ApplicationDataManager {
 	}
 
 	public async saveData(data: ApplicationData) {
-		const selectedWorkspace = store.getState().workspaces.selected;
+		const selectedWorkspace = data.workspaceMetadata;
 		const paths = this.getWorkspacePath(selectedWorkspace?.fileName);
 		const saveData = async () => {
 			const doesExist = await exists(paths.data, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
