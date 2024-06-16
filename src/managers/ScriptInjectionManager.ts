@@ -18,8 +18,9 @@ export function getScriptInjectionCode(
 		const data = getState();
 		const request = getRequest();
 		if (level === 'request') {
-			EnvironmentUtils.set(request.environmentOverride, key, value);
-			dispatch(updateRequest({ id: request.id, environmentOverride: { ...request.environmentOverride } }));
+			const newEnv = structuredClone(request.environmentOverride);
+			EnvironmentUtils.set(newEnv, key, value);
+			dispatch(updateRequest({ id: request.id, environmentOverride: newEnv }));
 		} else if (level === 'service') {
 			const endpoint = data.endpoints[request.endpointId];
 			if (!endpoint) {
@@ -31,13 +32,14 @@ export function getScriptInjectionCode(
 			}
 			const selectedEnvironment = service.selectedEnvironment;
 			if (selectedEnvironment) {
-				EnvironmentUtils.set(service.localEnvironments[selectedEnvironment], key, value);
+				const newEnv = structuredClone(service.localEnvironments[selectedEnvironment]);
+				EnvironmentUtils.set(newEnv, key, value);
 				dispatch(
 					updateService({
 						id: endpoint.serviceId,
 						localEnvironments: {
 							...service.localEnvironments,
-							[selectedEnvironment]: { ...service.localEnvironments[selectedEnvironment] },
+							[selectedEnvironment]: newEnv,
 						},
 					}),
 				);
@@ -47,7 +49,7 @@ export function getScriptInjectionCode(
 			if (selectedEnvironment) {
 				dispatch(
 					updateEnvironment({
-						id: selectedEnvironment,
+						__id: selectedEnvironment,
 						[key]: value,
 					}),
 				);

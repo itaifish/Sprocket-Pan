@@ -28,7 +28,7 @@ export function EndpointTab({ id }: TabProps) {
 		dispatch(updateEndpoint({ ...values, id }));
 	};
 
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
+	const { localDataState, setLocalDataState } = useDebounce({
 		state: endpointData.url,
 		setState: (newUrl: string) => update({ url: newUrl }),
 		debounceOverride: Constants.debounceTimeMS,
