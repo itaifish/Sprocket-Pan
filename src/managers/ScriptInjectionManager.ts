@@ -2,6 +2,7 @@ import { updateEnvironment, updateRequest, updateService } from '../state/active
 import { StateAccess } from '../state/types';
 import { EndpointResponse } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
+import { log } from '../utils/logging';
 import { AuditLog } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { networkRequestManager } from './NetworkRequestManager';
@@ -46,33 +47,34 @@ export function getScriptInjectionCode(
 			}
 		} else if (level === 'global') {
 			const selectedEnvironment = data.selectedEnvironment;
-			if (selectedEnvironment) {
-				dispatch(
-					updateEnvironment({
-						__id: selectedEnvironment,
-						[key]: value,
-					}),
-				);
+			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
+			if (newEnv) {
+				EnvironmentUtils.set(newEnv, key, value);
+				log.info(JSON.stringify(newEnv));
+				dispatch(updateEnvironment(newEnv));
 			}
 		}
 	};
 
 	const setQueryParam = (key: string, value: string) => {
 		const request = getRequest();
-		QueryParamUtils.add(request.queryParams, key, value);
-		dispatch(updateRequest({ id: request.id, queryParams: { ...request.queryParams } }));
+		const newQueryParams = structuredClone(request.queryParams);
+		QueryParamUtils.add(newQueryParams, key, value);
+		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
 	};
 
 	const setQueryParams = (key: string, values: string[]) => {
 		const request = getRequest();
-		QueryParamUtils.set(request.queryParams, key, values);
-		dispatch(updateRequest({ id: request.id, queryParams: { ...request.queryParams } }));
+		const newQueryParams = structuredClone(request.queryParams);
+		QueryParamUtils.set(newQueryParams, key, values);
+		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
 	};
 
 	const setHeader = (key: string, value: string) => {
 		const request = getRequest();
-		HeaderUtils.set(request.headers, key, value);
-		dispatch(updateRequest({ id: request.id, headers: { ...request.headers } }));
+		const newHeaders = structuredClone(request.headers);
+		HeaderUtils.set(newHeaders, key, value);
+		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
 	};
 
 	const getEnvironment = () => {
