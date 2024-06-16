@@ -25,14 +25,16 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 		if (localDataState == undefined) {
 			return;
 		}
-		clearTimeout(typingBufferTimeout ?? undefined);
 		const timeout = setTimeout(() => {
 			if (JSON.stringify(localDataState) !== JSON.stringify(props.state)) {
 				props.setState(localDataState);
 				debounceEventEmitter.emit('sync');
 			}
 		}, props.debounceOverride ?? Constants.debounceTimeMS);
-		setTypingBufferTimeout(timeout);
+		setTypingBufferTimeout((oldTimeout) => {
+			clearTimeout(oldTimeout ?? undefined);
+			return timeout;
+		});
 		debounceEventEmitter.emit('desync');
 	}, [localDataState]);
 

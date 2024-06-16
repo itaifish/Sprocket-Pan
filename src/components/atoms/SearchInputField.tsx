@@ -1,7 +1,7 @@
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import { IconButton, Input, Stack } from '@mui/joy';
 import { useDebounce } from '../../hooks/useDebounce';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined';
 import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { Constants } from '../../utils/constants';
@@ -21,16 +21,19 @@ export function SearchInputField({
 		debounceOverride: Constants.searchDebounceTimeMS,
 	});
 	const [isTyping, setTyping] = useState(false);
-	debounceEventEmitter.on('sync', () => {
-		if (isTyping) {
-			setTyping(false);
-		}
-	});
-	debounceEventEmitter.on('desync', () => {
-		if (!isTyping) {
-			setTyping(true);
-		}
-	});
+	useEffect(() => {
+		debounceEventEmitter.on('sync', () => {
+			if (isTyping) {
+				setTyping(false);
+			}
+		});
+		debounceEventEmitter.on('desync', () => {
+			if (!isTyping) {
+				setTyping(true);
+			}
+		});
+	}, []);
+
 	return (
 		<>
 			<Stack direction={'row'}>

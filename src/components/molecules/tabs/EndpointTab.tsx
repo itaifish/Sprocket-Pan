@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { EditableText } from '../../atoms/EditableText';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -14,6 +14,9 @@ import { selectActiveState, selectEndpoints, selectServices } from '../../../sta
 import { useSelector } from 'react-redux';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Constants } from '../../../utils/constants';
+import { log } from '../../../utils/logging';
 
 export function EndpointTab({ id }: TabProps) {
 	const tabsContext = useContext(TabsContext);
@@ -22,9 +25,24 @@ export function EndpointTab({ id }: TabProps) {
 	const serviceData = useSelector(selectServices)[endpointData.serviceId];
 	const dispatch = useAppDispatch();
 
-	function update(values: Partial<Endpoint>) {
+	const update = (values: Partial<Endpoint>) => {
 		dispatch(updateEndpoint({ ...values, id }));
-	}
+	};
+
+	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
+		state: endpointData.url,
+		setState: (newUrl: string) => update({ url: newUrl }),
+		debounceOverride: Constants.debounceTimeMS,
+	});
+
+	useEffect(() => {
+		debounceEventEmitter.on('sync', () => {
+			log.info('Sync Emitted');
+		});
+		debounceEventEmitter.on('desync', () => {
+			log.info('De-Sync Emitted');
+		});
+	}, []);
 
 	if (endpointData == null || serviceData == null) {
 		return <>Endpoint data not found</>;
@@ -67,9 +85,9 @@ export function EndpointTab({ id }: TabProps) {
 							undefined,
 							{ variant: 'outlined', color: 'primary' },
 						)}
-						value={endpointData.url}
+						value={localDataState}
 						onChange={(e) => {
-							update({ url: e.target.value });
+							setLocalDataState(e.target.value);
 						}}
 						color="primary"
 					></Input>
