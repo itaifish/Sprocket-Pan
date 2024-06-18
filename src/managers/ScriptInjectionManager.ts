@@ -2,7 +2,6 @@ import { updateEnvironment, updateRequest, updateService } from '../state/active
 import { StateAccess } from '../state/types';
 import { EndpointResponse } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
-import { log } from '../utils/logging';
 import { AuditLog } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { networkRequestManager } from './NetworkRequestManager';
@@ -50,7 +49,6 @@ export function getScriptInjectionCode(
 			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
 			if (newEnv) {
 				EnvironmentUtils.set(newEnv, key, value);
-				log.info(JSON.stringify(newEnv));
 				dispatch(updateEnvironment(newEnv));
 			}
 		}
