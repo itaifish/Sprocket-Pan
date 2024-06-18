@@ -1,7 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectRootState } from '../store';
+import { AuditLogState } from './slice';
 
 export const selectActiveState = createSelector(selectRootState, (state) => state.active);
+
+export const selectAuditLogState = createSelector(selectRootState<AuditLogState>, (state) => state);
 
 export const selectSelectedEnvironment = createSelector(selectActiveState, (state) => state.selectedEnvironment);
 

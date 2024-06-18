@@ -23,6 +23,6 @@ export type RootState = ReturnType<typeof rootReducer>;
 export type AppStore = ReturnType<typeof setupStore>;
 export type AppDispatch = AppStore['dispatch'];
 
-export const selectRootState = (state: RootState) => state;
+export const selectRootState = <T = RootState>(state: T) => state;
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
