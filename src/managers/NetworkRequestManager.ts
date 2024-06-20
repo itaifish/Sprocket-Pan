@@ -149,7 +149,7 @@ class NetworkRequestManager {
 			method: endpoint.verb,
 			body: body ?? {},
 			headers: headers,
-			dateTime: new Date(),
+			dateTime: new Date().getTime(),
 		};
 		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
@@ -173,7 +173,7 @@ class NetworkRequestManager {
 			}, {}),
 			bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 			body: responseText,
-			dateTime: new Date(),
+			dateTime: new Date().getTime(),
 		};
 		return { response, networkRequest };
 	}

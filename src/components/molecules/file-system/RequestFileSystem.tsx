@@ -23,16 +23,27 @@ import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
-import { log } from '../../../utils/logging';
 
-function RequestFileSystem({ request }: { request: EndpointRequest }) {
-	const tabsContext = useContext(TabsContext);
-	const { tabs } = tabsContext;
-	const data = useSelector(selectActiveState);
-	const [menuOpen, setMenuOpen] = useState(false);
-	const endpointData = data.endpoints[request.endpointId];
-	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+interface DumbRequestFileSystemProps {
+	menuOpen: boolean;
+	setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	deleteModalOpen: boolean;
+	setDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	isTabSelected: boolean;
+	request: EndpointRequest;
+	isDefaultRequest: boolean;
+}
+const DumbRequestFileSystem = ({
+	menuOpen,
+	setDeleteModalOpen,
+	deleteModalOpen,
+	setMenuOpen,
+	isTabSelected,
+	request,
+	isDefaultRequest,
+}: DumbRequestFileSystemProps) => {
 	const dispatch = useAppDispatch();
+	const tabsContext = useContext(TabsContext);
 
 	const menuButton = (
 		<>
@@ -78,8 +89,8 @@ function RequestFileSystem({ request }: { request: EndpointRequest }) {
 					onClick={() => {
 						tabsManager.selectTab(tabsContext, request.id, 'request');
 					}}
-					selected={tabs.selected === request.id}
-					color={endpointData.defaultRequest === request.id ? 'primary' : 'neutral'}
+					selected={isTabSelected}
+					color={isDefaultRequest ? 'primary' : 'neutral'}
 				>
 					<ListItemDecorator>
 						<TextSnippetIcon fontSize="small" />
@@ -95,14 +106,28 @@ function RequestFileSystem({ request }: { request: EndpointRequest }) {
 			/>
 		</>
 	);
+};
+
+export const MemoizedDumbRequestFileSystem = memo(DumbRequestFileSystem);
+
+export function RequestFileSystem({ request }: { request: EndpointRequest }) {
+	const tabsContext = useContext(TabsContext);
+	const { tabs } = tabsContext;
+	const data = useSelector(selectActiveState);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const endpointData = data.endpoints[request.endpointId];
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	return (
+		<MemoizedDumbRequestFileSystem
+			{...{
+				menuOpen,
+				setDeleteModalOpen,
+				setMenuOpen,
+				deleteModalOpen,
+				isTabSelected: tabs.selected === request.endpointId,
+				request,
+				isDefaultRequest: endpointData.defaultRequest === request.id,
+			}}
+		/>
+	);
 }
-
-export const MemoizedRequestFileSystem = memo(RequestFileSystem, (prevProps, nextProps) => {
-	log.info('Re-render chekc');
-	// check if anything that could affect file system rendering has changed
-	if (prevProps.request.name !== nextProps.request.name) {
-		return false;
-	}
-
-	return true;
-});

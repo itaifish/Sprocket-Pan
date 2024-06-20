@@ -69,7 +69,7 @@ export function ServiceTab({ id }: TabProps) {
 				}
 				const req1MostRecent = req1.history[req1.history.length - 1].request.dateTime;
 				const req2MostRecent = req2.history[req2.history.length - 1].request.dateTime;
-				const difference = req2MostRecent.getTime() - req1MostRecent.getTime();
+				const difference = req2MostRecent - req1MostRecent;
 				if (difference != 0) {
 					return difference;
 				}

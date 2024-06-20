@@ -36,7 +36,7 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 						<EventIcon />
 						<Typography level="title-sm">
 							{request.history.length > 0
-								? formatDate(request.history[request.history.length - 1].request.dateTime)
+								? formatDate(new Date(request.history[request.history.length - 1].request.dateTime))
 								: 'Never'}
 						</Typography>
 						<SprocketTooltip text={`Open "${request.name}" request`}>

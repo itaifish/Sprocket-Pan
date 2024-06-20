@@ -54,14 +54,14 @@ const defaultResponse: HistoricalEndpointResponse = {
 		body: 'View the response here',
 		bodyType: 'Text',
 		headers: structuredClone(EMPTY_HEADERS),
-		dateTime: new Date(),
+		dateTime: new Date().getTime(),
 	},
 	request: {
 		method: 'GET',
 		url: '',
 		headers: structuredClone(EMPTY_HEADERS),
 		body: {},
-		dateTime: new Date(),
+		dateTime: new Date().getTime(),
 	},
 };
 

@@ -16,7 +16,7 @@ import { Endpoint, EndpointRequest } from '../../../types/application-data/appli
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { memo, useContext, useState } from 'react';
-import { MemoizedRequestFileSystem as RequestFileSystem } from './RequestFileSystem';
+import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { MoreVert } from '@mui/icons-material';
 import { tabsManager } from '../../../managers/TabsManager';

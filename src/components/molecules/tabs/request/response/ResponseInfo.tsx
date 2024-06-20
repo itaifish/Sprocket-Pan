@@ -23,11 +23,11 @@ type ResponseTabType = ValuesOf<typeof responseTabs>;
 
 export function ResponseInfo({ response, requestId }: { response: HistoricalEndpointResponse; requestId: string }) {
 	const [tab, setTab] = useState<ResponseTabType>('responseBody');
-	const timeDifference = (response.response.dateTime.getTime() - response.request.dateTime.getTime()) / 1000;
+	const timeDifference = (response.response.dateTime - response.request.dateTime) / 1000;
 	return (
 		<>
 			<Typography level="h2" textAlign={'center'}>
-				{formatDate(response.response.dateTime)}
+				{formatDate(new Date(response.response.dateTime))}
 			</Typography>
 			<Tabs
 				aria-label="tabs"
@@ -54,8 +54,8 @@ export function ResponseInfo({ response, requestId }: { response: HistoricalEndp
 						Request
 					</Typography>
 					<Typography left="p" sx={{ mb: 2 }}>
-						At <u>{formatDate(response.request.dateTime)}</u>, a <u>{response.request.method}</u> request was sent to{' '}
-						<u>{response.request.url}</u>.{' '}
+						At <u>{formatDate(new Date(response.request.dateTime))}</u>, a <u>{response.request.method}</u> request was
+						sent to <u>{response.request.url}</u>.{' '}
 					</Typography>
 					<HeadersDisplayTable headers={response.request.headers} label="request" />
 					{Object.keys(response.request.body).length > 0 && (
@@ -82,7 +82,7 @@ export function ResponseInfo({ response, requestId }: { response: HistoricalEndp
 						Response
 					</Typography>
 					<Typography left="p" sx={{ mb: 2 }}>
-						{timeDifference} seconds later at <u>{formatDate(response.response.dateTime)}</u>, a{' '}
+						{timeDifference} seconds later at <u>{formatDate(new Date(response.response.dateTime))}</u>, a{' '}
 						<u>
 							{response.response.statusCode} ({statusCodes[response.response.statusCode]})
 						</u>{' '}
