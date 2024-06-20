@@ -14,7 +14,7 @@ import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
 import { useState, useContext, memo } from 'react';
 import { tabsManager } from '../../../managers/TabsManager';
-import { Service } from '../../../types/application-data/application-data';
+import { Endpoint, Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { MemoizedEndpointFileSystem as EndpointFileSystem } from './EndpointFileSystem';
 import { MoreVert } from '@mui/icons-material';
@@ -30,19 +30,37 @@ import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
 import { cloneService, deleteService } from '../../../state/active/thunks/services';
 
-function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
-	const [collapsed, setCollapsed] = useState(false);
-	const data = useSelector(selectActiveState);
-	const tabsContext = useContext(TabsContext);
-	const [menuOpen, setMenuOpen] = useState(false);
-	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-	const { tabs } = tabsContext;
+interface DumbServiceFileSystemProps {
+	collapsed: boolean;
+	setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+	menuOpen: boolean;
+	setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	deleteModalOpen: boolean;
+	setDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	endpoints: Endpoint[];
+	isTabSelected: boolean;
+	service: Service;
+	validIds: Set<string>;
+}
+
+const DumbServiceFileSystem = ({
+	collapsed,
+	setCollapsed,
+	menuOpen,
+	setMenuOpen,
+	deleteModalOpen,
+	setDeleteModalOpen,
+	endpoints,
+	isTabSelected,
+	service,
+	validIds,
+}: DumbServiceFileSystemProps) => {
 	const dispatch = useAppDispatch();
+	const tabsContext = useContext(TabsContext);
 
 	if (service == null) {
 		return <></>;
 	}
-
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -100,7 +118,7 @@ function ServiceFileSystem({ service, validIds }: { service: Service; validIds: 
 				onClick={() => {
 					tabsManager.selectTab(tabsContext, service.id, 'service');
 				}}
-				selected={tabs.selected === service.id}
+				selected={isTabSelected}
 			>
 				<ListItemDecorator>
 					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
@@ -125,12 +143,9 @@ function ServiceFileSystem({ service, validIds }: { service: Service; validIds: 
 				}}
 			>
 				{!collapsed &&
-					service.endpointIds
-						.filter((endpointId) => validIds.has(endpointId))
-						.map((endpointId) => data.endpoints[endpointId])
-						.filter((x) => x != null)
-						// .sort((a, b) => a.name.localeCompare(b.name))
-						.map((endpoint, index) => <EndpointFileSystem endpoint={endpoint} validIds={validIds} key={index} />)}
+					endpoints.map((endpoint, index) => (
+						<EndpointFileSystem endpoint={endpoint} validIds={validIds} key={index} />
+					))}
 			</List>
 			<AreYouSureModal
 				action={`delete '${service.name}' and all its data`}
@@ -140,24 +155,36 @@ function ServiceFileSystem({ service, validIds }: { service: Service; validIds: 
 			/>
 		</ListItem>
 	);
-}
+};
 
-/**
- * Commenting this out because of how selected logic works
- (prevProps, nextProps) => {
-	// check set equality first
-	if (!setsAreEqual(prevProps.validIds, nextProps.validIds)) {
-		return false;
-	}
-	// check if anything that could affect file system rendering has changed
-	if (prevProps.service.name !== nextProps.service.name) {
-		return false;
-	}
-	if (!setsAreEqual(new Set(prevProps.service.endpointIds), new Set(nextProps.service.endpointIds))) {
-		return false;
-	}
-	return true;
-}
- */
+const MemoizedDumbServiceFileSystem = memo(DumbServiceFileSystem);
 
-export const MemoizedServiceFileSystem = memo(ServiceFileSystem);
+export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
+	const [collapsed, setCollapsed] = useState(false);
+	const data = useSelector(selectActiveState);
+	const tabsContext = useContext(TabsContext);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const { tabs } = tabsContext;
+
+	return (
+		<MemoizedDumbServiceFileSystem
+			{...{
+				collapsed,
+				setCollapsed,
+				menuOpen,
+				setMenuOpen,
+				deleteModalOpen,
+				setDeleteModalOpen,
+				isTabSelected: tabs.selected === service.id,
+				service,
+				validIds,
+				endpoints: service.endpointIds
+					.filter((endpointId) => validIds.has(endpointId))
+					.map((endpointId) => data.endpoints[endpointId])
+					.filter((x) => x != null)
+					.sort((a, b) => a.name.localeCompare(b.name)),
+			}}
+		/>
+	);
+}

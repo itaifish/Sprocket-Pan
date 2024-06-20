@@ -23,6 +23,7 @@ import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
+import { log } from '../../../utils/logging';
 
 function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const tabsContext = useContext(TabsContext);
@@ -97,6 +98,7 @@ function RequestFileSystem({ request }: { request: EndpointRequest }) {
 }
 
 export const MemoizedRequestFileSystem = memo(RequestFileSystem, (prevProps, nextProps) => {
+	log.info('Re-render chekc');
 	// check if anything that could affect file system rendering has changed
 	if (prevProps.request.name !== nextProps.request.name) {
 		return false;

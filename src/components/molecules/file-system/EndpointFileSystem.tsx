@@ -33,6 +33,7 @@ import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
 import { setsAreEqual } from '../../../utils/math';
+import { log } from '../../../utils/logging';
 
 function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
@@ -149,18 +150,24 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 export const MemoizedEndpointFileSystem = memo(EndpointFileSystem, (prevProps, nextProps) => {
 	// check set equality first
 	if (!setsAreEqual(prevProps.validIds, nextProps.validIds)) {
+		log.info('Re-rendering because validIds are not equals');
 		return false;
 	}
 	// check if anything that could affect file system rendering has changed
 	if (prevProps.endpoint.name !== nextProps.endpoint.name) {
+		log.info('Re-rendering because endpoint has changed');
 		return false;
 	}
 
 	if (!setsAreEqual(new Set(prevProps.endpoint.requestIds), new Set(nextProps.endpoint.requestIds))) {
+		log.info('Re-rendering because request ids have changed');
+
 		return false;
 	}
 
 	if (prevProps.endpoint.defaultRequest !== nextProps.endpoint.defaultRequest) {
+		log.info('Re-rendering because default request has changed');
+
 		return false;
 	}
 

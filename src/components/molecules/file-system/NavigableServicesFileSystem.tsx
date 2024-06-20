@@ -2,7 +2,7 @@ import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
 import { useContext, useMemo, useState } from 'react';
 import { getValidIdsFromSearchTerm } from '../../../utils/search';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
-import { MemoizedServiceFileSystem as ServiceFileSystem } from './ServiceFileSystem';
+import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
 import { ServicesSearchContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState, selectEnvironments, selectServices } from '../../../state/active/selectors';
