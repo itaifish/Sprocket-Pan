@@ -35,14 +35,31 @@ import { addNewRequest } from '../../../state/active/thunks/requests';
 import { setsAreEqual } from '../../../utils/math';
 import { log } from '../../../utils/logging';
 
-function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
-	const tabsContext = useContext(TabsContext);
-	const { tabs } = tabsContext;
-	const [collapsed, setCollapsed] = useState(false);
-	const [menuOpen, setMenuOpen] = useState(false);
-	const data = useSelector(selectActiveState);
-	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+interface DumbEndpointFileSystemProps {
+	collapsed: boolean;
+	setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+	menuOpen: boolean;
+	setMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	deleteModalOpen: boolean;
+	setDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	requests: EndpointRequest[];
+	isTabSelected: boolean;
+	endpoint: Endpoint;
+}
+const DumbEndpointFileSystem = ({
+	menuOpen,
+	setCollapsed,
+	setDeleteModalOpen,
+	setMenuOpen,
+	collapsed,
+	deleteModalOpen,
+	requests,
+	isTabSelected,
+	endpoint,
+}: DumbEndpointFileSystemProps) => {
 	const dispatch = useAppDispatch();
+	const tabsContext = useContext(TabsContext);
+
 	const menuButton = (
 		<>
 			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
@@ -99,7 +116,7 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				onClick={() => {
 					tabsManager.selectTab(tabsContext, endpoint.id, 'endpoint');
 				}}
-				selected={tabs.selected === endpoint.id}
+				selected={isTabSelected}
 			>
 				<ListItemDecorator>
 					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
@@ -130,12 +147,7 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				}}
 			>
 				{!collapsed &&
-					data.endpoints[endpoint.id]?.requestIds
-						.filter((requestId) => validIds.has(requestId))
-						.map((requestIds) => data.requests[requestIds])
-						.filter((x) => x != null)
-						.sort((a, b) => a.name.localeCompare(b.name))
-						.map((request: EndpointRequest, index) => <RequestFileSystem request={request} key={index} />)}
+					requests.map((request: EndpointRequest, index) => <RequestFileSystem request={request} key={index} />)}
 			</List>
 			<AreYouSureModal
 				action={`delete '${endpoint.name}' and all its data`}
@@ -144,6 +156,38 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				actionFunc={() => dispatch(deleteEndpoint(endpoint.id))}
 			/>
 		</ListItem>
+	);
+};
+
+const MemoizedDumbEndpointFileSystem = memo(DumbEndpointFileSystem);
+
+function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
+	const tabsContext = useContext(TabsContext);
+	const { tabs } = tabsContext;
+	const [collapsed, setCollapsed] = useState(false);
+	const [menuOpen, setMenuOpen] = useState(false);
+	const data = useSelector(selectActiveState);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+
+	return (
+		<MemoizedDumbEndpointFileSystem
+			{...{
+				collapsed,
+				setCollapsed,
+				menuOpen,
+				setMenuOpen,
+				deleteModalOpen,
+				setDeleteModalOpen,
+				isTabSelected: tabs.selected === endpoint.id,
+				endpoint,
+				validIds,
+				requests: data.endpoints[endpoint.id]?.requestIds
+					.filter((requestId) => validIds.has(requestId))
+					.map((requestIds) => data.requests[requestIds])
+					.filter((x) => x != null)
+					.sort((a, b) => a.name.localeCompare(b.name)),
+			}}
+		/>
 	);
 }
 
