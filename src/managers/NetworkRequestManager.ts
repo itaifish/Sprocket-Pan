@@ -209,7 +209,7 @@ class NetworkRequestManager {
 			} catch (e) {
 				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 				const returnError = JSON.stringify({
-					...JSON.parse(errorStr),
+					errorStr,
 					errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
 				});
 				if (auditInfo) {

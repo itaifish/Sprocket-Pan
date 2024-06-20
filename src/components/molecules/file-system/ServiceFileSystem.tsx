@@ -12,11 +12,11 @@ import {
 } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
-import { useState, useContext } from 'react';
+import { useState, useContext, memo } from 'react';
 import { tabsManager } from '../../../managers/TabsManager';
 import { Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
-import { EndpointFileSystem } from './EndpointFileSystem';
+import { MemoizedEndpointFileSystem as EndpointFileSystem } from './EndpointFileSystem';
 import { MoreVert } from '@mui/icons-material';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -30,7 +30,7 @@ import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
 import { cloneService, deleteService } from '../../../state/active/thunks/services';
 
-export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
+function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const data = useSelector(selectActiveState);
 	const tabsContext = useContext(TabsContext);
@@ -141,3 +141,5 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 		</ListItem>
 	);
 }
+
+export const MemoizedServiceFileSystem = memo(ServiceFileSystem);

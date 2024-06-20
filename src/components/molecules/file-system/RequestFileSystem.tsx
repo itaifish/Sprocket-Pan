@@ -10,7 +10,7 @@ import {
 	MenuItem,
 } from '@mui/joy';
 import { EndpointRequest } from '../../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { memo, useContext, useState } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { tabsManager } from '../../../managers/TabsManager';
@@ -24,7 +24,7 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
 
-export function RequestFileSystem({ request }: { request: EndpointRequest }) {
+function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const tabsContext = useContext(TabsContext);
 	const { tabs } = tabsContext;
 	const data = useSelector(selectActiveState);
@@ -95,3 +95,5 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 		</>
 	);
 }
+
+export const MemoizedRequestFileSystem = memo(RequestFileSystem);

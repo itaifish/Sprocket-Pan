@@ -46,6 +46,7 @@ import { selectActiveState, selectEndpoints, selectRequests, selectServices } fr
 import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint, updateRequest } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
+import { log } from '../../../utils/logging';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -124,13 +125,17 @@ export function RequestTab({ id }: TabProps) {
 	async function sendRequest() {
 		setLoading(true);
 		try {
-			await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
-			setResponse('latest');
+			const result = await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
+			if (result != undefined) {
+				setLastError(getError(result));
+				setResponse('error');
+			} else {
+				setResponse('latest');
+			}
 		} catch (err) {
-			setLastError(getError(err));
+			setLastError(getError((err as any)?.message ?? 'An unknown error occured'));
+			log.error(err);
 			setResponse('error');
-		} finally {
-			setLoading(false);
 		}
 		setLoading(false);
 	}

@@ -11,6 +11,7 @@ import {
 } from '../slice';
 import { EndpointRequest } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
+import { log } from '../../../utils/logging';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -20,20 +21,29 @@ function extractStateAccess(thunk: any) {
 	return { getState: () => thunk.getState().active, dispatch: thunk.dispatch };
 }
 
-export const makeRequest = createAsyncThunk<void, { requestId: string; auditLog?: AuditLog }, { state: RootState }>(
-	'active/makeRequest',
-	async ({ requestId, auditLog = [] }, thunk) => {
-		const stateAccess = extractStateAccess(thunk);
-		await networkRequestManager.runPreScripts(requestId, stateAccess, auditLog);
-		const { networkRequest, response } = await networkRequestManager.sendRequest(
-			requestId,
-			thunk.getState().active,
-			auditLog,
-		);
-		await networkRequestManager.runPostScripts(requestId, stateAccess, response, auditLog);
-		thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest }));
-	},
-);
+export const makeRequest = createAsyncThunk<
+	string | undefined,
+	{ requestId: string; auditLog?: AuditLog },
+	{ state: RootState }
+>('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {
+	const stateAccess = extractStateAccess(thunk);
+	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, auditLog);
+	if (error) {
+		log.warn(error);
+		return error;
+	}
+	const { networkRequest, response } = await networkRequestManager.sendRequest(
+		requestId,
+		thunk.getState().active,
+		auditLog,
+	);
+	error = await networkRequestManager.runPostScripts(requestId, stateAccess, response, auditLog);
+	if (error) {
+		log.warn(error);
+		return error;
+	}
+	thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest }));
+});
 
 interface AddNewRequest {
 	data?: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;

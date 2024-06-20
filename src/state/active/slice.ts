@@ -212,3 +212,5 @@ export const {
 	deleteAllHistory,
 	addResponseToHistory,
 } = activeSlice.actions;
+
+export const { addToAuditLog, clearAuditLogEntry } = inProgressAuditLogSlice.actions;

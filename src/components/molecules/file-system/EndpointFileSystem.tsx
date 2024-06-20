@@ -15,8 +15,8 @@ import {
 import { Endpoint, EndpointRequest } from '../../../types/application-data/application-data';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
-import { useContext, useState } from 'react';
-import { RequestFileSystem } from './RequestFileSystem';
+import { memo, useContext, useState } from 'react';
+import { MemoizedRequestFileSystem as RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { MoreVert } from '@mui/icons-material';
 import { tabsManager } from '../../../managers/TabsManager';
@@ -33,7 +33,7 @@ import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
 
-export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
+function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
 	const { tabs } = tabsContext;
 	const [collapsed, setCollapsed] = useState(false);
@@ -144,3 +144,5 @@ export function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint;
 		</ListItem>
 	);
 }
+
+export const MemoizedEndpointFileSystem = memo(EndpointFileSystem);
