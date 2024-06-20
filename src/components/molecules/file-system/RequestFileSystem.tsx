@@ -96,4 +96,11 @@ function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	);
 }
 
-export const MemoizedRequestFileSystem = memo(RequestFileSystem);
+export const MemoizedRequestFileSystem = memo(RequestFileSystem, (prevProps, nextProps) => {
+	// check if anything that could affect file system rendering has changed
+	if (prevProps.request.name !== nextProps.request.name) {
+		return false;
+	}
+
+	return true;
+});

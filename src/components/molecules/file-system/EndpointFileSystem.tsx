@@ -32,6 +32,7 @@ import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
+import { setsAreEqual } from '../../../utils/math';
 
 function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
 	const tabsContext = useContext(TabsContext);
@@ -128,7 +129,7 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				}}
 			>
 				{!collapsed &&
-					Object.values(data.endpoints[endpoint.id]?.requestIds)
+					data.endpoints[endpoint.id]?.requestIds
 						.filter((requestId) => validIds.has(requestId))
 						.map((requestIds) => data.requests[requestIds])
 						.filter((x) => x != null)
@@ -145,4 +146,23 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 	);
 }
 
-export const MemoizedEndpointFileSystem = memo(EndpointFileSystem);
+export const MemoizedEndpointFileSystem = memo(EndpointFileSystem, (prevProps, nextProps) => {
+	// check set equality first
+	if (!setsAreEqual(prevProps.validIds, nextProps.validIds)) {
+		return false;
+	}
+	// check if anything that could affect file system rendering has changed
+	if (prevProps.endpoint.name !== nextProps.endpoint.name) {
+		return false;
+	}
+
+	if (!setsAreEqual(new Set(prevProps.endpoint.requestIds), new Set(nextProps.endpoint.requestIds))) {
+		return false;
+	}
+
+	if (prevProps.endpoint.defaultRequest !== nextProps.endpoint.defaultRequest) {
+		return false;
+	}
+
+	return true;
+});

@@ -125,11 +125,11 @@ function ServiceFileSystem({ service, validIds }: { service: Service; validIds: 
 				}}
 			>
 				{!collapsed &&
-					Object.values(service.endpointIds)
+					service.endpointIds
 						.filter((endpointId) => validIds.has(endpointId))
 						.map((endpointId) => data.endpoints[endpointId])
 						.filter((x) => x != null)
-						.sort((a, b) => a.name.localeCompare(b.name))
+						// .sort((a, b) => a.name.localeCompare(b.name))
 						.map((endpoint, index) => <EndpointFileSystem endpoint={endpoint} validIds={validIds} key={index} />)}
 			</List>
 			<AreYouSureModal
@@ -141,5 +141,23 @@ function ServiceFileSystem({ service, validIds }: { service: Service; validIds: 
 		</ListItem>
 	);
 }
+
+/**
+ * Commenting this out because of how selected logic works
+ (prevProps, nextProps) => {
+	// check set equality first
+	if (!setsAreEqual(prevProps.validIds, nextProps.validIds)) {
+		return false;
+	}
+	// check if anything that could affect file system rendering has changed
+	if (prevProps.service.name !== nextProps.service.name) {
+		return false;
+	}
+	if (!setsAreEqual(new Set(prevProps.service.endpointIds), new Set(nextProps.service.endpointIds))) {
+		return false;
+	}
+	return true;
+}
+ */
 
 export const MemoizedServiceFileSystem = memo(ServiceFileSystem);
