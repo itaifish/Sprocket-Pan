@@ -3,10 +3,12 @@ import { useDispatch } from 'react-redux';
 import { workspacesSlice } from './workspaces/slice';
 import { activeSlice } from './active/slice';
 import { isModifiedListener } from './active/listener';
+import { tabsSlice } from './tabs/slice';
 
 const rootReducer = combineReducers({
 	[workspacesSlice.name]: workspacesSlice.reducer,
 	[activeSlice.name]: activeSlice.reducer,
+	[tabsSlice.name]: tabsSlice.reducer,
 });
 
 export function setupStore(preloadedState?: Partial<RootState>) {

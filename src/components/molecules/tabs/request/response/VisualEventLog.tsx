@@ -10,10 +10,8 @@ import {
 	Stack,
 	ListItemButton,
 } from '@mui/joy';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { AuditLog, TransformedAuditLog, auditLogManager } from '../../../../../managers/AuditLogManager';
-import { TabsContext } from '../../../../../managers/GlobalContextManager';
-import { tabsManager } from '../../../../../managers/TabsManager';
 import { iconFromTabType } from '../../../../../types/application-data/application-data';
 import { camelCaseToTitle, formatMilliseconds } from '../../../../../utils/string';
 import { SprocketTooltip } from '../../../../atoms/SprocketTooltip';
@@ -29,6 +27,8 @@ import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 import { CollapseExpandButton } from '../../../../atoms/buttons/CollapseExpandButton';
 import { selectActiveState } from '../../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../../../state/store';
+import { addTabs, setSelectedTab } from '../../../../../state/tabs/slice';
 
 const eventStrIconsMap = {
 	Service: (
@@ -65,7 +65,7 @@ interface VisualEventLogInnerProps {
 
 function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerProps) {
 	const data = useSelector(selectActiveState);
-	const tabsContext = useContext(TabsContext);
+	const dispatch = useAppDispatch();
 	const [collapsed, setCollapsed] = useState(false);
 	const requestEvent = transformedLog.before;
 	const icons = (
@@ -100,9 +100,7 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 						<Typography level="body-sm">
 							<Stack direction="row" alignItems="center" gap={1}>
 								<TimerIcon />
-								{formatMilliseconds(
-									transformedLog.after.timestamp.getTime() - transformedLog.before.timestamp.getTime(),
-								)}
+								{formatMilliseconds(transformedLog.after.timestamp - transformedLog.before.timestamp)}
 							</Stack>
 							{dataType && requestEvent.associatedId && (
 								<Stack direction="row" alignItems={'center'} gap={1}>
@@ -118,7 +116,9 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 												size="sm"
 												color="primary"
 												onClick={() => {
-													tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
+													const id = requestEvent.associatedId as string;
+													dispatch(addTabs({ [id]: dataType }));
+													dispatch(setSelectedTab(id));
 												}}
 											>
 												<LaunchIcon />

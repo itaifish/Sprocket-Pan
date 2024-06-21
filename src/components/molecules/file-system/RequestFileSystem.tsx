@@ -10,19 +10,19 @@ import {
 	MenuItem,
 } from '@mui/joy';
 import { EndpointRequest } from '../../../types/application-data/application-data';
-import { memo, useContext, useState } from 'react';
+import { memo, useState } from 'react';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { keepStringLengthReasonable } from '../../../utils/string';
-import { tabsManager } from '../../../managers/TabsManager';
 import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { selectActiveTab } from '../../../state/tabs/selectors';
 
 interface DumbRequestFileSystemProps {
 	menuOpen: boolean;
@@ -43,7 +43,6 @@ const DumbRequestFileSystem = ({
 	isDefaultRequest,
 }: DumbRequestFileSystemProps) => {
 	const dispatch = useAppDispatch();
-	const tabsContext = useContext(TabsContext);
 
 	const menuButton = (
 		<>
@@ -87,7 +86,8 @@ const DumbRequestFileSystem = ({
 			<ListItem nested endAction={<>{menuButton}</>}>
 				<ListItemButton
 					onClick={() => {
-						tabsManager.selectTab(tabsContext, request.id, 'request');
+						dispatch(addTabs({ [request.id]: 'request' }));
+						dispatch(setSelectedTab(request.id));
 					}}
 					selected={isTabSelected}
 					color={isDefaultRequest ? 'primary' : 'neutral'}
@@ -111,8 +111,7 @@ const DumbRequestFileSystem = ({
 export const MemoizedDumbRequestFileSystem = memo(DumbRequestFileSystem);
 
 export function RequestFileSystem({ request }: { request: EndpointRequest }) {
-	const tabsContext = useContext(TabsContext);
-	const { tabs } = tabsContext;
+	const selectedTabId = useSelector(selectActiveTab);
 	const data = useSelector(selectActiveState);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const endpointData = data.endpoints[request.endpointId];
@@ -124,7 +123,7 @@ export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 				setDeleteModalOpen,
 				setMenuOpen,
 				deleteModalOpen,
-				isTabSelected: tabs.selected === request.endpointId,
+				isTabSelected: selectedTabId === request.endpointId,
 				request,
 				isDefaultRequest: endpointData.defaultRequest === request.id,
 			}}

@@ -21,7 +21,7 @@ import {
 	HistoricalEndpointResponse,
 	RESTfulRequestVerbs,
 } from '../../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
@@ -32,10 +32,8 @@ import { EditableText } from '../../atoms/EditableText';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
-import { tabsManager } from '../../../managers/TabsManager';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
@@ -47,6 +45,7 @@ import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint, updateRequest } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
 import { log } from '../../../utils/logging';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -79,7 +78,6 @@ export function RequestTab({ id }: TabProps) {
 	const endpointData = useSelector(selectEndpoints)[requestData?.endpointId];
 	const serviceData = useSelector(selectServices)[endpointData?.serviceId];
 	const theme = useTheme();
-	const tabsContext = useContext(TabsContext);
 	const { mode } = useColorScheme();
 	const [hidden, setHidden] = useState(false);
 	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
@@ -229,7 +227,8 @@ export function RequestTab({ id }: TabProps) {
 									variant="outlined"
 									color="primary"
 									onClick={() => {
-										tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
+										dispatch(addTabs({ [requestData.endpointId]: 'endpoint' }));
+										dispatch(setSelectedTab(requestData.endpointId));
 									}}
 								>
 									<EditIcon />

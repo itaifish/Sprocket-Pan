@@ -12,8 +12,7 @@ import {
 } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
-import { useState, useContext, memo } from 'react';
-import { tabsManager } from '../../../managers/TabsManager';
+import { useState, memo } from 'react';
 import { Endpoint, Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { MemoizedEndpointFileSystem as EndpointFileSystem } from './EndpointFileSystem';
@@ -22,13 +21,14 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
 import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
 import { cloneService, deleteService } from '../../../state/active/thunks/services';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { selectActiveTab } from '../../../state/tabs/selectors';
 
 interface DumbServiceFileSystemProps {
 	collapsed: boolean;
@@ -56,7 +56,6 @@ const DumbServiceFileSystem = ({
 	validIds,
 }: DumbServiceFileSystemProps) => {
 	const dispatch = useAppDispatch();
-	const tabsContext = useContext(TabsContext);
 
 	if (service == null) {
 		return <></>;
@@ -116,7 +115,8 @@ const DumbServiceFileSystem = ({
 		<ListItem nested endAction={<>{menuButton}</>}>
 			<ListItemButton
 				onClick={() => {
-					tabsManager.selectTab(tabsContext, service.id, 'service');
+					dispatch(addTabs({ [service.id]: 'service' }));
+					dispatch(setSelectedTab(service.id));
 				}}
 				selected={isTabSelected}
 			>
@@ -162,10 +162,9 @@ const MemoizedDumbServiceFileSystem = memo(DumbServiceFileSystem);
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
 	const data = useSelector(selectActiveState);
-	const tabsContext = useContext(TabsContext);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-	const { tabs } = tabsContext;
+	const selectedTabId = useSelector(selectActiveTab);
 
 	return (
 		<MemoizedDumbServiceFileSystem
@@ -176,7 +175,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 				setMenuOpen,
 				deleteModalOpen,
 				setDeleteModalOpen,
-				isTabSelected: tabs.selected === service.id,
+				isTabSelected: selectedTabId === service.id,
 				service,
 				validIds,
 				endpoints: service.endpointIds

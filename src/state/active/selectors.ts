@@ -2,7 +2,10 @@ import { createSelector } from '@reduxjs/toolkit';
 import { RootState, selectRootState } from '../store';
 import { AuditLogState } from './slice';
 
-export const selectActiveState = createSelector(selectRootState<RootState>, (state) => state.active);
+export const selectActiveState = createSelector(selectRootState<RootState>, (state) => {
+	console.log('reran active state selector');
+	return state.active;
+});
 
 export const selectAuditLogState = createSelector(selectRootState<AuditLogState>, (state) => state);
 
@@ -12,7 +15,10 @@ export const selectEndpoints = createSelector(selectActiveState, (state) => stat
 
 export const selectServices = createSelector(selectActiveState, (state) => state.services);
 
-export const selectEnvironments = createSelector(selectActiveState, (state) => state.environments);
+export const selectEnvironments = createSelector(selectActiveState, (state) => {
+	console.log('reran environments selector');
+	return state.environments;
+});
 
 export const selectRequests = createSelector(selectActiveState, (state) => state.requests);
 

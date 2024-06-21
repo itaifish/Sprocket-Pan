@@ -10,9 +10,8 @@ import {
 	MenuItem,
 } from '@mui/joy';
 import { Environment } from '../../../types/application-data/application-data';
-import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
@@ -22,15 +21,15 @@ import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks/environments';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { selectEnvironment } from '../../../state/active/slice';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { selectActiveTab } from '../../../state/tabs/selectors';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
-	const tabsContext = useContext(TabsContext);
 	const data = useSelector(selectActiveState);
-	const { tabs } = tabsContext;
-	const selected = tabs.selected === environment.__id;
+	const selectedTabId = useSelector(selectActiveTab);
+	const selected = selectedTabId === environment.__id;
 	const envSelected = data.selectedEnvironment === environment.__id;
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -93,7 +92,8 @@ export function EnvironmentFileSystem({ environment }: { environment: Environmen
 			<ListItem nested endAction={menuButton}>
 				<ListItemButton
 					onClick={() => {
-						tabsManager.selectTab(tabsContext, environment.__id, 'environment');
+						dispatch(addTabs({ [environment.__id]: 'environment' }));
+						dispatch(setSelectedTab(environment.__id));
 					}}
 					selected={selected}
 					color={envSelected ? 'success' : 'neutral'}

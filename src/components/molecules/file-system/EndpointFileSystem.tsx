@@ -15,17 +15,15 @@ import {
 import { Endpoint, EndpointRequest } from '../../../types/application-data/application-data';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
-import { memo, useContext, useState } from 'react';
+import { memo, useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { MoreVert } from '@mui/icons-material';
-import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import { verbColors } from '../../../utils/style';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
 import { selectActiveState } from '../../../state/active/selectors';
@@ -34,6 +32,8 @@ import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/end
 import { addNewRequest } from '../../../state/active/thunks/requests';
 import { setsAreEqual } from '../../../utils/math';
 import { log } from '../../../utils/logging';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { selectActiveTab } from '../../../state/tabs/selectors';
 
 interface DumbEndpointFileSystemProps {
 	collapsed: boolean;
@@ -58,7 +58,6 @@ const DumbEndpointFileSystem = ({
 	endpoint,
 }: DumbEndpointFileSystemProps) => {
 	const dispatch = useAppDispatch();
-	const tabsContext = useContext(TabsContext);
 
 	const menuButton = (
 		<>
@@ -114,7 +113,8 @@ const DumbEndpointFileSystem = ({
 		<ListItem nested endAction={<>{menuButton}</>}>
 			<ListItemButton
 				onClick={() => {
-					tabsManager.selectTab(tabsContext, endpoint.id, 'endpoint');
+					dispatch(addTabs({ [endpoint.id]: 'endpoint' }));
+					dispatch(setSelectedTab(endpoint.id));
 				}}
 				selected={isTabSelected}
 			>
@@ -162,8 +162,7 @@ const DumbEndpointFileSystem = ({
 const MemoizedDumbEndpointFileSystem = memo(DumbEndpointFileSystem);
 
 function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validIds: Set<string> }) {
-	const tabsContext = useContext(TabsContext);
-	const { tabs } = tabsContext;
+	const selected = useSelector(selectActiveTab);
 	const [collapsed, setCollapsed] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const data = useSelector(selectActiveState);
@@ -178,7 +177,7 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				setMenuOpen,
 				deleteModalOpen,
 				setDeleteModalOpen,
-				isTabSelected: tabs.selected === endpoint.id,
+				isTabSelected: selected === endpoint.id,
 				endpoint,
 				validIds,
 				requests: data.endpoints[endpoint.id]?.requestIds

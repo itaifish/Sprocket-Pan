@@ -9,20 +9,19 @@ import {
 	Typography,
 } from '@mui/joy';
 import { EndpointRequest, iconFromTabType } from '../../../../../types/application-data/application-data';
-import { tabsManager } from '../../../../../managers/TabsManager';
 import { formatDate } from '../../../../../utils/string';
 import { SprocketTooltip } from '../../../../atoms/SprocketTooltip';
-import { TabsContext } from '../../../../../managers/GlobalContextManager';
-import { useContext } from 'react';
 import EventIcon from '@mui/icons-material/Event';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import { useAppDispatch } from '../../../../../state/store';
+import { addTabs, setSelectedTab } from '../../../../../state/tabs/slice';
 
 interface RecentRequestListItemProps {
 	request: EndpointRequest;
 }
 
 export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
-	const tabsContext = useContext(TabsContext);
+	const dispatch = useAppDispatch();
 
 	return (
 		<>
@@ -43,7 +42,8 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 							<IconButton
 								color="primary"
 								onClick={() => {
-									tabsManager.selectTab(tabsContext, request.id, 'request');
+									dispatch(addTabs({ [request.id]: 'request' }));
+									dispatch(setSelectedTab(request.id));
 								}}
 							>
 								<OpenInNewIcon />

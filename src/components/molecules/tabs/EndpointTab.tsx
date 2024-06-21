@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { EditableText } from '../../atoms/EditableText';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -7,8 +6,6 @@ import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
-import { tabsManager } from '../../../managers/TabsManager';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
 import { selectActiveState, selectEndpoints, selectServices } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
@@ -16,9 +13,9 @@ import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Constants } from '../../../utils/constants';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 
 export function EndpointTab({ id }: TabProps) {
-	const tabsContext = useContext(TabsContext);
 	const data = useSelector(selectActiveState);
 	const endpointData = useSelector(selectEndpoints)[id];
 	const serviceData = useSelector(selectServices)[endpointData.serviceId];
@@ -90,7 +87,8 @@ export function EndpointTab({ id }: TabProps) {
 							disabled={!endpointData.defaultRequest}
 							onClick={() => {
 								if (endpointData.defaultRequest) {
-									tabsManager.selectTab(tabsContext, endpointData.defaultRequest, 'request');
+									dispatch(addTabs({ [endpointData.defaultRequest]: 'request' }));
+									dispatch(setSelectedTab(endpointData.defaultRequest));
 								}
 							}}
 						>

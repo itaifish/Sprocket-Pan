@@ -7,16 +7,14 @@ import { UndoRedoTabsButton } from '../../atoms/buttons/UndoRedoTabsButton';
 
 export function SideDrawerActionButtons() {
 	return (
-		<>
-			<Stack direction={'row'} spacing={3}>
-				<Stack direction={'row'} spacing={2}>
-					<NewServiceButton />
-					<NewButton />
-					<SaveButton />
-					<OpenSettingsButton />
-				</Stack>
-				<UndoRedoTabsButton />
+		<Stack direction={'row'} spacing={3}>
+			<Stack direction={'row'} spacing={2}>
+				<NewServiceButton />
+				<NewButton />
+				<SaveButton />
+				<OpenSettingsButton />
 			</Stack>
-		</>
+			<UndoRedoTabsButton />
+		</Stack>
 	);
 }

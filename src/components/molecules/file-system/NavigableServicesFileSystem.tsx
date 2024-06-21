@@ -1,14 +1,17 @@
 import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
-import { useContext, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { getValidIdsFromSearchTerm } from '../../../utils/search';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { ServicesSearchContext } from '../../../managers/GlobalContextManager';
 import { selectActiveState, selectEnvironments, selectServices } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 
-export function NavigableServicesFileSystem() {
+interface NavigableServicesFileSystemProps {
+	searchText: string;
+}
+
+export function NavigableServicesFileSystem({ searchText }: NavigableServicesFileSystemProps) {
 	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
@@ -16,7 +19,9 @@ export function NavigableServicesFileSystem() {
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);
 
-	const { searchText } = useContext(ServicesSearchContext);
+	console.log('file system re-rendered');
+	console.log({ searchText });
+
 	const validIds = useMemo(() => {
 		return getValidIdsFromSearchTerm(searchText, applicationData);
 	}, [applicationData, searchText]);
