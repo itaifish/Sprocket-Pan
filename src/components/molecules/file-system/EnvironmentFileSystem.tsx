@@ -17,7 +17,6 @@ import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { selectActiveState } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEnvironment, deleteEnvironment } from '../../../state/active/thunks/environments';
@@ -25,12 +24,13 @@ import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { selectEnvironment } from '../../../state/active/slice';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { selectActiveTab } from '../../../state/tabs/selectors';
+import { selectSelectedEnvironment } from '../../../state/active/selectors';
 
 export function EnvironmentFileSystem({ environment }: { environment: Environment }) {
-	const data = useSelector(selectActiveState);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const selectedTabId = useSelector(selectActiveTab);
 	const selected = selectedTabId === environment.__id;
-	const envSelected = data.selectedEnvironment === environment.__id;
+	const envSelected = selectedEnvironment === environment.__id;
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const dispatch = useAppDispatch();

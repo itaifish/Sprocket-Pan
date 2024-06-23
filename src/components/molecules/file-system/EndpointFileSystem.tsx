@@ -26,7 +26,7 @@ import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import { verbColors } from '../../../utils/style';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
-import { selectActiveState } from '../../../state/active/selectors';
+import { selectEndpoints, selectRequests } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint, deleteEndpoint } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
@@ -165,7 +165,8 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 	const selected = useSelector(selectActiveTab);
 	const [collapsed, setCollapsed] = useState(false);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const data = useSelector(selectActiveState);
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
 	return (
@@ -180,9 +181,9 @@ function EndpointFileSystem({ endpoint, validIds }: { endpoint: Endpoint; validI
 				isTabSelected: selected === endpoint.id,
 				endpoint,
 				validIds,
-				requests: data.endpoints[endpoint.id]?.requestIds
+				requests: endpoints[endpoint.id]?.requestIds
 					.filter((requestId) => validIds.has(requestId))
-					.map((requestIds) => data.requests[requestIds])
+					.map((requestIds) => requests[requestIds])
 					.filter((x) => x != null)
 					.sort((a, b) => a.name.localeCompare(b.name)),
 			}}

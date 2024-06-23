@@ -40,7 +40,14 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
 import { ResponseInfo } from './request/response/ResponseInfo';
 import { useSelector } from 'react-redux';
-import { selectActiveState, selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint, updateRequest } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
@@ -73,10 +80,15 @@ const getError = (error: string): HistoricalEndpointResponse => {
 };
 
 export function RequestTab({ id }: TabProps) {
-	const data = useSelector(selectActiveState);
-	const requestData = useSelector(selectRequests)[id];
-	const endpointData = useSelector(selectEndpoints)[requestData?.endpointId];
-	const serviceData = useSelector(selectServices)[endpointData?.serviceId];
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
+	const services = useSelector(selectServices);
+	const settings = useSelector(selectSettings);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const environments = useSelector(selectEnvironments);
+	const requestData = requests[id];
+	const endpointData = endpoints[requestData?.endpointId];
+	const serviceData = services[endpointData?.serviceId];
 	const theme = useTheme();
 	const { mode } = useColorScheme();
 	const [hidden, setHidden] = useState(false);
@@ -183,7 +195,7 @@ export function RequestTab({ id }: TabProps) {
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
 							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
-							data,
+							{ requests, services, settings, selectedEnvironment, environments },
 							serviceData.id,
 							requestData.id,
 						)}

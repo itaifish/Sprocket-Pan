@@ -7,13 +7,16 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { ApplicationData, Environment, iconFromTabType } from '../../../types/application-data/application-data';
 import { useSelector } from 'react-redux';
-import { selectActiveState } from '../../../state/active/selectors';
+import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../../../state/active/selectors';
 import { selectTabsState } from '../../../state/tabs/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { closeTab, setSelectedTab } from '../../../state/tabs/slice';
 import { TabType } from '../../../types/state/state';
 
-function getMapFromTabType(data: ApplicationData, tabType: TabType) {
+function getMapFromTabType(
+	data: Pick<ApplicationData, 'environments' | 'requests' | 'services' | 'endpoints'>,
+	tabType: TabType,
+) {
 	switch (tabType) {
 		case 'environment':
 			return data.environments;
@@ -28,7 +31,10 @@ function getMapFromTabType(data: ApplicationData, tabType: TabType) {
 }
 
 export function TabHeader() {
-	const data = useSelector(selectActiveState);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
 	const { list, selected } = useSelector(selectTabsState);
 	const [disabled, setDisabled] = useState({ left: false, right: false });
 	const dispatch = useAppDispatch();
@@ -120,7 +126,7 @@ export function TabHeader() {
 						</IconButton>
 					</div>
 					{Object.entries(list).map(([tabId, tabType], index) => {
-						const tabData = getMapFromTabType(data, tabType)[tabId];
+						const tabData = getMapFromTabType({ environments, requests, services, endpoints }, tabType)[tabId];
 
 						return (
 							<Tab

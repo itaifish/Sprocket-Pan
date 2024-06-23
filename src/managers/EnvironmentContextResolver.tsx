@@ -8,13 +8,18 @@ type Snippet = {
 	variableName?: string;
 };
 
+type PickedApplicationData = Pick<
+	ApplicationData,
+	'selectedEnvironment' | 'services' | 'environments' | 'requests' | 'settings'
+>;
+
 class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
 	private constructor() {}
 
 	public stringWithVarsToTypography(
 		text: string,
-		data: ApplicationData,
+		data: PickedApplicationData,
 		serviceId?: string,
 		requestId?: string,
 		typographyProps?: React.ComponentProps<typeof Typography>,
@@ -63,7 +68,7 @@ class EnvironmentContextResolver {
 		);
 	}
 
-	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string, requestId?: string) {
+	public resolveVariablesForString(text: string, data: PickedApplicationData, serviceId?: string, requestId?: string) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
@@ -71,7 +76,7 @@ class EnvironmentContextResolver {
 	public resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
 		context: {
-			data: ApplicationData;
+			data: PickedApplicationData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -89,7 +94,7 @@ class EnvironmentContextResolver {
 		object: T,
 		key: TKey,
 		context: {
-			data: ApplicationData;
+			data: PickedApplicationData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -140,7 +145,7 @@ class EnvironmentContextResolver {
 
 	public parseStringWithEnvironmentOverrides(
 		text: string,
-		data: ApplicationData,
+		data: PickedApplicationData,
 		serviceId?: string,
 		requestId?: string,
 	) {
@@ -148,7 +153,7 @@ class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	public buildEnvironmentVariables(data: ApplicationData, serviceId?: string, requestId?: string) {
+	public buildEnvironmentVariables(data: PickedApplicationData, serviceId?: string, requestId?: string) {
 		let env: Environment = asEnv({ __name: '', __id: '', __data: [] });
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };

@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState, selectRootState } from '../store';
+import { tabsSlice } from './slice';
 
-export const selectTabsState = createSelector(selectRootState<RootState>, (state) => state.tabs);
+export const selectTabsState = tabsSlice.selectSlice;
 
 export const selectTabsList = createSelector(selectTabsState, (state) => state.list);
 

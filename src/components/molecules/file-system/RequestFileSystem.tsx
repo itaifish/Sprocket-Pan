@@ -17,7 +17,7 @@ import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { selectActiveState } from '../../../state/active/selectors';
+import { selectEndpoints } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
@@ -112,9 +112,9 @@ export const MemoizedDumbRequestFileSystem = memo(DumbRequestFileSystem);
 
 export function RequestFileSystem({ request }: { request: EndpointRequest }) {
 	const selectedTabId = useSelector(selectActiveTab);
-	const data = useSelector(selectActiveState);
 	const [menuOpen, setMenuOpen] = useState(false);
-	const endpointData = data.endpoints[request.endpointId];
+	const endpoints = useSelector(selectEndpoints);
+	const endpointData = endpoints[request.endpointId];
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	return (
 		<MemoizedDumbRequestFileSystem

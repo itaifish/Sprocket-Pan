@@ -25,10 +25,15 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 import { CollapseExpandButton } from '../../../../atoms/buttons/CollapseExpandButton';
-import { selectActiveState } from '../../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../../../state/store';
 import { addTabs, setSelectedTab } from '../../../../../state/tabs/slice';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectServices,
+} from '../../../../../state/active/selectors';
 
 const eventStrIconsMap = {
 	Service: (
@@ -64,7 +69,11 @@ interface VisualEventLogInnerProps {
 }
 
 function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerProps) {
-	const data = useSelector(selectActiveState);
+	const requests = useSelector(selectRequests);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const endpoints = useSelector(selectEndpoints);
+	const data = { requests, environments, services, endpoints };
 	const dispatch = useAppDispatch();
 	const [collapsed, setCollapsed] = useState(false);
 	const requestEvent = transformedLog.before;
@@ -88,7 +97,7 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 					<Box sx={{ mr: '5px' }}>{icons}</Box>
 					{requestEvent.eventType === 'request' &&
 						requestEvent.associatedId &&
-						data.requests[requestEvent.associatedId].name}{' '}
+						requests[requestEvent.associatedId].name}{' '}
 					{camelCaseToTitle(requestEvent.eventType)}
 					{transformedLog.innerEvents.length > 0 && (
 						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />

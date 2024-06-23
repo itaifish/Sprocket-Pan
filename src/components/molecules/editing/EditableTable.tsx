@@ -15,7 +15,7 @@ import { FormatIcon } from '../../atoms/buttons/FormatIcon';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { CopyToClipboardButton } from '../../atoms/buttons/CopyToClipboardButton';
 import { useSelector } from 'react-redux';
-import { selectActiveState } from '../../../state/active/selectors';
+import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -94,10 +94,10 @@ export function EditableTable(props: EditableTableProps) {
 	const selectedMode = colorScheme.mode;
 	const systemMode = colorScheme.systemMode;
 	const resolvedMode = selectedMode === 'system' ? systemMode : selectedMode;
-	const data = useSelector(selectActiveState);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const environments = useSelector(selectEnvironments);
 	const environment =
-		props.environment ??
-		(data.selectedEnvironment ? data.environments[data.selectedEnvironment as string] : EMPTY_ENVIRONMENT);
+		props.environment ?? (selectedEnvironment ? environments[selectedEnvironment as string] : EMPTY_ENVIRONMENT);
 	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
 	const [backupEditorText, setBackupEditorText] = useState(editorText);
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);

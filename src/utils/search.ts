@@ -10,19 +10,18 @@ class AlwaysYesSet<T> extends Set<T> {
 	}
 }
 
-export function getValidIdsFromSearchTerm(searchText: string, data: ApplicationData): Set<string> {
+const serviceProperties = ['name', 'description', 'baseUrl', 'version'] as const satisfies readonly (keyof Service)[];
+const endpointProperties = ['description', 'name', 'verb', 'url'] as const satisfies readonly (keyof Endpoint)[];
+
+type DataSearchContext = Pick<ApplicationData, 'endpoints' | 'environments' | 'requests' | 'services'>;
+
+export function getValidIdsFromSearchTerm(searchText: string, data: DataSearchContext): Set<string> {
 	const searchUncased = searchText.toLocaleLowerCase();
 	if (searchText === '') {
 		return new AlwaysYesSet<string>();
 	}
 	const validIds = new Set<string>();
 	serviceLoop: for (const service of Object.values(data.services)) {
-		const serviceProperties = [
-			'name',
-			'description',
-			'baseUrl',
-			'version',
-		] as const satisfies readonly (keyof Service)[];
 		for (const property of serviceProperties) {
 			if (service[property].toLocaleLowerCase().includes(searchUncased)) {
 				log.trace(`${service.name}.${property} matches ${searchText}`);
@@ -39,7 +38,6 @@ export function getValidIdsFromSearchTerm(searchText: string, data: ApplicationD
 		}
 		endpointLoop: for (const endpointId of Object.values(service.endpointIds)) {
 			const endpoint = data.endpoints[endpointId];
-			const endpointProperties = ['description', 'name', 'verb', 'url'] as const satisfies readonly (keyof Endpoint)[];
 			for (const property of endpointProperties) {
 				if (endpoint[property].toLocaleLowerCase().includes(searchUncased)) {
 					validIds.add(endpointId);

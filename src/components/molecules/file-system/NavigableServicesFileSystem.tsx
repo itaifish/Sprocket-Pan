@@ -4,7 +4,7 @@ import { getValidIdsFromSearchTerm } from '../../../utils/search';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { selectActiveState, selectEnvironments, selectServices } from '../../../state/active/selectors';
+import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 
 interface NavigableServicesFileSystemProps {
@@ -15,16 +15,32 @@ export function NavigableServicesFileSystem({ searchText }: NavigableServicesFil
 	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
-	const applicationData = useSelector(selectActiveState);
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);
+	const endpoints = useSelector(selectEndpoints);
+	const requests = useSelector(selectRequests);
 
 	console.log('file system re-rendered');
-	console.log({ searchText });
+	console.log({ searchText, environments, services, endpoints, requests });
 
 	const validIds = useMemo(() => {
-		return getValidIdsFromSearchTerm(searchText, applicationData);
-	}, [applicationData, searchText]);
+		console.log('validIds recalculated');
+		return getValidIdsFromSearchTerm(searchText, { environments, services, endpoints, requests });
+	}, [environments, services, endpoints, requests, searchText]);
+
+	const envTreeList = useMemo(() => {
+		console.log('tree list recalculating: env');
+		return Object.values(environments)
+			.filter((env) => validIds.has(env.__id))
+			.sort((a, b) => a.__name.localeCompare(b.__name));
+	}, [validIds, environments]);
+
+	const srvTreeList = useMemo(() => {
+		console.log('tree list recalculating: srv');
+		return Object.values(services)
+			.filter((service) => validIds.has(service.id))
+			.sort((a, b) => a.name.localeCompare(b.name));
+	}, [services, validIds]);
 
 	return (
 		<>
@@ -41,15 +57,12 @@ export function NavigableServicesFileSystem({ searchText }: NavigableServicesFil
 						}}
 					>
 						{!environmentsCollapsed &&
-							Object.values(environments)
-								.filter((env) => validIds.has(env.__id))
-								.sort((a, b) => a.__name.localeCompare(b.__name))
-								.map((env, index, arr) => (
-									<div key={index}>
-										<EnvironmentFileSystem environment={env} />
-										{index != arr.length - 1 && <ListDivider />}
-									</div>
-								))}
+							envTreeList.map((env, index) => (
+								<div key={env.__id}>
+									{index !== 0 && <ListDivider />}
+									<EnvironmentFileSystem environment={env} />
+								</div>
+							))}
 					</List>
 				</ListItem>
 				<ListDivider />
@@ -65,15 +78,12 @@ export function NavigableServicesFileSystem({ searchText }: NavigableServicesFil
 						}}
 					>
 						{!servicesCollapsed &&
-							Object.values(services)
-								.filter((service) => validIds.has(service.id))
-								.sort((a, b) => a.name.localeCompare(b.name))
-								.map((service, index) => (
-									<div key={index}>
-										<ServiceFileSystem service={service} validIds={validIds} />
-										<ListDivider />
-									</div>
-								))}
+							srvTreeList.map((srv) => (
+								<div key={srv.id}>
+									<ServiceFileSystem service={srv} validIds={validIds} />
+									<ListDivider />
+								</div>
+							))}
 					</List>
 				</ListItem>
 			</List>

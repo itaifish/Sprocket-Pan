@@ -13,6 +13,7 @@ export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 
 	console.log('the root re-rendered');
+	console.log({ searchText, activeWorkspace });
 
 	return (
 		<Box

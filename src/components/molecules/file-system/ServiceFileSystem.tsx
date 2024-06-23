@@ -12,7 +12,7 @@ import {
 } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import { Endpoint, Service } from '../../../types/application-data/application-data';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import { MemoizedEndpointFileSystem as EndpointFileSystem } from './EndpointFileSystem';
@@ -23,12 +23,12 @@ import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import { useSelector } from 'react-redux';
-import { selectActiveState } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
 import { cloneService, deleteService } from '../../../state/active/thunks/services';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { selectActiveTab } from '../../../state/tabs/selectors';
+import { selectEndpoints } from '../../../state/active/selectors';
 
 interface DumbServiceFileSystemProps {
 	collapsed: boolean;
@@ -161,10 +161,17 @@ const MemoizedDumbServiceFileSystem = memo(DumbServiceFileSystem);
 
 export function ServiceFileSystem({ service, validIds }: { service: Service; validIds: Set<string> }) {
 	const [collapsed, setCollapsed] = useState(false);
-	const data = useSelector(selectActiveState);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const selectedTabId = useSelector(selectActiveTab);
+	const endpoints = useSelector(selectEndpoints);
+	const propEndpoints = useMemo(() => {
+		return service.endpointIds
+			.filter((endpointId) => validIds.has(endpointId))
+			.map((endpointId) => endpoints[endpointId])
+			.filter((x) => x != null)
+			.sort((a, b) => a.name.localeCompare(b.name));
+	}, []);
 
 	return (
 		<MemoizedDumbServiceFileSystem
@@ -178,11 +185,7 @@ export function ServiceFileSystem({ service, validIds }: { service: Service; val
 				isTabSelected: selectedTabId === service.id,
 				service,
 				validIds,
-				endpoints: service.endpointIds
-					.filter((endpointId) => validIds.has(endpointId))
-					.map((endpointId) => data.endpoints[endpointId])
-					.filter((x) => x != null)
-					.sort((a, b) => a.name.localeCompare(b.name)),
+				endpoints: propEndpoints,
 			}}
 		/>
 	);

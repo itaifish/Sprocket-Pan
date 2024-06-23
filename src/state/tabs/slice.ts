@@ -2,7 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TabType } from '../../types/state/state';
 
 export interface TabsState {
-	selected?: string;
+	selected: string | null;
 	list: Record<string, TabType>;
 	history: any;
 	historyLocation: number;
@@ -12,6 +12,7 @@ const initialState: TabsState = {
 	list: {},
 	history: [],
 	historyLocation: 0,
+	selected: null,
 };
 
 export const tabsSlice = createSlice({
@@ -24,7 +25,7 @@ export const tabsSlice = createSlice({
 		closeTab: (state, action: PayloadAction<string>) => {
 			delete state.list[action.payload];
 			if (action.payload === state.selected) {
-				state.selected = Object.keys(state.list).at(-1);
+				state.selected = Object.keys(state.list).at(-1) ?? null;
 			}
 		},
 		setSelectedTab: (state, { payload }: PayloadAction<string>) => {
