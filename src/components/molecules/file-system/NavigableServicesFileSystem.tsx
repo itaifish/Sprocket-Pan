@@ -1,46 +1,22 @@
 import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
-import { useMemo, useState } from 'react';
-import { getValidIdsFromSearchTerm } from '../../../utils/search';
+import { useState } from 'react';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { selectFilteredNestedIds } from '../../../state/tabs/selectors';
+import { selectEnvironments, selectServices } from '../../../state/active/selectors';
 
-interface NavigableServicesFileSystemProps {
-	searchText: string;
-}
-
-export function NavigableServicesFileSystem({ searchText }: NavigableServicesFileSystemProps) {
+export function NavigableServicesFileSystem() {
 	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
 	const environments = useSelector(selectEnvironments);
+	const environmentIdsUnfiltered = Object.values(environments).map((env) => env.__id);
 	const services = useSelector(selectServices);
-	const endpoints = useSelector(selectEndpoints);
-	const requests = useSelector(selectRequests);
-
-	console.log('file system re-rendered');
-	console.log({ searchText, environments, services, endpoints, requests });
-
-	const validIds = useMemo(() => {
-		console.log('validIds recalculated');
-		return getValidIdsFromSearchTerm(searchText, { environments, services, endpoints, requests });
-	}, [environments, services, endpoints, requests, searchText]);
-
-	const envTreeList = useMemo(() => {
-		console.log('tree list recalculating: env');
-		return Object.values(environments)
-			.filter((env) => validIds.has(env.__id))
-			.sort((a, b) => a.__name.localeCompare(b.__name));
-	}, [validIds, environments]);
-
-	const srvTreeList = useMemo(() => {
-		console.log('tree list recalculating: srv');
-		return Object.values(services)
-			.filter((service) => validIds.has(service.id))
-			.sort((a, b) => a.name.localeCompare(b.name));
-	}, [services, validIds]);
+	const serviceIdsUnfiltered = Object.values(services).map((srv) => srv.id);
+	const environmentIds = useSelector((state) => selectFilteredNestedIds(state, environmentIdsUnfiltered));
+	const serviceIds = useSelector((state) => selectFilteredNestedIds(state, serviceIdsUnfiltered));
 
 	return (
 		<>
@@ -57,10 +33,10 @@ export function NavigableServicesFileSystem({ searchText }: NavigableServicesFil
 						}}
 					>
 						{!environmentsCollapsed &&
-							envTreeList.map((env, index) => (
-								<div key={env.__id}>
+							environmentIds.map((environmentId, index) => (
+								<div key={environmentId}>
 									{index !== 0 && <ListDivider />}
-									<EnvironmentFileSystem environment={env} />
+									<EnvironmentFileSystem environmentId={environmentId} />
 								</div>
 							))}
 					</List>
@@ -78,9 +54,9 @@ export function NavigableServicesFileSystem({ searchText }: NavigableServicesFil
 						}}
 					>
 						{!servicesCollapsed &&
-							srvTreeList.map((srv) => (
-								<div key={srv.id}>
-									<ServiceFileSystem service={srv} validIds={validIds} />
+							serviceIds.map((serviceId) => (
+								<div key={serviceId}>
+									<ServiceFileSystem serviceId={serviceId} />
 									<ListDivider />
 								</div>
 							))}

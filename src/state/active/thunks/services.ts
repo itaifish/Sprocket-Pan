@@ -24,6 +24,16 @@ export const cloneService = createAsyncThunk<void, CloneServiceInput, { state: R
 	},
 );
 
+export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootState }>(
+	'active/cloneServiceFromId',
+	async (id, thunk) => {
+		const service = thunk.getState().active.services[id];
+		if (service != null) {
+			thunk.dispatch(cloneService({ data: service }));
+		}
+	},
+);
+
 export const deleteService = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteService',
 	async (id, thunk) => {

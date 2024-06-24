@@ -6,6 +6,8 @@ export interface TabsState {
 	list: Record<string, TabType>;
 	history: any;
 	historyLocation: number;
+	deleteQueue: string[];
+	searchText: string;
 }
 
 const initialState: TabsState = {
@@ -13,12 +15,26 @@ const initialState: TabsState = {
 	history: [],
 	historyLocation: 0,
 	selected: null,
+	deleteQueue: [],
+	searchText: '',
 };
 
 export const tabsSlice = createSlice({
 	name: 'tabs',
 	initialState,
 	reducers: {
+		addToDeleteQueue: (state, { payload }: PayloadAction<string>) => {
+			state.deleteQueue.push(payload);
+		},
+		removeFromDeleteQueue: (state, { payload }: PayloadAction<string>) => {
+			state.deleteQueue.splice(
+				state.deleteQueue.findIndex((id) => id === payload),
+				1,
+			);
+		},
+		setSearchText: (state, { payload }: PayloadAction<string>) => {
+			state.searchText = payload;
+		},
 		addTabs: (state, action: PayloadAction<TabsState['list']>) => {
 			state.list = { ...state.list, ...action.payload };
 		},
@@ -51,4 +67,12 @@ export const tabsSlice = createSlice({
 	},
 });
 
-export const { setSelectedTab, addTabs, closeTab, setSelectedTabFromHistory } = tabsSlice.actions;
+export const {
+	setSearchText,
+	addToDeleteQueue,
+	removeFromDeleteQueue,
+	setSelectedTab,
+	addTabs,
+	closeTab,
+	setSelectedTabFromHistory,
+} = tabsSlice.actions;

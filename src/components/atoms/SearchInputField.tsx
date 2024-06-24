@@ -7,17 +7,17 @@ import SavedSearchIcon from '@mui/icons-material/SavedSearch';
 import { Constants } from '../../utils/constants';
 import ClearIcon from '@mui/icons-material/Clear';
 import { SprocketTooltip } from './SprocketTooltip';
+import { selectSearchText } from '../../state/tabs/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../state/store';
+import { setSearchText } from '../../state/tabs/slice';
 
-export function SearchInputField({
-	searchText,
-	setSearchText,
-}: {
-	searchText: string;
-	setSearchText: React.Dispatch<React.SetStateAction<string>>;
-}) {
+export function SearchInputField() {
+	const searchText = useSelector(selectSearchText);
+	const dispatch = useAppDispatch();
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
 		state: searchText,
-		setState: setSearchText,
+		setState: (text: string) => dispatch(setSearchText(text)),
 		debounceOverride: Constants.searchDebounceTimeMS,
 	});
 	const [isTyping, setTyping] = useState(false);

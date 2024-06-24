@@ -1,15 +1,6 @@
 import { ApplicationData, Endpoint, Service } from '../types/application-data/application-data';
 import { log } from './logging';
 
-class AlwaysYesSet<T> extends Set<T> {
-	constructor() {
-		super();
-	}
-	has(_value: T) {
-		return true;
-	}
-}
-
 const serviceProperties = ['name', 'description', 'baseUrl', 'version'] as const satisfies readonly (keyof Service)[];
 const endpointProperties = ['description', 'name', 'verb', 'url'] as const satisfies readonly (keyof Endpoint)[];
 
@@ -17,9 +8,6 @@ type DataSearchContext = Pick<ApplicationData, 'endpoints' | 'environments' | 'r
 
 export function getValidIdsFromSearchTerm(searchText: string, data: DataSearchContext): Set<string> {
 	const searchUncased = searchText.toLocaleLowerCase();
-	if (searchText === '') {
-		return new AlwaysYesSet<string>();
-	}
 	const validIds = new Set<string>();
 	serviceLoop: for (const service of Object.values(data.services)) {
 		for (const property of serviceProperties) {

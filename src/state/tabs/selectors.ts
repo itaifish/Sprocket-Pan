@@ -1,5 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { tabsSlice } from './slice';
+import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../active/selectors';
+import { getValidIdsFromSearchTerm } from '../../utils/search';
 
 export const selectTabsState = tabsSlice.selectSlice;
 
@@ -14,3 +16,25 @@ export const selectPeekHistory = createSelector(selectTabsState, ({ historyLocat
 		previous: historyLocation <= 0 ? null : historyLocation - 1,
 	};
 });
+
+export const selectNextForDeletion = createSelector(selectTabsState, ({ deleteQueue }) => {
+	return deleteQueue[0];
+});
+
+export const selectSearchText = createSelector(selectTabsState, (state) => state.searchText);
+
+export const selectFilteredIds = createSelector(
+	[selectSearchText, selectEnvironments, selectServices, selectEndpoints, selectRequests],
+	(searchText, environments, services, endpoints, requests) =>
+		searchText === '' ? null : getValidIdsFromSearchTerm(searchText, { environments, services, endpoints, requests }),
+);
+
+export const selectFilteredNestedIds = createSelector(
+	[selectFilteredIds, (_, nestedIds: string[]) => nestedIds],
+	(filteredIds, nestedIds) => (filteredIds == null ? nestedIds : nestedIds.filter(filteredIds.has.bind(filteredIds))),
+);
+
+export const selectIsActiveTab = createSelector(
+	[selectActiveTab, (_, id: string) => id],
+	(activeTab, id) => activeTab === id,
+);

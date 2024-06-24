@@ -21,6 +21,14 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 	},
 );
 
+export const addNewEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
+	'active/addEnvironmentById',
+	async (id, thunk) => {
+		const environment = thunk.getState().active.environments[id];
+		thunk.dispatch(addNewEnvironment({ data: environment }));
+	},
+);
+
 export const deleteEnvironment = deleteEnvironmentFromState;
 
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
