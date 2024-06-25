@@ -15,22 +15,19 @@ import { setSearchText } from '../../state/tabs/slice';
 export function SearchInputField() {
 	const searchText = useSelector(selectSearchText);
 	const dispatch = useAppDispatch();
+	const setState = (text: string) => dispatch(setSearchText(text));
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
 		state: searchText,
-		setState: (text: string) => dispatch(setSearchText(text)),
+		setState,
 		debounceOverride: Constants.searchDebounceTimeMS,
 	});
 	const [isTyping, setTyping] = useState(false);
 	useEffect(() => {
 		debounceEventEmitter.on('sync', () => {
-			if (isTyping) {
-				setTyping(false);
-			}
+			setTyping(false);
 		});
 		debounceEventEmitter.on('desync', () => {
-			if (!isTyping) {
-				setTyping(true);
-			}
+			setTyping(true);
 		});
 	}, []);
 
@@ -64,7 +61,8 @@ export function SearchInputField() {
 						variant="plain"
 						color={'danger'}
 						onClick={() => {
-							setSearchText('');
+							setLocalDataState('');
+							setState('');
 							setTyping(false);
 						}}
 					>
