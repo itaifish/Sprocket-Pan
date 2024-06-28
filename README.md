@@ -29,7 +29,7 @@ Key:
     - Postman ☐
     - Insomnia ☐
     - Swagger / OpenAPI ❗
-- Refactor global state ☐
+- Refactor global state ✅
 - Refactor Environment input/output (Janky) ✅
 - Show debug logs option in settings ☐
 - Scratchpad (Requests / Scripts not associated with a service) ☐
