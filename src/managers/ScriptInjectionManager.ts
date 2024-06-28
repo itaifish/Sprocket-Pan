@@ -1,10 +1,10 @@
 import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
+import { makeRequest } from '../state/active/thunks/requests';
 import { StateAccess } from '../state/types';
 import { EndpointResponse } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
 import { AuditLog } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
-import { networkRequestManager } from './NetworkRequestManager';
 
 export function getScriptInjectionCode(
 	requestId: string,
@@ -85,7 +85,7 @@ export function getScriptInjectionCode(
 
 	const sendRequest = async (requestId: string) => {
 		const data = getState();
-		await networkRequestManager.sendRequest(requestId, data, auditLog);
+		await dispatch(makeRequest({ requestId, auditLog }));
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 

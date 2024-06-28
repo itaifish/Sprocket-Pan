@@ -35,6 +35,8 @@ import {
 	selectServices,
 } from '../../../../../state/active/selectors';
 
+const indentationSize = 20;
+
 const eventStrIconsMap = {
 	Service: (
 		<>
@@ -66,9 +68,10 @@ const eventStrIconsMap = {
 interface VisualEventLogInnerProps {
 	transformedLog: TransformedAuditLog;
 	requestId: string;
+	indentation: number;
 }
 
-function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerProps) {
+function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualEventLogInnerProps) {
 	const requests = useSelector(selectRequests);
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);
@@ -92,7 +95,7 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
 	return (
 		<>
-			<Box>
+			<Box sx={{ pl: `${indentation}px` }}>
 				<ListItemDecorator>
 					<Box sx={{ mr: '5px' }}>{icons}</Box>
 					{requestEvent.eventType === 'request' &&
@@ -153,11 +156,15 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 				</ListItemButton>
 			</Box>
 			{transformedLog.innerEvents.length > 0 && !collapsed && (
-				<ListItem nested>
+				<ListItem nested sx={{ '--List-nestedInsetStart': '10rem' }}>
 					{transformedLog.innerEvents.map((event, index) => (
 						<Box key={index}>
 							<Divider sx={{ my: '10px' }} />
-							<VisualEventLogInner transformedLog={event} requestId={requestId} />
+							<VisualEventLogInner
+								transformedLog={event}
+								requestId={requestId}
+								indentation={indentation + indentationSize}
+							/>
 						</Box>
 					))}
 				</ListItem>
@@ -170,7 +177,9 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
 	return (
 		<List sx={{ '--List-nestedInsetStart': '10rem' }}>
-			{transformedLog && <VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} />}
+			{transformedLog && (
+				<VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} indentation={0} />
+			)}
 		</List>
 	);
 }
