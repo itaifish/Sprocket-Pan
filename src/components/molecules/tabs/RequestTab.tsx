@@ -49,10 +49,11 @@ import {
 	selectSettings,
 } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { updateEndpoint, updateRequest } from '../../../state/active/slice';
+import { deleteResponseFromHistory, updateEndpoint, updateRequest } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
 import { log } from '../../../utils/logging';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import DeleteForever from '@mui/icons-material/DeleteForever';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -294,27 +295,29 @@ export function RequestTab({ id }: TabProps) {
 						</Typography>
 						<Divider />
 						<Stack direction={'row'}>
-							<IconButton
-								aria-label="previousHistory"
-								disabled={response === 0 || requestData.history.length === 0}
-								onClick={() => {
-									setResponse((currentResponse) => {
-										let newResponse: number;
-										if (currentResponse === 0) {
-											newResponse = currentResponse;
-										} else if (currentResponse === 'error') {
-											newResponse = requestData.history.length - 1;
-										} else if (currentResponse === 'latest') {
-											newResponse = requestData.history.length - 2;
-										} else {
-											newResponse = currentResponse - 1;
-										}
-										return clamp(newResponse, 0, Math.max(requestData.history.length - 1, 0));
-									});
-								}}
-							>
-								<ArrowLeftIcon />
-							</IconButton>
+							<SprocketTooltip text={'Previous Response'}>
+								<IconButton
+									aria-label="previousHistory"
+									disabled={response === 0 || requestData.history.length === 0}
+									onClick={() => {
+										setResponse((currentResponse) => {
+											let newResponse: number;
+											if (currentResponse === 0) {
+												newResponse = currentResponse;
+											} else if (currentResponse === 'error') {
+												newResponse = requestData.history.length - 1;
+											} else if (currentResponse === 'latest') {
+												newResponse = requestData.history.length - 2;
+											} else {
+												newResponse = currentResponse - 1;
+											}
+											return clamp(newResponse, 0, Math.max(requestData.history.length - 1, 0));
+										});
+									}}
+								>
+									<ArrowLeftIcon />
+								</IconButton>
+							</SprocketTooltip>
 							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
 								<EditableText
 									sx={{ display: 'flex', alignItems: 'center' }}
@@ -335,24 +338,43 @@ export function RequestTab({ id }: TabProps) {
 									}}
 								/>
 							</Typography>
-							<IconButton
-								aria-label="nextHistory"
-								disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
-								onClick={() => {
-									setResponse((currentResponse) => {
-										if (currentResponse == 'error') {
-											return currentResponse;
+							<SprocketTooltip text={'Next Response'}>
+								<IconButton
+									aria-label="nextHistory"
+									disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
+									onClick={() => {
+										setResponse((currentResponse) => {
+											if (currentResponse == 'error') {
+												return currentResponse;
+											}
+											if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
+												return currentResponse;
+											} else {
+												return currentResponse + 1;
+											}
+										});
+									}}
+								>
+									<ArrowRightIcon />
+								</IconButton>
+							</SprocketTooltip>
+							<SprocketTooltip text={'Delete Response'}>
+								<IconButton
+									disabled={response == 'error' || requestData.history.length == 0}
+									onClick={() => {
+										if (response == 'error') {
+											return;
 										}
-										if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
-											return currentResponse;
-										} else {
-											return currentResponse + 1;
+										const index = response == 'latest' ? requestData.history.length - 1 : response;
+										dispatch(deleteResponseFromHistory({ requestId: id, historyIndex: index }));
+										if (response != 'latest' && requestData.history.length >= response) {
+											setResponse(requestData.history.length - 1);
 										}
-									});
-								}}
-							>
-								<ArrowRightIcon />
-							</IconButton>
+									}}
+								>
+									<DeleteForever />
+								</IconButton>
+							</SprocketTooltip>
 						</Stack>
 						<ResponseInfo response={responseData} requestId={id} />
 					</Card>

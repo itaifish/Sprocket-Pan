@@ -29,6 +29,11 @@ interface AddResponseToHistory {
 	auditLog?: AuditLog;
 }
 
+interface DeleteResponseFromHistory {
+	requestId: string;
+	historyIndex: number;
+}
+
 interface AddRequestToEndpoint {
 	requestId: string;
 	endpointId: string;
@@ -152,6 +157,14 @@ export const activeSlice = createSlice({
 				reqToUpdate.history.shift();
 			}
 		},
+		deleteResponseFromHistory: (state, action: PayloadAction<DeleteResponseFromHistory>) => {
+			const { requestId, historyIndex } = action.payload;
+			const reqToUpdate = state.requests[requestId];
+			if (reqToUpdate == null) {
+				throw new Error('addResponseToHistory called with no associated request');
+			}
+			reqToUpdate.history.splice(historyIndex, 1);
+		},
 	},
 });
 
@@ -179,4 +192,5 @@ export const {
 	removeEndpointFromService,
 	deleteAllHistory,
 	addResponseToHistory,
+	deleteResponseFromHistory,
 } = activeSlice.actions;
