@@ -367,8 +367,8 @@ export function RequestTab({ id }: TabProps) {
 										}
 										const index = response == 'latest' ? requestData.history.length - 1 : response;
 										dispatch(deleteResponseFromHistory({ requestId: id, historyIndex: index }));
-										if (response != 'latest' && requestData.history.length >= response) {
-											setResponse(requestData.history.length - 1);
+										if (response != 'latest' && requestData.history.length <= response) {
+											setResponse('latest');
 										}
 									}}
 								>
