@@ -18,6 +18,7 @@ import { toValidFolderName } from '../../../utils/string';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppDispatch } from '../../../state/store';
 import { createWorkspace } from '../../../state/workspaces/thunks';
+
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;
@@ -57,7 +58,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 			createWorkspace({
 				name: workspaceName,
 				description: workspaceDescription,
-				lastModified: new Date(),
+				lastModified: new Date().getTime(),
 				fileName: workspaceFileName,
 			}),
 		).unwrap();

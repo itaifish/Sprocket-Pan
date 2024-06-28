@@ -1,26 +1,15 @@
 import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import RedoRoundedIcon from '@mui/icons-material/RedoRounded';
 import { Stack, IconButton } from '@mui/joy';
-import { useContext, useEffect, useState } from 'react';
-import { tabsManager } from '../../../managers/TabsManager';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { useSelector } from 'react-redux';
+import { selectPeekHistory } from '../../../state/tabs/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { setSelectedTabFromHistory } from '../../../state/tabs/slice';
 
 export function UndoRedoTabsButton() {
-	const [goBackIndex, setGoBackIndex] = useState<number | null>(null);
-	const [goForwardIndex, setGoForwardIndex] = useState<number | null>(null);
-	const tabsContext = useContext(TabsContext);
-
-	useEffect(() => {
-		const onTabSelected = () => {
-			setGoBackIndex(tabsManager.peekHistoryPrevious());
-			setGoForwardIndex(tabsManager.peekHistoryNext());
-		};
-		tabsManager.on('TabSelected', onTabSelected);
-		return () => {
-			tabsManager.removeListener('TabSelected', onTabSelected);
-		};
-	}, []);
+	const { previous: goBackIndex, next: goForwardIndex } = useSelector(selectPeekHistory);
+	const dispatch = useAppDispatch();
 
 	return (
 		<Stack direction={'row'} spacing={0} justifyContent={'flex-end'}>
@@ -28,7 +17,7 @@ export function UndoRedoTabsButton() {
 				<IconButton
 					variant="outlined"
 					disabled={goBackIndex == null}
-					onClick={() => goBackIndex != null && tabsManager.selectTabFromHistory(tabsContext, goBackIndex)}
+					onClick={() => dispatch(setSelectedTabFromHistory(goBackIndex))}
 				>
 					<UndoRoundedIcon />
 				</IconButton>
@@ -37,7 +26,7 @@ export function UndoRedoTabsButton() {
 				<IconButton
 					variant="outlined"
 					disabled={goForwardIndex == null}
-					onClick={() => goForwardIndex != null && tabsManager.selectTabFromHistory(tabsContext, goForwardIndex)}
+					onClick={() => dispatch(setSelectedTabFromHistory(goForwardIndex))}
 				>
 					<RedoRoundedIcon />
 				</IconButton>

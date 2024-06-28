@@ -1,60 +1,52 @@
-import { useContext, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CircularProgress, IconButton } from '@mui/joy';
 import SaveIcon from '@mui/icons-material/Save';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import Badge from '@mui/joy/Badge';
-import { ApplicationDataContext } from '../../../managers/GlobalContextManager';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { useAppDispatch } from '../../../state/store';
+import { selectHasBeenModifiedSinceLastSave } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { saveActiveData } from '../../../state/active/thunks/environments';
+import { log } from '../../../utils/logging';
+
 export function SaveButton() {
-	const data = useContext(ApplicationDataContext);
 	const [loading, setLoading] = useState(false);
-	const [isModified, setIsModified] = useState(false);
-	useEffect(() => {
-		const updateListener = () => {
-			setIsModified(true);
-		};
-		const saveListener = () => {
-			setIsModified(false);
-		};
-		applicationDataManager.addListener('update', updateListener);
-		applicationDataManager.addListener('saved', saveListener);
-		return () => {
-			applicationDataManager.removeListener('update', updateListener);
-			applicationDataManager.removeListener('saved', saveListener);
-		};
-	}, []);
+	const isModified = useSelector(selectHasBeenModifiedSinceLastSave);
+	const dispatch = useAppDispatch();
+
+	async function save() {
+		setLoading(true);
+		try {
+			await dispatch(saveActiveData()).unwrap();
+		} catch (e) {
+			const err = e as Error;
+			log.error(`${err.message}\n${err.stack}`);
+		}
+		setTimeout(() => setLoading(false), 500);
+	}
+
 	return (
-		<>
-			{loading ? (
-				<CircularProgress />
-			) : (
-				<SprocketTooltip text="Save">
-					<Badge
-						size="sm"
-						invisible={!isModified}
-						anchorOrigin={{
-							vertical: 'top',
-							horizontal: 'right',
-						}}
-						badgeInset="14%"
-					>
-						<IconButton
-							id="toggle-mode"
-							size="sm"
-							variant="soft"
-							color="neutral"
-							onClick={async () => {
-								setLoading(true);
-								await applicationDataManager.saveApplicationData(data);
-								setTimeout(() => setLoading(false), 200);
-							}}
-							disabled={!isModified}
-						>
-							<SaveIcon />
-						</IconButton>
-					</Badge>
-				</SprocketTooltip>
-			)}
-		</>
+		<SprocketTooltip text="Save">
+			<Badge
+				size="sm"
+				invisible={!isModified}
+				anchorOrigin={{
+					vertical: 'top',
+					horizontal: 'right',
+				}}
+				badgeInset="14%"
+			>
+				<IconButton
+					id="toggle-mode"
+					size="sm"
+					variant="soft"
+					color="neutral"
+					onClick={save}
+					disabled={!isModified || loading}
+				>
+					{loading ? <CircularProgress /> : <SaveIcon />}
+				</IconButton>
+			</Badge>
+		</SprocketTooltip>
 	);
 }

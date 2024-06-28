@@ -1,7 +1,7 @@
 import { EventEmitter } from '@tauri-apps/api/shell';
 
 export type RequestEvent = {
-	timestamp: Date;
+	timestamp: number;
 	chronology: 'before' | 'after';
 	eventType: `${'pre' | 'post'}${'Service' | 'Endpoint' | 'Request'}Script` | 'request' | 'root';
 	associatedId?: string;
@@ -37,7 +37,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 		error?: string,
 	) {
 		const newRequestEvent: RequestEvent = {
-			timestamp: new Date(),
+			timestamp: new Date().getTime(),
 			chronology,
 			eventType,
 			error,

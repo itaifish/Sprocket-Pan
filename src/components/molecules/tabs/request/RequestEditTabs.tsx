@@ -5,24 +5,46 @@ import {
 	Environment,
 	QueryParams,
 } from '../../../../types/application-data/application-data';
-import { useState, useContext } from 'react';
+import { useState } from 'react';
 import { RequestBody } from './RequestBody';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable';
-import { applicationDataManager } from '../../../../managers/ApplicationDataManager';
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 import { RequestScripts } from './RequestScripts';
 import { environmentContextResolver } from '../../../../managers/EnvironmentContextResolver';
-import { ApplicationDataContext } from '../../../../managers/GlobalContextManager';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../../state/store';
+import { updateRequest } from '../../../../state/active/slice';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	const [tab, setTab] = useState<RequestTabType>('body');
-	const data = useContext(ApplicationDataContext);
-	const endpoint = data.endpoints[request.endpointId];
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(data, endpoint?.serviceId, request.id);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const settings = useSelector(selectSettings);
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
+	const endpoint = endpoints[request.endpointId];
+	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
+		{ environments, selectedEnvironment, services, settings, requests },
+		endpoint?.serviceId,
+		request.id,
+	);
+	const dispatch = useAppDispatch();
+	function update(values: Partial<EndpointRequest>) {
+		dispatch(updateRequest({ ...values, id: request.id }));
+	}
 	return (
 		<Tabs
 			aria-label="tabs"
@@ -46,9 +68,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			<TabPanel value="headers">
 				<EnvironmentEditableTable
 					environment={request.headers as Environment}
-					setNewEnvironment={(newEnvironment: Environment) =>
-						applicationDataManager.update('request', request.id, { headers: newEnvironment })
-					}
+					setNewEnvironment={(newEnvironment: Environment) => update({ headers: newEnvironment })}
 					varsEnv={varsEnv}
 				/>
 			</TabPanel>
@@ -56,7 +76,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<QueryParamEditableTable
 					queryParams={request.queryParams}
 					setNewQueryParams={(newQueryParams: QueryParams) => {
-						applicationDataManager.update('request', request.id, { queryParams: newQueryParams });
+						update({ queryParams: newQueryParams });
 					}}
 					varsEnv={varsEnv}
 				/>
@@ -67,9 +87,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			<TabPanel value="environment">
 				<EnvironmentEditableTable
 					environment={(request.environmentOverride ?? EMPTY_ENVIRONMENT) as Environment}
-					setNewEnvironment={(newEnvironment: Environment) =>
-						applicationDataManager.update('request', request.id, { environmentOverride: newEnvironment })
-					}
+					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
 					varsEnv={varsEnv}
 				/>
 			</TabPanel>

@@ -1,20 +1,22 @@
 import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
-import { useContext, useMemo, useState } from 'react';
-import { getValidIdsFromSearchTerm } from '../../../utils/search';
+import { useState } from 'react';
 import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { ApplicationDataContext, ServicesSearchContext } from '../../../managers/GlobalContextManager';
+import { useSelector } from 'react-redux';
+import { selectFilteredNestedIds } from '../../../state/tabs/selectors';
+import { selectEnvironments, selectServices } from '../../../state/active/selectors';
 
 export function NavigableServicesFileSystem() {
 	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
 
-	const applicationData = useContext(ApplicationDataContext);
-	const { searchText } = useContext(ServicesSearchContext);
-	const validIds = useMemo(() => {
-		return getValidIdsFromSearchTerm(searchText, applicationData);
-	}, [applicationData, searchText]);
+	const environments = useSelector(selectEnvironments);
+	const environmentIdsUnfiltered = Object.values(environments).map((env) => env.__id);
+	const services = useSelector(selectServices);
+	const serviceIdsUnfiltered = Object.values(services).map((srv) => srv.id);
+	const environmentIds = useSelector((state) => selectFilteredNestedIds(state, environmentIdsUnfiltered));
+	const serviceIds = useSelector((state) => selectFilteredNestedIds(state, serviceIdsUnfiltered));
 
 	return (
 		<>
@@ -31,15 +33,12 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!environmentsCollapsed &&
-							Object.values(applicationData.environments)
-								.filter((env) => validIds.has(env.__id))
-								.sort((a, b) => a.__name.localeCompare(b.__name))
-								.map((env, index, arr) => (
-									<div key={index}>
-										<EnvironmentFileSystem environment={env} />
-										{index != arr.length - 1 && <ListDivider />}
-									</div>
-								))}
+							environmentIds.map((environmentId, index) => (
+								<div key={environmentId}>
+									{index !== 0 && <ListDivider />}
+									<EnvironmentFileSystem environmentId={environmentId} />
+								</div>
+							))}
 					</List>
 				</ListItem>
 				<ListDivider />
@@ -55,15 +54,12 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!servicesCollapsed &&
-							Object.values(applicationData.services)
-								.filter((service) => validIds.has(service.id))
-								.sort((a, b) => a.name.localeCompare(b.name))
-								.map((service, index) => (
-									<div key={index}>
-										<ServiceFileSystem service={service} validIds={validIds} />
-										<ListDivider />
-									</div>
-								))}
+							serviceIds.map((serviceId) => (
+								<div key={serviceId}>
+									<ServiceFileSystem serviceId={serviceId} />
+									<ListDivider />
+								</div>
+							))}
 					</List>
 				</ListItem>
 			</List>

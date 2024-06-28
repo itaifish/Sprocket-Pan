@@ -11,23 +11,29 @@ interface EditableTextProps {
 	isTitle?: boolean;
 }
 
-export function EditableText(props: EditableTextProps & Partial<TypographyProps>) {
+export function EditableText({
+	text,
+	setText,
+	isValidFunc,
+	isTitle,
+	...props
+}: EditableTextProps & Partial<TypographyProps>) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [typingText, setTypingText] = useState(props.text);
+	const [typingText, setTypingText] = useState(text);
 	const [isValid, setIsValid] = useState(true);
 	useEffect(() => {
-		setIsValid(props.isValidFunc(typingText));
-	}, [typingText, props.isValidFunc]);
+		setIsValid(isValidFunc(typingText));
+	}, [typingText, isValidFunc]);
 	return isEditing ? (
 		<Input
-			size={props.isTitle ? 'lg' : 'md'}
+			size={isTitle ? 'lg' : 'md'}
 			sx={{
-				maxWidth: props.isTitle ? '100%' : '600px',
+				maxWidth: isTitle ? '100%' : '600px',
 				marginLeft: 'auto',
 				marginRight: 'auto',
-				width: props.isTitle ? '80%' : undefined,
+				width: isTitle ? '80%' : undefined,
 			}}
-			placeholder={props.isTitle ? `Enter your title here` : `${props.text}`}
+			placeholder={isTitle ? `Enter your title here` : `${text}`}
 			variant="outlined"
 			value={typingText}
 			onChange={(e) => setTypingText(e.target.value)}
@@ -45,7 +51,7 @@ export function EditableText(props: EditableTextProps & Partial<TypographyProps>
 					<IconButton
 						onClick={() => {
 							if (isValid) {
-								props.setText(typingText);
+								setText(typingText);
 								setIsEditing(false);
 							}
 						}}
@@ -58,16 +64,16 @@ export function EditableText(props: EditableTextProps & Partial<TypographyProps>
 		/>
 	) : (
 		<Typography
-			level={props.isTitle ? `h2` : 'body-md'}
+			level={isTitle ? `h2` : 'body-md'}
 			sx={{ textAlign: 'center', ml: 'auto', mr: 'auto' }}
 			onClick={() => {
-				setTypingText(props.text);
+				setTypingText(text);
 				setIsEditing(true);
 			}}
 			{...props}
 		>
 			{<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
-			{keepStringLengthReasonable(props.text, props.isTitle ? 100 : 30)}
+			{keepStringLengthReasonable(text, isTitle ? 100 : 30)}
 		</Typography>
 	);
 }

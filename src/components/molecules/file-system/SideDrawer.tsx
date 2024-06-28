@@ -1,8 +1,16 @@
-import { Box, BoxProps, Sheet } from '@mui/joy';
+import { Box, Sheet } from '@mui/joy';
+import { PropsWithChildren } from 'react';
 
-export function SideDrawer(props: BoxProps) {
+interface SideDrawerProps extends PropsWithChildren {
+	open: boolean;
+}
+
+export function SideDrawer({ open, children }: SideDrawerProps) {
+	if (!open) {
+		return null;
+	}
 	return (
-		<Box {...props} sx={[...(Array.isArray(props.sx) ? props.sx : [props.sx])]}>
+		<Box>
 			<Box
 				role="button"
 				sx={{
@@ -22,7 +30,7 @@ export function SideDrawer(props: BoxProps) {
 					overflowY: 'scroll',
 				}}
 			>
-				{props.children}
+				{children}
 			</Sheet>
 		</Box>
 	);

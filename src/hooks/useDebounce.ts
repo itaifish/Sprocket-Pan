@@ -10,7 +10,7 @@ interface UseDebounceProps<T> {
 
 export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 	const [localDataState, setLocalDataState] = useState<TData>(props.state);
-	const [typingBufferTimeout, setTypingBufferTimeout] = useState<null | NodeJS.Timeout>(null);
+	const [_typingBufferTimeout, setTypingBufferTimeout] = useState<null | NodeJS.Timeout>(null);
 	const debounceEventEmitter = useMemo(() => new EventEmitter<'sync' | 'desync'>(), []);
 
 	// When the state changes, set the local state to the state
@@ -25,14 +25,16 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 		if (localDataState == undefined) {
 			return;
 		}
-		clearTimeout(typingBufferTimeout ?? undefined);
 		const timeout = setTimeout(() => {
 			if (JSON.stringify(localDataState) !== JSON.stringify(props.state)) {
 				props.setState(localDataState);
 				debounceEventEmitter.emit('sync');
 			}
 		}, props.debounceOverride ?? Constants.debounceTimeMS);
-		setTypingBufferTimeout(timeout);
+		setTypingBufferTimeout((oldTimeout) => {
+			clearTimeout(oldTimeout ?? undefined);
+			return timeout;
+		});
 		debounceEventEmitter.emit('desync');
 	}, [localDataState]);
 

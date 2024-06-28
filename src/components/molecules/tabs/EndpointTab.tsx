@@ -1,31 +1,57 @@
-import { useContext } from 'react';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { EditableText } from '../../atoms/EditableText';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { RESTfulRequestVerbs } from '../../../types/application-data/application-data';
+import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
-import { tabsManager } from '../../../managers/TabsManager';
-import { ApplicationDataContext, TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { updateEndpoint } from '../../../state/active/slice';
+import { useAppDispatch } from '../../../state/store';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Constants } from '../../../utils/constants';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 
-export function EndpointTab(props: TabProps) {
-	const data = useContext(ApplicationDataContext);
-	const tabsContext = useContext(TabsContext);
-	const endpointData = data.endpoints[props.id];
-	const serviceData = data.services[endpointData.serviceId];
+export function EndpointTab({ id }: TabProps) {
+	const endpoints = useSelector(selectEndpoints);
+	const services = useSelector(selectServices);
+	const settings = useSelector(selectSettings);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const environments = useSelector(selectEnvironments);
+	const requests = useSelector(selectRequests);
+	const endpointData = endpoints[id];
+	const serviceData = services[endpointData.serviceId];
+	const dispatch = useAppDispatch();
+
+	const update = (values: Partial<Endpoint>) => {
+		dispatch(updateEndpoint({ ...values, id }));
+	};
+
+	const { localDataState, setLocalDataState } = useDebounce({
+		state: endpointData.url,
+		setState: (newUrl: string) => update({ url: newUrl }),
+		debounceOverride: Constants.debounceTimeMS,
+	});
 
 	if (endpointData == null || serviceData == null) {
 		return <>Endpoint data not found</>;
 	}
+
 	return (
 		<>
 			<EditableText
 				text={endpointData.name}
-				setText={(newText: string) => applicationDataManager.update('endpoint', props.id, { name: newText })}
+				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
 				isTitle
 			/>
@@ -38,7 +64,7 @@ export function EndpointTab(props: TabProps) {
 						variant="soft"
 						onChange={(_e, newVerb) => {
 							if (newVerb) {
-								applicationDataManager.update('endpoint', props.id, { verb: newVerb });
+								update({ verb: newVerb });
 							}
 						}}
 					>
@@ -53,14 +79,14 @@ export function EndpointTab(props: TabProps) {
 					<Input
 						startDecorator={environmentContextResolver.stringWithVarsToTypography(
 							serviceData.baseUrl || 'unknown',
-							data,
+							{ environments, selectedEnvironment, services, settings, requests },
 							serviceData.id,
 							undefined,
 							{ variant: 'outlined', color: 'primary' },
 						)}
-						value={endpointData.url}
+						value={localDataState}
 						onChange={(e) => {
-							applicationDataManager.update('endpoint', props.id, { url: e.target.value });
+							setLocalDataState(e.target.value);
 						}}
 						color="primary"
 					></Input>
@@ -73,7 +99,8 @@ export function EndpointTab(props: TabProps) {
 							disabled={!endpointData.defaultRequest}
 							onClick={() => {
 								if (endpointData.defaultRequest) {
-									tabsManager.selectTab(tabsContext, endpointData.defaultRequest, 'request');
+									dispatch(addTabs({ [endpointData.defaultRequest]: 'request' }));
+									dispatch(setSelectedTab(endpointData.defaultRequest));
 								}
 							}}
 						>

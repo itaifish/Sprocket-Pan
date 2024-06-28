@@ -17,7 +17,7 @@ import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
 import { QueryParamUtils } from '../utils/data-utils';
 
-type ParsedServiceApplicationData = {
+export type ParsedServiceApplicationData = {
 	services: Service[];
 	endpoints: Endpoint[];
 	requests: EndpointRequest[];
@@ -37,7 +37,8 @@ class SwaggerParseManager {
 		inputValue: string,
 	): Promise<ParsedServiceApplicationData> {
 		try {
-			const input = this.parseSwaggerInput(await this.loadSwaggerFile(inputType, inputValue));
+			const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
+			const input = this.parseSwaggerInput(loadedFile);
 			const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
 			if (!api) {
 				log.warn(`parser is: ${JSON.stringify(this.parser)}`);

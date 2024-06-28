@@ -7,8 +7,8 @@ import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { setWorkspace } from '../../state/workspaces/slice';
 import { useAppDispatch } from '../../state/store';
+import { loadAndSelectWorkspace } from '../../state/workspaces/thunks';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;
@@ -21,7 +21,7 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 		onDelete(workspace);
 	}
 	function openWorkspace() {
-		dispatch(setWorkspace(workspace));
+		dispatch(loadAndSelectWorkspace(workspace));
 	}
 	return (
 		<Card
@@ -58,7 +58,7 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 				<SprocketTooltip text="Last Modified">
 					<EditCalendarIcon></EditCalendarIcon>
 				</SprocketTooltip>
-				<Typography level="body-md"> {formatDate(workspace.lastModified)}</Typography>
+				<Typography level="body-md"> {formatDate(new Date(workspace.lastModified))}</Typography>
 			</CardContent>
 			<CardContent orientation="horizontal">
 				<SprocketTooltip text="Description">
