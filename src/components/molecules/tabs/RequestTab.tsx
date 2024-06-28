@@ -74,7 +74,7 @@ const defaultResponse: HistoricalEndpointResponse = {
 const getError = (error: string): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
 	errorRes.response.statusCode = 400;
-	errorRes.response.body = error;
+	errorRes.response.body = JSON.stringify({ error });
 	errorRes.response.bodyType = 'JSON';
 	return errorRes;
 };
@@ -296,7 +296,7 @@ export function RequestTab({ id }: TabProps) {
 						<Stack direction={'row'}>
 							<IconButton
 								aria-label="previousHistory"
-								disabled={response === 0 || response == 'error' || requestData.history.length === 0}
+								disabled={response === 0 || requestData.history.length === 0}
 								onClick={() => {
 									setResponse((currentResponse) => {
 										let newResponse: number;
@@ -319,7 +319,11 @@ export function RequestTab({ id }: TabProps) {
 								<EditableText
 									sx={{ display: 'flex', alignItems: 'center' }}
 									text={
-										response === 'latest' || response === 'error' ? `${requestData.history.length}` : `${response + 1}`
+										response === 'latest'
+											? `${requestData.history.length}/${requestData.history.length}`
+											: response === 'error'
+											? `error`
+											: `${response + 1}/${requestData.history.length}`
 									}
 									setText={(text: string) => {
 										const num = Number.parseInt(text);
@@ -330,7 +334,6 @@ export function RequestTab({ id }: TabProps) {
 										return !isNaN(num) && num >= 1 && num <= requestData.history.length;
 									}}
 								/>
-								/{requestData.history.length}
 							</Typography>
 							<IconButton
 								aria-label="nextHistory"
