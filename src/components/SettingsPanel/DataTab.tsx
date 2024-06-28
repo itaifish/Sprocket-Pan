@@ -2,7 +2,6 @@ import { Box, Button, Grid } from '@mui/joy';
 import { useState } from 'react';
 import { ApplicationDataManager } from '../../managers/ApplicationDataManager';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import invoke from '../../utils/invoke';
 import { appLocalDataDir } from '@tauri-apps/api/path';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
@@ -10,6 +9,7 @@ import SaveIcon from '@mui/icons-material/Save';
 import { useAppDispatch } from '../../state/store';
 import { deleteAllHistory } from '../../state/active/slice';
 import { saveActiveData } from '../../state/active/thunks/environments';
+import invoke from '../../utils/invoke';
 
 interface DataTabProps {
 	onQuit: () => void;

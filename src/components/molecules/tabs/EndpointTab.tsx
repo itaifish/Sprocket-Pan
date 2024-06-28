@@ -1,4 +1,3 @@
-import { useContext } from 'react';
 import { EditableText } from '../../atoms/EditableText';
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -7,24 +6,42 @@ import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { EndpointEditTabs } from './endpoint/EndpointEditTabs';
-import { tabsManager } from '../../../managers/TabsManager';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
-import { selectActiveState, selectEndpoints, selectServices } from '../../../state/active/selectors';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { Constants } from '../../../utils/constants';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 
 export function EndpointTab({ id }: TabProps) {
-	const tabsContext = useContext(TabsContext);
-	const data = useSelector(selectActiveState);
-	const endpointData = useSelector(selectEndpoints)[id];
-	const serviceData = useSelector(selectServices)[endpointData.serviceId];
+	const endpoints = useSelector(selectEndpoints);
+	const services = useSelector(selectServices);
+	const settings = useSelector(selectSettings);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const environments = useSelector(selectEnvironments);
+	const requests = useSelector(selectRequests);
+	const endpointData = endpoints[id];
+	const serviceData = services[endpointData.serviceId];
 	const dispatch = useAppDispatch();
 
-	function update(values: Partial<Endpoint>) {
+	const update = (values: Partial<Endpoint>) => {
 		dispatch(updateEndpoint({ ...values, id }));
-	}
+	};
+
+	const { localDataState, setLocalDataState } = useDebounce({
+		state: endpointData.url,
+		setState: (newUrl: string) => update({ url: newUrl }),
+		debounceOverride: Constants.debounceTimeMS,
+	});
 
 	if (endpointData == null || serviceData == null) {
 		return <>Endpoint data not found</>;
@@ -62,14 +79,14 @@ export function EndpointTab({ id }: TabProps) {
 					<Input
 						startDecorator={environmentContextResolver.stringWithVarsToTypography(
 							serviceData.baseUrl || 'unknown',
-							data,
+							{ environments, selectedEnvironment, services, settings, requests },
 							serviceData.id,
 							undefined,
 							{ variant: 'outlined', color: 'primary' },
 						)}
-						value={endpointData.url}
+						value={localDataState}
 						onChange={(e) => {
-							update({ url: e.target.value });
+							setLocalDataState(e.target.value);
 						}}
 						color="primary"
 					></Input>
@@ -82,7 +99,8 @@ export function EndpointTab({ id }: TabProps) {
 							disabled={!endpointData.defaultRequest}
 							onClick={() => {
 								if (endpointData.defaultRequest) {
-									tabsManager.selectTab(tabsContext, endpointData.defaultRequest, 'request');
+									dispatch(addTabs({ [endpointData.defaultRequest]: 'request' }));
+									dispatch(setSelectedTab(endpointData.defaultRequest));
 								}
 							}}
 						>

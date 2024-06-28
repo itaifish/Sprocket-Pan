@@ -35,7 +35,7 @@ pub fn show_in_explorer(path: String) {
                         "--type=method_call",
                         "/org/freedesktop/FileManager1",
                         "org.freedesktop.FileManager1.ShowItems",
-                        format!("array:string:\"file://{path}\"").as_str(),
+                        format!("array:string:file://{path}").as_str(),
                         "string:\"\"",
                     ])
                     .spawn()

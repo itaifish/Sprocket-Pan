@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from '@mui/joy';
 import invoke from '../../utils/invoke';
 import { selectDefaultTheme, selectZoomLevel } from '../../state/active/selectors';
+import { QueueModals } from '../molecules/QueueModals';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -25,5 +26,14 @@ export function Root() {
 		setMode(defaultTheme === 'system-default' ? 'system' : defaultTheme);
 	}, [defaultTheme]);
 
-	return <>{activeWorkspace == null ? <WorkspaceSelector /> : <Workspace />}</>;
+	if (activeWorkspace == null) {
+		return <WorkspaceSelector />;
+	}
+
+	return (
+		<>
+			<Workspace />
+			<QueueModals />
+		</>
+	);
 }

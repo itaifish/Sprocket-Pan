@@ -9,7 +9,6 @@ interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>>;
 }
 
-// TODO: what is up with this and why is the typing broken
 export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { state: RootState }>(
 	'active/addEnvironment',
 	async ({ data = {} }, thunk) => {
@@ -17,8 +16,16 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 			...createNewEnvironmentObject(),
 			...data,
 			__data: structuredClone(data.__data ?? []),
-		};
-		await thunk.dispatch(insertEnvironment(newEnvironment));
+		} as unknown as Environment;
+		thunk.dispatch(insertEnvironment(newEnvironment));
+	},
+);
+
+export const addNewEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
+	'active/addEnvironmentById',
+	async (id, thunk) => {
+		const environment = thunk.getState().active.environments[id];
+		thunk.dispatch(addNewEnvironment({ data: environment }));
 	},
 );
 
@@ -29,7 +36,7 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	async (_, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { lastModified, lastSaved, ...data } = thunk.getState().active;
-		await thunk.dispatch(setSavedNow());
+		thunk.dispatch(setSavedNow());
 		await applicationDataManager.saveData(data);
 	},
 );

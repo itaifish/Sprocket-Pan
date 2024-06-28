@@ -1,22 +1,47 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
-import { tabsManager } from '../../../managers/TabsManager';
 import { keepStringLengthReasonable } from '../../../utils/string';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
-import { Environment, iconFromTabType } from '../../../types/application-data/application-data';
-import { TabsContext } from '../../../managers/GlobalContextManager';
+import { ApplicationData, Environment, iconFromTabType } from '../../../types/application-data/application-data';
 import { useSelector } from 'react-redux';
-import { selectActiveState } from '../../../state/active/selectors';
+import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../../../state/active/selectors';
+import { selectTabsState } from '../../../state/tabs/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { closeTab, setSelectedTab } from '../../../state/tabs/slice';
+import { TabType } from '../../../types/state/state';
+
+function getMapFromTabType(
+	data: Pick<ApplicationData, 'environments' | 'requests' | 'services' | 'endpoints'>,
+	tabType: TabType,
+) {
+	switch (tabType) {
+		case 'environment':
+			return data.environments;
+		case 'request':
+			return data.requests;
+		case 'service':
+			return data.services;
+		case 'endpoint':
+		default:
+			return data.endpoints;
+	}
+}
 
 export function TabHeader() {
-	const tabsContext = useContext(TabsContext);
-	const data = useSelector(selectActiveState);
-	const { tabs } = tabsContext;
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
+	const { list, selected } = useSelector(selectTabsState);
 	const [disabled, setDisabled] = useState({ left: false, right: false });
+	const dispatch = useAppDispatch();
 	const getTabScroll = () => document.getElementById('tabScroll');
+	useEffect(() => {
+		document.getElementById(`tab_${selected}`)?.scrollIntoView();
+	}, [selected]);
 	const validateScroll = useCallback(() => {
 		const scrollEl = getTabScroll();
 		if (!scrollEl) {
@@ -43,16 +68,16 @@ export function TabHeader() {
 
 	useEffect(() => {
 		validateScroll();
-	}, [tabs]);
+	}, [list, selected]);
 	return (
 		<div style={{ width: '100%', height: '100%', overflowY: 'auto', maxHeight: '100vh' }}>
 			<Tabs
 				aria-label="tabs"
 				size="lg"
-				value={tabs.selected}
+				value={selected}
 				onChange={(_event, newValue) => {
 					const newTabId = newValue as string;
-					tabsManager.selectTab(tabsContext, newTabId, tabs.tabs[newTabId]);
+					dispatch(setSelectedTab(newTabId));
 				}}
 			>
 				<TabList
@@ -100,8 +125,8 @@ export function TabHeader() {
 							<ArrowLeftIcon />
 						</IconButton>
 					</div>
-					{Object.entries(tabs.tabs).map(([tabId, tabType], index) => {
-						const tabData = tabsManager.getMapFromTabType(data, tabType)[tabId];
+					{Object.entries(list).map(([tabId, tabType], index) => {
+						const tabData = getMapFromTabType({ environments, requests, services, endpoints }, tabType)[tabId];
 
 						return (
 							<Tab
@@ -117,7 +142,7 @@ export function TabHeader() {
 									<IconButton
 										color="danger"
 										onClick={(e) => {
-											tabsManager.closeTab(tabsContext, tabId);
+											dispatch(closeTab(tabId));
 											e.stopPropagation();
 										}}
 									>
@@ -143,7 +168,7 @@ export function TabHeader() {
 						</IconButton>
 					</div>
 				</TabList>
-				{Object.entries(tabs.tabs).map(([tabId, tabType], index) => (
+				{Object.entries(list).map(([tabId, tabType], index) => (
 					<TabPanel value={tabId} key={index}>
 						<Sheet sx={{ boxSizing: 'content-box' }}>
 							<TabContent id={tabId} type={tabType} />

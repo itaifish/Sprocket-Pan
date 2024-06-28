@@ -10,10 +10,8 @@ import {
 	Stack,
 	ListItemButton,
 } from '@mui/joy';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { AuditLog, TransformedAuditLog, auditLogManager } from '../../../../../managers/AuditLogManager';
-import { TabsContext } from '../../../../../managers/GlobalContextManager';
-import { tabsManager } from '../../../../../managers/TabsManager';
 import { iconFromTabType } from '../../../../../types/application-data/application-data';
 import { camelCaseToTitle, formatMilliseconds } from '../../../../../utils/string';
 import { SprocketTooltip } from '../../../../atoms/SprocketTooltip';
@@ -27,8 +25,17 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 import { CollapseExpandButton } from '../../../../atoms/buttons/CollapseExpandButton';
-import { selectActiveState } from '../../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../../../../../state/store';
+import { addTabs, setSelectedTab } from '../../../../../state/tabs/slice';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectServices,
+} from '../../../../../state/active/selectors';
+
+const indentationSize = 20;
 
 const eventStrIconsMap = {
 	Service: (
@@ -61,11 +68,16 @@ const eventStrIconsMap = {
 interface VisualEventLogInnerProps {
 	transformedLog: TransformedAuditLog;
 	requestId: string;
+	indentation: number;
 }
 
-function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerProps) {
-	const data = useSelector(selectActiveState);
-	const tabsContext = useContext(TabsContext);
+function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualEventLogInnerProps) {
+	const requests = useSelector(selectRequests);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const endpoints = useSelector(selectEndpoints);
+	const data = { requests, environments, services, endpoints };
+	const dispatch = useAppDispatch();
 	const [collapsed, setCollapsed] = useState(false);
 	const requestEvent = transformedLog.before;
 	const icons = (
@@ -83,12 +95,12 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
 	return (
 		<>
-			<Box>
+			<Box sx={{ pl: `${indentation}px` }}>
 				<ListItemDecorator>
 					<Box sx={{ mr: '5px' }}>{icons}</Box>
 					{requestEvent.eventType === 'request' &&
 						requestEvent.associatedId &&
-						data.requests[requestEvent.associatedId].name}{' '}
+						requests[requestEvent.associatedId].name}{' '}
 					{camelCaseToTitle(requestEvent.eventType)}
 					{transformedLog.innerEvents.length > 0 && (
 						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
@@ -100,9 +112,7 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 						<Typography level="body-sm">
 							<Stack direction="row" alignItems="center" gap={1}>
 								<TimerIcon />
-								{formatMilliseconds(
-									transformedLog.after.timestamp.getTime() - transformedLog.before.timestamp.getTime(),
-								)}
+								{formatMilliseconds(transformedLog.after.timestamp - transformedLog.before.timestamp)}
 							</Stack>
 							{dataType && requestEvent.associatedId && (
 								<Stack direction="row" alignItems={'center'} gap={1}>
@@ -118,7 +128,9 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 												size="sm"
 												color="primary"
 												onClick={() => {
-													tabsManager.selectTab(tabsContext, requestEvent.associatedId as string, dataType);
+													const id = requestEvent.associatedId as string;
+													dispatch(addTabs({ [id]: dataType }));
+													dispatch(setSelectedTab(id));
 												}}
 											>
 												<LaunchIcon />
@@ -144,11 +156,15 @@ function VisualEventLogInner({ transformedLog, requestId }: VisualEventLogInnerP
 				</ListItemButton>
 			</Box>
 			{transformedLog.innerEvents.length > 0 && !collapsed && (
-				<ListItem nested>
+				<ListItem nested sx={{ '--List-nestedInsetStart': '10rem' }}>
 					{transformedLog.innerEvents.map((event, index) => (
 						<Box key={index}>
 							<Divider sx={{ my: '10px' }} />
-							<VisualEventLogInner transformedLog={event} requestId={requestId} />
+							<VisualEventLogInner
+								transformedLog={event}
+								requestId={requestId}
+								indentation={indentation + indentationSize}
+							/>
 						</Box>
 					))}
 				</ListItem>
@@ -161,7 +177,9 @@ export function VisualEventLog(props: { auditLog: AuditLog; requestId: string })
 	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
 	return (
 		<List sx={{ '--List-nestedInsetStart': '10rem' }}>
-			{transformedLog && <VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} />}
+			{transformedLog && (
+				<VisualEventLogInner transformedLog={transformedLog} requestId={props.requestId} indentation={0} />
+			)}
 		</List>
 	);
 }

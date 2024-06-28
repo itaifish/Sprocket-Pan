@@ -7,6 +7,7 @@ import { useAppDispatch } from '../../../state/store';
 import { selectHasBeenModifiedSinceLastSave } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { saveActiveData } from '../../../state/active/thunks/environments';
+import { log } from '../../../utils/logging';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);
@@ -15,7 +16,12 @@ export function SaveButton() {
 
 	async function save() {
 		setLoading(true);
-		await dispatch(saveActiveData()).unwrap();
+		try {
+			await dispatch(saveActiveData()).unwrap();
+		} catch (e) {
+			const err = e as Error;
+			log.error(`${err.message}\n${err.stack}`);
+		}
 		setTimeout(() => setLoading(false), 500);
 	}
 

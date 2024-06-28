@@ -6,18 +6,31 @@ import { EnvironmentEditableTable } from '../../editing/EnvironmentEditableTable
 import { QueryParamEditableTable } from '../../editing/QueryParamEditableTable';
 import { EndpointScripts } from './EndpointScripts';
 import { environmentContextResolver } from '../../../../managers/EnvironmentContextResolver';
-import { selectActiveState } from '../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../../state/store';
 import { updateEndpoint } from '../../../../state/active/slice';
+import {
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../../state/active/selectors';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
 type EndpointTabType = (typeof endpointTabs)[number];
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const [tab, setTab] = useState<EndpointTabType>('headers');
-	const data = useSelector(selectActiveState);
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(data, endpoint.serviceId);
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const settings = useSelector(selectSettings);
+	const requests = useSelector(selectRequests);
+	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
+		{ services, selectedEnvironment, requests, environments, settings },
+		endpoint.serviceId,
+	);
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
 		dispatch(updateEndpoint({ ...values, id: endpoint.id }));

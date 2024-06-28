@@ -44,7 +44,7 @@ export type NetworkFetchRequest = {
 	url: string;
 	headers: SPHeaders;
 	body: Record<string, unknown>;
-	dateTime: Date;
+	dateTime: number;
 };
 
 export type HistoricalEndpointResponse = {
@@ -132,7 +132,7 @@ export type EndpointResponse = {
 	body: string;
 	bodyType: RawBodyType;
 	headers: Record<string, string>;
-	dateTime: Date;
+	dateTime: number;
 };
 
 export const iconFromTabType: Record<TabType, JSX.Element> = {

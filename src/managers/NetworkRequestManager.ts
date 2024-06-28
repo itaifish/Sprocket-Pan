@@ -149,7 +149,7 @@ class NetworkRequestManager {
 			method: endpoint.verb,
 			body: body ?? {},
 			headers: headers,
-			dateTime: new Date(),
+			dateTime: new Date().getTime(),
 		};
 		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
@@ -173,7 +173,7 @@ class NetworkRequestManager {
 			}, {}),
 			bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 			body: responseText,
-			dateTime: new Date(),
+			dateTime: new Date().getTime(),
 		};
 		return { response, networkRequest };
 	}
@@ -209,7 +209,7 @@ class NetworkRequestManager {
 			} catch (e) {
 				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 				const returnError = JSON.stringify({
-					...JSON.parse(errorStr),
+					errorStr,
 					errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
 				});
 				if (auditInfo) {

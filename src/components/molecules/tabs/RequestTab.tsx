@@ -21,7 +21,7 @@ import {
 	HistoricalEndpointResponse,
 	RESTfulRequestVerbs,
 } from '../../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import LabelIcon from '@mui/icons-material/Label';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
@@ -32,20 +32,28 @@ import { EditableText } from '../../atoms/EditableText';
 import { verbColors } from '../../../utils/style';
 import { RequestEditTabs } from './request/RequestEditTabs';
 import { queryParamsToString } from '../../../utils/application';
-import { tabsManager } from '../../../managers/TabsManager';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import { TabsContext } from '../../../managers/GlobalContextManager';
 import { TabProps } from './tab-props';
 import { SprocketTooltip } from '../../atoms/SprocketTooltip';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
 import { ResponseInfo } from './request/response/ResponseInfo';
 import { useSelector } from 'react-redux';
-import { selectActiveState, selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { updateEndpoint, updateRequest } from '../../../state/active/slice';
+import { deleteResponseFromHistory, updateEndpoint, updateRequest } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
+import { log } from '../../../utils/logging';
+import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import DeleteForever from '@mui/icons-material/DeleteForever';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -53,32 +61,36 @@ const defaultResponse: HistoricalEndpointResponse = {
 		body: 'View the response here',
 		bodyType: 'Text',
 		headers: structuredClone(EMPTY_HEADERS),
-		dateTime: new Date(),
+		dateTime: new Date().getTime(),
 	},
 	request: {
 		method: 'GET',
 		url: '',
 		headers: structuredClone(EMPTY_HEADERS),
 		body: {},
-		dateTime: new Date(),
+		dateTime: new Date().getTime(),
 	},
 };
 
 const getError = (error: string): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
 	errorRes.response.statusCode = 400;
-	errorRes.response.body = error;
+	errorRes.response.body = JSON.stringify({ error });
 	errorRes.response.bodyType = 'JSON';
 	return errorRes;
 };
 
 export function RequestTab({ id }: TabProps) {
-	const data = useSelector(selectActiveState);
-	const requestData = useSelector(selectRequests)[id];
-	const endpointData = useSelector(selectEndpoints)[requestData?.endpointId];
-	const serviceData = useSelector(selectServices)[endpointData?.serviceId];
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
+	const services = useSelector(selectServices);
+	const settings = useSelector(selectSettings);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const environments = useSelector(selectEnvironments);
+	const requestData = requests[id];
+	const endpointData = endpoints[requestData?.endpointId];
+	const serviceData = services[endpointData?.serviceId];
 	const theme = useTheme();
-	const tabsContext = useContext(TabsContext);
 	const { mode } = useColorScheme();
 	const [hidden, setHidden] = useState(false);
 	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
@@ -124,13 +136,17 @@ export function RequestTab({ id }: TabProps) {
 	async function sendRequest() {
 		setLoading(true);
 		try {
-			await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
-			setResponse('latest');
+			const result = await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
+			if (result != undefined) {
+				setLastError(getError(result));
+				setResponse('error');
+			} else {
+				setResponse('latest');
+			}
 		} catch (err) {
-			setLastError(getError(err));
+			setLastError(getError((err as any)?.message ?? 'An unknown error occured'));
+			log.error(err);
 			setResponse('error');
-		} finally {
-			setLoading(false);
 		}
 		setLoading(false);
 	}
@@ -180,7 +196,7 @@ export function RequestTab({ id }: TabProps) {
 					>
 						{environmentContextResolver.stringWithVarsToTypography(
 							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
-							data,
+							{ requests, services, settings, selectedEnvironment, environments },
 							serviceData.id,
 							requestData.id,
 						)}
@@ -224,7 +240,8 @@ export function RequestTab({ id }: TabProps) {
 									variant="outlined"
 									color="primary"
 									onClick={() => {
-										tabsManager.selectTab(tabsContext, requestData.endpointId, 'endpoint');
+										dispatch(addTabs({ [requestData.endpointId]: 'endpoint' }));
+										dispatch(setSelectedTab(requestData.endpointId));
 									}}
 								>
 									<EditIcon />
@@ -278,32 +295,38 @@ export function RequestTab({ id }: TabProps) {
 						</Typography>
 						<Divider />
 						<Stack direction={'row'}>
-							<IconButton
-								aria-label="previousHistory"
-								disabled={response === 0 || response == 'error' || requestData.history.length === 0}
-								onClick={() => {
-									setResponse((currentResponse) => {
-										let newResponse: number;
-										if (currentResponse === 0) {
-											newResponse = currentResponse;
-										} else if (currentResponse === 'error') {
-											newResponse = requestData.history.length - 1;
-										} else if (currentResponse === 'latest') {
-											newResponse = requestData.history.length - 2;
-										} else {
-											newResponse = currentResponse - 1;
-										}
-										return clamp(newResponse, 0, Math.max(requestData.history.length - 1, 0));
-									});
-								}}
-							>
-								<ArrowLeftIcon />
-							</IconButton>
+							<SprocketTooltip text={'Previous Response'}>
+								<IconButton
+									aria-label="previousHistory"
+									disabled={response === 0 || requestData.history.length === 0}
+									onClick={() => {
+										setResponse((currentResponse) => {
+											let newResponse: number;
+											if (currentResponse === 0) {
+												newResponse = currentResponse;
+											} else if (currentResponse === 'error') {
+												newResponse = requestData.history.length - 1;
+											} else if (currentResponse === 'latest') {
+												newResponse = requestData.history.length - 2;
+											} else {
+												newResponse = currentResponse - 1;
+											}
+											return clamp(newResponse, 0, Math.max(requestData.history.length - 1, 0));
+										});
+									}}
+								>
+									<ArrowLeftIcon />
+								</IconButton>
+							</SprocketTooltip>
 							<Typography sx={{ display: 'flex', alignItems: 'center' }}>
 								<EditableText
 									sx={{ display: 'flex', alignItems: 'center' }}
 									text={
-										response === 'latest' || response === 'error' ? `${requestData.history.length}` : `${response + 1}`
+										response === 'latest'
+											? `${requestData.history.length}/${requestData.history.length}`
+											: response === 'error'
+											? `error`
+											: `${response + 1}/${requestData.history.length}`
 									}
 									setText={(text: string) => {
 										const num = Number.parseInt(text);
@@ -314,26 +337,44 @@ export function RequestTab({ id }: TabProps) {
 										return !isNaN(num) && num >= 1 && num <= requestData.history.length;
 									}}
 								/>
-								/{requestData.history.length}
 							</Typography>
-							<IconButton
-								aria-label="nextHistory"
-								disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
-								onClick={() => {
-									setResponse((currentResponse) => {
-										if (currentResponse == 'error') {
-											return currentResponse;
+							<SprocketTooltip text={'Next Response'}>
+								<IconButton
+									aria-label="nextHistory"
+									disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
+									onClick={() => {
+										setResponse((currentResponse) => {
+											if (currentResponse == 'error') {
+												return currentResponse;
+											}
+											if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
+												return currentResponse;
+											} else {
+												return currentResponse + 1;
+											}
+										});
+									}}
+								>
+									<ArrowRightIcon />
+								</IconButton>
+							</SprocketTooltip>
+							<SprocketTooltip text={'Delete Response'}>
+								<IconButton
+									disabled={response == 'error' || requestData.history.length == 0}
+									onClick={() => {
+										if (response == 'error') {
+											return;
 										}
-										if (currentResponse === 'latest' || currentResponse === requestData.history.length - 1) {
-											return currentResponse;
-										} else {
-											return currentResponse + 1;
+										const index = response == 'latest' ? requestData.history.length - 1 : response;
+										dispatch(deleteResponseFromHistory({ requestId: id, historyIndex: index }));
+										if (response != 'latest' && requestData.history.length <= response) {
+											setResponse('latest');
 										}
-									});
-								}}
-							>
-								<ArrowRightIcon />
-							</IconButton>
+									}}
+								>
+									<DeleteForever />
+								</IconButton>
+							</SprocketTooltip>
 						</Stack>
 						<ResponseInfo response={responseData} requestId={id} />
 					</Card>

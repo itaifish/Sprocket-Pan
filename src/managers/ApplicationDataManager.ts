@@ -45,12 +45,14 @@ export class ApplicationDataManager {
 
 	private constructor() {}
 
-	public loadSwaggerFile(url: string) {
-		return swaggerParseManager.parseSwaggerFile('filePath', url);
+	public async loadSwaggerFile(url: string) {
+		const newService = await swaggerParseManager.parseSwaggerFile('filePath', url);
+		return newService;
 	}
 
 	public async saveData(data: ApplicationData) {
-		const paths = this.getWorkspacePath(data.workspaceMetadata?.fileName);
+		const selectedWorkspace = data.workspaceMetadata;
+		const paths = this.getWorkspacePath(selectedWorkspace?.fileName);
 		const saveData = async () => {
 			const doesExist = await exists(paths.data, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
 			if (!doesExist) {
@@ -95,9 +97,9 @@ export class ApplicationDataManager {
 				return 'doesNotExist' as const;
 			} else {
 				log.trace(`File already exists, updating...`);
-				const metadata = data.workspaceMetadata;
+				let metadata = data.workspaceMetadata;
 				if (metadata != null) {
-					metadata.lastModified = new Date().getTime();
+					metadata = { ...metadata, lastModified: new Date().getTime() };
 				}
 				await writeFile(
 					{
@@ -137,12 +139,16 @@ export class ApplicationDataManager {
 		const folderStatus = await this.createDataFolderIfNotExists();
 		const fileStatus = await this.createDataFilesIfNotExist(workspace);
 		if (folderStatus === 'alreadyExists' && fileStatus === 'alreadyExists') {
-			return await this.loadDataFromFile();
+			try {
+				return await this.loadDataFromFile(workspace);
+			} catch (e) {
+				log.error((e as Error).message);
+			}
 		}
 	}
 
-	private async loadDataFromFile() {
-		const paths = this.getWorkspacePath();
+	private async loadDataFromFile(workspace: WorkspaceMetadata | undefined) {
+		const paths = this.getWorkspacePath(workspace?.fileName);
 		const contentsTask = readTextFile(paths.data, {
 			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
 		});
@@ -199,7 +205,7 @@ export class ApplicationDataManager {
 		const pathsAndDataToCreate = [
 			{ path: paths.data, content: defaultApplicationData },
 			{ path: paths.history, content: [] },
-			{ path: paths.metadata, content: workspace },
+			{ path: paths.metadata, content: workspace ?? defaultApplicationData.workspaceMetadata },
 		];
 		const createIfNotExistsPromises = pathsAndDataToCreate.map(({ path, content }) => {
 			const action = async () => {

@@ -1,97 +1,50 @@
-import {
-	Dropdown,
-	IconButton,
-	ListItem,
-	ListItemButton,
-	ListItemDecorator,
-	ListSubheader,
-	Menu,
-	MenuButton,
-	MenuItem,
-} from '@mui/joy';
-import { EndpointRequest } from '../../../types/application-data/application-data';
-import { useContext, useState } from 'react';
+import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { keepStringLengthReasonable } from '../../../utils/string';
-import { tabsManager } from '../../../managers/TabsManager';
-import { MoreVert } from '@mui/icons-material';
-import FolderCopyIcon from '@mui/icons-material/FolderCopy';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import { AreYouSureModal } from '../../atoms/modals/AreYouSureModal';
-import { TabsContext } from '../../../managers/GlobalContextManager';
-import { selectActiveState } from '../../../state/active/selectors';
-import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
-import { addNewRequest, deleteRequest } from '../../../state/active/thunks/requests';
+import { addNewRequestFromId } from '../../../state/active/thunks/requests';
+import { addTabs, addToDeleteQueue, setSelectedTab } from '../../../state/tabs/slice';
+import { selectEndpointById, selectRequestsById } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
+import { selectIsActiveTab } from '../../../state/tabs/selectors';
+import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
 
-export function RequestFileSystem({ request }: { request: EndpointRequest }) {
-	const tabsContext = useContext(TabsContext);
-	const { tabs } = tabsContext;
-	const data = useSelector(selectActiveState);
-	const [menuOpen, setMenuOpen] = useState(false);
-	const endpointData = data.endpoints[request.endpointId];
-	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+interface RequestFileSystemProps {
+	requestId: string;
+}
+
+export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
+	const request = useSelector((state) => selectRequestsById(state, requestId));
+	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const isDefaultRequest = request.id === endpoint.defaultRequest;
+	const isSelected = useSelector((state) => selectIsActiveTab(state, request.id));
 	const dispatch = useAppDispatch();
 
-	const menuButton = (
-		<>
-			<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
-				<MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'plain', color: 'neutral' } }}>
-					<MoreVert />
-				</MenuButton>
-				<Menu>
-					<MenuItem
-						onClick={() => {
-							setMenuOpen(false);
-							dispatch(addNewRequest({ endpointId: request.endpointId, data: request }));
-						}}
-					>
-						<ListItemDecorator>
-							<IconButton aria-label="copy request" size="sm">
-								<FolderCopyIcon fontSize="small" />
-							</IconButton>
-							Duplicate
-						</ListItemDecorator>
-					</MenuItem>
-					<MenuItem
-						onClick={() => {
-							setMenuOpen(false);
-							setDeleteModalOpen(true);
-						}}
-					>
-						<ListItemDecorator>
-							<IconButton aria-label="delete request" size="sm">
-								<DeleteForeverIcon fontSize="small" />
-							</IconButton>
-							Delete
-						</ListItemDecorator>
-					</MenuItem>
-				</Menu>
-			</Dropdown>
-		</>
-	);
 	return (
-		<>
-			<ListItem nested endAction={<>{menuButton}</>}>
-				<ListItemButton
-					onClick={() => {
-						tabsManager.selectTab(tabsContext, request.id, 'request');
-					}}
-					selected={tabs.selected === request.id}
-					color={endpointData.defaultRequest === request.id ? 'primary' : 'neutral'}
-				>
-					<ListItemDecorator>
-						<TextSnippetIcon fontSize="small" />
-					</ListItemDecorator>
-					<ListSubheader>{keepStringLengthReasonable(request.name)}</ListSubheader>
-				</ListItemButton>
-			</ListItem>
-			<AreYouSureModal
-				action={`delete '${request.name}' and all its data`}
-				open={deleteModalOpen}
-				closeFunc={() => setDeleteModalOpen(false)}
-				actionFunc={() => dispatch(deleteRequest(request.id))}
-			/>
-		</>
+		<ListItem
+			nested
+			endAction={
+				<FileSystemDropdown
+					options={[
+						menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
+						menuOptionDelete(() => dispatch(addToDeleteQueue(request.id))),
+					]}
+				/>
+			}
+		>
+			<ListItemButton
+				onClick={() => {
+					dispatch(addTabs({ [request.id]: 'request' }));
+					dispatch(setSelectedTab(request.id));
+				}}
+				color={isDefaultRequest ? 'primary' : 'neutral'}
+				selected={isSelected}
+			>
+				<ListItemDecorator>
+					<TextSnippetIcon fontSize="small" />
+				</ListItemDecorator>
+				<ListSubheader>{keepStringLengthReasonable(request.name)}</ListSubheader>
+			</ListItemButton>
+		</ListItem>
 	);
 }

@@ -28,24 +28,37 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { AreYouSureModal } from '../../../../atoms/modals/AreYouSureModal';
 import { environmentContextResolver } from '../../../../../managers/EnvironmentContextResolver';
 import { RecentRequestListItem } from './RecentRequestListItem';
-import { selectActiveState, selectServices } from '../../../../../state/active/selectors';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectSelectedEnvironment,
+	selectServices,
+	selectSettings,
+} from '../../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../../../state/store';
 import { updateService } from '../../../../../state/active/slice';
+import { asEnv } from '../../../../../utils/types';
 
 export function ServiceTab({ id }: TabProps) {
 	const dispatch = useAppDispatch();
-	const data = useSelector(selectActiveState);
-	const serviceData = useSelector(selectServices)[id];
+	const environments = useSelector(selectEnvironments);
+	const services = useSelector(selectServices);
+	const selectedEnvironment = useSelector(selectSelectedEnvironment);
+	const settings = useSelector(selectSettings);
+	const requests = useSelector(selectRequests);
+	const endpoints = useSelector(selectEndpoints);
+	const serviceData = services[id];
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
 	const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
 	const recentRequests = useMemo(() => {
 		const allRequests = serviceData.endpointIds.flatMap((endpointId) => {
-			const endpoint = data.endpoints[endpointId];
+			const endpoint = endpoints[endpointId];
 			if (endpoint != null) {
 				return endpoint.requestIds
 					.map((requestId) => {
-						const request = data.requests[requestId];
+						const request = requests[requestId];
 						if (request == null) {
 							return null as unknown as EndpointRequest;
 						}
@@ -68,7 +81,7 @@ export function ServiceTab({ id }: TabProps) {
 				}
 				const req1MostRecent = req1.history[req1.history.length - 1].request.dateTime;
 				const req2MostRecent = req2.history[req2.history.length - 1].request.dateTime;
-				const difference = req2MostRecent.getTime() - req1MostRecent.getTime();
+				const difference = req2MostRecent - req1MostRecent;
 				if (difference != 0) {
 					return difference;
 				}
@@ -134,11 +147,11 @@ export function ServiceTab({ id }: TabProps) {
 								<SprocketTooltip text="Add New Service Environment">
 									<IconButton
 										onClick={() => {
-											const newEnv = {
+											const newEnv = asEnv({
 												__id: v4(),
 												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
 												__data: [],
-											} as unknown as Environment;
+											});
 											update({
 												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
 											});
@@ -217,7 +230,10 @@ export function ServiceTab({ id }: TabProps) {
 														},
 													})
 												}
-												varsEnv={environmentContextResolver.buildEnvironmentVariables(data, serviceData.id)}
+												varsEnv={environmentContextResolver.buildEnvironmentVariables(
+													{ services, selectedEnvironment, environments, requests, settings },
+													serviceData.id,
+												)}
 											/>
 										</Box>
 									))}

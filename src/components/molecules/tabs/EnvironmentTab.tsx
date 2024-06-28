@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
 import { Typography } from '@mui/joy';
+import { Box } from '@mui/joy';
 
 export function EnvironmentTab({ id }: TabProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -16,7 +17,7 @@ export function EnvironmentTab({ id }: TabProps) {
 	const dispatch = useAppDispatch();
 
 	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, __id: id }));
+		dispatch(updateEnvironment({ ...values, __id: id } as unknown as Environment));
 	}
 
 	if (environment == null) {
@@ -41,9 +42,9 @@ export function EnvironmentTab({ id }: TabProps) {
 				checked={selectedEnvironment === id}
 				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
 			/>
-			<div style={{ height: '60vh' }}>
+			<Box sx={{ height: '70vh', pb: '5vh' }}>
 				<EnvironmentEditableTable environment={environment} setNewEnvironment={update} fullSize={true} />
-			</div>
+			</Box>
 		</>
 	);
 }

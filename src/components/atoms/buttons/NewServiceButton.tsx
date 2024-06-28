@@ -3,8 +3,11 @@ import { open } from '@tauri-apps/api/dialog';
 import { IconButton } from '@mui/joy';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
+import { useAppDispatch } from '../../../state/store';
 
 export function NewServiceButton() {
+	const dispatch = useAppDispatch();
 	return (
 		<SprocketTooltip text="Import From File">
 			<IconButton
@@ -20,7 +23,8 @@ export function NewServiceButton() {
 						],
 					});
 					if (selectedUrl && typeof selectedUrl === 'string') {
-						await applicationDataManager.loadSwaggerFile(selectedUrl);
+						const loadedData = await applicationDataManager.loadSwaggerFile(selectedUrl);
+						dispatch(InjectLoadedData(loadedData));
 					}
 				}}
 			>

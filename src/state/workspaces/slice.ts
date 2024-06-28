@@ -24,11 +24,11 @@ export const workspacesSlice = createSlice({
 		setWorkspaces: (state, action: PayloadAction<WorkspaceMetadata[]>) => {
 			state.list = action.payload;
 		},
-		setWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
+		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
 			const workspace = action.payload;
 			state.selected = workspace;
 		},
 	},
 });
 
-export const { setWorkspaces, setWorkspace } = workspacesSlice.actions;
+export const { setWorkspaces, setSelectedWorkspace } = workspacesSlice.actions;

@@ -29,6 +29,11 @@ interface AddResponseToHistory {
 	auditLog?: AuditLog;
 }
 
+interface DeleteResponseFromHistory {
+	requestId: string;
+	historyIndex: number;
+}
+
 interface AddRequestToEndpoint {
 	requestId: string;
 	endpointId: string;
@@ -39,12 +44,15 @@ interface AddEndpointToService {
 	serviceId: string;
 }
 
-type Update<T> = Partial<Omit<T, 'id'>> & { id: string };
+type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
 	name: 'active',
 	initialState: initialState,
 	reducers: {
+		setFullState: (state, action: PayloadAction<ApplicationData>) => {
+			Object.assign(state, action.payload);
+		},
 		setSavedNow: (state) => {
 			state.lastSaved = new Date().getTime();
 		},
@@ -80,7 +88,7 @@ export const activeSlice = createSlice({
 			const environment = action.payload;
 			Object.assign(state.environments, { [environment.__id]: environment });
 		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment>>) => {
+		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
 			const { __id, ...updateFields } = action.payload;
 			if (__id == null) {
 				throw new Error('attempted to update environment with null __id');
@@ -149,10 +157,19 @@ export const activeSlice = createSlice({
 				reqToUpdate.history.shift();
 			}
 		},
+		deleteResponseFromHistory: (state, action: PayloadAction<DeleteResponseFromHistory>) => {
+			const { requestId, historyIndex } = action.payload;
+			const reqToUpdate = state.requests[requestId];
+			if (reqToUpdate == null) {
+				throw new Error('addResponseToHistory called with no associated request');
+			}
+			reqToUpdate.history.splice(historyIndex, 1);
+		},
 	},
 });
 
 export const {
+	setFullState,
 	setSavedNow,
 	setModifiedNow,
 	insertService,
@@ -175,4 +192,5 @@ export const {
 	removeEndpointFromService,
 	deleteAllHistory,
 	addResponseToHistory,
+	deleteResponseFromHistory,
 } = activeSlice.actions;
