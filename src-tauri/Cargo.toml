@@ -2,7 +2,7 @@
 name = "sprocket_pan"
 version = "1.0.0"
 description = "Sprocket Pan"
-authors = ["Itai Fish"]
+authors = ["Itai Fish", "KateLynn Pullen"]
 license = ""
 repository = ""
 edition = "2021"
