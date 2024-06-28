@@ -27,7 +27,8 @@ export const makeRequest = createAsyncThunk<
 	{ state: RootState }
 >('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {
 	const stateAccess = extractStateAccess(thunk);
-	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, auditLog);
+	const localAuditLog: AuditLog = [];
+	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, localAuditLog);
 	if (error) {
 		log.warn(error);
 		return error;
@@ -35,14 +36,15 @@ export const makeRequest = createAsyncThunk<
 	const { networkRequest, response } = await networkRequestManager.sendRequest(
 		requestId,
 		thunk.getState().active,
-		auditLog,
+		localAuditLog,
 	);
-	error = await networkRequestManager.runPostScripts(requestId, stateAccess, response, auditLog);
+	error = await networkRequestManager.runPostScripts(requestId, stateAccess, response, localAuditLog);
 	if (error) {
 		log.warn(error);
 		return error;
 	}
-	thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest }));
+	auditLog.push(...localAuditLog);
+	thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest, auditLog: localAuditLog }));
 });
 
 interface AddNewRequest {
