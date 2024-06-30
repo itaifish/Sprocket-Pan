@@ -1,3 +1,4 @@
+import ts from 'typescript';
 import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
 import { makeRequest } from '../state/active/thunks/requests';
 import { StateAccess } from '../state/types';
@@ -98,7 +99,8 @@ export function getScriptInjectionCode(
 					...previousValue,
 					[currentValue.scriptCallableName]: async () => {
 						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName}` : '';
-						const result = await evalAsync(`${currentValue.content}${addendum}`);
+						const jsScript = ts.transpile(currentValue.content);
+						const result = await evalAsync(`${jsScript}${addendum}`);
 						return result as unknown;
 					},
 				};
@@ -108,7 +110,7 @@ export function getScriptInjectionCode(
 	};
 
 	return {
-		...getRunnableScripts,
+		...getRunnableScripts(),
 		setEnvironmentVariable,
 		setQueryParam,
 		setQueryParams,
