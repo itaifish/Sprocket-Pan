@@ -1,8 +1,9 @@
 import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
 import { makeRequest } from '../state/active/thunks/requests';
 import { StateAccess } from '../state/types';
-import { EndpointResponse } from '../types/application-data/application-data';
+import { EndpointResponse, Script } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
+import { evalAsync } from '../utils/functions';
 import { AuditLog } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 
@@ -89,7 +90,25 @@ export function getScriptInjectionCode(
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
+	const getRunnableScripts = () => {
+		const data = getState();
+		return Object.values(data.scripts).reduce(
+			(previousValue: Record<string, () => Promise<unknown>>, currentValue: Script) => {
+				return {
+					...previousValue,
+					[currentValue.scriptCallableName]: async () => {
+						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName}` : '';
+						const result = await evalAsync(`${currentValue.content}${addendum}`);
+						return result as unknown;
+					},
+				};
+			},
+			{},
+		);
+	};
+
 	return {
+		...getRunnableScripts,
 		setEnvironmentVariable,
 		setQueryParam,
 		setQueryParams,

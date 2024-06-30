@@ -1,36 +1,23 @@
 import { Monaco } from '@monaco-editor/react';
+import { Script } from '../types/application-data/application-data';
 
-export const defaultEditorOptions = {
-	tabSize: 2,
-	insertSpaces: false,
-	wordWrap: 'bounded',
-	wrappingIndent: 'same',
-	wordWrapColumn: 9999,
-};
+function getSprocketPanType(scripts: Script[]) {
+	return `
+	type SprocketPan = {
+		setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
+		setQueryParam: (key: string, value: string) => void;
+		setQueryParams: (key: string, values: string[]) => void;
+		setHeader: (key: string, value: string) => void;
+		getEnvironment: () => Record<string, string>;
+		sendRequest: (requestId: string) => Promise<EndpointResponse>;
+		readonly data: ApplicationData;
+		readonly response: HistoricalEndpointResponse | null;
+		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
+		${scripts.map((script) => `${script.scriptCallableName}: () => Promise<unknown>;\n`)}
+	}`;
+}
 
-export function initMonaco(monaco: Monaco) {
-	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-		noSemanticValidation: false,
-		noSyntaxValidation: false,
-	});
-	monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-		diagnosticCodesToIgnore: [
-			1375, //'await' expressions are only allowed at the top level of a file when that file is a module
-			1378, //Top-level 'await' expressions are only allowed when the 'module' option is set to 'esnext' or 'system', and the 'target' option is set to 'es2017' or higher
-		],
-	});
-	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-		target: monaco.languages.typescript.ScriptTarget.ESNext,
-		module: monaco.languages.typescript.ModuleKind.ESNext,
-		allowNonTsExtensions: true,
-		alwaysStrict: true,
-		noUnusedParameters: true,
-		noImplicitUseStrict: true,
-		noUnusedLocals: true,
-	});
-
-	monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
-	monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
 	const injectedCode = `
 		type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 			id: string;
@@ -107,19 +94,43 @@ export function initMonaco(monaco: Monaco) {
 			headers: Record<string, string>;
 	};
 
-		type SprocketPan = {
-			setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
-			setQueryParam: (key: string, value: string) => void;
-			setQueryParams: (key: string, values: string[]) => void;
-			setHeader: (key: string, value: string) => void;
-			getEnvironment: () => Record<string, string>;
-			sendRequest: (requestId: string) => Promise<EndpointResponse>;
-			readonly data: ApplicationData;
-			readonly response: HistoricalEndpointResponse | null;
-			readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
-		}
+		${getSprocketPanType(scripts)}
 		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 		const sp = sprocketPan;
 			`;
 	monaco.languages.typescript.typescriptDefaults.addExtraLib(injectedCode, 'ts:types/types.d.ts');
+}
+
+export const defaultEditorOptions = {
+	tabSize: 2,
+	insertSpaces: false,
+	wordWrap: 'bounded',
+	wrappingIndent: 'same',
+	wordWrapColumn: 9999,
+};
+
+export function initMonaco(monaco: Monaco) {
+	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+		noSemanticValidation: false,
+		noSyntaxValidation: false,
+	});
+	monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+		diagnosticCodesToIgnore: [
+			1375, //'await' expressions are only allowed at the top level of a file when that file is a module
+			1378, //Top-level 'await' expressions are only allowed when the 'module' option is set to 'esnext' or 'system', and the 'target' option is set to 'es2017' or higher
+		],
+	});
+	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+		target: monaco.languages.typescript.ScriptTarget.ESNext,
+		module: monaco.languages.typescript.ModuleKind.ESNext,
+		allowNonTsExtensions: true,
+		alwaysStrict: true,
+		noUnusedParameters: true,
+		noImplicitUseStrict: true,
+		noUnusedLocals: true,
+	});
+
+	monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+	monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+	setMonacoInjectedTypeCode(monaco);
 }
