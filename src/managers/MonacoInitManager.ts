@@ -98,7 +98,12 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 		const sp = sprocketPan;
 			`;
-	monaco.languages.typescript.typescriptDefaults.addExtraLib(injectedCode, 'ts:types/types.d.ts');
+	monaco.languages.typescript.typescriptDefaults.setExtraLibs([
+		{
+			content: injectedCode,
+			filePath: 'ts:types/types.d.ts',
+		},
+	]);
 }
 
 export const defaultEditorOptions = {
@@ -107,7 +112,7 @@ export const defaultEditorOptions = {
 	wordWrap: 'bounded',
 	wrappingIndent: 'same',
 	wordWrapColumn: 9999,
-};
+} as const;
 
 export function initMonaco(monaco: Monaco) {
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({

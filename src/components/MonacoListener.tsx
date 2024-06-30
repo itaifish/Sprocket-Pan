@@ -7,6 +7,8 @@ import { selectScripts } from '../state/active/selectors';
 export function MonacoListener() {
 	const monaco = useMonaco();
 	const scripts = useSelector(selectScripts);
+
+	const scriptCalls = Object.values(scripts).map((x) => x.scriptCallableName);
 	useEffect(() => {
 		if (monaco) {
 			initMonaco(monaco);
@@ -17,7 +19,7 @@ export function MonacoListener() {
 		if (monaco) {
 			setMonacoInjectedTypeCode(monaco, Object.values(scripts));
 		}
-	}, [monaco, scripts]);
+	}, [monaco, scriptCalls]);
 
 	return <></>;
 }
