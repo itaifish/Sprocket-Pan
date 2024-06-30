@@ -6,6 +6,7 @@ import {
 	EndpointResponse,
 	Environment,
 	NetworkFetchRequest,
+	Script,
 	Service,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
@@ -175,6 +176,10 @@ export const activeSlice = createSlice({
 			}
 			reqToUpdate.history.splice(historyIndex, 1);
 		},
+		updateScript: (state, action: PayloadAction<Update<Script>>) => {
+			const { id, ...updateFields } = action.payload;
+			Object.assign(state.scripts[id], updateFields);
+		},
 		addScript: (state, action: PayloadAction<AddScript>) => {
 			const { scriptContent: script, scriptName } = action.payload;
 			const newId = v4();
@@ -213,4 +218,5 @@ export const {
 	deleteResponseFromHistory,
 	addScript,
 	deleteScript,
+	updateScript,
 } = activeSlice.actions;
