@@ -101,7 +101,6 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 	monaco.languages.typescript.typescriptDefaults.setExtraLibs([
 		{
 			content: injectedCode,
-			filePath: 'ts:types/types.d.ts',
 		},
 	]);
 }
