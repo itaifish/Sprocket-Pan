@@ -12,6 +12,7 @@ import {
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 import { v4 } from 'uuid';
+import { toValidFunctionName } from '../../utils/string';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
 	lastModified: number;
@@ -183,7 +184,13 @@ export const activeSlice = createSlice({
 		addScript: (state, action: PayloadAction<AddScript>) => {
 			const { scriptContent: script, scriptName } = action.payload;
 			const newId = v4();
-			state.scripts[newId] = { content: script, id: newId, name: scriptName };
+			state.scripts[newId] = {
+				content: script,
+				id: newId,
+				name: scriptName,
+				scriptCallableName: toValidFunctionName(scriptName),
+				returnVariableName: null,
+			};
 		},
 		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
 			delete state.scripts[action.payload.scriptId];

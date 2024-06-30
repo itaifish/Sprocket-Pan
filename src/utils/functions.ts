@@ -1,5 +1,5 @@
 import { Environment } from '../types/application-data/application-data';
-
+import { parseScript } from 'esprima';
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
  * @param asyncPromise An asynchronous promise to resolve
@@ -24,6 +24,28 @@ export const asyncCallWithTimeout = async <T>(asyncPromise: Promise<T>, timeLimi
 
 export const evalAsync = async (codeToEval: string) => {
 	return Object.getPrototypeOf(async function () {}).constructor(codeToEval)();
+};
+
+export const getVariablesFromCode = (codeToEval: string) => {
+	const scriptProgram = parseScript(codeToEval);
+	const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
+	scriptProgram.body.forEach((bodyElement) => {
+		if (bodyElement.type === 'VariableDeclaration') {
+			bodyElement.declarations.forEach((declaration) => {
+				if (declaration.id.type == 'Identifier') {
+					variables.push({ name: declaration.id.name, type: 'variable' });
+				}
+			});
+		} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
+			if (bodyElement.id?.name != null) {
+				variables.push({
+					name: bodyElement.id.name,
+					type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+				});
+			}
+		}
+	});
+	return variables;
 };
 
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {

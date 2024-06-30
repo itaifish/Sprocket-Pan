@@ -120,6 +120,8 @@ export type WorkspaceMetadata = {
 
 export type Script = {
 	name: string;
+	scriptCallableName: string;
+	returnVariableName: string | null;
 	id: string;
 	content: string;
 };
