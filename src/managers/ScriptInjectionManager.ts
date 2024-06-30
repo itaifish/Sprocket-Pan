@@ -98,7 +98,7 @@ export function getScriptInjectionCode(
 				return {
 					...previousValue,
 					[currentValue.scriptCallableName]: async () => {
-						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName}` : '';
+						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName};` : '';
 						const jsScript = ts.transpile(currentValue.content);
 						const result = await evalAsync(`${jsScript}${addendum}`);
 						return result as unknown;
