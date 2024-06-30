@@ -56,10 +56,10 @@ export function NavigableServicesFileSystem() {
 						}}
 					>
 						{!scriptsCollapsed &&
-							Object.keys(scripts).map((scriptName, index) => (
+							Object.keys(scripts).map((scriptId, index) => (
 								<Box key={index}>
 									{index !== 0 && <ListDivider />}
-									<ScriptFileSystem scriptName={scriptName} />
+									<ScriptFileSystem scriptId={scriptId} />
 								</Box>
 							))}
 					</List>

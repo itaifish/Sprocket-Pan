@@ -121,7 +121,7 @@ export function TabHeader() {
 					</div>
 					{Object.entries(list).map(([tabId, tabType], index) => {
 						const tabData = getMapFromTabType({ environments, requests, services, endpoints, scripts }, tabType)[tabId];
-						const name = tabType === 'script' ? tabId : (tabData as any).name ?? (tabData as Environment)?.__name ?? '';
+						const name = tabData.name ?? (tabData as Environment)?.__name ?? '';
 						return (
 							<Tab
 								indicatorPlacement="top"

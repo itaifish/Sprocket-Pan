@@ -10,6 +10,7 @@ import {
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
+import { v4 } from 'uuid';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
 	lastModified: number;
@@ -46,11 +47,11 @@ interface AddEndpointToService {
 
 interface AddScript {
 	scriptName: string;
-	script: string;
+	scriptContent: string;
 }
 
 interface DeleteScript {
-	scriptName: string;
+	scriptId: string;
 }
 
 type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
@@ -175,11 +176,12 @@ export const activeSlice = createSlice({
 			reqToUpdate.history.splice(historyIndex, 1);
 		},
 		addScript: (state, action: PayloadAction<AddScript>) => {
-			const { script, scriptName } = action.payload;
-			state.scripts[scriptName] = script;
+			const { scriptContent: script, scriptName } = action.payload;
+			const newId = v4();
+			state.scripts[newId] = { content: script, id: newId, name: scriptName };
 		},
 		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
-			delete state.scripts[action.payload.scriptName];
+			delete state.scripts[action.payload.scriptId];
 		},
 	},
 });

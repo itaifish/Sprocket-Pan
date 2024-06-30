@@ -23,7 +23,7 @@ export function NewButton() {
 		},
 		{
 			name: 'Script',
-			createFunc: () => addScript({ scriptName: `${generate()} ${generate()} ${generate()}`, script: '' }),
+			createFunc: () => addScript({ scriptName: `${generate()} ${generate()} ${generate()}`, scriptContent: '' }),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];

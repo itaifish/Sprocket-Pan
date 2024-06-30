@@ -118,12 +118,18 @@ export type WorkspaceMetadata = {
 	lastModified: number;
 };
 
+export type Script = {
+	name: string;
+	id: string;
+	content: string;
+};
+
 export type ApplicationData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
-	scripts: Record<string, string>;
+	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
 	workspaceMetadata?: WorkspaceMetadata;

@@ -10,12 +10,12 @@ import { keepStringLengthReasonable } from '../../../utils/string';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 
 interface ScriptFileSystemProps {
-	scriptName: string;
+	scriptId: string;
 }
 
-export function ScriptFileSystem({ scriptName }: ScriptFileSystemProps) {
-	const isSelected = useSelector((state) => selectIsActiveTab(state, scriptName));
-	const script = useSelector((state) => selectScript(state, scriptName));
+export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
+	const isSelected = useSelector((state) => selectIsActiveTab(state, scriptId));
+	const script = useSelector((state) => selectScript(state, scriptId));
 	const dispatch = useAppDispatch();
 
 	return (
@@ -25,23 +25,25 @@ export function ScriptFileSystem({ scriptName }: ScriptFileSystemProps) {
 				endAction={
 					<FileSystemDropdown
 						options={[
-							menuOptionDuplicate(() => dispatch(addScript({ scriptName: `${scriptName} (Copy)`, script }))),
-							menuOptionDelete(() => dispatch(deleteScript({ scriptName }))),
+							menuOptionDuplicate(() =>
+								dispatch(addScript({ scriptName: `${script.name} (Copy)`, scriptContent: script.content })),
+							),
+							menuOptionDelete(() => dispatch(deleteScript({ scriptId: script.id }))),
 						]}
 					/>
 				}
 			>
 				<ListItemButton
 					onClick={() => {
-						dispatch(addTabs({ [scriptName]: 'script' }));
-						dispatch(setSelectedTab(scriptName));
+						dispatch(addTabs({ [script.id]: 'script' }));
+						dispatch(setSelectedTab(script.id));
 					}}
 					selected={isSelected}
 				>
 					<ListItemDecorator>
 						<CodeIcon fontSize="small" />
 					</ListItemDecorator>
-					<ListSubheader>{keepStringLengthReasonable(scriptName)}</ListSubheader>
+					<ListSubheader>{keepStringLengthReasonable(script.name)}</ListSubheader>
 				</ListItemButton>
 			</ListItem>
 		</>
