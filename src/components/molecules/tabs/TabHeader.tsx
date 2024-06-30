@@ -7,27 +7,20 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { TabContent } from './TabContent';
 import { ApplicationData, Environment, iconFromTabType } from '../../../types/application-data/application-data';
 import { useSelector } from 'react-redux';
-import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../../../state/active/selectors';
+import {
+	selectEndpoints,
+	selectEnvironments,
+	selectRequests,
+	selectScripts,
+	selectServices,
+} from '../../../state/active/selectors';
 import { selectTabsState } from '../../../state/tabs/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { closeTab, setSelectedTab } from '../../../state/tabs/slice';
 import { TabType } from '../../../types/state/state';
 
-function getMapFromTabType(
-	data: Pick<ApplicationData, 'environments' | 'requests' | 'services' | 'endpoints'>,
-	tabType: TabType,
-) {
-	switch (tabType) {
-		case 'environment':
-			return data.environments;
-		case 'request':
-			return data.requests;
-		case 'service':
-			return data.services;
-		case 'endpoint':
-		default:
-			return data.endpoints;
-	}
+function getMapFromTabType(data: Pick<ApplicationData, `${TabType}s`>, tabType: TabType) {
+	return data[`${tabType}s`];
 }
 
 export function TabHeader() {
@@ -35,6 +28,7 @@ export function TabHeader() {
 	const services = useSelector(selectServices);
 	const requests = useSelector(selectRequests);
 	const endpoints = useSelector(selectEndpoints);
+	const scripts = useSelector(selectScripts);
 	const { list, selected } = useSelector(selectTabsState);
 	const [disabled, setDisabled] = useState({ left: false, right: false });
 	const dispatch = useAppDispatch();
@@ -126,8 +120,8 @@ export function TabHeader() {
 						</IconButton>
 					</div>
 					{Object.entries(list).map(([tabId, tabType], index) => {
-						const tabData = getMapFromTabType({ environments, requests, services, endpoints }, tabType)[tabId];
-
+						const tabData = getMapFromTabType({ environments, requests, services, endpoints, scripts }, tabType)[tabId];
+						const name = tabType === 'script' ? tabId : (tabData as any).name ?? (tabData as Environment)?.__name ?? '';
 						return (
 							<Tab
 								indicatorPlacement="top"
@@ -137,7 +131,7 @@ export function TabHeader() {
 								sx={{ minWidth: 230, flex: 'none', scrollSnapAlign: 'start' }}
 							>
 								<ListItemDecorator>{iconFromTabType[tabType]}</ListItemDecorator>
-								{keepStringLengthReasonable(tabData?.name ?? (tabData as Environment)?.__name ?? '', 20)}
+								{keepStringLengthReasonable(name, 20)}
 								<ListItemDecorator>
 									<IconButton
 										color="danger"

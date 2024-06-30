@@ -7,10 +7,27 @@ import { SprocketTooltip } from '../SprocketTooltip';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEnvironment } from '../../../state/active/thunks/environments';
 import { cloneService } from '../../../state/active/thunks/services';
+import { addScript } from '../../../state/active/slice';
+import { generate } from 'random-words';
+import CodeIcon from '@mui/icons-material/Code';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
+	const newEntities = [
+		{ name: 'Service', createFunc: () => cloneService({}), icon: <CreateNewFolderSharpIcon fontSize="small" /> },
+		{
+			name: 'Environment',
+			createFunc: () => addNewEnvironment({}),
+			icon: <TableChartIcon fontSize="small" />,
+		},
+		{
+			name: 'Script',
+			createFunc: () => addScript({ scriptName: `${generate()} ${generate()} ${generate()}`, script: '' }),
+			icon: <CodeIcon fontSize="small" />,
+		},
+	];
+
 	return (
 		<SprocketTooltip text="Create New" disabled={menuOpen}>
 			<Box>
@@ -22,32 +39,23 @@ export function NewButton() {
 						<AddBoxIcon />
 					</MenuButton>
 					<Menu>
-						<MenuItem
-							onClick={() => {
-								dispatch(cloneService({}));
-								setMenuOpen(false);
-							}}
-						>
-							<ListItemDecorator>
-								<IconButton aria-label="Create new service" size="sm">
-									<CreateNewFolderSharpIcon fontSize="small" />
-								</IconButton>
-								New Service
-							</ListItemDecorator>
-						</MenuItem>
-						<MenuItem
-							onClick={() => {
-								dispatch(addNewEnvironment({}));
-								setMenuOpen(false);
-							}}
-						>
-							<ListItemDecorator>
-								<IconButton aria-label="add new environment" size="sm">
-									<TableChartIcon fontSize="small" />
-								</IconButton>
-								New Environment
-							</ListItemDecorator>
-						</MenuItem>
+						{newEntities.map((entity, index) => (
+							<Box key={index}>
+								<MenuItem
+									onClick={() => {
+										dispatch(entity.createFunc());
+										setMenuOpen(false);
+									}}
+								>
+									<ListItemDecorator>
+										<IconButton aria-label={`Create New ${entity.name}`} size="sm">
+											{entity.icon}
+										</IconButton>
+										New {entity.name}
+									</ListItemDecorator>
+								</MenuItem>
+							</Box>
+						))}
 					</Menu>
 				</Dropdown>
 			</Box>

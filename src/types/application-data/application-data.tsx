@@ -5,6 +5,7 @@ import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { TabType } from '../state/state';
+import CodeIcon from '@mui/icons-material/Code';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -122,6 +123,7 @@ export type ApplicationData = {
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
+	scripts: Record<string, string>;
 	selectedEnvironment?: string;
 	settings: Settings;
 	workspaceMetadata?: WorkspaceMetadata;
@@ -140,4 +142,5 @@ export const iconFromTabType: Record<TabType, JSX.Element> = {
 	environment: <TableChartIcon />,
 	request: <TextSnippetIcon />,
 	service: <FolderOpenSharpIcon />,
+	script: <CodeIcon />,
 };

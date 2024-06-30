@@ -44,6 +44,15 @@ interface AddEndpointToService {
 	serviceId: string;
 }
 
+interface AddScript {
+	scriptName: string;
+	script: string;
+}
+
+interface DeleteScript {
+	scriptName: string;
+}
+
 type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
@@ -165,6 +174,13 @@ export const activeSlice = createSlice({
 			}
 			reqToUpdate.history.splice(historyIndex, 1);
 		},
+		addScript: (state, action: PayloadAction<AddScript>) => {
+			const { script, scriptName } = action.payload;
+			state.scripts[scriptName] = script;
+		},
+		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
+			delete state.scripts[action.payload.scriptName];
+		},
 	},
 });
 
@@ -193,4 +209,6 @@ export const {
 	deleteAllHistory,
 	addResponseToHistory,
 	deleteResponseFromHistory,
+	addScript,
+	deleteScript,
 } = activeSlice.actions;

@@ -15,6 +15,7 @@ export const defaultApplicationData: ApplicationData = {
 	endpoints: {},
 	requests: {},
 	environments: {},
+	scripts: {},
 	selectedEnvironment: undefined,
 	workspaceMetadata: undefined,
 	settings: {
