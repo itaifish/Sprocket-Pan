@@ -27,25 +27,29 @@ export const evalAsync = async (codeToEval: string) => {
 };
 
 export const getVariablesFromCode = (codeToEval: string) => {
-	const scriptProgram = parseScript(codeToEval);
-	const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
-	scriptProgram.body.forEach((bodyElement) => {
-		if (bodyElement.type === 'VariableDeclaration') {
-			bodyElement.declarations.forEach((declaration) => {
-				if (declaration.id.type == 'Identifier') {
-					variables.push({ name: declaration.id.name, type: 'variable' });
-				}
-			});
-		} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
-			if (bodyElement.id?.name != null) {
-				variables.push({
-					name: bodyElement.id.name,
-					type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+	try {
+		const scriptProgram = parseScript(codeToEval);
+		const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
+		scriptProgram.body.forEach((bodyElement) => {
+			if (bodyElement.type === 'VariableDeclaration') {
+				bodyElement.declarations.forEach((declaration) => {
+					if (declaration.id.type == 'Identifier') {
+						variables.push({ name: declaration.id.name, type: 'variable' });
+					}
 				});
+			} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
+				if (bodyElement.id?.name != null) {
+					variables.push({
+						name: bodyElement.id.name,
+						type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+					});
+				}
 			}
-		}
-	});
-	return variables;
+		});
+		return variables;
+	} catch (e) {
+		return [];
+	}
 };
 
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
