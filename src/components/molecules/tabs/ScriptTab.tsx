@@ -14,6 +14,7 @@ import {
 	Option,
 	Select,
 	Stack,
+	Typography,
 	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
@@ -50,6 +51,7 @@ export function ScriptTab({ id }: TabProps) {
 	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<any>(null);
 	const settings = useSelector(selectSettings);
+	const [scriptOutput, setScriptOutput] = useState('');
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.getAction('editor.action.formatDocument').run();
@@ -143,12 +145,15 @@ export function ScriptTab({ id }: TabProps) {
 						variant="outlined"
 						onClick={async () => {
 							setRunning(true);
-							const jsScript = ts.transpile(script.content);
-							const ranScript = evalAsync(jsScript);
+							const jsScript = ts.transpile(localDataState);
+							const addendum = script.returnVariableName ? `\nreturn ${script.returnVariableName};` : '';
+							const ranScript = evalAsync(`${jsScript}${addendum}`);
 							const timeoutPromise = new Promise<void>((resolve) => {
 								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
 							});
 							await Promise.all([asyncCallWithTimeout(ranScript, settings.timeoutDurationMS), timeoutPromise]);
+							const output = JSON.stringify(await ranScript);
+							setScriptOutput(output ?? '');
 							setRunning(false);
 						}}
 					>
@@ -172,7 +177,7 @@ export function ScriptTab({ id }: TabProps) {
 				<CopyToClipboardButton copied={copied} setCopied={setCopied} text={localDataState} />
 			</Stack>
 			<Editor
-				height={'75vh'}
+				height={'55vh'}
 				value={localDataState}
 				onChange={(value) => {
 					if (value != null) {
@@ -183,6 +188,16 @@ export function ScriptTab({ id }: TabProps) {
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 				options={defaultEditorOptions}
 				onMount={handleEditorDidMount}
+			/>
+			<Typography level="h3" sx={{ textAlign: 'center', my: '15px' }}>
+				Return Variable Output
+			</Typography>
+			<Editor
+				height={'15vh'}
+				value={scriptOutput}
+				language={'json'}
+				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 			/>
 		</>
 	);
