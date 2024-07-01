@@ -1,5 +1,7 @@
 import { Environment } from '../types/application-data/application-data';
 import { parseScript } from 'esprima';
+import { log } from './logging';
+import ts from 'typescript';
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
  * @param asyncPromise An asynchronous promise to resolve
@@ -28,26 +30,35 @@ export const evalAsync = async (codeToEval: string) => {
 
 export const getVariablesFromCode = (codeToEval: string) => {
 	try {
-		const scriptProgram = parseScript(codeToEval);
+		let javascriptCode = ts.transpile(codeToEval);
+		javascriptCode = `async function topLevelAsync() {
+			${javascriptCode}
+		}`;
+		const scriptProgram = parseScript(javascriptCode);
 		const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
-		scriptProgram.body.forEach((bodyElement) => {
-			if (bodyElement.type === 'VariableDeclaration') {
-				bodyElement.declarations.forEach((declaration) => {
-					if (declaration.id.type == 'Identifier') {
-						variables.push({ name: declaration.id.name, type: 'variable' });
-					}
-				});
-			} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
-				if (bodyElement.id?.name != null) {
-					variables.push({
-						name: bodyElement.id.name,
-						type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+		if (scriptProgram.body[0].type === 'FunctionDeclaration') {
+			scriptProgram.body[0].body.body.forEach((bodyElement) => {
+				if (bodyElement.type === 'VariableDeclaration') {
+					bodyElement.declarations.forEach((declaration) => {
+						if (declaration.id.type == 'Identifier') {
+							variables.push({ name: declaration.id.name, type: 'variable' });
+						}
 					});
+				} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
+					if (bodyElement.id?.name != null) {
+						variables.push({
+							name: bodyElement.id.name,
+							type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+						});
+					}
+				} else {
+					log.info(bodyElement.type);
 				}
-			}
-		});
+			});
+		}
 		return variables;
 	} catch (e) {
+		log.error(e);
 		return [];
 	}
 };
