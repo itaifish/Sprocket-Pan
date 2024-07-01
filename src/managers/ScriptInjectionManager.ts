@@ -5,7 +5,7 @@ import { StateAccess } from '../state/types';
 import { EndpointResponse, Script } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
 import { evalAsync } from '../utils/functions';
-import { AuditLog } from './AuditLogManager';
+import { AuditLog, auditLogManager } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 
 export function getScriptInjectionCode(
@@ -100,7 +100,13 @@ export function getScriptInjectionCode(
 					[currentValue.scriptCallableName]: async () => {
 						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName};` : '';
 						const jsScript = ts.transpile(currentValue.content);
+						if (auditLog) {
+							auditLogManager.addToAuditLog(auditLog, 'before', 'standaloneScript', currentValue.id);
+						}
 						const result = await evalAsync(`${jsScript}${addendum}`);
+						if (auditLog) {
+							auditLogManager.addToAuditLog(auditLog, 'after', 'standaloneScript', currentValue.id);
+						}
 						return result as unknown;
 					},
 				};

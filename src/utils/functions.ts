@@ -51,8 +51,6 @@ export const getVariablesFromCode = (codeToEval: string) => {
 							type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
 						});
 					}
-				} else {
-					log.info(bodyElement.type);
 				}
 			});
 		}

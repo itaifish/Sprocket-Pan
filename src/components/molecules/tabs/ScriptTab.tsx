@@ -4,7 +4,18 @@ import { useAppDispatch } from '../../../state/store';
 import { EditableText } from '../../atoms/EditableText';
 import { TabProps } from './tab-props';
 import { updateScript } from '../../../state/active/slice';
-import { FormControl, FormLabel, Input, ListItemDecorator, Option, Select, Stack, useColorScheme } from '@mui/joy';
+import {
+	Button,
+	CircularProgress,
+	FormControl,
+	FormLabel,
+	Input,
+	ListItemDecorator,
+	Option,
+	Select,
+	Stack,
+	useColorScheme,
+} from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useMemo } from 'react';
 import { Script } from '../../../types/application-data/application-data';
@@ -20,6 +31,8 @@ import { getVariablesFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -33,6 +46,7 @@ export function ScriptTab({ id }: TabProps) {
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [copied, setCopied] = useState(false);
+	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<any>(null);
 	const format = () => {
 		if (editorRef.current) {
@@ -120,6 +134,29 @@ export function ScriptTab({ id }: TabProps) {
 						))}
 					</Select>
 				</FormControl>
+				{!isRunning && (
+					<Button
+						color="success"
+						startDecorator={<PlayCircleIcon />}
+						variant="outlined"
+						onClick={async () => {
+							setRunning(true);
+						}}
+					>
+						Run
+					</Button>
+				)}
+				{isRunning && (
+					<Button
+						color="warning"
+						startDecorator={<CancelIcon />}
+						endDecorator={<CircularProgress />}
+						variant="outlined"
+						onClick={() => setRunning(false)}
+					>
+						Cancel
+					</Button>
+				)}
 			</Stack>
 			<Stack direction={'row'} spacing={2}>
 				<FormatIcon actionFunction={() => format()} />

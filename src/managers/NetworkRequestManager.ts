@@ -178,7 +178,7 @@ class NetworkRequestManager {
 		return { response, networkRequest };
 	}
 
-	private async runScript(
+	public async runScript(
 		script: string | undefined,
 		requestId: string,
 		stateAccess: StateAccess,

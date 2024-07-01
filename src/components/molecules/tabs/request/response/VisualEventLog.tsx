@@ -32,8 +32,10 @@ import {
 	selectEndpoints,
 	selectEnvironments,
 	selectRequests,
+	selectScripts,
 	selectServices,
 } from '../../../../../state/active/selectors';
+import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
 
 const indentationSize = 20;
 
@@ -63,6 +65,12 @@ const eventStrIconsMap = {
 		</>
 	),
 	root: <AnchorIcon />,
+	standaloneScript: (
+		<>
+			<SelfImprovementIcon />
+			{iconFromTabType.script}
+		</>
+	),
 };
 
 interface VisualEventLogInnerProps {
@@ -76,7 +84,8 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);
 	const endpoints = useSelector(selectEndpoints);
-	const data = { requests, environments, services, endpoints };
+	const scripts = useSelector(selectScripts);
+	const data = { requests, environments, services, endpoints, scripts };
 	const dispatch = useAppDispatch();
 	const [collapsed, setCollapsed] = useState(false);
 	const requestEvent = transformedLog.before;
