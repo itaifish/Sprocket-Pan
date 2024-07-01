@@ -34,7 +34,6 @@ export const getVariablesFromCode = (codeToEval: string) => {
 		javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
 		}`;
-		log.info(javascriptCode);
 		const scriptProgram = parseScript(javascriptCode, { tolerant: true });
 		const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
 		if (scriptProgram.body[0].type === 'FunctionDeclaration') {
