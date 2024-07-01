@@ -30,11 +30,12 @@ export const evalAsync = async (codeToEval: string) => {
 
 export const getVariablesFromCode = (codeToEval: string) => {
 	try {
-		let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ESNext });
+		let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
 		javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
 		}`;
-		const scriptProgram = parseScript(javascriptCode);
+		log.info(javascriptCode);
+		const scriptProgram = parseScript(javascriptCode, { tolerant: true });
 		const variables: { name: string; type: 'variable' | 'function' | 'class' }[] = [];
 		if (scriptProgram.body[0].type === 'FunctionDeclaration') {
 			scriptProgram.body[0].body.body.forEach((bodyElement) => {
