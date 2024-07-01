@@ -1,7 +1,7 @@
 import { Environment } from '../types/application-data/application-data';
 import { parseScript } from 'esprima';
 import { log } from './logging';
-import ts from 'typescript';
+import ts, { ScriptTarget } from 'typescript';
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
  * @param asyncPromise An asynchronous promise to resolve
@@ -30,7 +30,7 @@ export const evalAsync = async (codeToEval: string) => {
 
 export const getVariablesFromCode = (codeToEval: string) => {
 	try {
-		let javascriptCode = ts.transpile(codeToEval);
+		let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ESNext });
 		javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
 		}`;
