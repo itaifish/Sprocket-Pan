@@ -28,13 +28,13 @@ import { Constants } from '../../../utils/constants';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { asyncCallWithTimeout, evalAsync, getVariablesFromCode } from '../../../utils/functions';
+import { asyncCallWithTimeout, getVariablesFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import ts from 'typescript';
+import { scriptRunnerManager } from '../../../managers/ScriptRunnerManager';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -52,6 +52,7 @@ export function ScriptTab({ id }: TabProps) {
 	const editorRef = useRef<any>(null);
 	const settings = useSelector(selectSettings);
 	const [scriptOutput, setScriptOutput] = useState('');
+	const [scriptOutputLang, setScriptOutputLang] = useState<'json' | 'javascript'>('json');
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.getAction('editor.action.formatDocument').run();
@@ -145,15 +146,19 @@ export function ScriptTab({ id }: TabProps) {
 						variant="outlined"
 						onClick={async () => {
 							setRunning(true);
-							const jsScript = ts.transpile(localDataState);
-							const addendum = script.returnVariableName ? `\nreturn ${script.returnVariableName};` : '';
-							const ranScript = evalAsync(`${jsScript}${addendum}`);
+							const ranScript = scriptRunnerManager.runTypescriptContextless({ ...script, content: localDataState });
 							const timeoutPromise = new Promise<void>((resolve) => {
 								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
 							});
 							await Promise.all([asyncCallWithTimeout(ranScript, settings.timeoutDurationMS), timeoutPromise]);
-							const output = JSON.stringify(await ranScript);
-							setScriptOutput(output ?? '');
+							const output = await ranScript;
+							if (typeof output === 'function') {
+								setScriptOutputLang('javascript');
+								setScriptOutput(output.toString());
+							} else {
+								setScriptOutputLang('json');
+								setScriptOutput(JSON.stringify(output) ?? '');
+							}
 							setRunning(false);
 						}}
 					>
@@ -195,7 +200,7 @@ export function ScriptTab({ id }: TabProps) {
 			<Editor
 				height={'15vh'}
 				value={scriptOutput}
-				language={'json'}
+				language={scriptOutputLang}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 			/>

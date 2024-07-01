@@ -1,12 +1,11 @@
-import ts from 'typescript';
 import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
 import { makeRequest } from '../state/active/thunks/requests';
 import { StateAccess } from '../state/types';
 import { EndpointResponse, Script } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
-import { evalAsync } from '../utils/functions';
 import { AuditLog, auditLogManager } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
+import { scriptRunnerManager } from './ScriptRunnerManager';
 
 export function getScriptInjectionCode(
 	requestId: string,
@@ -98,12 +97,10 @@ export function getScriptInjectionCode(
 				return {
 					...previousValue,
 					[currentValue.scriptCallableName]: async () => {
-						const addendum = currentValue.returnVariableName ? `\nreturn ${currentValue.returnVariableName};` : '';
-						const jsScript = ts.transpile(currentValue.content);
 						if (auditLog) {
 							auditLogManager.addToAuditLog(auditLog, 'before', 'standaloneScript', currentValue.id);
 						}
-						const result = await evalAsync(`${jsScript}${addendum}`);
+						const result = await scriptRunnerManager.runTypescriptContextless(currentValue);
 						if (auditLog) {
 							auditLogManager.addToAuditLog(auditLog, 'after', 'standaloneScript', currentValue.id);
 						}
