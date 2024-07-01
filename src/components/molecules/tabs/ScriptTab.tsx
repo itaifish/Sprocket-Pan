@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { selectScript, selectScripts } from '../../../state/active/selectors';
+import { selectScript, selectScripts, selectSettings } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
 import { EditableText } from '../../atoms/EditableText';
 import { TabProps } from './tab-props';
@@ -27,12 +27,13 @@ import { Constants } from '../../../utils/constants';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { getVariablesFromCode } from '../../../utils/functions';
+import { asyncCallWithTimeout, evalAsync, getVariablesFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import ts from 'typescript';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -48,6 +49,7 @@ export function ScriptTab({ id }: TabProps) {
 	const [copied, setCopied] = useState(false);
 	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<any>(null);
+	const settings = useSelector(selectSettings);
 	const format = () => {
 		if (editorRef.current) {
 			editorRef.current.getAction('editor.action.formatDocument').run();
@@ -141,6 +143,13 @@ export function ScriptTab({ id }: TabProps) {
 						variant="outlined"
 						onClick={async () => {
 							setRunning(true);
+							const jsScript = ts.transpile(script.content);
+							const ranScript = evalAsync(jsScript);
+							const timeoutPromise = new Promise<void>((resolve) => {
+								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
+							});
+							await Promise.all([asyncCallWithTimeout(ranScript, settings.timeoutDurationMS), timeoutPromise]);
+							setRunning(false);
 						}}
 					>
 						Run

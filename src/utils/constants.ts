@@ -4,4 +4,5 @@ export const Constants = {
 	longEditTimeMS: 2_500,
 	scriptsTimeoutMS: 5_000,
 	networkRequestTimeoutMS: 10_000,
+	minimumScriptRunTimeMS: 400,
 };
