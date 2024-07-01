@@ -4,6 +4,7 @@ import { RootState } from '../../store';
 import { insertService, deleteEndpointFromState, deleteServiceFromState } from '../slice';
 import { createNewServiceObject } from './util';
 import { addNewEndpoint } from './endpoints';
+import { closeTab } from '../../tabs/slice';
 
 interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
@@ -42,8 +43,10 @@ export const deleteService = createAsyncThunk<void, string, { state: RootState }
 			throw new Error('attempted to delete service that does not exist');
 		}
 		for (const endpointId in service.endpointIds) {
+			thunk.dispatch(closeTab(endpointId));
 			thunk.dispatch(deleteEndpointFromState(endpointId));
 		}
+		thunk.dispatch(closeTab(service.id));
 		thunk.dispatch(deleteServiceFromState(service.id));
 	},
 );

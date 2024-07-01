@@ -12,6 +12,7 @@ import {
 import { EndpointRequest } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
+import { closeTab } from '../../tabs/slice';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -72,6 +73,7 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteRequest',
 	async (id, thunk) => {
+		thunk.dispatch(closeTab(id));
 		thunk.dispatch(removeRequestFromEndpoint(id));
 		thunk.dispatch(deleteRequestFromState(id));
 	},

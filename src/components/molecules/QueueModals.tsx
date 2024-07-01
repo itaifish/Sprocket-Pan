@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { selectNextForDeletion } from '../../state/tabs/selectors';
-import { deleteEnvironment } from '../../state/active/thunks/environments';
+import { deleteEnvironmentById } from '../../state/active/thunks/environments';
 import { AreYouSureModal } from '../atoms/modals/AreYouSureModal';
 import { useAppDispatch } from '../../state/store';
 import { removeFromDeleteQueue } from '../../state/tabs/slice';
@@ -9,10 +9,11 @@ import { ApplicationData } from '../../types/application-data/application-data';
 import { deleteEndpoint } from '../../state/active/thunks/endpoints';
 import { deleteService } from '../../state/active/thunks/services';
 import { deleteRequest } from '../../state/active/thunks/requests';
+import { deleteScriptById } from '../../state/active/thunks/scripts';
 
 function getAttributesAndSelectorsForId(
 	id: string,
-	state: Pick<ApplicationData, 'endpoints' | 'environments' | 'requests' | 'services'>,
+	state: Pick<ApplicationData, 'endpoints' | 'environments' | 'requests' | 'services' | 'scripts'>,
 ) {
 	// this is messy, there's better ways to do this but I'd like to bring env in alignment with the others first
 	if (state.endpoints[id]) {
@@ -36,10 +37,17 @@ function getAttributesAndSelectorsForId(
 		};
 	}
 
+	if (state.scripts[id]) {
+		return {
+			name: state.scripts[id].name,
+			func: deleteScriptById(id),
+		};
+	}
+
 	if (state.environments[id]) {
 		return {
 			name: state.environments[id].__name,
-			func: deleteEnvironment(id),
+			func: deleteEnvironmentById(id),
 		};
 	}
 

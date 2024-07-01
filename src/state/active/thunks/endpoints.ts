@@ -10,6 +10,7 @@ import {
 } from '../slice';
 import { createNewEndpointObject } from './util';
 import { addNewRequest } from './requests';
+import { closeTab } from '../../tabs/slice';
 
 interface AddNewEndpoint {
 	data?: Partial<Omit<Endpoint, 'id' | 'serviceId'>>;
@@ -47,8 +48,10 @@ export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState 
 			throw new Error('attempted to delete endpoint that does not exist');
 		}
 		for (const requestId in endpoint.requestIds) {
+			thunk.dispatch(closeTab(requestId));
 			thunk.dispatch(deleteRequestFromState(requestId));
 		}
+		thunk.dispatch(closeTab(endpoint.id));
 		thunk.dispatch(removeEndpointFromService(endpoint.id));
 		thunk.dispatch(deleteEndpointFromState(endpoint.id));
 	},
