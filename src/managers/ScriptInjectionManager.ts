@@ -8,22 +8,25 @@ import { environmentContextResolver } from './EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 
 export function getScriptInjectionCode(
-	requestId: string,
+	requestId: string | null,
 	{ getState, dispatch }: StateAccess,
 	response?: EndpointResponse,
 	auditLog?: AuditLog,
 ) {
-	const getRequest = () => getState().requests[requestId];
+	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
 
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
 		const data = getState();
 		const request = getRequest();
+		if (request == null) {
+			level = 'global';
+		}
 		if (level === 'request') {
-			const newEnv = structuredClone(request.environmentOverride);
+			const newEnv = structuredClone(request!.environmentOverride);
 			EnvironmentUtils.set(newEnv, key, value);
-			dispatch(updateRequest({ id: request.id, environmentOverride: newEnv }));
+			dispatch(updateRequest({ id: request!.id, environmentOverride: newEnv }));
 		} else if (level === 'service') {
-			const endpoint = data.endpoints[request.endpointId];
+			const endpoint = data.endpoints[request!.endpointId];
 			if (!endpoint) {
 				return;
 			}
@@ -57,6 +60,9 @@ export function getScriptInjectionCode(
 
 	const setQueryParam = (key: string, value: string) => {
 		const request = getRequest();
+		if (request == null) {
+			return;
+		}
 		const newQueryParams = structuredClone(request.queryParams);
 		QueryParamUtils.add(newQueryParams, key, value);
 		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
@@ -64,6 +70,9 @@ export function getScriptInjectionCode(
 
 	const setQueryParams = (key: string, values: string[]) => {
 		const request = getRequest();
+		if (request == null) {
+			return;
+		}
 		const newQueryParams = structuredClone(request.queryParams);
 		QueryParamUtils.set(newQueryParams, key, values);
 		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
@@ -71,6 +80,9 @@ export function getScriptInjectionCode(
 
 	const setHeader = (key: string, value: string) => {
 		const request = getRequest();
+		if (request == null) {
+			return;
+		}
 		const newHeaders = structuredClone(request.headers);
 		HeaderUtils.set(newHeaders, key, value);
 		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
@@ -79,6 +91,9 @@ export function getScriptInjectionCode(
 	const getEnvironment = () => {
 		const data = getState();
 		const request = getRequest();
+		if (request == null) {
+			return environmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
+		}
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
 		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
@@ -124,10 +139,13 @@ export function getScriptInjectionCode(
 			return structuredClone(getState());
 		},
 		get activeRequest() {
-			return structuredClone(getState().requests[requestId]);
+			return requestId != null ? structuredClone(getState().requests[requestId]) : null;
 		},
 		get response() {
 			const request = getRequest();
+			if (request == null) {
+				return null;
+			}
 			const latestResponse =
 				response ?? (request.history && request.history.length > 0)
 					? request.history[request.history.length - 1]

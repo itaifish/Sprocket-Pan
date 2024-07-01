@@ -1,6 +1,10 @@
 import ts from 'typescript';
-import { Script } from '../types/application-data/application-data';
-import { evalAsync } from '../utils/functions';
+import { EndpointResponse, Script } from '../types/application-data/application-data';
+import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
+import { StateAccess } from '../state/types';
+import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
+import { getScriptInjectionCode } from './ScriptInjectionManager';
+import { Constants } from '../utils/constants';
 
 class ScriptRunnerManager {
 	public static readonly INSTANCE = new ScriptRunnerManager();
@@ -12,6 +16,59 @@ class ScriptRunnerManager {
 		const addendum = script.returnVariableName ? `\nreturn ${script.returnVariableName};` : '';
 		const ranScript = await evalAsync(`${jsScript}${addendum}`);
 		return ranScript as TReturnType;
+	}
+
+	/**
+	 * Dont' call this function directly
+	 * Call the thunk `runScript` so you have the stateAccess context
+	 */
+	public async runTypescriptWithSprocketContext<TReturnType>(
+		script: string | Script,
+		requestId: string | null,
+		stateAccess: StateAccess,
+		response?: EndpointResponse | undefined,
+		auditInfo?: {
+			log: AuditLog;
+			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
+			associatedId: string;
+		},
+	) {
+		try {
+			const runnableScript: Script =
+				typeof script === 'string'
+					? { scriptCallableName: '_', content: script, id: '', returnVariableName: null, name: 'wrapper' }
+					: script;
+			if (auditInfo) {
+				auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
+			}
+			const sprocketPan = getScriptInjectionCode(requestId, stateAccess, response, auditInfo?.log);
+			const _this = globalThis as any;
+			_this.sp = sprocketPan;
+			_this.sprocketPan = sprocketPan;
+			_this.fetch = fetch;
+			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
+			const result = await asyncCallWithTimeout<TReturnType>(scriptTask, Constants.scriptsTimeoutMS);
+			if (auditInfo) {
+				auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
+			}
+			return result;
+		} catch (e) {
+			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
+			const returnError = JSON.stringify({
+				errorStr,
+				errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
+			});
+			if (auditInfo) {
+				auditLogManager.addToAuditLog(
+					auditInfo.log,
+					'after',
+					auditInfo.scriptType,
+					auditInfo.associatedId,
+					returnError,
+				);
+			}
+			return { error: returnError };
+		}
 	}
 }
 

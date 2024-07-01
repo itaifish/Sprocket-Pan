@@ -34,7 +34,7 @@ import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { scriptRunnerManager } from '../../../managers/ScriptRunnerManager';
+import { runScript } from '../../../state/active/thunks/requests';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -146,7 +146,8 @@ export function ScriptTab({ id }: TabProps) {
 						variant="outlined"
 						onClick={async () => {
 							setRunning(true);
-							const ranScript = scriptRunnerManager.runTypescriptContextless({ ...script, content: localDataState });
+							const scriptToRun = { ...script, content: localDataState };
+							const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
 							const timeoutPromise = new Promise<void>((resolve) => {
 								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
 							});
@@ -154,7 +155,7 @@ export function ScriptTab({ id }: TabProps) {
 							const output = await ranScript;
 							if (typeof output === 'function') {
 								setScriptOutputLang('javascript');
-								setScriptOutput(output.toString());
+								setScriptOutput((output as any).toString());
 							} else {
 								setScriptOutputLang('json');
 								setScriptOutput(JSON.stringify(output) ?? '');
