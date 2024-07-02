@@ -40,6 +40,7 @@
 		"react-redux": "^9.1.0",
 		"tauri-plugin-log-api": "https://github.com/tauri-apps/tauri-plugin-log",
 		"tauri-plugin-window-state-api": "https://github.com/tauri-apps/tauri-plugin-window-state#v1",
+		"ts-morph": "^23.0.0",
 		"uuid": "^9.0.1",
 		"xml2js": "^0.6.2"
 	},

@@ -80,7 +80,8 @@ export function ScriptTab({ id }: TabProps) {
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 
 	const scriptVariables = useMemo(() => {
-		return getVariablesFromCode(script.content);
+		const variables = getVariablesFromCode(script.content);
+		return new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const));
 	}, [script.content]);
 
 	return (
@@ -114,11 +115,22 @@ export function ScriptTab({ id }: TabProps) {
 						size="md"
 						variant="outlined"
 						onChange={(_event: React.SyntheticEvent | null, newValue: string | null) => {
-							update({ returnVariableName: newValue });
+							const variable = scriptVariables.get(newValue as string);
+							if (variable) {
+								update({
+									returnVariableName: newValue,
+									returnVariableType: {
+										isClass: variable.type === 'class',
+										typeText: variable.typescriptTypeString,
+									},
+								});
+							} else {
+								update({ returnVariableName: newValue });
+							}
 						}}
 						value={script.returnVariableName}
 						renderValue={(option) => {
-							const variable = scriptVariables.find((x) => x.name === option?.value);
+							const variable = scriptVariables.get(option?.value as string);
 							if (variable == null) {
 								return option?.label;
 							}
@@ -131,7 +143,7 @@ export function ScriptTab({ id }: TabProps) {
 						}}
 					>
 						<Option value={null}>No return</Option>
-						{scriptVariables.map((variable, index) => (
+						{[...scriptVariables.values()].map((variable, index) => (
 							<Option key={index} value={variable.name}>
 								<ListItemDecorator>{iconMap[variable.type]} </ListItemDecorator>
 								{variable.name}

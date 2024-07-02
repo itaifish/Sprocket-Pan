@@ -122,6 +122,10 @@ export type Script = {
 	name: string;
 	scriptCallableName: string;
 	returnVariableName: string | null;
+	returnVariableType?: {
+		isClass?: boolean;
+		typeText: string;
+	};
 	id: string;
 	content: string;
 };

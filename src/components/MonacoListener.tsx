@@ -8,7 +8,9 @@ export function MonacoListener() {
 	const monaco = useMonaco();
 	const scripts = useSelector(selectScripts);
 
-	const scriptCalls = Object.values(scripts).map((x) => x.scriptCallableName);
+	const scriptCalls = Object.values(scripts).map(
+		(x) => `${x.scriptCallableName}${JSON.stringify(x.returnVariableType)}`,
+	);
 	useEffect(() => {
 		if (monaco) {
 			initMonaco(monaco);
@@ -19,7 +21,7 @@ export function MonacoListener() {
 		if (monaco) {
 			setMonacoInjectedTypeCode(monaco, Object.values(scripts));
 		}
-	}, [monaco, scriptCalls]);
+	}, [monaco, scripts]);
 
 	return <></>;
 }

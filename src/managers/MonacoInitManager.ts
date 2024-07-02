@@ -1,8 +1,16 @@
 import { Monaco } from '@monaco-editor/react';
 import { Script } from '../types/application-data/application-data';
+import { log } from '../utils/logging';
 
 function getSprocketPanType(scripts: Script[]) {
-	return `
+	const classes = scripts.filter((script) => script.returnVariableType?.isClass);
+	const type = `
+	${classes.reduce(
+		(runningClassTypeOutput, classType) => `
+		${runningClassTypeOutput}
+	${classType.returnVariableType?.typeText}`,
+		'',
+	)}
 	type SprocketPan = {
 		setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
 		setQueryParam: (key: string, value: string) => void;
@@ -13,8 +21,21 @@ function getSprocketPanType(scripts: Script[]) {
 		readonly data: ApplicationData;
 		readonly response: HistoricalEndpointResponse | null;
 		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
-		${scripts.map((script) => `${script.scriptCallableName}: () => Promise<unknown>;\n`)}
+		${scripts.reduce(
+			(runningScriptOutput, script) =>
+				`${runningScriptOutput}
+		${script.scriptCallableName}: () => Promise<${
+			script.returnVariableType
+				? script.returnVariableType.isClass
+					? script.returnVariableName
+					: script.returnVariableType.typeText
+				: 'void'
+		}>;`,
+			'',
+		)}
 	}`;
+	log.info(type);
+	return type;
 }
 
 export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
@@ -98,6 +119,7 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 		const sp = sprocketPan;
 			`;
+	log.info('Updating monaco code');
 	monaco.languages.typescript.typescriptDefaults.setExtraLibs([
 		{
 			content: injectedCode,
