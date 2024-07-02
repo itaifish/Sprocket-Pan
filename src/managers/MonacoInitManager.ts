@@ -40,6 +40,8 @@ function getSprocketPanType(scripts: Script[]) {
 
 export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
 	const injectedCode = `
+		type RawBodyType = 'Text' | 'JSON' | 'JavaScript' | 'HTML' | 'XML';
+		type RequestBodyType = 'form-data' | 'x-www-form-urlencoded' | 'none' | 'raw';
 		type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 			id: string;
 			endpointId: string;
@@ -47,13 +49,25 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 			headers: Record<string, string>;
 			queryParams: Record<string, string[]>;
 			bodyType: TRequestBodyType;
-			body: TRequestBodyType extends 'none' ? undefined : TRequestBodyType extends 'raw' ? string : TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded' ? Map<string, string> : Map<string, string> | string | undefined;
-			rawType: TRequestBodyType extends 'raw' ? RawBodyType : TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded' ? undefined : RawBodyType | undefined;
+			body: TRequestBodyType extends 'none'
+				? undefined
+				: TRequestBodyType extends 'raw'
+				? string
+				: TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded'
+				? Map<string, string>
+				: Map<string, string> | string | undefined;
+			rawType: TRequestBodyType extends 'raw'
+				? RawBodyType
+				: TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded'
+				? undefined
+				: RawBodyType | undefined;
 			preRequestScript?: string;
 			postRequestScript?: string;
 			environmentOverride: Record<string, string>;
 			history: HistoricalEndpointResponse[];
 		};
+
+		type RESTfulRequestVerb = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
 
 		type NetworkFetchRequest = {
 			method: RESTfulRequestVerb;
@@ -94,12 +108,34 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 			version: string;
 			baseUrl: TBaseUrl;
 			localEnvironments: {
-					[environmentName: string]: Environment;
+				[environmentName: string]: Environment;
 			};
 			selectedEnvironment?: string;
 			endpointIds: string[];
 			preRequestScript?: string;
 		};
+
+		type ScriptRunnerStrategy =
+			| ['request', 'service', 'endpoint']
+			| ['request', 'endpoint', 'service']
+			| ['service', 'request', 'endpoint']
+			| ['service', 'endpoint', 'request']
+			| ['endpoint', 'request', 'service']
+			| ['endpoint', 'service', 'request'];
+
+		type Settings = {
+			debugLogs: boolean;
+			zoomLevel: number;
+			timeoutDurationMS: number;
+			defaultTheme: 'light' | 'dark' | 'system-default';
+			maxHistoryLength: number;
+			displayVariableNames: boolean;
+			scriptRunnerStrategy: {
+				pre: ScriptRunnerStrategy;
+				post: ScriptRunnerStrategy;
+			};
+		};
+
 		type ApplicationData = {
 			services: Record<string, Service>;
 			endpoints: Record<string, Endpoint>;
@@ -113,13 +149,13 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 			body: string;
 			bodyType: RawBodyType;
 			headers: Record<string, string>;
-	};
+		};
 
-		${getSprocketPanType(scripts)}
-		const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
-		const sp = sprocketPan;
+	${getSprocketPanType(scripts)}
+	const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
+	const sp = sprocketPan;
 			`;
-	log.info('Updating monaco code');
+	log.info(injectedCode);
 	monaco.languages.typescript.typescriptDefaults.setExtraLibs([
 		{
 			content: injectedCode,
