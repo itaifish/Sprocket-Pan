@@ -44,7 +44,8 @@ const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 
 export function ScriptTab({ id }: TabProps) {
 	const script = useSelector((state) => selectScript(state, id));
-	const scriptNames = new Set(Object.values(useSelector(selectScripts)).map((script) => script.name));
+	const scripts = useSelector(selectScripts);
+	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [copied, setCopied] = useState(false);
@@ -80,7 +81,7 @@ export function ScriptTab({ id }: TabProps) {
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 
 	const scriptVariables = useMemo(() => {
-		const variables = getVariablesFromCode(script.content);
+		const variables = getVariablesFromCode(script.content, Object.values(scripts));
 		return new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const));
 	}, [script.content]);
 

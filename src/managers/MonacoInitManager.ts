@@ -58,7 +58,7 @@ function getSprocketPanType(scripts: Script[]) {
 	return type;
 }
 
-export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
+export function getMonacoInjectedTypeCode(scripts: Script[]) {
 	const injectedCode = `
 		type RawBodyType = 'Text' | 'JSON' | 'JavaScript' | 'HTML' | 'XML';
 		type RequestBodyType = 'form-data' | 'x-www-form-urlencoded' | 'none' | 'raw';
@@ -175,7 +175,11 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 	const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 	const sp = sprocketPan;
 			`;
-	updateModelDefinition(monaco, injectedCode);
+	return injectedCode;
+}
+
+export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
+	updateModelDefinition(monaco, getMonacoInjectedTypeCode(scripts));
 }
 
 export const defaultEditorOptions = {

@@ -1,8 +1,9 @@
-import { Environment } from '../types/application-data/application-data';
+import { Environment, Script } from '../types/application-data/application-data';
 import { parseScript } from 'esprima';
 import { log } from './logging';
 import { ScriptTarget } from 'typescript';
 import { Project, TypeFormatFlags, ts } from 'ts-morph';
+import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -30,14 +31,19 @@ export const evalAsync = async (codeToEval: string) => {
 	return Object.getPrototypeOf(async function () {}).constructor(codeToEval)();
 };
 
-export const getTypesFromCode = (codeToEval: string) => {
+export const getTypesFromCode = (codeToEval: string, scripts: Script[]) => {
 	const project = new Project({
 		useInMemoryFileSystem: true,
 		compilerOptions: {
 			target: ts.ScriptTarget.ES2023,
 		},
 	});
-	const sourceFile = project.createSourceFile('_evalCode.ts', codeToEval);
+	const sourceFile = project.createSourceFile(
+		'_evalCode.ts',
+		`
+	${getMonacoInjectedTypeCode(scripts)}
+	${codeToEval}`,
+	);
 	const typeMap = new Map<string, string>();
 	const variables = [...sourceFile.getVariableDeclarations(), ...sourceFile.getFunctions(), ...sourceFile.getClasses()];
 	variables.forEach((variable) => {
@@ -49,14 +55,15 @@ export const getTypesFromCode = (codeToEval: string) => {
 			} else {
 				const typeString = type.getText(
 					variable,
-					TypeFormatFlags.NoTruncation |
+					TypeFormatFlags.None |
+						TypeFormatFlags.NoTruncation |
 						TypeFormatFlags.UseAliasDefinedOutsideCurrentScope |
 						TypeFormatFlags.WriteArrayAsGenericType |
 						TypeFormatFlags.WriteArrowStyleSignature |
 						TypeFormatFlags.WriteClassExpressionAsTypeLiteral |
-						TypeFormatFlags.UseFullyQualifiedType |
-						TypeFormatFlags.NoTypeReduction,
+						TypeFormatFlags.UseStructuralFallback,
 				);
+				log.info(`Setting ${name}, ${typeString}`);
 				typeMap.set(name, typeString);
 			}
 		}
@@ -70,9 +77,9 @@ type VariablesFromCode = Array<{
 	typescriptTypeString: string;
 }>;
 
-export const getVariablesFromCode = (codeToEval: string): VariablesFromCode => {
+export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): VariablesFromCode => {
 	try {
-		const types = getTypesFromCode(codeToEval);
+		const types = getTypesFromCode(codeToEval, scripts);
 		let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
 		javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
