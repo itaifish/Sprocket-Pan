@@ -18,7 +18,7 @@ import {
 	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { FormatIcon } from '../../atoms/buttons/FormatIcon';
@@ -35,6 +35,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { runScript } from '../../../state/active/thunks/requests';
+import { editor } from 'monaco-editor';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -50,18 +51,39 @@ export function ScriptTab({ id }: TabProps) {
 	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [copied, setCopied] = useState(false);
 	const [isRunning, setRunning] = useState(false);
-	const editorRef = useRef<any>(null);
+	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const settings = useSelector(selectSettings);
 	const [scriptOutput, setScriptOutput] = useState('');
 	const [scriptOutputLang, setScriptOutputLang] = useState<'json' | 'javascript'>('json');
 	const format = () => {
 		if (editorRef.current) {
-			editorRef.current.getAction('editor.action.formatDocument').run();
+			editorRef.current.getAction('editor.action.formatDocument')?.run();
 		}
 	};
-	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
+
+	const formatReturnEditor = () => {
+		if (scriptReturnEditorRef.current) {
+			scriptReturnEditorRef.current.updateOptions({ readOnly: false });
+			scriptReturnEditorRef.current
+				.getAction('editor.action.formatDocument')
+				?.run()
+				.then(() => {
+					scriptReturnEditorRef.current?.updateOptions({ readOnly: true });
+				});
+		}
+	};
+
+	useEffect(() => {
+		formatReturnEditor();
+	}, [scriptOutput]);
+	const handleMainEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		editorRef.current = editor;
 		format();
+	};
+	const handleReturnEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
+		scriptReturnEditorRef.current = editor;
+		formatReturnEditor();
 	};
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Script>) {
@@ -206,7 +228,7 @@ export function ScriptTab({ id }: TabProps) {
 				language={'typescript'}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 				options={defaultEditorOptions}
-				onMount={handleEditorDidMount}
+				onMount={handleMainEditorDidMount}
 			/>
 			<Typography level="h3" sx={{ textAlign: 'center', my: '15px' }}>
 				Return Variable Output
@@ -217,6 +239,7 @@ export function ScriptTab({ id }: TabProps) {
 				language={scriptOutputLang}
 				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
+				onMount={handleReturnEditorDidMount}
 			/>
 		</>
 	);
