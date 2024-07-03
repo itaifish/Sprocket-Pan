@@ -102,6 +102,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 		</>
 	);
 	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
+	const associatedItem = dataType && requestEvent.associatedId ? data[`${dataType}s`][requestEvent.associatedId] : null;
 	return (
 		<>
 			<Box sx={{ pl: `${indentation}px` }}>
@@ -126,20 +127,19 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 							{dataType && requestEvent.associatedId && (
 								<Stack direction="row" alignItems={'center'} gap={1}>
 									<BadgeIcon />
-									{data[`${dataType}s`][requestEvent.associatedId].name} {camelCaseToTitle(dataType)}
+									{associatedItem?.name ?? 'Unknown'} {camelCaseToTitle(dataType)}
 									{requestEvent.associatedId != requestId ? (
-										<SprocketTooltip
-											text={`Open ${data[`${dataType}s`][requestEvent.associatedId].name} ${camelCaseToTitle(
-												dataType,
-											)}`}
-										>
+										<SprocketTooltip text={`Open ${associatedItem?.name ?? 'Unknown'} ${camelCaseToTitle(dataType)}`}>
 											<IconButton
 												size="sm"
 												color="primary"
+												disabled={associatedItem == null}
 												onClick={() => {
-													const id = requestEvent.associatedId as string;
-													dispatch(addTabs({ [id]: dataType }));
-													dispatch(setSelectedTab(id));
+													if (associatedItem != null) {
+														const id = requestEvent.associatedId as string;
+														dispatch(addTabs({ [id]: dataType }));
+														dispatch(setSelectedTab(id));
+													}
 												}}
 											>
 												<LaunchIcon />
