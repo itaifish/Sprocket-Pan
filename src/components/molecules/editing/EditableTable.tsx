@@ -16,6 +16,7 @@ import { environmentContextResolver } from '../../../managers/EnvironmentContext
 import { CopyToClipboardButton } from '../../atoms/buttons/CopyToClipboardButton';
 import { useSelector } from 'react-redux';
 import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
+import { editor } from 'monaco-editor';
 
 export type TableData<TID extends string | number> = {
 	key: string;
@@ -104,13 +105,13 @@ export function EditableTable(props: EditableTableProps) {
 	const [hasChanged, setChanged] = useState(false);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
 	const [copied, setCopied] = useState(false);
-	const editorRef = useRef<any>(null);
+	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const format = () => {
-		if (editorRef.current) {
-			editorRef.current.getAction('editor.action.formatDocument').run();
+		if (editorRef.current != null) {
+			editorRef.current.getAction('editor.action.formatDocument')?.run();
 		}
 	};
-	const handleEditorDidMount = (editor: any, _monaco: Monaco) => {
+	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		editorRef.current = editor;
 		format();
 	};
