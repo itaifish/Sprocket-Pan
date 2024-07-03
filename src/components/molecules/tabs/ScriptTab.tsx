@@ -126,7 +126,7 @@ export function ScriptTab({ id }: TabProps) {
 									},
 								});
 							} else {
-								update({ returnVariableName: newValue });
+								update({ returnVariableName: newValue, returnVariableType: undefined });
 							}
 						}}
 						value={script.returnVariableName}

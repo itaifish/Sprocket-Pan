@@ -1,6 +1,5 @@
 import { Monaco } from '@monaco-editor/react';
 import { Script } from '../types/application-data/application-data';
-import { log } from '../utils/logging';
 
 // this is hacky but how it has to be done because of
 // https://github.com/microsoft/monaco-editor/issues/2696
@@ -54,7 +53,6 @@ function getSprocketPanType(scripts: Script[]) {
 			'',
 		)}
 	}`;
-	log.info(type);
 	return type;
 }
 

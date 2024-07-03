@@ -63,7 +63,6 @@ export const getTypesFromCode = (codeToEval: string, scripts: Script[]) => {
 						TypeFormatFlags.WriteClassExpressionAsTypeLiteral |
 						TypeFormatFlags.UseStructuralFallback,
 				);
-				log.info(`Setting ${name}, ${typeString}`);
 				typeMap.set(name, typeString);
 			}
 		}
