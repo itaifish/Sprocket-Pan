@@ -2,6 +2,26 @@ import { Monaco } from '@monaco-editor/react';
 import { Script } from '../types/application-data/application-data';
 import { log } from '../utils/logging';
 
+// this is hacky but how it has to be done because of
+// https://github.com/microsoft/monaco-editor/issues/2696
+// and more importanty
+// https://github.com/microsoft/monaco-editor/pull/4544/files
+// ^ when this PR is merged we can clean this up
+let uriModelNumber = 0;
+function updateModelDefinition(monaco: Monaco, injectedCode: string) {
+	const filePath = `ts:sprocket/model${uriModelNumber}.ts`;
+	const uri = monaco.Uri.parse(filePath);
+
+	const toDispose = monaco.editor.getModels().find((x) => x.uri.toString() === uri.toString());
+	if (toDispose) {
+		toDispose?.dispose();
+	}
+	uriModelNumber++;
+	const newFilePath = `ts:sprocket/model${uriModelNumber}.ts`;
+	const newUri = monaco.Uri.parse(newFilePath);
+	monaco.editor.createModel(injectedCode, 'typescript', newUri);
+}
+
 function getSprocketPanType(scripts: Script[]) {
 	const classes = scripts.filter((script) => script.returnVariableType?.isClass);
 	const type = `
@@ -155,12 +175,7 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 	const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
 	const sp = sprocketPan;
 			`;
-	log.info(injectedCode);
-	monaco.languages.typescript.typescriptDefaults.setExtraLibs([
-		{
-			content: injectedCode,
-		},
-	]);
+	updateModelDefinition(monaco, injectedCode);
 }
 
 export const defaultEditorOptions = {
