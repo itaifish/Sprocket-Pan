@@ -8,15 +8,14 @@ import {
 } from '../types/application-data/application-data';
 import { queryParamsToStringReplaceVars } from '../utils/application';
 import { environmentContextResolver } from './EnvironmentContextResolver';
-import ts from 'typescript';
-import { getScriptInjectionCode } from './ScriptInjectionManager';
-import { Constants } from '../utils/constants';
-import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
+import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
 import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
+import { scriptRunnerManager } from './ScriptRunnerManager';
+import { SprocketError } from '../types/state/state';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
@@ -36,14 +35,16 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const preRequestScript of preRequestScripts) {
-			const res = await this.runScript(preRequestScript.script, requestId, stateAccess, undefined, {
+			const res = (await this.runScript(preRequestScript.script, requestId, stateAccess, undefined, {
 				log: auditLog,
 				scriptType: preRequestScript.name,
 				associatedId: preRequestScript.id,
-			});
+			})) as {
+				error: SprocketError;
+			};
 			// if an error, return it
-			if (res) {
-				return res;
+			if (res.error) {
+				return res.error;
 			}
 		}
 	}
@@ -65,14 +66,16 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const postRequestScript of postRequestScripts) {
-			const res = await this.runScript(postRequestScript.script, requestId, stateAccess, response, {
+			const res = (await this.runScript(postRequestScript.script, requestId, stateAccess, response, {
 				log: auditLog,
 				scriptType: postRequestScript.name,
 				associatedId: postRequestScript.id,
-			});
+			})) as {
+				error: SprocketError;
+			};
 			// if an error, return it
-			if (res) {
-				return res;
+			if (res.error) {
+				return res.error;
 			}
 		}
 	}
@@ -178,7 +181,7 @@ class NetworkRequestManager {
 		return { response, networkRequest };
 	}
 
-	private async runScript(
+	public async runScript(
 		script: string | undefined,
 		requestId: string,
 		stateAccess: StateAccess,
@@ -188,41 +191,16 @@ class NetworkRequestManager {
 			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
 			associatedId: string;
 		},
-	): Promise<string | undefined> {
+	): Promise<unknown | { error: string }> {
 		if (script) {
-			try {
-				if (auditInfo) {
-					auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
-				}
-
-				const sprocketPan = getScriptInjectionCode(requestId, stateAccess, response, auditInfo?.log);
-				const _this = globalThis as any;
-				_this.sp = sprocketPan;
-				_this.sprocketPan = sprocketPan;
-				_this.fetch = fetch;
-				const jsScript = ts.transpile(script);
-				const scriptTask = evalAsync(jsScript);
-				await asyncCallWithTimeout(scriptTask, Constants.scriptsTimeoutMS);
-				if (auditInfo) {
-					auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
-				}
-			} catch (e) {
-				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-				const returnError = JSON.stringify({
-					errorStr,
-					errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
-				});
-				if (auditInfo) {
-					auditLogManager.addToAuditLog(
-						auditInfo.log,
-						'after',
-						auditInfo.scriptType,
-						auditInfo.associatedId,
-						returnError,
-					);
-				}
-				return returnError;
-			}
+			const result = await scriptRunnerManager.runTypescriptWithSprocketContext(
+				script,
+				requestId,
+				stateAccess,
+				response,
+				auditInfo,
+			);
+			return result;
 		}
 	}
 

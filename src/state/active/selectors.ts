@@ -8,6 +8,7 @@ export const selectAllItems = createSelector(selectActiveState, (state) => ({
 	services: state.services,
 	requests: state.requests,
 	endpoints: state.endpoints,
+	scripts: state.scripts,
 }));
 
 export const selectSelectedEnvironment = createSelector(selectActiveState, (state) => state.selectedEnvironment);
@@ -52,6 +53,12 @@ export const selectSaveStateTimestamps = createSelector(selectActiveState, (stat
 	modified: state.lastModified,
 	saved: state.lastSaved,
 }));
+
+export const selectScripts = createSelector(selectActiveState, (state) => state.scripts);
+export const selectScript = createSelector(
+	[selectScripts, (_, scriptName: string) => scriptName],
+	(scripts, scriptName) => scripts[scriptName],
+);
 
 export const selectHasBeenModifiedSinceLastSave = createSelector(
 	selectSaveStateTimestamps,

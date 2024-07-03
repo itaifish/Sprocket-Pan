@@ -54,6 +54,7 @@ import { makeRequest } from '../../../state/active/thunks/requests';
 import { log } from '../../../utils/logging';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import DeleteForever from '@mui/icons-material/DeleteForever';
+import { SprocketError } from '../../../types/state/state';
 
 const defaultResponse: HistoricalEndpointResponse = {
 	response: {
@@ -72,7 +73,7 @@ const defaultResponse: HistoricalEndpointResponse = {
 	},
 };
 
-const getError = (error: string): HistoricalEndpointResponse => {
+const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
 	errorRes.response.statusCode = 400;
 	errorRes.response.body = JSON.stringify({ error });

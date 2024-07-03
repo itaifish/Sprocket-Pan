@@ -6,10 +6,13 @@ import {
 	EndpointResponse,
 	Environment,
 	NetworkFetchRequest,
+	Script,
 	Service,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
+import { v4 } from 'uuid';
+import { toValidFunctionName } from '../../utils/string';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
 	lastModified: number;
@@ -42,6 +45,15 @@ interface AddRequestToEndpoint {
 interface AddEndpointToService {
 	endpointId: string;
 	serviceId: string;
+}
+
+interface AddScript {
+	scriptName: string;
+	scriptContent: string;
+}
+
+interface DeleteScript {
+	scriptId: string;
 }
 
 type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
@@ -165,6 +177,24 @@ export const activeSlice = createSlice({
 			}
 			reqToUpdate.history.splice(historyIndex, 1);
 		},
+		updateScript: (state, action: PayloadAction<Update<Script>>) => {
+			const { id, ...updateFields } = action.payload;
+			Object.assign(state.scripts[id], updateFields);
+		},
+		addScript: (state, action: PayloadAction<AddScript>) => {
+			const { scriptContent: script, scriptName } = action.payload;
+			const newId = v4();
+			state.scripts[newId] = {
+				content: script,
+				id: newId,
+				name: scriptName,
+				scriptCallableName: toValidFunctionName(scriptName),
+				returnVariableName: null,
+			};
+		},
+		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
+			delete state.scripts[action.payload.scriptId];
+		},
 	},
 });
 
@@ -193,4 +223,7 @@ export const {
 	deleteAllHistory,
 	addResponseToHistory,
 	deleteResponseFromHistory,
+	addScript,
+	deleteScript,
+	updateScript,
 } = activeSlice.actions;

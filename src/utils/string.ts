@@ -22,6 +22,11 @@ export function toValidFolderName(text: string) {
 	return text.replace(/([^a-z0-9_]+)/gi, '-');
 }
 
+export function toValidFunctionName(text: string) {
+	// replace groups that aren't a letter, number or underscore with an underscore
+	return text.replace(/([^a-z0-9_]+)/gi, '_');
+}
+
 const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
 	year: 'numeric',
 	month: 'long',

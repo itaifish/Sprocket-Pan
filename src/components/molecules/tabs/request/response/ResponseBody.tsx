@@ -6,9 +6,10 @@ import { FormatIcon } from '../../../../atoms/buttons/FormatIcon';
 import { EndpointResponse } from '../../../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../../../managers/MonacoInitManager';
 import { CopyToClipboardButton } from '../../../../atoms/buttons/CopyToClipboardButton';
+import { editor } from 'monaco-editor';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
-	const editorRef = useRef<any>(null);
+	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const [copied, setCopied] = useState(false);
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
@@ -18,9 +19,9 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 			log.info('run format');
 			editorRef.current
 				.getAction('editor.action.formatDocument')
-				.run()
+				?.run()
 				.then(() => {
-					editorRef.current.updateOptions({ readOnly: true });
+					editorRef.current?.updateOptions({ readOnly: true });
 				});
 		}
 	};

@@ -1,5 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AuditLog } from '../../../managers/AuditLogManager';
+import { AuditLog, RequestEvent } from '../../../managers/AuditLogManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { RootState } from '../../store';
 import {
@@ -9,9 +9,12 @@ import {
 	insertRequest,
 	removeRequestFromEndpoint,
 } from '../slice';
-import { EndpointRequest } from '../../../types/application-data/application-data';
+import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
+import { closeTab } from '../../tabs/slice';
+import { scriptRunnerManager } from '../../../managers/ScriptRunnerManager';
+import { SprocketError } from '../../../types/state/state';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -21,8 +24,37 @@ function extractStateAccess(thunk: any) {
 	return { getState: () => thunk.getState().active, dispatch: thunk.dispatch };
 }
 
+export const runScript = createAsyncThunk<
+	| {
+			error: SprocketError;
+	  }
+	| unknown,
+	{
+		script: string | Script;
+		requestId: string | null;
+		response?: EndpointResponse | undefined;
+		auditInfo?: {
+			log: AuditLog;
+			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
+			associatedId: string;
+		};
+	},
+	{ state: RootState }
+>('active/runScipt', async (options, thunk) => {
+	const stateAccess = extractStateAccess(thunk);
+
+	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
+		options.script,
+		options.requestId,
+		stateAccess,
+		options.response,
+		options.auditInfo,
+	);
+	return result;
+});
+
 export const makeRequest = createAsyncThunk<
-	string | undefined,
+	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },
 	{ state: RootState }
 >('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {
@@ -72,6 +104,7 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteRequest',
 	async (id, thunk) => {
+		thunk.dispatch(closeTab(id));
 		thunk.dispatch(removeRequestFromEndpoint(id));
 		thunk.dispatch(deleteRequestFromState(id));
 	},
