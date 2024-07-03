@@ -54,17 +54,18 @@ class ScriptRunnerManager {
 			return result;
 		} catch (e) {
 			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-			const returnError = JSON.stringify({
+			const scriptName = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
+			const returnError = {
 				errorStr,
-				errorType: `Invalid ${response == undefined ? 'Pre' : 'Post'}-request Script`,
-			});
+				errorType: `Invalid ${scriptName}`,
+			};
 			if (auditInfo) {
 				auditLogManager.addToAuditLog(
 					auditInfo.log,
 					'after',
 					auditInfo.scriptType,
 					auditInfo.associatedId,
-					returnError,
+					JSON.stringify(returnError),
 				);
 			}
 			return { error: returnError };

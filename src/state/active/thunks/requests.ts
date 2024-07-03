@@ -14,6 +14,7 @@ import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
 import { closeTab } from '../../tabs/slice';
 import { scriptRunnerManager } from '../../../managers/ScriptRunnerManager';
+import { SprocketError } from '../../../types/state/state';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -24,7 +25,10 @@ function extractStateAccess(thunk: any) {
 }
 
 export const runScript = createAsyncThunk<
-	{ error: string } | unknown,
+	| {
+			error: SprocketError;
+	  }
+	| unknown,
 	{
 		script: string | Script;
 		requestId: string | null;
@@ -50,7 +54,7 @@ export const runScript = createAsyncThunk<
 });
 
 export const makeRequest = createAsyncThunk<
-	string | undefined,
+	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },
 	{ state: RootState }
 >('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {

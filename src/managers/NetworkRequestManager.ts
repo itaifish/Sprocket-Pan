@@ -15,6 +15,7 @@ import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
 import { scriptRunnerManager } from './ScriptRunnerManager';
+import { SprocketError } from '../types/state/state';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
@@ -38,7 +39,9 @@ class NetworkRequestManager {
 				log: auditLog,
 				scriptType: preRequestScript.name,
 				associatedId: preRequestScript.id,
-			})) as { error: string };
+			})) as {
+				error: SprocketError;
+			};
 			// if an error, return it
 			if (res.error) {
 				return res.error;
@@ -67,7 +70,9 @@ class NetworkRequestManager {
 				log: auditLog,
 				scriptType: postRequestScript.name,
 				associatedId: postRequestScript.id,
-			})) as { error: string };
+			})) as {
+				error: SprocketError;
+			};
 			// if an error, return it
 			if (res.error) {
 				return res.error;
