@@ -62,7 +62,7 @@ export class ApplicationDataManager {
 			} else {
 				log.trace(`File already exists, updating...`);
 				await writeFile(
-					{ contents: JSON.stringify(data, noHistoryAndMetadataReplacer, 4), path: paths.data },
+					{ contents: JSON.stringify(data, noHistoryAndMetadataReplacer), path: paths.data },
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
 				);
 			}
@@ -81,7 +81,7 @@ export class ApplicationDataManager {
 				});
 				await writeFile(
 					{
-						contents: JSON.stringify(historyOnly, undefined, 4),
+						contents: JSON.stringify(historyOnly, undefined),
 						path: paths.history,
 					},
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
