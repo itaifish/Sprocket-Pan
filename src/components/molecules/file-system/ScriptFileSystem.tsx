@@ -19,33 +19,31 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 	const dispatch = useAppDispatch();
 
 	return (
-		<>
-			<ListItem
-				nested
-				endAction={
-					<FileSystemDropdown
-						options={[
-							menuOptionDuplicate(() =>
-								dispatch(addScript({ scriptName: `${script.name} (Copy)`, scriptContent: script.content })),
-							),
-							menuOptionDelete(() => dispatch(addToDeleteQueue(script.id))),
-						]}
-					/>
-				}
+		<ListItem
+			nested
+			endAction={
+				<FileSystemDropdown
+					options={[
+						menuOptionDuplicate(() =>
+							dispatch(addScript({ scriptName: `${script.name} (Copy)`, scriptContent: script.content })),
+						),
+						menuOptionDelete(() => dispatch(addToDeleteQueue(script.id))),
+					]}
+				/>
+			}
+		>
+			<ListItemButton
+				onClick={() => {
+					dispatch(addTabs({ [script.id]: 'script' }));
+					dispatch(setSelectedTab(script.id));
+				}}
+				selected={isSelected}
 			>
-				<ListItemButton
-					onClick={() => {
-						dispatch(addTabs({ [script.id]: 'script' }));
-						dispatch(setSelectedTab(script.id));
-					}}
-					selected={isSelected}
-				>
-					<ListItemDecorator>
-						<CodeIcon fontSize="small" />
-					</ListItemDecorator>
-					<ListSubheader>{keepStringLengthReasonable(script.name)}</ListSubheader>
-				</ListItemButton>
-			</ListItem>
-		</>
+				<ListItemDecorator>
+					<CodeIcon fontSize="small" />
+				</ListItemDecorator>
+				<ListSubheader>{keepStringLengthReasonable(script.name)}</ListSubheader>
+			</ListItemButton>
+		</ListItem>
 	);
 }
