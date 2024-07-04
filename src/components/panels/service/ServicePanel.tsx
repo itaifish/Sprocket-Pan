@@ -8,7 +8,6 @@ import {
 	IconButton,
 	List,
 	Stack,
-	TabProps,
 	Typography,
 } from '@mui/joy';
 import Table from '@mui/joy/Table';
@@ -20,7 +19,6 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 
 import { useSelector } from 'react-redux';
-import { Environment } from 'monaco-editor';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
 	selectEnvironments,
@@ -32,7 +30,7 @@ import {
 } from '../../../state/active/selectors';
 import { updateService } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
-import { Service, EndpointRequest } from '../../../types/application-data/application-data';
+import { Service, EndpointRequest, Environment } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { asEnv } from '../../../utils/types';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
@@ -42,8 +40,9 @@ import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
 import { RecentRequestListItem } from '../request/RecentRequestListItem';
 import { RequestScript } from '../script/RequestScript';
+import { PanelProps } from '../panels.interface';
 
-export function ServicePanel({ id }: TabProps) {
+export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);

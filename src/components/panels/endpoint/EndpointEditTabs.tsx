@@ -2,7 +2,6 @@ import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
 import { EndpointScripts } from './EndpointScripts';
 import { useSelector } from 'react-redux';
-import { Environment } from 'monaco-editor';
 import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
 	selectEnvironments,
@@ -13,7 +12,7 @@ import {
 } from '../../../state/active/selectors';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
-import { Endpoint, QueryParams } from '../../../types/application-data/application-data';
+import { Endpoint, Environment, QueryParams } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
 import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
