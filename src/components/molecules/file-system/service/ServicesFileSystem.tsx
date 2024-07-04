@@ -1,4 +1,4 @@
-import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
+import { Box, List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
 import { CollapseExpandButton } from '../../../atoms/buttons/CollapseExpandButton';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { useState } from 'react';
@@ -26,10 +26,10 @@ export function ServicesFileSystem() {
 			>
 				{!servicesCollapsed &&
 					serviceIds.map((serviceId) => (
-						<div key={serviceId}>
+						<Box key={serviceId}>
 							<ServiceFileSystem serviceId={serviceId} />
 							<ListDivider />
-						</div>
+						</Box>
 					))}
 			</List>
 		</ListItem>
