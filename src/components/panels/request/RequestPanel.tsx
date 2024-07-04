@@ -1,155 +1,51 @@
-import {
-	Grid,
-	Select,
-	Option,
-	Typography,
-	Button,
-	Stack,
-	IconButton,
-	useTheme,
-	useColorScheme,
-	Card,
-	Divider,
-	CircularProgress,
-	Switch,
-	Tooltip,
-} from '@mui/joy';
-import {
-	EMPTY_HEADERS,
-	Endpoint,
-	EndpointRequest,
-	HistoricalEndpointResponse,
-	RESTfulRequestVerbs,
-} from '../../../types/application-data/application-data';
+import { Grid, Typography, Stack, IconButton, Card, Divider } from '@mui/joy';
+import { EndpointRequest, HistoricalEndpointResponse } from '../../../types/application-data/application-data';
 import { useState } from 'react';
-import LabelIcon from '@mui/icons-material/Label';
-import EditIcon from '@mui/icons-material/Edit';
-import ParticleEffectButton from 'react-particle-effect-button';
-import { rgbToHex } from '@mui/material';
-import SendIcon from '@mui/icons-material/Send';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { verbColors } from '../../../utils/style';
-import { queryParamsToString } from '../../../utils/application';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { clamp } from '../../../utils/math';
 import { useSelector } from 'react-redux';
-import {
-	selectEndpoints,
-	selectEnvironments,
-	selectRequests,
-	selectSelectedEnvironment,
-	selectServices,
-	selectSettings,
-} from '../../../state/active/selectors';
+import { selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { deleteResponseFromHistory, updateEndpoint, updateRequest } from '../../../state/active/slice';
-import { makeRequest } from '../../../state/active/thunks/requests';
-import { log } from '../../../utils/logging';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { deleteResponseFromHistory, updateRequest } from '../../../state/active/slice';
 import DeleteForever from '@mui/icons-material/DeleteForever';
-import { SprocketError } from '../../../types/state/state';
 import { PanelProps } from '../panels.interface';
 import { EditableText } from '../../shared/input/EditableText';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { RequestEditTabs } from './RequestEditTabs';
 import { ResponseInfo } from './response/ResponseInfo';
-
-const defaultResponse: HistoricalEndpointResponse = {
-	response: {
-		statusCode: 200,
-		body: 'View the response here',
-		bodyType: 'Text',
-		headers: structuredClone(EMPTY_HEADERS),
-		dateTime: new Date().getTime(),
-	},
-	request: {
-		method: 'GET',
-		url: '',
-		headers: structuredClone(EMPTY_HEADERS),
-		body: {},
-		dateTime: new Date().getTime(),
-	},
-};
-
-const getError = (error: SprocketError): HistoricalEndpointResponse => {
-	const errorRes = structuredClone(defaultResponse);
-	errorRes.response.statusCode = 400;
-	errorRes.response.body = JSON.stringify({ error });
-	errorRes.response.bodyType = 'JSON';
-	return errorRes;
-};
+import { RequestActions, ResponseState } from './RequestActions';
+import { defaultResponse } from './constants';
 
 export function RequestPanel({ id }: PanelProps) {
 	const requests = useSelector(selectRequests);
 	const endpoints = useSelector(selectEndpoints);
 	const services = useSelector(selectServices);
-	const settings = useSelector(selectSettings);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const environments = useSelector(selectEnvironments);
 	const requestData = requests[id];
 	const endpointData = endpoints[requestData?.endpointId];
 	const serviceData = services[endpointData?.serviceId];
-	const theme = useTheme();
-	const { mode } = useColorScheme();
-	const [hidden, setHidden] = useState(false);
-	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
-	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
-	const hexColor = rgbToHex(colorRgb);
-	const [isAnimating, setIsAnimating] = useState(false);
-	const [response, setResponse] = useState<number | 'latest' | 'error'>('latest');
+
+	const [responseState, setResponseState] = useState<ResponseState>('latest');
 	const [lastError, setLastError] = useState(defaultResponse);
-	const [isLoading, setLoading] = useState(false);
-	const [copied, setCopied] = useState(false);
+
 	const dispatch = useAppDispatch();
 
 	if (requestData == null || endpointData == null || serviceData == null) {
 		return <>Request data not found</>;
 	}
 
-	const isDefault = endpointData.defaultRequest === requestData.id;
+	let responseStateData: HistoricalEndpointResponse;
 
-	let responseData: HistoricalEndpointResponse;
-
-	if (response != 'error') {
-		const responseIndex = response === 'latest' ? Math.max(requestData.history.length - 1, 0) : response;
-		responseData = responseIndex >= requestData.history.length ? defaultResponse : requestData.history[responseIndex];
+	if (responseState != 'error') {
+		const responseStateIndex = responseState === 'latest' ? Math.max(requestData.history.length - 1, 0) : responseState;
+		responseStateData =
+			responseStateIndex >= requestData.history.length ? defaultResponse : requestData.history[responseStateIndex];
 	} else {
-		responseData = lastError;
-	}
-
-	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
-
-	let queryStr = queryParamsToString(fullQueryParams);
-	if (queryStr) {
-		queryStr = `?${queryStr}`;
+		responseStateData = lastError;
 	}
 
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(updateRequest({ ...values, id: requestData.id }));
-	}
-
-	function updateAssociatedEndpoint(values: Partial<Endpoint>) {
-		dispatch(updateEndpoint({ ...values, id: requestData.endpointId }));
-	}
-
-	async function sendRequest() {
-		setLoading(true);
-		try {
-			const result = await dispatch(makeRequest({ requestId: requestData.id })).unwrap();
-			if (result != undefined) {
-				setLastError(getError(result));
-				setResponse('error');
-			} else {
-				setResponse('latest');
-			}
-		} catch (err) {
-			setLastError(getError((err as any)?.message ?? 'An unknown error occured'));
-			log.error(err);
-			setResponse('error');
-		}
-		setLoading(false);
 	}
 
 	return (
@@ -160,125 +56,12 @@ export function RequestPanel({ id }: PanelProps) {
 				isValidFunc={(text: string) => text.length >= 1}
 				isTitle
 			/>
-			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
-				<Grid xs={2}>
-					<Select
-						value={endpointData.verb}
-						startDecorator={<LabelIcon />}
-						color={verbColors[endpointData.verb]}
-						variant="soft"
-						listboxOpen={false}
-						onListboxOpenChange={() => {
-							if (!isAnimating) {
-								setHidden(true);
-							}
-						}}
-					>
-						{RESTfulRequestVerbs.map((verb, index) => (
-							<Option key={index} value={verb} color={verbColors[verb]}>
-								{verb}
-							</Option>
-						))}
-					</Select>
-				</Grid>
-				<Grid xs={5} xl={7}>
-					<Card
-						variant="outlined"
-						color={'primary'}
-						onClick={() => {
-							if (!isAnimating) {
-								setHidden(true);
-							}
-						}}
-						sx={{
-							'--Card-padding': '6px',
-							overflowWrap: 'break-word',
-						}}
-					>
-						{environmentContextResolver.stringWithVarsToTypography(
-							`${serviceData.baseUrl}${endpointData.url}${queryStr}`,
-							{ requests, services, settings, selectedEnvironment, environments },
-							serviceData.id,
-							requestData.id,
-						)}
-					</Card>
-				</Grid>
-				<Grid xs={5} xl={3}>
-					<Stack direction={'row'} spacing={2}>
-						<Button
-							color="primary"
-							startDecorator={isLoading ? <CircularProgress /> : <SendIcon />}
-							onClick={sendRequest}
-						>
-							Send
-						</Button>
-						<ParticleEffectButton
-							hidden={hidden}
-							canvasPadding={50}
-							type={'rectangle'}
-							color={hexColor}
-							oscillationCoefficient={15}
-							style={'stroke'}
-							particlesAmountCoefficient={2}
-							duration={800}
-							speed={0.7}
-							direction={'top'}
-							easing={'easeOutSine'}
-							onBegin={() => {
-								setIsAnimating(true);
-							}}
-							size={4}
-							onComplete={() => {
-								if (hidden == true) {
-									setTimeout(() => setHidden(false), 50);
-								} else {
-									setIsAnimating(false);
-								}
-							}}
-						>
-							<SprocketTooltip text="Edit Endpoint">
-								<IconButton
-									variant="outlined"
-									color="primary"
-									onClick={() => {
-										dispatch(addTabs({ [requestData.endpointId]: 'endpoint' }));
-										dispatch(setSelectedTab(requestData.endpointId));
-									}}
-								>
-									<EditIcon />
-								</IconButton>
-							</SprocketTooltip>
-						</ParticleEffectButton>
-						<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-							<SprocketTooltip text={copied ? '' : 'Copy Request ID'}>
-								<IconButton
-									variant="outlined"
-									color="primary"
-									disabled={copied}
-									onClick={() => {
-										setCopied(true);
-										setTimeout(() => {
-											setCopied(false);
-										}, 800);
-										navigator.clipboard.writeText(requestData.id);
-									}}
-								>
-									<FingerprintIcon />
-								</IconButton>
-							</SprocketTooltip>
-						</Tooltip>
-						<Switch
-							checked={isDefault}
-							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
-								updateAssociatedEndpoint({
-									defaultRequest: isDefault ? null : requestData.id,
-								})
-							}
-							endDecorator={'Default'}
-						/>
-					</Stack>
-				</Grid>
-			</Grid>
+			<RequestActions
+				endpoint={endpointData}
+				request={requestData}
+				onError={setLastError}
+				onResponse={setResponseState}
+			/>
 			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
 				<Grid xs={6}>
 					<Card>
@@ -299,9 +82,9 @@ export function RequestPanel({ id }: PanelProps) {
 							<SprocketTooltip text={'Previous Response'}>
 								<IconButton
 									aria-label="previousHistory"
-									disabled={response === 0 || requestData.history.length === 0}
+									disabled={responseState === 0 || requestData.history.length === 0}
 									onClick={() => {
-										setResponse((currentResponse) => {
+										setResponseState((currentResponse) => {
 											let newResponse: number;
 											if (currentResponse === 0) {
 												newResponse = currentResponse;
@@ -323,15 +106,15 @@ export function RequestPanel({ id }: PanelProps) {
 								<EditableText
 									sx={{ display: 'flex', alignItems: 'center' }}
 									text={
-										response === 'latest'
+										responseState === 'latest'
 											? `${requestData.history.length}/${requestData.history.length}`
-											: response === 'error'
+											: responseState === 'error'
 											? `error`
-											: `${response + 1}/${requestData.history.length}`
+											: `${responseState + 1}/${requestData.history.length}`
 									}
 									setText={(text: string) => {
 										const num = Number.parseInt(text);
-										setResponse(num - 1);
+										setResponseState(num - 1);
 									}}
 									isValidFunc={(text: string) => {
 										const num = Number.parseInt(text);
@@ -342,9 +125,13 @@ export function RequestPanel({ id }: PanelProps) {
 							<SprocketTooltip text={'Next Response'}>
 								<IconButton
 									aria-label="nextHistory"
-									disabled={response === 'latest' || response == 'error' || response >= requestData.history.length - 1}
+									disabled={
+										responseState === 'latest' ||
+										responseState == 'error' ||
+										responseState >= requestData.history.length - 1
+									}
 									onClick={() => {
-										setResponse((currentResponse) => {
+										setResponseState((currentResponse) => {
 											if (currentResponse == 'error') {
 												return currentResponse;
 											}
@@ -361,15 +148,15 @@ export function RequestPanel({ id }: PanelProps) {
 							</SprocketTooltip>
 							<SprocketTooltip text={'Delete Response'}>
 								<IconButton
-									disabled={response == 'error' || requestData.history.length == 0}
+									disabled={responseState == 'error' || requestData.history.length == 0}
 									onClick={() => {
-										if (response == 'error') {
+										if (responseState == 'error') {
 											return;
 										}
-										const index = response == 'latest' ? requestData.history.length - 1 : response;
+										const index = responseState == 'latest' ? requestData.history.length - 1 : responseState;
 										dispatch(deleteResponseFromHistory({ requestId: id, historyIndex: index }));
-										if (response != 'latest' && requestData.history.length <= response) {
-											setResponse('latest');
+										if (responseState != 'latest' && requestData.history.length <= responseState) {
+											setResponseState('latest');
 										}
 									}}
 								>
@@ -377,7 +164,7 @@ export function RequestPanel({ id }: PanelProps) {
 								</IconButton>
 							</SprocketTooltip>
 						</Stack>
-						<ResponseInfo response={responseData} requestId={id} />
+						<ResponseInfo response={responseStateData} requestId={id} />
 					</Card>
 				</Grid>
 			</Grid>

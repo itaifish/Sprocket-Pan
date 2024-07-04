@@ -10,29 +10,27 @@ export function RequestScripts({ request }: { request: EndpointRequest }) {
 		dispatch(updateRequest({ ...values, id: request.id }));
 	}
 	return (
-		<>
-			<AccordionGroup>
-				<Accordion defaultExpanded>
-					<AccordionSummary>Pre-request Script</AccordionSummary>
-					<AccordionDetails>
-						<RequestScript
-							scriptText={request.preRequestScript}
-							scriptKey={'preRequestScript'}
-							updateScript={(scriptText) => update({ preRequestScript: scriptText })}
-						/>
-					</AccordionDetails>
-				</Accordion>
-				<Accordion defaultExpanded>
-					<AccordionSummary>Post-request Script</AccordionSummary>
-					<AccordionDetails>
-						<RequestScript
-							scriptText={request.postRequestScript}
-							scriptKey={'postRequestScript'}
-							updateScript={(scriptText) => update({ postRequestScript: scriptText })}
-						/>
-					</AccordionDetails>
-				</Accordion>
-			</AccordionGroup>
-		</>
+		<AccordionGroup>
+			<Accordion defaultExpanded>
+				<AccordionSummary>Pre-request Script</AccordionSummary>
+				<AccordionDetails>
+					<RequestScript
+						scriptText={request.preRequestScript}
+						scriptKey={'preRequestScript'}
+						updateScript={(scriptText) => update({ preRequestScript: scriptText })}
+					/>
+				</AccordionDetails>
+			</Accordion>
+			<Accordion defaultExpanded>
+				<AccordionSummary>Post-request Script</AccordionSummary>
+				<AccordionDetails>
+					<RequestScript
+						scriptText={request.postRequestScript}
+						scriptKey={'postRequestScript'}
+						updateScript={(scriptText) => update({ postRequestScript: scriptText })}
+					/>
+				</AccordionDetails>
+			</Accordion>
+		</AccordionGroup>
 	);
 }
