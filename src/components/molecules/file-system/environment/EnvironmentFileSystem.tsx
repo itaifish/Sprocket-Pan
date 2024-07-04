@@ -1,15 +1,15 @@
 import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
-import { keepStringLengthReasonable } from '../../../utils/string';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../state/store';
-import { addNewEnvironmentById } from '../../../state/active/thunks/environments';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import { selectEnvironment } from '../../../state/active/slice';
-import { addTabs, addToDeleteQueue, setSelectedTab } from '../../../state/tabs/slice';
-import { selectEnvironmentsById, selectSelectedEnvironment } from '../../../state/active/selectors';
-import { selectIsActiveTab } from '../../../state/tabs/selectors';
-import { FileSystemDropdown, menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
+import { selectSelectedEnvironment, selectEnvironmentsById } from '../../../../state/active/selectors';
+import { selectEnvironment } from '../../../../state/active/slice';
+import { addNewEnvironmentById } from '../../../../state/active/thunks/environments';
+import { useAppDispatch } from '../../../../state/store';
+import { selectIsActiveTab } from '../../../../state/tabs/selectors';
+import { addToDeleteQueue, addTabs, setSelectedTab } from '../../../../state/tabs/slice';
+import { keepStringLengthReasonable } from '../../../../utils/string';
+import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
