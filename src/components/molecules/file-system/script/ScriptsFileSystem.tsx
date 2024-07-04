@@ -1,9 +1,9 @@
 import { Box, List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
-import { CollapseExpandButton } from '../../atoms/buttons/CollapseExpandButton';
 import { ScriptFileSystem } from './ScriptFileSystem';
 import { useSelector } from 'react-redux';
-import { selectScripts } from '../../../state/active/selectors';
 import { useState } from 'react';
+import { selectScripts } from '../../../../state/active/selectors';
+import { CollapseExpandButton } from '../../../atoms/buttons/CollapseExpandButton';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);

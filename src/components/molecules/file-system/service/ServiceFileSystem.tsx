@@ -2,18 +2,18 @@ import { IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubh
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
 import { useState } from 'react';
-import { keepStringLengthReasonable } from '../../../utils/string';
-import { EndpointFileSystem } from './EndpointFileSystem';
+import { keepStringLengthReasonable } from '../../../../utils/string';
+import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { SprocketTooltip } from '../../atoms/SprocketTooltip';
-import { useAppDispatch } from '../../../state/store';
-import { addNewEndpoint } from '../../../state/active/thunks/endpoints';
-import { cloneServiceFromId } from '../../../state/active/thunks/services';
-import { addTabs, addToDeleteQueue, setSelectedTab } from '../../../state/tabs/slice';
+import { SprocketTooltip } from '../../../atoms/SprocketTooltip';
+import { useAppDispatch } from '../../../../state/store';
+import { addNewEndpoint } from '../../../../state/active/thunks/endpoints';
+import { cloneServiceFromId } from '../../../../state/active/thunks/services';
+import { addTabs, addToDeleteQueue, setSelectedTab } from '../../../../state/tabs/slice';
 import { useSelector } from 'react-redux';
-import { selectServicesById } from '../../../state/active/selectors';
-import { selectFilteredNestedIds, selectIsActiveTab } from '../../../state/tabs/selectors';
-import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
+import { selectServicesById } from '../../../../state/active/selectors';
+import { selectFilteredNestedIds, selectIsActiveTab } from '../../../../state/tabs/selectors';
+import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
