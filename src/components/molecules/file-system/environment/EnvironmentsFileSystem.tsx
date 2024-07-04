@@ -3,13 +3,12 @@ import { CollapseExpandButton } from '../../../atoms/buttons/CollapseExpandButto
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectEnvironments } from '../../../../state/active/selectors';
+import { selectEnvironmentIds } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
 
 export function EnvironmentsFileSystem() {
 	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
-	const environments = useSelector(selectEnvironments);
-	const environmentIdsUnfiltered = Object.values(environments).map((env) => env.__id);
+	const environmentIdsUnfiltered = useSelector(selectEnvironmentIds);
 	const environmentIds = useSelector((state) => selectFilteredNestedIds(state, environmentIdsUnfiltered));
 
 	return (
@@ -24,7 +23,6 @@ export function EnvironmentsFileSystem() {
 					'& .JoyListItemButton-root': { p: '8px' },
 				}}
 			>
-				<EnvironmentsFileSystem />
 				{!environmentsCollapsed &&
 					environmentIds.map((environmentId, index) => (
 						<div key={environmentId}>

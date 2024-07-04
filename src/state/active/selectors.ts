@@ -31,6 +31,10 @@ export const selectEnvironments = createSelector(selectActiveState, (state) => {
 	return state.environments;
 });
 
+export const selectEnvironmentIds = createSelector(selectEnvironments, (environments) => {
+	return Object.values(environments).map((env) => env.__id);
+});
+
 export const selectEnvironmentsById = createSelector(
 	[selectEnvironments, (_, id: string) => id],
 	(environments, id) => environments[id],
