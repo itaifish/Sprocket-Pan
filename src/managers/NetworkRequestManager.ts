@@ -43,7 +43,7 @@ class NetworkRequestManager {
 				error: SprocketError;
 			};
 			// if an error, return it
-			if (res.error) {
+			if (res?.error) {
 				return res.error;
 			}
 		}
@@ -74,7 +74,7 @@ class NetworkRequestManager {
 				error: SprocketError;
 			};
 			// if an error, return it
-			if (res.error) {
+			if (res?.error) {
 				return res.error;
 			}
 		}
