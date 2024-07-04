@@ -25,10 +25,10 @@ import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTabl
 import { RequestScripts } from './RequestScripts';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
-type RequestPanelType = (typeof requestTabs)[number];
+type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
-	const [tab, setTab] = useState<RequestPanelType>('body');
+	const [tab, setTab] = useState<RequestTabType>('body');
 	const environments = useSelector(selectEnvironments);
 	const services = useSelector(selectServices);
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -51,7 +51,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			size="lg"
 			value={tab}
 			onChange={(_event, newValue) => {
-				const newTabId = newValue as RequestPanelType;
+				const newTabId = newValue as RequestTabType;
 				setTab(newTabId);
 			}}
 		>
