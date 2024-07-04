@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux';
 import { store } from './state/store';
-import { Root } from './components/organisms/Root';
+import { Root } from './components/root/Root';
 
 export function App() {
 	return (
