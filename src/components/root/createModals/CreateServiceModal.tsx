@@ -1,11 +1,28 @@
-import { Button, DialogActions, DialogContent, DialogTitle, Divider, Modal, ModalDialog } from '@mui/joy';
+import {
+	Button,
+	DialogActions,
+	DialogContent,
+	DialogTitle,
+	Divider,
+	FormControl,
+	FormLabel,
+	Input,
+	Modal,
+	ModalDialog,
+	Textarea,
+} from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
 import { iconFromTabType } from '../../../types/application-data/application-data';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const createServiceFunction = () => undefined;
-	const allFieldsValid = useMemo(() => true, []);
+	const [serviceName, setServiceName] = useState('');
+	const [serviceDescription, setServiceDescription] = useState('');
+	const [baseUrl, setBaseUrl] = useState('');
+	const serviceNameValid = serviceName.length > 0;
+	const allFieldsValid = useMemo(() => serviceNameValid, [serviceName]);
+
 	return (
 		<Modal
 			open={open}
@@ -19,7 +36,31 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 					Create New Service
 				</DialogTitle>
 				<Divider />
-				<DialogContent>Lorem Ipsum Dolar Sit Amit</DialogContent>
+				<DialogContent>
+					<>
+						<FormControl>
+							<FormLabel>Service Name *</FormLabel>
+							<Input
+								value={serviceName}
+								onChange={(e) => setServiceName(e.target.value)}
+								error={!serviceNameValid}
+								required
+							/>
+						</FormControl>
+						<FormControl>
+							<FormLabel>Service Description</FormLabel>
+							<Textarea
+								minRows={3}
+								value={serviceDescription}
+								onChange={(e) => setServiceDescription(e.target.value)}
+							/>
+						</FormControl>
+						<FormControl>
+							<FormLabel>Base Url</FormLabel>
+							<Input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} />
+						</FormControl>
+					</>
+				</DialogContent>
 				<DialogActions>
 					<Button
 						variant="outlined"
