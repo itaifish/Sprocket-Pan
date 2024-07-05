@@ -1,6 +1,6 @@
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 import { Box, Button, Card, CardContent, Typography } from '@mui/joy';
-import { formatDate } from '../../utils/string';
+import { formatFullDate } from '../../utils/string';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -58,7 +58,7 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 				<SprocketTooltip text="Last Modified">
 					<EditCalendarIcon></EditCalendarIcon>
 				</SprocketTooltip>
-				<Typography level="body-md"> {formatDate(new Date(workspace.lastModified))}</Typography>
+				<Typography level="body-md"> {formatFullDate(new Date(workspace.lastModified))}</Typography>
 			</CardContent>
 			<CardContent orientation="horizontal">
 				<SprocketTooltip text="Description">

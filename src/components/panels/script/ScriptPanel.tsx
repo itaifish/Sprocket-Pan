@@ -49,7 +49,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
-	const [copied, setCopied] = useState(false);
+
 	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -215,7 +215,7 @@ export function ScriptPanel({ id }: PanelProps) {
 			</Stack>
 			<Stack direction={'row'} spacing={2}>
 				<FormatIcon actionFunction={() => format()} />
-				<CopyToClipboardButton copied={copied} setCopied={setCopied} text={localDataState} />
+				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
 			<Editor
 				height={'55vh'}

@@ -1,11 +1,11 @@
 import { Typography, Stack, IconButton } from '@mui/joy';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
-import { clamp } from '../../../utils/math';
 import DeleteForever from '@mui/icons-material/DeleteForever';
-import { EditableText } from '../../shared/input/EditableText';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { ResponseState } from './RequestActions';
+import { ResponseState } from '../RequestActions';
+import { SprocketTooltip } from '../../../shared/SprocketTooltip';
+import { EditableText } from '../../../shared/input/EditableText';
+import { clamp } from '../../../../utils/math';
 
 interface HistoryControlProps {
 	value: ResponseState;
@@ -18,8 +18,6 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 	// mathematically in this component, 'error' is treated as historyLength,
 	// and 'latest' is identical to historyLength - 1
 	const numValue = value === 'latest' ? historyLength - 1 : value === 'error' ? historyLength : value;
-
-	console.log({ historyLength });
 	return (
 		<Stack direction={'row'}>
 			<SprocketTooltip text={'Previous Response'}>
@@ -66,8 +64,6 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 					disabled={value === 'error' || historyLength === 0}
 					aria-label="Delete Response"
 					onClick={() => {
-						console.log('deleting ' + numValue);
-						console.log({ historyLength, numValue });
 						onDelete(numValue);
 						if (numValue >= historyLength - 1) {
 							onChange('latest');

@@ -1,4 +1,4 @@
-import { Button, Stack, IconButton, CircularProgress, Switch, Tooltip, Grid, Select, Option, Card } from '@mui/joy';
+import { Button, Stack, IconButton, CircularProgress, Switch, Grid, Select, Option, Card } from '@mui/joy';
 import LabelIcon from '@mui/icons-material/Label';
 import {
 	Endpoint,
@@ -23,6 +23,7 @@ import { useSelector } from 'react-redux';
 import { selectEnvironmentTypography } from '../../../state/active/selectors';
 import { verbColors } from '../../../utils/style';
 import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
+import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
@@ -48,7 +49,6 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 	const dispatch = useAppDispatch();
 	const particleColor = useParticleThemeColor();
 	const [isLoading, setLoading] = useState(false);
-	const [copied, setCopied] = useState(false);
 	const isDefault = endpoint.defaultRequest === request.id;
 	function updateAssociatedEndpoint(values: Partial<Endpoint>) {
 		dispatch(updateEndpoint({ ...values, id: request.endpointId }));
@@ -157,24 +157,9 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 							</IconButton>
 						</SprocketTooltip>
 					</ParticleEffectButton>
-					<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-						<SprocketTooltip text={copied ? '' : 'Copy Request ID'}>
-							<IconButton
-								variant="outlined"
-								color="primary"
-								disabled={copied}
-								onClick={() => {
-									setCopied(true);
-									setTimeout(() => {
-										setCopied(false);
-									}, 800);
-									navigator.clipboard.writeText(request.id);
-								}}
-							>
-								<FingerprintIcon />
-							</IconButton>
-						</SprocketTooltip>
-					</Tooltip>
+					<CopyToClipboardButton tooltipText="Copy Request ID" copyText={request.id}>
+						<FingerprintIcon />
+					</CopyToClipboardButton>
 					<Switch
 						checked={isDefault}
 						onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>

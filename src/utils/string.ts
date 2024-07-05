@@ -27,22 +27,30 @@ export function toValidFunctionName(text: string) {
 	return text.replace(/([^a-z0-9_]+)/gi, '_');
 }
 
-const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-	year: 'numeric',
-	month: 'long',
-	day: 'numeric',
-	hour12: true,
-	hour: '2-digit',
-	minute: '2-digit',
-	second: '2-digit',
-	fractionalSecondDigits: 3,
-});
+const dateTimeFormatters = {
+	full: new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour12: true,
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		fractionalSecondDigits: 3,
+	}),
+	date: new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	}),
+};
 
-export function formatDate(date: Date | string) {
-	if (typeof date === 'string') {
-		date = new Date(date);
-	}
-	return defaultDateTimeFormatter.format(date);
+export function formatFullDate(date: Date | string | number) {
+	return dateTimeFormatters.full.format(new Date(date));
+}
+
+export function formatDate(date: Date | string | number) {
+	return dateTimeFormatters.date.format(new Date(date));
 }
 
 export function formatMilliseconds(ms: number) {

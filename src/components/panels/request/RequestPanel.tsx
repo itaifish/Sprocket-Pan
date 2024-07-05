@@ -4,19 +4,13 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectFullRequestInfoById } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { deleteResponseFromHistory, updateRequest } from '../../../state/active/slice';
+import { updateRequest } from '../../../state/active/slice';
 import { PanelProps } from '../panels.interface';
 import { EditableText } from '../../shared/input/EditableText';
 import { RequestEditTabs } from './RequestEditTabs';
-import { ResponseInfo } from './response/ResponseInfo';
 import { RequestActions, ResponseState } from './RequestActions';
 import { defaultResponse } from './constants';
-import { HistoryControl } from './HistoryControl';
-
-function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
-	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;
-	return responseStateIndex >= request.history.length ? defaultResponse : request.history[responseStateIndex];
-}
+import { ResponsePanel } from './response/ResponsePanel';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
@@ -29,8 +23,6 @@ export function RequestPanel({ id }: PanelProps) {
 	if (request == null || endpoint == null || service == null) {
 		return <>Request data not found</>;
 	}
-
-	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, request);
 
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(updateRequest({ ...values, id: request.id }));
@@ -47,7 +39,7 @@ export function RequestPanel({ id }: PanelProps) {
 			<RequestActions endpoint={endpoint} request={request} onError={setLastError} onResponse={setResponseState} />
 			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
 				<Grid xs={6}>
-					<Card>
+					<Card sx={{ height: '100%', width: '100%' }}>
 						<Typography level="h3" sx={{ textAlign: 'center' }}>
 							Request
 						</Typography>
@@ -56,19 +48,12 @@ export function RequestPanel({ id }: PanelProps) {
 					</Card>
 				</Grid>
 				<Grid xs={6}>
-					<Card>
-						<Typography level="h3" sx={{ textAlign: 'center' }}>
-							Response
-						</Typography>
-						<Divider />
-						<HistoryControl
-							value={responseState}
-							onChange={setResponseState}
-							historyLength={request.history.length}
-							onDelete={(index) => dispatch(deleteResponseFromHistory({ requestId: id, historyIndex: index }))}
-						/>
-						<ResponseInfo response={responseStateData} requestId={id} />
-					</Card>
+					<ResponsePanel
+						responseState={responseState}
+						setResponseState={setResponseState}
+						lastError={lastError}
+						request={request}
+					/>
 				</Grid>
 			</Grid>
 		</>

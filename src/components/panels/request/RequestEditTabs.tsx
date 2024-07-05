@@ -63,7 +63,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				))}
 			</TabList>
 			<TabPanel value={'body'}>
-				<RequestBody requestData={request}></RequestBody>
+				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
 				<EnvironmentEditableTable

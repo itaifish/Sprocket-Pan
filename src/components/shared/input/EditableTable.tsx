@@ -1,4 +1,4 @@
-import { Badge, IconButton, useColorScheme } from '@mui/joy';
+import { Badge, IconButton, Stack, useColorScheme } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
 import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -103,7 +103,6 @@ export function EditableTable(props: EditableTableProps) {
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
 	const [hasChanged, setChanged] = useState(false);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
-	const [copied, setCopied] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const format = () => {
 		if (editorRef.current != null) {
@@ -143,57 +142,59 @@ export function EditableTable(props: EditableTableProps) {
 
 	return (
 		<>
-			<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
-				<IconButton
-					disabled={runningTableData == null}
-					onClick={() => {
-						if (mode === 'edit') {
-							setMode('view');
-							setBackupEditorText(editorText);
-							setEditorText(getEnvParsedRunningTableData());
-							editorRef.current?.updateOptions({ readOnly: true });
-						} else {
-							setMode('edit');
-							setEditorText(backupEditorText);
-							editorRef.current?.updateOptions({ readOnly: false });
-							editorRef.current?.setValue(backupEditorText);
-						}
-					}}
-				>
-					{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
-				</IconButton>
-			</SprocketTooltip>
-			<CopyToClipboardButton copied={copied} setCopied={setCopied} text={editorText} />
-			<FormatIcon actionFunction={() => format()} />
-			<SprocketTooltip text="Clear Changes">
-				<IconButton
-					disabled={!hasChanged}
-					onClick={() => {
-						setEditorText(tableDataToString(props.tableData, props.unique));
-						setChanged(false);
-						setRunningTableData(props.tableData);
-						format();
-					}}
-				>
-					<CancelIcon />
-				</IconButton>
-			</SprocketTooltip>
-			<SprocketTooltip text="Save Changes">
-				<IconButton
-					disabled={!hasChanged || runningTableData == null}
-					onClick={() => {
-						const tableData = stringToTableData(editorText, props.unique);
-						if (tableData != null) {
-							props.setTableData(tableData);
+			<Stack direction="row" justifyContent="end" alignItems="end">
+				<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
+					<IconButton
+						disabled={runningTableData == null}
+						onClick={() => {
+							if (mode === 'edit') {
+								setMode('view');
+								setBackupEditorText(editorText);
+								setEditorText(getEnvParsedRunningTableData());
+								editorRef.current?.updateOptions({ readOnly: true });
+							} else {
+								setMode('edit');
+								setEditorText(backupEditorText);
+								editorRef.current?.updateOptions({ readOnly: false });
+								editorRef.current?.setValue(backupEditorText);
+							}
+						}}
+					>
+						{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
+					</IconButton>
+				</SprocketTooltip>
+				<SprocketTooltip text="Clear Changes">
+					<IconButton
+						disabled={!hasChanged}
+						onClick={() => {
+							setEditorText(tableDataToString(props.tableData, props.unique));
 							setChanged(false);
-						}
-					}}
-				>
-					<Badge invisible={!hasChanged || runningTableData == null} color="primary">
-						<SaveIcon></SaveIcon>
-					</Badge>
-				</IconButton>
-			</SprocketTooltip>
+							setRunningTableData(props.tableData);
+							format();
+						}}
+					>
+						<CancelIcon />
+					</IconButton>
+				</SprocketTooltip>
+				<SprocketTooltip text="Save Changes">
+					<IconButton
+						disabled={!hasChanged || runningTableData == null}
+						onClick={() => {
+							const tableData = stringToTableData(editorText, props.unique);
+							if (tableData != null) {
+								props.setTableData(tableData);
+								setChanged(false);
+							}
+						}}
+					>
+						<Badge invisible={!hasChanged || runningTableData == null} color="primary">
+							<SaveIcon></SaveIcon>
+						</Badge>
+					</IconButton>
+				</SprocketTooltip>
+				<CopyToClipboardButton copyText={editorText} />
+				<FormatIcon actionFunction={() => format()} />
+			</Stack>
 			<Editor
 				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
 				value={editorText}
