@@ -10,7 +10,7 @@ interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>>;
 }
 
-export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { state: RootState }>(
+export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { state: RootState }>(
 	'active/addEnvironment',
 	async ({ data = {} }, thunk) => {
 		const newEnvironment = {
@@ -19,6 +19,7 @@ export const addNewEnvironment = createAsyncThunk<void, AddNewEnvironment, { sta
 			__data: structuredClone(data.__data ?? []),
 		} as unknown as Environment;
 		thunk.dispatch(insertEnvironment(newEnvironment));
+		return newEnvironment.__id;
 	},
 );
 
