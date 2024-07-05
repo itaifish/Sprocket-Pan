@@ -1,4 +1,8 @@
+/**
+ * Clamps a function to a given range. If the max is lower than the min, returns the min as the only valid value.
+ */
 export function clamp(value: number, min: number, max: number) {
+	if (max < min) return min;
 	return Math.min(Math.max(value, min), max);
 }
 

@@ -49,6 +49,20 @@ export const selectRequestsById = createSelector(
 	(requests, id) => requests[id],
 );
 
+export const selectFullRequestInfoById = createSelector(
+	[selectRequests, selectEndpoints, selectServices, (_, id: string) => id],
+	(requests, endpoints, services, id) => {
+		const request = requests[id];
+		const endpoint = endpoints[request?.endpointId];
+		const service = services[endpoint?.serviceId];
+		return {
+			request,
+			endpoint,
+			service,
+		};
+	},
+);
+
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);

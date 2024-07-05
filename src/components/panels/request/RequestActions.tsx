@@ -1,17 +1,4 @@
-import {
-	Button,
-	Stack,
-	IconButton,
-	useTheme,
-	useColorScheme,
-	CircularProgress,
-	Switch,
-	Tooltip,
-	Grid,
-	Select,
-	Option,
-	Card,
-} from '@mui/joy';
+import { Button, Stack, IconButton, CircularProgress, Switch, Tooltip, Grid, Select, Option, Card } from '@mui/joy';
 import LabelIcon from '@mui/icons-material/Label';
 import {
 	Endpoint,
@@ -22,10 +9,8 @@ import {
 import { useState } from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import ParticleEffectButton from 'react-particle-effect-button';
-import { rgbToHex } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
-
 import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
@@ -37,6 +22,7 @@ import { defaultResponse } from './constants';
 import { useSelector } from 'react-redux';
 import { selectEnvironmentTypography } from '../../../state/active/selectors';
 import { verbColors } from '../../../utils/style';
+import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
@@ -60,12 +46,7 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 	const [isAnimating, setIsAnimating] = useState(false);
 	const environmentTypography = useSelector((state) => selectEnvironmentTypography(state, request.id));
 	const dispatch = useAppDispatch();
-	const theme = useTheme();
-	const { mode } = useColorScheme();
-	const color = theme.palette.primary[mode === 'light' ? 'lightChannel' : 'darkChannel'];
-	const colorRgb = `rgb(${color.replaceAll(' ', ', ')})`;
-	const hexColor = rgbToHex(colorRgb);
-	console.log({ hexColor, colorRgb, color });
+	const particleColor = useParticleThemeColor();
 	const [isLoading, setLoading] = useState(false);
 	const [copied, setCopied] = useState(false);
 	const isDefault = endpoint.defaultRequest === request.id;
@@ -143,7 +124,7 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 						hidden={hidden}
 						canvasPadding={50}
 						type={'rectangle'}
-						color={hexColor}
+						color={particleColor}
 						oscillationCoefficient={15}
 						style={'stroke'}
 						particlesAmountCoefficient={2}
