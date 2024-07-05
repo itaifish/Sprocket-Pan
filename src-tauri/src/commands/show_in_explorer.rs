@@ -12,6 +12,7 @@ pub fn show_in_explorer(path: String) {
 
     #[cfg(target_os = "linux")]
     {
+        // TODO should we be using dbus? we were in a previous commit but it crashed in ubuntu jammy jellyfish
         use std::{fs::metadata, path::PathBuf}; // dep: fork = "0.1"
 
         let new_path = match metadata(&path).unwrap().is_dir() {
