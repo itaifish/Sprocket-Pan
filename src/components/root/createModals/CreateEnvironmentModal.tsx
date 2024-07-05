@@ -3,8 +3,8 @@ import { CreateModalsProps } from './createModalsProps';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { useMemo } from 'react';
 
-export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
-	const createServiceFunction = () => undefined;
+export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
+	const createEnvironmentFunction = () => undefined;
 	const allFieldsValid = useMemo(() => true, []);
 	return (
 		<Modal
@@ -15,24 +15,24 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 		>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>
-					{iconFromTabType['service']}
-					Create New Service
+					{iconFromTabType['environment']}
+					Create New Environment
 				</DialogTitle>
 				<Divider />
 				<DialogContent>Lorem Ipsum Dolar Sit Amit</DialogContent>
 				<DialogActions>
 					<Button
-						variant="outlined"
+						variant="solid"
 						color="success"
 						disabled={!allFieldsValid}
 						onClick={() => {
-							createServiceFunction();
+							createEnvironmentFunction();
 							closeFunc();
 						}}
 					>
 						Save
 					</Button>
-					<Button variant="outlined" color="warning" onClick={() => closeFunc()}>
+					<Button variant="plain" color="neutral" onClick={() => closeFunc()}>
 						Cancel
 					</Button>
 				</DialogActions>

@@ -3,27 +3,28 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
-import { generate } from 'random-words';
 import CodeIcon from '@mui/icons-material/Code';
-import { addScript } from '../../../state/active/slice';
-import { addNewEnvironment } from '../../../state/active/thunks/environments';
-import { cloneService } from '../../../state/active/thunks/services';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
+import { addToCreateQueue } from '../../../state/tabs/slice';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
 	const newEntities = [
-		{ name: 'Service', createFunc: () => cloneService({}), icon: <CreateNewFolderSharpIcon fontSize="small" /> },
+		{
+			name: 'Service',
+			createFunc: () => addToCreateQueue('service'),
+			icon: <CreateNewFolderSharpIcon fontSize="small" />,
+		},
 		{
 			name: 'Environment',
-			createFunc: () => addNewEnvironment({}),
+			createFunc: () => addToCreateQueue('environment'),
 			icon: <TableChartIcon fontSize="small" />,
 		},
 		{
 			name: 'Script',
-			createFunc: () => addScript({ scriptName: `${generate()} ${generate()} ${generate()}`, scriptContent: '' }),
+			createFunc: () => addToCreateQueue('script'),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];
