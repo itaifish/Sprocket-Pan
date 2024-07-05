@@ -10,11 +10,9 @@ import { deleteService } from '../../state/active/thunks/services';
 import { deleteRequest } from '../../state/active/thunks/requests';
 import { deleteScriptById } from '../../state/active/thunks/scripts';
 import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
+import { TabType } from '../../types/state/state';
 
-function getAttributesAndSelectorsForId(
-	id: string,
-	state: Pick<ApplicationData, 'endpoints' | 'environments' | 'requests' | 'services' | 'scripts'>,
-) {
+function getAttributesAndSelectorsForId(id: string, state: Pick<ApplicationData, `${TabType}s`>) {
 	// this is messy, there's better ways to do this but I'd like to bring env in alignment with the others first
 	if (state.endpoints[id]) {
 		return {
@@ -54,7 +52,7 @@ function getAttributesAndSelectorsForId(
 	throw new Error('an orphan id got into the delete queue');
 }
 
-export function QueueModals() {
+export function DeleteQueueModals() {
 	const nextForDeletion = useSelector(selectNextForDeletion);
 	const dispatch = useAppDispatch();
 	const state = useSelector(selectAllItems);

@@ -6,7 +6,7 @@ import invoke from '../../utils/invoke';
 import { selectDefaultTheme, selectZoomLevel } from '../../state/active/selectors';
 import { WorkspaceSelector } from '../workspaces/WorkspaceSelector';
 import { MonacoListener } from './MonacoListener';
-import { QueueModals } from './QueueModals';
+import { DeleteQueueModals } from './DeleteQueueModals';
 import { Workspace } from './Workspace';
 
 export function Root() {
@@ -34,7 +34,7 @@ export function Root() {
 	return (
 		<>
 			<Workspace />
-			<QueueModals />
+			<DeleteQueueModals />
 			<MonacoListener />
 		</>
 	);

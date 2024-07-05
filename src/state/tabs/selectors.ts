@@ -21,6 +21,10 @@ export const selectNextForDeletion = createSelector(selectTabsState, ({ deleteQu
 	return deleteQueue[0];
 });
 
+export const selectNextForCreation = createSelector(selectTabsList, ({ createQueue }) => {
+	return createQueue[0];
+});
+
 export const selectSearchText = createSelector(selectTabsState, (state) => state.searchText);
 
 export const selectFilteredIds = createSelector(
