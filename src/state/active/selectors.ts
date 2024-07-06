@@ -1,5 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
+import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
+import { queryParamsToString } from '../../utils/application';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -47,6 +49,20 @@ export const selectRequestsById = createSelector(
 	(requests, id) => requests[id],
 );
 
+export const selectFullRequestInfoById = createSelector(
+	[selectRequests, selectEndpoints, selectServices, (_, id: string) => id],
+	(requests, endpoints, services, id) => {
+		const request = requests[id];
+		const endpoint = endpoints[request?.endpointId];
+		const service = services[endpoint?.serviceId];
+		return {
+			request,
+			endpoint,
+			service,
+		};
+	},
+);
+
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);
@@ -68,3 +84,20 @@ export const selectHasBeenModifiedSinceLastSave = createSelector(
 	selectSaveStateTimestamps,
 	(time) => time.modified > time.saved,
 );
+
+export const selectEnvironmentTypography = createSelector([selectActiveState, (_, id: string) => id], (state, id) => {
+	const requestData = state.requests[id];
+	const endpointData = state.endpoints[requestData?.endpointId];
+	const serviceData = state.services[endpointData?.serviceId];
+	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
+	let query = queryParamsToString(fullQueryParams);
+	if (query) {
+		query = `?${query}`;
+	}
+	return environmentContextResolver.stringWithVarsToTypography(
+		`${serviceData.baseUrl}${endpointData.url}${query}`,
+		state,
+		serviceData.id,
+		requestData.id,
+	);
+});

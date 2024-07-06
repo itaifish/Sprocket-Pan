@@ -13,7 +13,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../state/store';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { EndpointRequest, iconFromTabType } from '../../../types/application-data/application-data';
-import { formatDate } from '../../../utils/string';
+import { formatFullDate } from '../../../utils/string';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 
 interface RecentRequestListItemProps {
@@ -35,7 +35,7 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 						<EventIcon />
 						<Typography level="title-sm">
 							{request.history.length > 0
-								? formatDate(new Date(request.history[request.history.length - 1].request.dateTime))
+								? formatFullDate(new Date(request.history[request.history.length - 1].request.dateTime))
 								: 'Never'}
 						</Typography>
 						<SprocketTooltip text={`Open "${request.name}" request`}>

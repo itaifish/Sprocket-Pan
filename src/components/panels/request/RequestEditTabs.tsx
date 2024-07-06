@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
 import { RequestBody } from './RequestBody';
 import { useSelector } from 'react-redux';
@@ -21,8 +21,8 @@ import {
 } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
-import { RequestScripts } from './RequestScripts';
+import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
+import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
@@ -63,7 +63,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				))}
 			</TabList>
 			<TabPanel value={'body'}>
-				<RequestBody requestData={request}></RequestBody>
+				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
 				<EnvironmentEditableTable
@@ -82,7 +82,13 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">
-				<RequestScripts request={request} />
+				<AccordionGroup>
+					<PrePostScriptDisplay
+						onChange={update}
+						preRequestScript={request.preRequestScript}
+						postRequestScript={request.postRequestScript}
+					/>
+				</AccordionGroup>
 			</TabPanel>
 			<TabPanel value="environment">
 				<EnvironmentEditableTable

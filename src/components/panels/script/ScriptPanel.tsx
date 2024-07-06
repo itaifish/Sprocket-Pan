@@ -36,6 +36,7 @@ import { PanelProps } from '../panels.interface';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
+import { sleep } from '../../../utils/misc';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -49,7 +50,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
-	const [copied, setCopied] = useState(false);
+
 	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -183,10 +184,10 @@ export function ScriptPanel({ id }: PanelProps) {
 							setRunning(true);
 							const scriptToRun = { ...script, content: localDataState };
 							const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
-							const timeoutPromise = new Promise<void>((resolve) => {
-								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
-							});
-							await Promise.all([asyncCallWithTimeout(ranScript, settings.timeoutDurationMS), timeoutPromise]);
+							await Promise.all([
+								asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
+								sleep(Constants.minimumScriptRunTimeMS),
+							]);
 							const output = await ranScript;
 							if (typeof output === 'function') {
 								setScriptOutputLang('javascript');
@@ -215,7 +216,7 @@ export function ScriptPanel({ id }: PanelProps) {
 			</Stack>
 			<Stack direction={'row'} spacing={2}>
 				<FormatIcon actionFunction={() => format()} />
-				<CopyToClipboardButton copied={copied} setCopied={setCopied} text={localDataState} />
+				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
 			<Editor
 				height={'55vh'}

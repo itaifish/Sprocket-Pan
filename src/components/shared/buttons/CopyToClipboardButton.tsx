@@ -1,31 +1,37 @@
-import { Tooltip, IconButton } from '@mui/joy';
+import { Tooltip, IconButton, Box } from '@mui/joy';
 import { SprocketTooltip } from '../SprocketTooltip';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Dispatch, SetStateAction } from 'react';
+import { PropsWithChildren, useState } from 'react';
 
-interface CopyToClipboardButtonProps {
-	copied: boolean;
-	setCopied: Dispatch<SetStateAction<boolean>>;
-	text: string;
+interface CopyToClipboardButtonProps extends PropsWithChildren {
+	tooltipText?: string;
+	copyText: string;
 }
 
-export function CopyToClipboardButton({ copied, setCopied, text }: CopyToClipboardButtonProps) {
+export function CopyToClipboardButton({
+	tooltipText = 'Copy to clipboard',
+	children = <ContentCopyIcon />,
+	copyText,
+}: CopyToClipboardButtonProps) {
+	const [copied, setCopied] = useState(false);
 	return (
-		<SprocketTooltip text={'Copy to clipboard'} disabled={copied}>
-			<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
-				<IconButton
-					disabled={copied}
-					onClick={() => {
-						setCopied(true);
-						setTimeout(() => {
-							setCopied(false);
-						}, 800);
-						navigator.clipboard.writeText(text);
-					}}
-				>
-					<ContentCopyIcon />
-				</IconButton>
-			</Tooltip>
+		<SprocketTooltip text={tooltipText} disabled={copied}>
+			<Box>
+				<Tooltip title="✓ Copied to clipboard!" arrow open={copied} placement="right" color="primary">
+					<IconButton
+						disabled={copied}
+						onClick={() => {
+							setCopied(true);
+							setTimeout(() => {
+								setCopied(false);
+							}, 800);
+							navigator.clipboard.writeText(copyText);
+						}}
+					>
+						{children}
+					</IconButton>
+				</Tooltip>
+			</Box>
 		</SprocketTooltip>
 	);
 }
