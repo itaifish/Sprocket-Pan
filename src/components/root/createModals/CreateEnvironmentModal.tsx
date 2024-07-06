@@ -39,7 +39,7 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 		dispatch(setSelectedTab(createdEnvironmentId));
 	};
 	const envNameValid = envName.length > 0;
-	const allFieldsValid = useMemo(() => true, []);
+	const allFieldsValid = useMemo(() => envNameValid, [envName]);
 	return (
 		<Modal
 			open={open}
