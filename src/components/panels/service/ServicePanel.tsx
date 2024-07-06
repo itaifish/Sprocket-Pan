@@ -37,7 +37,7 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { EditableText } from '../../shared/input/EditableText';
 import { EditableTextArea } from '../../shared/input/EditableTextArea';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
-import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
+import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { RecentRequestListItem } from './RecentRequestListItem';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';

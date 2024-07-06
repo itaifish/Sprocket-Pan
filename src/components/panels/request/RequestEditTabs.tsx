@@ -21,7 +21,7 @@ import {
 } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
+import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;

@@ -14,7 +14,7 @@ import { useAppDispatch } from '../../../state/store';
 import { Endpoint, Environment, QueryParams } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
+import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
