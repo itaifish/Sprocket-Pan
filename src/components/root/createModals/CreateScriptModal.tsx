@@ -13,7 +13,7 @@ import {
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
 import { iconFromTabType, Script } from '../../../types/application-data/application-data';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toValidFunctionName } from '../../../utils/string';
 import { InfoOutlined } from '@mui/icons-material';
 import { useAppDispatch } from '../../../state/store';
@@ -34,7 +34,7 @@ export function CreateScriptModal({ open, closeFunc }: CreateModalsProps) {
 	const scriptCallingNameValid =
 		scriptCallingName.length > 0 && toValidFunctionName(scriptCallingName) === scriptCallingName;
 	const scriptNameValid = scriptName.length > 0;
-	const allFieldsValid = useMemo(() => scriptNameValid && scriptCallingNameValid, [scriptName, scriptCallingName]);
+	const allFieldsValid = scriptNameValid && scriptCallingNameValid;
 
 	useEffect(() => {
 		setScriptCallingName(toValidFunctionName(scriptName));

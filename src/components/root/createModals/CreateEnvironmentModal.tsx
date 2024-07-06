@@ -13,7 +13,7 @@ import {
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
 import { Environment, iconFromTabType } from '../../../types/application-data/application-data';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectEnvironments } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
@@ -39,7 +39,7 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 		dispatch(setSelectedTab(createdEnvironmentId));
 	};
 	const envNameValid = envName.length > 0;
-	const allFieldsValid = useMemo(() => envNameValid, [envName]);
+	const allFieldsValid = envNameValid;
 	return (
 		<Modal
 			open={open}

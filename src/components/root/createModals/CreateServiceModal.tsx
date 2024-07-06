@@ -13,7 +13,7 @@ import {
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
 import { iconFromTabType, Service } from '../../../types/application-data/application-data';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useAppDispatch } from '../../../state/store';
 import { cloneService } from '../../../state/active/thunks/services';
 import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
@@ -24,7 +24,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const [serviceDescription, setServiceDescription] = useState('');
 	const [baseUrl, setBaseUrl] = useState('');
 	const serviceNameValid = serviceName.length > 0;
-	const allFieldsValid = useMemo(() => serviceNameValid, [serviceName]);
+	const allFieldsValid = serviceNameValid;
 
 	const createServiceFunction = async () => {
 		const newService: Partial<Service> = { name: serviceName };
