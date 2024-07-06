@@ -38,9 +38,9 @@ import { EditableText } from '../../shared/input/EditableText';
 import { EditableTextArea } from '../../shared/input/EditableTextArea';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { EnvironmentEditableTable } from '../environment/EnvironmentEditableTable';
-import { RecentRequestListItem } from '../request/RecentRequestListItem';
-import { RequestScript } from '../script/RequestScript';
+import { RecentRequestListItem } from './RecentRequestListItem';
 import { PanelProps } from '../panels.interface';
+import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -242,30 +242,11 @@ export function ServicePanel({ id }: PanelProps) {
 							</Box>
 						</AccordionDetails>
 					</Accordion>
-					<Accordion defaultExpanded>
-						<AccordionSummary>Pre-Request Script</AccordionSummary>
-						<AccordionDetails>
-							<RequestScript
-								scriptText={serviceData.preRequestScript}
-								scriptKey={'preRequestScript'}
-								updateScript={(scriptText: string) => {
-									update({ preRequestScript: scriptText });
-								}}
-							/>
-						</AccordionDetails>
-					</Accordion>
-					<Accordion defaultExpanded>
-						<AccordionSummary>Post-Request Script</AccordionSummary>
-						<AccordionDetails>
-							<RequestScript
-								scriptText={serviceData.postRequestScript}
-								scriptKey={'postRequestScript'}
-								updateScript={(scriptText: string) => {
-									update({ postRequestScript: scriptText });
-								}}
-							/>
-						</AccordionDetails>
-					</Accordion>
+					<PrePostScriptDisplay
+						onChange={update}
+						preRequestScript={serviceData.preRequestScript}
+						postRequestScript={serviceData.postRequestScript}
+					/>
 					<Accordion defaultExpanded>
 						<AccordionSummary>Recent Requests</AccordionSummary>
 						<AccordionDetails>
