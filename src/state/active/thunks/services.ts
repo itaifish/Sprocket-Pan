@@ -10,7 +10,7 @@ interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
 }
 
-export const cloneService = createAsyncThunk<void, CloneServiceInput, { state: RootState }>(
+export const cloneService = createAsyncThunk<string, CloneServiceInput, { state: RootState }>(
 	'active/cloneService',
 	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
 		const newService = { ...createNewServiceObject(), ...structuredClone(data) };
@@ -22,6 +22,7 @@ export const cloneService = createAsyncThunk<void, CloneServiceInput, { state: R
 			const { id, serviceId, ...endpoint } = structuredClone(endpoints[endpointId]);
 			await thunk.dispatch(addNewEndpoint({ data: endpoint, serviceId: newService.id }));
 		}
+		return newService.id;
 	},
 );
 

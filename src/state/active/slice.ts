@@ -11,8 +11,6 @@ import {
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
-import { v4 } from 'uuid';
-import { toValidFunctionName } from '../../utils/string';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
 	lastModified: number;
@@ -49,6 +47,7 @@ interface AddEndpointToService {
 
 interface AddScript {
 	scriptName: string;
+	scriptCallableName?: string;
 	scriptContent: string;
 }
 
@@ -181,16 +180,8 @@ export const activeSlice = createSlice({
 			const { id, ...updateFields } = action.payload;
 			Object.assign(state.scripts[id], updateFields);
 		},
-		addScript: (state, action: PayloadAction<AddScript>) => {
-			const { scriptContent: script, scriptName } = action.payload;
-			const newId = v4();
-			state.scripts[newId] = {
-				content: script,
-				id: newId,
-				name: scriptName,
-				scriptCallableName: toValidFunctionName(scriptName),
-				returnVariableName: null,
-			};
+		addScript: (state, action: PayloadAction<Script>) => {
+			state.scripts[action.payload.id] = action.payload;
 		},
 		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
 			delete state.scripts[action.payload.scriptId];
