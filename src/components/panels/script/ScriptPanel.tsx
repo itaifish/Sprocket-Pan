@@ -36,6 +36,7 @@ import { PanelProps } from '../panels.interface';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
+import { sleep } from '../../../utils/misc';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -183,10 +184,10 @@ export function ScriptPanel({ id }: PanelProps) {
 							setRunning(true);
 							const scriptToRun = { ...script, content: localDataState };
 							const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
-							const timeoutPromise = new Promise<void>((resolve) => {
-								setTimeout(() => resolve(), Constants.minimumScriptRunTimeMS);
-							});
-							await Promise.all([asyncCallWithTimeout(ranScript, settings.timeoutDurationMS), timeoutPromise]);
+							await Promise.all([
+								asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
+								sleep(Constants.minimumScriptRunTimeMS),
+							]);
 							const output = await ranScript;
 							if (typeof output === 'function') {
 								setScriptOutputLang('javascript');
