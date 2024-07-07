@@ -1,5 +1,6 @@
 import { Monaco } from '@monaco-editor/react';
 import { Script } from '../types/application-data/application-data';
+import { editor } from 'monaco-editor';
 
 // this is hacky but how it has to be done because of
 // https://github.com/microsoft/monaco-editor/issues/2696
@@ -183,10 +184,9 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 export const defaultEditorOptions = {
 	tabSize: 2,
 	insertSpaces: false,
-	wordWrap: 'bounded',
+	wordWrap: 'on',
 	wrappingIndent: 'same',
-	wordWrapColumn: 9999,
-} as const;
+} as const satisfies editor.IStandaloneEditorConstructionOptions;
 
 export function initMonaco(monaco: Monaco) {
 	monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({

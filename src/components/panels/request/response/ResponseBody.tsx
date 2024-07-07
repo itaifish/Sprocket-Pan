@@ -5,18 +5,23 @@ import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	let editorType = 'text';
-	if (response.bodyType?.toLowerCase()?.includes('json')) {
-		editorType = 'json';
-	} else if (response.bodyType?.toLowerCase()?.includes('html')) {
-		editorType = 'html';
+	const otherOptions = ['json', 'html', 'xml'];
+	for (const option of otherOptions) {
+		if (response.bodyType?.toLowerCase()?.includes(option)) {
+			editorType = option;
+			break;
+		}
 	}
-
 	return (
 		<SprocketEditor
 			ActionBarItems={
-				<Typography>
-					{response.statusCode}: {statusCodes[response.statusCode]}
-				</Typography>
+				<>
+					{response.statusCode != 0 && (
+						<Typography>
+							{response.statusCode}: {statusCodes[response.statusCode]}
+						</Typography>
+					)}
+				</>
 			}
 			height={'45vh'}
 			value={response.body}
