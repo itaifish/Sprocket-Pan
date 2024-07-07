@@ -8,7 +8,7 @@ import { Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
-import { EnvironmentEditableTable } from './EnvironmentEditableTable';
+import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
