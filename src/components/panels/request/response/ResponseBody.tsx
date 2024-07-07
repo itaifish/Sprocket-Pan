@@ -24,7 +24,8 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 				</>
 			}
 			height={'45vh'}
-			value={response.body}
+			// this is to maintain backwards compatibility with the old way we stored response bodies
+			value={typeof response.body === 'string' ? response.body : JSON.stringify(response.body)}
 			language={editorType}
 			options={{ readOnly: true, domReadOnly: true }}
 			formatOnChange
