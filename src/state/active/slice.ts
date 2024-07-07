@@ -45,12 +45,6 @@ interface AddEndpointToService {
 	serviceId: string;
 }
 
-interface AddScript {
-	scriptName: string;
-	scriptCallableName?: string;
-	scriptContent: string;
-}
-
 interface DeleteScript {
 	scriptId: string;
 }
