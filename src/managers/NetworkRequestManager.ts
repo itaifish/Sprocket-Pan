@@ -1,7 +1,9 @@
 import {
 	ApplicationData,
 	EMPTY_HEADERS,
+	EndpointRequest,
 	EndpointResponse,
+	NetworkFetchRequest,
 	RawBodyType,
 	RawBodyTypes,
 	SPHeaders,
@@ -16,11 +18,16 @@ import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
+import * as xmlParse from 'xml2js';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
-	private constructor() {}
+	private xmlBuilder: xmlParse.Builder;
+
+	private constructor() {
+		this.xmlBuilder = new xmlParse.Builder();
+	}
 
 	public async runPreScripts(requestId: string, stateAccess: StateAccess, auditLog: AuditLog = []) {
 		const data = stateAccess.getState();
@@ -80,21 +87,44 @@ class NetworkRequestManager {
 		}
 	}
 
+	private async parseRequestForEnvironmentOverrides(request: EndpointRequest) {
+		if (request.bodyType === 'none' || request.body == undefined) {
+			return undefined;
+		}
+		if (request.rawType === 'JSON') {
+			return JSON.parse(request.body as string) as Record<string, unknown>;
+		}
+		if (request.rawType === 'XML') {
+			return (await xmlParse.parseStringPromise(request.body)) as Record<string, unknown>;
+		}
+		return request.body;
+	}
+
+	private parseRequestForNetworkCall(
+		request: EndpointRequest,
+		parsedBody: Record<string, unknown> | string | undefined,
+	) {
+		if (parsedBody == undefined) {
+			return undefined;
+		}
+		if (request.rawType === 'JSON') {
+			return JSON.stringify(parsedBody as Record<string, unknown>);
+		}
+		if (request.rawType === 'XML') {
+			// convert to xml
+			return this.xmlBuilder.buildObject(parsedBody);
+		}
+		return parsedBody as string;
+	}
+
 	public async sendRequest(requestId: string, data: ApplicationData, auditLog: AuditLog = []) {
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 		const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
-		let body =
-			request.bodyType === 'none'
-				? undefined
-				: request.body
-				? typeof request.body === 'string'
-					? (JSON.parse(request.body) as Record<string, unknown>)
-					: request.body
-				: undefined;
-		if (body) {
+		let body = await this.parseRequestForEnvironmentOverrides(request);
+		if (body != undefined && typeof body != 'string') {
 			body = environmentContextResolver.resolveVariablesForMappedObject(body, {
 				data,
 				serviceId: endpoint.serviceId,
@@ -150,15 +180,16 @@ class NetworkRequestManager {
 		const networkRequest = {
 			url: `${url}${queryParamStr}`,
 			method: endpoint.verb,
-			body: body ?? {},
+			body: this.parseRequestForNetworkCall(request, body) ?? JSON.stringify({}),
 			headers: headers,
 			dateTime: new Date().getTime(),
-		};
+			bodyType: request.rawType,
+		} as const satisfies NetworkFetchRequest;
 		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
-			body: body ? Body.json(body) : undefined,
+			body: Body.text(networkRequest.body),
 			headers: headersToSend,
 			responseType: ResponseType.Text,
 		});

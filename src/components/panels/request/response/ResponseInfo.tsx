@@ -69,14 +69,14 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 					<>
 						<AccordionGroup>
 							<Accordion defaultExpanded>
-								<AccordionSummary>Body</AccordionSummary>
+								<AccordionSummary>Request Body</AccordionSummary>
 								<AccordionDetails>
 									<ResponseBody
 										response={{
 											...response.request,
-											bodyType: 'JSON',
+											bodyType: response.request.bodyType ?? 'JSON',
 											statusCode: 0,
-											body: JSON.stringify(response.request.body),
+											body: response.request.body,
 										}}
 									/>
 								</AccordionDetails>

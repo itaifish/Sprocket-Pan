@@ -44,7 +44,8 @@ export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
 	url: string;
 	headers: SPHeaders;
-	body: Record<string, unknown>;
+	body: string;
+	bodyType?: RawBodyType;
 	dateTime: number;
 };
 
