@@ -100,12 +100,3 @@ jobs:
               draft: false,
               prerelease: false
             })
-      # TODO: Create step that creates json file https://tauri.app/v1/guides/distribution/updater#static-json-file
-      - name: Deploy latest update to Gist
-        uses: exuanbo/actions-deploy-gist@v1.1.4
-        with:
-          token: ${{ secrets.TAURI_GIST_KEY }}
-          gist_description: SprocketPan Update Artifact Gist
-          gist_id: 1c3f0fae3933e0006ee6e0ed4c12a61b
-          file_path: ./sprocket-updater.json
-          gist_file_name: sprocket-updater.json
