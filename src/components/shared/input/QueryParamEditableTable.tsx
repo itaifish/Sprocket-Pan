@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Environment, QueryParams } from '../../../types/application-data/application-data';
-import { EditableTable, TableData } from './EditableTable';
+import { EditableData, TableData } from './EditableData';
 import { QueryParamUtils } from '../../../utils/data-utils';
 
 interface QueryParamEditableTableProps {
@@ -52,7 +52,7 @@ export function QueryParamEditableTable(props: QueryParamEditableTableProps) {
 		setLocalDataState(newQueryParams);
 	};
 	return (
-		<EditableTable
+		<EditableData
 			tableData={displayData}
 			changeTableData={changeData}
 			addNewData={addNewData}

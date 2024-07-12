@@ -80,7 +80,7 @@ const stringToTableData = (str: string, uniqueValues: boolean): TableData<number
 	return td;
 };
 
-interface EditableTableProps {
+interface EditableDataProps {
 	tableData: TableData<number>;
 	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
 	addNewData: (key: string, value: string) => void;
@@ -89,7 +89,7 @@ interface EditableTableProps {
 	unique: boolean;
 	fullSize?: boolean;
 }
-export function EditableTable(props: EditableTableProps) {
+export function EditableData(props: EditableDataProps) {
 	const colorScheme = useColorScheme();
 	const selectedMode = colorScheme.mode;
 	const systemMode = colorScheme.systemMode;

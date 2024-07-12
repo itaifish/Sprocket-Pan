@@ -3,7 +3,7 @@ import { Environment } from '../../../types/application-data/application-data';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { EnvironmentUtils } from '../../../utils/data-utils';
 import { log } from '../../../utils/logging';
-import { EditableTable, TableData } from '../../shared/input/EditableTable';
+import { EditableData, TableData } from '../../shared/input/EditableData';
 
 interface EnvironmentEditableTableProps {
 	environment: Environment;
@@ -66,7 +66,7 @@ export function EnvironmentEditableTable(props: EnvironmentEditableTableProps) {
 		}
 	};
 	return (
-		<EditableTable
+		<EditableData
 			tableData={displayData}
 			changeTableData={changeData}
 			addNewData={addNewData}
