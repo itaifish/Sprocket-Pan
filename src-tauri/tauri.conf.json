@@ -12,7 +12,7 @@
 	},
 	"tauri": {
 		"updater": {
-			"active": false,
+			"active": true,
 			"dialog": true,
 			"endpoints": ["https://gist.githubusercontent.com/itaifish/1c3f0fae3933e0006ee6e0ed4c12a61b/raw/"],
 			"pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IERERDM2QjQwNDdGRkRGQTkKUldTcDMvOUhRR3ZUM2NYNmJMR040c3ZFdTljZitTSHR3eXd5eWdlNmU3elpIcjY1WlpCczhrY1AK"
