@@ -3,6 +3,7 @@ import {
 	EMPTY_HEADERS,
 	EndpointRequest,
 	EndpointResponse,
+	getRequestBodyCategory,
 	NetworkFetchRequest,
 	RawBodyType,
 	RawBodyTypes,
@@ -97,7 +98,7 @@ class NetworkRequestManager {
 		if (request.rawType === 'XML') {
 			return (await xmlParse.parseStringPromise(request.body)) as Record<string, unknown>;
 		}
-		return request.body;
+		return request.body as Record<string, unknown> | undefined;
 	}
 
 	private parseRequestForNetworkCall(
@@ -107,7 +108,8 @@ class NetworkRequestManager {
 		if (parsedBody == undefined) {
 			return undefined;
 		}
-		if (request.rawType === 'JSON') {
+		const category = getRequestBodyCategory(request.bodyType);
+		if (request.rawType === 'JSON' || category === 'table') {
 			return JSON.stringify(parsedBody as Record<string, unknown>);
 		}
 		if (request.rawType === 'Yaml') {
@@ -190,9 +192,16 @@ class NetworkRequestManager {
 		} as const satisfies NetworkFetchRequest;
 		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+		let networkBody: Body;
+		const category = getRequestBodyCategory(request.bodyType);
+		if (category === 'table') {
+			networkBody = Body.form(body as Record<string, string>);
+		} else {
+			networkBody = Body.text(networkRequest.body);
+		}
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
-			body: Body.text(networkRequest.body),
+			body: networkBody,
 			headers: headersToSend,
 			responseType: ResponseType.Text,
 		});
