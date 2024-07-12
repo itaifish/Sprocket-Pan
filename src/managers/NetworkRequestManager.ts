@@ -195,7 +195,11 @@ class NetworkRequestManager {
 		let networkBody: Body;
 		const category = getRequestBodyCategory(request.bodyType);
 		if (category === 'table') {
-			networkBody = Body.form(body as Record<string, string>);
+			if (request.bodyType === 'x-www-form-urlencoded') {
+				networkBody = Body.form(body as Record<string, string>);
+			} else {
+				networkBody = Body.json(body as Record<string, string>);
+			}
 		} else {
 			networkBody = Body.text(networkRequest.body);
 		}
