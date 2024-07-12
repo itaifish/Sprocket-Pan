@@ -22,6 +22,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 
 	return (
 		<ListItem
+			id={`file_${requestId}`}
 			nested
 			endAction={
 				<FileSystemDropdown

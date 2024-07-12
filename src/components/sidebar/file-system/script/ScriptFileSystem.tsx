@@ -1,13 +1,13 @@
 import { useSelector } from 'react-redux';
 import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import { selectScript } from '../../../../state/active/selectors';
-import { addScript } from '../../../../state/active/slice';
 import { useAppDispatch } from '../../../../state/store';
 import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { addToDeleteQueue, addTabs, setSelectedTab } from '../../../../state/tabs/slice';
 import { keepStringLengthReasonable } from '../../../../utils/string';
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import CodeIcon from '@mui/icons-material/Code';
+import { createScript } from '../../../../state/active/thunks/scripts';
 
 interface ScriptFileSystemProps {
 	scriptId: string;
@@ -20,12 +20,20 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 
 	return (
 		<ListItem
+			id={`file_${scriptId}`}
 			nested
 			endAction={
 				<FileSystemDropdown
 					options={[
 						menuOptionDuplicate(() =>
-							dispatch(addScript({ scriptName: `${script.name} (Copy)`, scriptContent: script.content })),
+							dispatch(
+								createScript({
+									name: `${script.name} (Copy)`,
+									content: script.content,
+									returnVariableName: script.returnVariableName,
+									returnVariableType: structuredClone(script.returnVariableType),
+								}),
+							),
 						),
 						menuOptionDelete(() => dispatch(addToDeleteQueue(script.id))),
 					]}

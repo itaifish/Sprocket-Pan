@@ -1,4 +1,4 @@
-import { IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
+import { Box, IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
 import { useState } from 'react';
@@ -28,53 +28,57 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	const dispatch = useAppDispatch();
 
 	return (
-		<ListItem
-			nested
-			endAction={
-				<FileSystemDropdown
-					options={[
-						menuOptionDuplicate(() => dispatch(cloneServiceFromId(service.id))),
-						{
-							onClick: () => dispatch(addNewEndpoint({ serviceId: service.id })),
-							label: 'Add Endpoint',
-							Icon: AddBoxIcon,
-						},
-						menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
-					]}
-				/>
-			}
-		>
-			<ListItemButton
-				onClick={() => {
-					dispatch(addTabs({ [service.id]: 'service' }));
-					dispatch(setSelectedTab(service.id));
-				}}
-				selected={isSelected}
+		<>
+			<Box id={`file_${serviceId}`}></Box>
+			<ListItem
+				nested
+				endAction={
+					<FileSystemDropdown
+						options={[
+							menuOptionDuplicate(() => dispatch(cloneServiceFromId(service.id))),
+							{
+								onClick: () => dispatch(addNewEndpoint({ serviceId: service.id })),
+								label: 'Add Endpoint',
+								Icon: AddBoxIcon,
+							},
+							menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
+						]}
+					/>
+				}
 			>
-				<ListItemDecorator>
-					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-						<IconButton
-							onClick={(e) => {
-								setCollapsed((wasCollapsed) => !wasCollapsed);
-								e.preventDefault();
-								e.stopPropagation();
-							}}
-						>
-							{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
-						</IconButton>
-					</SprocketTooltip>
-				</ListItemDecorator>
-				<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
-			</ListItemButton>
-			<List
-				aria-labelledby="nav-list-browse"
-				sx={{
-					'& .JoyListItemButton-root': { p: '8px' },
-					'--List-nestedInsetStart': '1rem',
-				}}
-			>
-				{!collapsed && endpointIds.map((endpointId) => <EndpointFileSystem endpointId={endpointId} key={endpointId} />)}
-			</List>
-		</ListItem>
+				<ListItemButton
+					onClick={() => {
+						dispatch(addTabs({ [service.id]: 'service' }));
+						dispatch(setSelectedTab(service.id));
+					}}
+					selected={isSelected}
+				>
+					<ListItemDecorator>
+						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
+							<IconButton
+								onClick={(e) => {
+									setCollapsed((wasCollapsed) => !wasCollapsed);
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+							>
+								{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
+							</IconButton>
+						</SprocketTooltip>
+					</ListItemDecorator>
+					<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
+				</ListItemButton>
+				<List
+					aria-labelledby="nav-list-browse"
+					sx={{
+						'& .JoyListItemButton-root': { p: '8px' },
+						'--List-nestedInsetStart': '1rem',
+					}}
+				>
+					{!collapsed &&
+						endpointIds.map((endpointId) => <EndpointFileSystem endpointId={endpointId} key={endpointId} />)}
+				</List>
+			</ListItem>
+		</>
 	);
 }

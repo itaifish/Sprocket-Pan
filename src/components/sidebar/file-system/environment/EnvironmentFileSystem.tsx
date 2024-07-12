@@ -23,6 +23,7 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 	const dispatch = useAppDispatch();
 	return (
 		<ListItem
+			id={`file_${environmentId}`}
 			nested
 			endAction={
 				<FileSystemDropdown
