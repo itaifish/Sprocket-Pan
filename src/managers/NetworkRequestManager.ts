@@ -19,7 +19,7 @@ import { StateAccess } from '../state/types';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
-
+import yaml from 'js-yaml';
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -91,8 +91,8 @@ class NetworkRequestManager {
 		if (request.bodyType === 'none' || request.body == undefined) {
 			return undefined;
 		}
-		if (request.rawType === 'JSON') {
-			return JSON.parse(request.body as string) as Record<string, unknown>;
+		if (request.rawType === 'JSON' || request.rawType === 'Yaml') {
+			return yaml.load(request.body as string) as Record<string, unknown>;
 		}
 		if (request.rawType === 'XML') {
 			return (await xmlParse.parseStringPromise(request.body)) as Record<string, unknown>;
@@ -109,6 +109,9 @@ class NetworkRequestManager {
 		}
 		if (request.rawType === 'JSON') {
 			return JSON.stringify(parsedBody as Record<string, unknown>);
+		}
+		if (request.rawType === 'Yaml') {
+			return yaml.dump(parsedBody, { skipInvalid: true });
 		}
 		if (request.rawType === 'XML') {
 			// convert to xml

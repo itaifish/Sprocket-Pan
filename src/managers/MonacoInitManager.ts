@@ -59,7 +59,7 @@ function getSprocketPanType(scripts: Script[]) {
 
 export function getMonacoInjectedTypeCode(scripts: Script[]) {
 	const injectedCode = `
-		type RawBodyType = 'Text' | 'JSON' | 'JavaScript' | 'HTML' | 'XML';
+		type RawBodyType = 'Text' | 'JSON' | 'JavaScript' | 'HTML' | 'XML' | 'Yaml';
 		type RequestBodyType = 'form-data' | 'x-www-form-urlencoded' | 'none' | 'raw';
 		type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 			id: string;
