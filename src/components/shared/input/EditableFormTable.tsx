@@ -14,9 +14,9 @@ const getTransformedData = (data: Table) =>
 	}));
 
 const getUntransformedData = (data: ReturnType<typeof getTransformedData>) => {
-	return data
-		.sort((a, b) => a.key.localeCompare(b.key))
-		.reduce((prev, curr) => ({ ...prev, [curr.key]: curr.value }), {} as Record<string, string>);
+	const result: Record<string, string> = {};
+	data.forEach((kvp) => (result[kvp.key] = kvp.value));
+	return result;
 };
 
 interface EditableFormTableProps {
@@ -61,9 +61,9 @@ export function EditableFormTable({ data, setData }: EditableFormTableProps) {
 			<Table>
 				<thead>
 					<tr>
-						<th style={{ width: '40%' }}>Name</th>
-						<th style={{ width: '40%' }}>Value</th>
-						<th style={{ width: '20%' }}></th>
+						<th style={{ maxWidth: '45%' }}>Name</th>
+						<th style={{ width: '45%' }}>Value</th>
+						<th style={{ width: '10%' }}></th>
 					</tr>
 				</thead>
 				<tbody>
