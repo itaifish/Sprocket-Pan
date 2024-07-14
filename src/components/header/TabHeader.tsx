@@ -18,7 +18,7 @@ import { setSelectedTab, closeTab } from '../../state/tabs/slice';
 import { keepStringLengthReasonable } from '../../utils/string';
 import { TabContent } from '../panels/TabContent';
 
-function getMapFromTabType(data: Pick<ApplicationData, `${TabType}s`>, tabType: TabType) {
+function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
 	return data[`${tabType}s`];
 }
 
