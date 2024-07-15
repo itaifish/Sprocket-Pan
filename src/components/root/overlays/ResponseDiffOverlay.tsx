@@ -45,11 +45,11 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 
 	return (
 		<Sheet>
-			<Typography sx={{ textAlign: 'center' }} level="h2">
+			<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h3">
 				Compare Responses
 			</Typography>
 			<Divider />
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction={'row'} spacing={2} sx={{ mt: '20px' }}>
 				{(['left', 'right'] as const).map((direction) => (
 					<Box key={direction}>
 						<Stack direction={'column'}>
@@ -58,7 +58,10 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<Autocomplete
 									startDecorator={iconFromTabType.service}
 									autoHighlight
-									value={{ label: selectedService[direction].name, value: selectedService[direction].id }}
+									value={{
+										label: selectedService[direction]?.name ?? 'No Service Selected',
+										value: selectedService[direction]?.id,
+									}}
 									onChange={(_event, newValue) => {
 										if (newValue != null) {
 											setSelectedService((selectedService) => ({
@@ -78,7 +81,10 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<Autocomplete
 									startDecorator={iconFromTabType.endpoint}
 									autoHighlight
-									value={{ label: selectedEndpoint[direction].name, value: selectedEndpoint[direction].id }}
+									value={{
+										label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
+										value: selectedEndpoint[direction]?.id,
+									}}
 									onChange={(_event, newValue) => {
 										if (newValue != null) {
 											setSelectedEndpoint((selectedEndpoint) => ({
@@ -97,7 +103,10 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<Autocomplete
 									startDecorator={iconFromTabType.request}
 									autoHighlight
-									value={{ label: selectedRequest[direction].name, value: selectedRequest[direction].id }}
+									value={{
+										label: selectedRequest[direction]?.name ?? 'No Request Selected',
+										value: selectedRequest[direction]?.id,
+									}}
 									onChange={(_event, newValue) => {
 										if (newValue != null) {
 											setSelectedRequest((selectedRequest) => ({
@@ -113,8 +122,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 							<FormControl>
 								<FormLabel>History Item</FormLabel>
 								<HistoryControl
-									value={selectedHistoryIndex[direction]}
-									historyLength={selectedRequest[direction].history.length}
+									value={selectedHistoryIndex[direction] ?? 0}
+									historyLength={selectedRequest[direction]?.history.length ?? 0}
 									onChange={(state) =>
 										setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: state }))
 									}

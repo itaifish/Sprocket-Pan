@@ -9,6 +9,7 @@ import { MonacoListener } from './MonacoListener';
 import { DeleteQueueModals } from './DeleteQueueModals';
 import { Workspace } from './Workspace';
 import { CreateQueueModals } from './CreateQueueModals';
+import { DiffQueueModals } from './DiffQueueModals';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -37,6 +38,7 @@ export function Root() {
 			<Workspace />
 			<DeleteQueueModals />
 			<CreateQueueModals />
+			<DiffQueueModals />
 			<MonacoListener />
 		</>
 	);

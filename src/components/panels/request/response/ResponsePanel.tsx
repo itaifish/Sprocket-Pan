@@ -7,6 +7,7 @@ import { deleteResponseFromHistory } from '../../../../state/active/slice';
 import { ResponseInfo } from './ResponseInfo';
 import { ResponseState } from '../RequestActions';
 import { formatFullDate } from '../../../../utils/string';
+import { OpenDiffToolButton } from './OpenDiffToolButton';
 
 function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
 	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;
@@ -40,12 +41,22 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 						<Typography level="title-md" textAlign={'center'}>
 							{formatFullDate(new Date(responseStateData?.response.dateTime))}
 						</Typography>
-						<HistoryControl
-							value={responseState}
-							onChange={setResponseState}
-							historyLength={request.history.length}
-							onDelete={(index) => dispatch(deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))}
-						/>
+						<Stack direction={'row'} spacing={0}>
+							<OpenDiffToolButton
+								historyIndex={
+									typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)
+								}
+								request={request}
+							/>
+							<HistoryControl
+								value={responseState}
+								onChange={setResponseState}
+								historyLength={request.history.length}
+								onDelete={(index) =>
+									dispatch(deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
+								}
+							/>
+						</Stack>
 					</Stack>
 					<Divider />
 					<ResponseInfo response={responseStateData} requestId={request.id} />
