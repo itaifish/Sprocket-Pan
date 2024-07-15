@@ -19,6 +19,34 @@ import { iconFromTabType } from '../../../types/application-data/application-dat
 import { HistoryControl } from '../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 
+function headersToJson(headers: Record<string, string>) {
+	return JSON.stringify(
+		Object.entries(headers)
+			.sort((e1, e2) => e1[0].localeCompare(e2[0]))
+			.reduce(
+				(acc, curr) => {
+					acc[curr[0]] = curr[1];
+					return acc;
+				},
+				{} as Record<string, string>,
+			),
+	);
+}
+
+function requestHeadersToJson(headers: Record<string, string>) {
+	return headersToJson(
+		Object.entries(headers).reduce(
+			(acc, curr) => {
+				if (!curr[0].startsWith('__')) {
+					acc[curr[0]] = curr[1];
+				}
+				return acc;
+			},
+			{} as Record<string, string>,
+		),
+	);
+}
+
 export type SelectedResponseDiffItem = {
 	requestId: string;
 	historyIndex: number;
@@ -172,7 +200,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					<>
 						<Tabs value={selectedTab} onChange={(_e, newTab) => setSelectedTab(newTab as number)}>
 							<TabList color="primary">
-								{['Response Body', 'Headers', 'Request Body'].map((text, index) => (
+								{['Response Body', 'Response Headers', 'Request Headers', 'Request Body'].map((text, index) => (
 									<Tab color={selectedTab === index ? 'primary' : 'neutral'} value={index} key={index}>
 										{text}
 									</Tab>
@@ -198,20 +226,36 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 							<TabPanel value={1}>
 								<>
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
-										Headers
+										Response Headers
 									</Typography>
 									<SprocketEditor
 										width={'80vw'}
 										height={'40vh'}
 										isDiff={true}
-										original={JSON.stringify(original.response.headers)}
-										modified={JSON.stringify(modified.response.headers)}
+										original={headersToJson(original.response.headers)}
+										modified={headersToJson(modified.response.headers)}
 										language="json"
 										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
 									/>
 								</>
 							</TabPanel>
 							<TabPanel value={2}>
+								<>
+									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
+										Request Headers
+									</Typography>
+									<SprocketEditor
+										width={'80vw'}
+										height={'40vh'}
+										isDiff={true}
+										original={requestHeadersToJson(original.request.headers)}
+										modified={requestHeadersToJson(modified.request.headers)}
+										language="json"
+										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+									/>
+								</>
+							</TabPanel>
+							<TabPanel value={3}>
 								<>
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Request Body
