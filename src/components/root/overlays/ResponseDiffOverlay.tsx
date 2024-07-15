@@ -4,6 +4,7 @@ import { Autocomplete, Box, Divider, FormControl, FormLabel, Sheet, Stack, Typog
 import { useState } from 'react';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { HistoryControl } from '../../panels/request/response/HistoryControl';
+import { SprocketEditor } from '../../shared/input/SprocketEditor';
 
 export type SelectedResponseDiffItem = {
 	requestId: string;
@@ -132,6 +133,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 						</Stack>
 					</Box>
 				))}
+				<SprocketEditor width={'80vw'} isDiff={true} />
 			</Stack>
 		</Sheet>
 	);
