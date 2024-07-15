@@ -41,8 +41,10 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 			}
 			if (overrides?.options?.readOnly) {
 				editorRef.current?.updateOptions({ readOnly: false });
+				editorRef.current?.updateOptions({ originalEditable: true });
 				await action();
 				editorRef.current?.updateOptions({ readOnly: true });
+				editorRef.current?.updateOptions({ originalEditable: false });
 			} else {
 				await action();
 			}
@@ -73,7 +75,7 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 		<Box>
 			<Stack direction="row" justifyContent="space-between" alignItems="end">
 				{ActionBarItems}
-				<EditorActions copyText={value} format={format} />
+				<EditorActions copyText={isDiff ? undefined : value} format={format} />
 			</Stack>
 			<EditorType
 				language={'typescript'}

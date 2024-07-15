@@ -44,96 +44,129 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 	const [selectedEndpoint, setSelectedEndpoint] = useState(initialEndpoint);
 	const [selectedService, setSelectedService] = useState(initialService);
 
+	const originalHistory = selectedRequest.left?.history;
+	const modifiedHistory = selectedRequest.right?.history;
+
+	const original =
+		originalHistory?.length > selectedHistoryIndex.left ? originalHistory[selectedHistoryIndex.left] : null;
+	const modified =
+		modifiedHistory?.length > selectedHistoryIndex.right ? modifiedHistory[selectedHistoryIndex.right] : null;
+
 	return (
 		<Sheet>
 			<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h3">
 				Compare Responses
 			</Typography>
 			<Divider />
-			<Stack direction={'row'} spacing={2} sx={{ mt: '20px' }}>
-				{(['left', 'right'] as const).map((direction) => (
-					<Box key={direction}>
-						<Stack direction={'column'}>
-							<FormControl>
-								<FormLabel>Service</FormLabel>
-								<Autocomplete
-									startDecorator={iconFromTabType.service}
-									autoHighlight
-									value={{
-										label: selectedService[direction]?.name ?? 'No Service Selected',
-										value: selectedService[direction]?.id,
-									}}
-									onChange={(_event, newValue) => {
-										if (newValue != null) {
-											setSelectedService((selectedService) => ({
-												...selectedService,
-												[direction]: services[newValue.value],
-											}));
-											setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
-											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
+			<Stack>
+				<Stack direction={'row'} spacing={2} sx={{ mt: '20px' }} justifyContent={'space-between'}>
+					{(['left', 'right'] as const).map((direction) => (
+						<Box key={direction}>
+							<Stack direction={'column'}>
+								<FormControl>
+									<FormLabel>Service</FormLabel>
+									<Autocomplete
+										startDecorator={iconFromTabType.service}
+										autoHighlight
+										value={{
+											label: selectedService[direction]?.name ?? 'No Service Selected',
+											value: selectedService[direction]?.id,
+										}}
+										onChange={(_event, newValue) => {
+											if (newValue != null) {
+												setSelectedService((selectedService) => ({
+													...selectedService,
+													[direction]: services[newValue.value],
+												}));
+												setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
+												setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
+												setSelectedHistoryIndex((selectedHistoryIndex) => ({
+													...selectedHistoryIndex,
+													[direction]: 0,
+												}));
+											}
+										}}
+										options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
+									></Autocomplete>
+								</FormControl>
+								<FormControl>
+									<FormLabel>Endpoint</FormLabel>
+									<Autocomplete
+										startDecorator={iconFromTabType.endpoint}
+										autoHighlight
+										value={{
+											label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
+											value: selectedEndpoint[direction]?.id,
+										}}
+										onChange={(_event, newValue) => {
+											if (newValue != null) {
+												setSelectedEndpoint((selectedEndpoint) => ({
+													...selectedEndpoint,
+													[direction]: endpoints[newValue.value],
+												}));
+												setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
+												setSelectedHistoryIndex((selectedHistoryIndex) => ({
+													...selectedHistoryIndex,
+													[direction]: 0,
+												}));
+											}
+										}}
+										options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
+									></Autocomplete>
+								</FormControl>
+								<FormControl>
+									<FormLabel>Request</FormLabel>
+									<Autocomplete
+										startDecorator={iconFromTabType.request}
+										autoHighlight
+										value={{
+											label: selectedRequest[direction]?.name ?? 'No Request Selected',
+											value: selectedRequest[direction]?.id,
+										}}
+										onChange={(_event, newValue) => {
+											if (newValue != null) {
+												setSelectedRequest((selectedRequest) => ({
+													...selectedRequest,
+													[direction]: requests[newValue.value],
+												}));
+												setSelectedHistoryIndex((selectedHistoryIndex) => ({
+													...selectedHistoryIndex,
+													[direction]: 0,
+												}));
+											}
+										}}
+										options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
+									></Autocomplete>
+								</FormControl>
+								<FormControl>
+									<FormLabel>History Item</FormLabel>
+									<HistoryControl
+										value={selectedHistoryIndex[direction] ?? 0}
+										historyLength={selectedRequest[direction]?.history.length ?? 0}
+										onChange={(state) =>
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({
+												...selectedHistoryIndex,
+												[direction]: state,
+											}))
 										}
-									}}
-									options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
-								></Autocomplete>
-							</FormControl>
-							<FormControl>
-								<FormLabel>Endpoint</FormLabel>
-								<Autocomplete
-									startDecorator={iconFromTabType.endpoint}
-									autoHighlight
-									value={{
-										label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
-										value: selectedEndpoint[direction]?.id,
-									}}
-									onChange={(_event, newValue) => {
-										if (newValue != null) {
-											setSelectedEndpoint((selectedEndpoint) => ({
-												...selectedEndpoint,
-												[direction]: endpoints[newValue.value],
-											}));
-											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
-										}
-									}}
-									options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
-								></Autocomplete>
-							</FormControl>
-							<FormControl>
-								<FormLabel>Request</FormLabel>
-								<Autocomplete
-									startDecorator={iconFromTabType.request}
-									autoHighlight
-									value={{
-										label: selectedRequest[direction]?.name ?? 'No Request Selected',
-										value: selectedRequest[direction]?.id,
-									}}
-									onChange={(_event, newValue) => {
-										if (newValue != null) {
-											setSelectedRequest((selectedRequest) => ({
-												...selectedRequest,
-												[direction]: requests[newValue.value],
-											}));
-											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
-										}
-									}}
-									options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
-								></Autocomplete>
-							</FormControl>
-							<FormControl>
-								<FormLabel>History Item</FormLabel>
-								<HistoryControl
-									value={selectedHistoryIndex[direction] ?? 0}
-									historyLength={selectedRequest[direction]?.history.length ?? 0}
-									onChange={(state) =>
-										setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: state }))
-									}
-								/>
-							</FormControl>
-						</Stack>
-					</Box>
-				))}
-				<SprocketEditor width={'80vw'} isDiff={true} />
+									/>
+								</FormControl>
+							</Stack>
+						</Box>
+					))}
+				</Stack>
+				{original && modified && (
+					<SprocketEditor
+						width={'80vw'}
+						height={'40vh'}
+						isDiff={true}
+						original={original.response.body}
+						modified={modified.response.body}
+						originalLanguage={original.response.bodyType?.toLocaleLowerCase()}
+						modifiedLanguage={modified.response.bodyType?.toLocaleLowerCase()}
+						options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+					/>
+				)}
 			</Stack>
 		</Sheet>
 	);
