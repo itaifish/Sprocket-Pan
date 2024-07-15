@@ -1,25 +1,12 @@
 import { useSelector } from 'react-redux';
-import { selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
-import {
-	Autocomplete,
-	Box,
-	Divider,
-	FormControl,
-	FormLabel,
-	Sheet,
-	Stack,
-	Tab,
-	TabList,
-	TabPanel,
-	Tabs,
-	Typography,
-} from '@mui/joy';
+import { selectEndpoints, selectRequests, selectServices } from '../../../../state/active/selectors';
+import { Box, Divider, FormControl, FormLabel, Sheet, Stack, Tab, TabList, TabPanel, Tabs, Typography } from '@mui/joy';
 import { useState } from 'react';
-import { iconFromTabType } from '../../../types/application-data/application-data';
-import { HistoryControl } from '../../panels/request/response/HistoryControl';
-import { SprocketEditor } from '../../shared/input/SprocketEditor';
-import { VisualEventLog } from '../../panels/request/response/VisualEventLog';
-import { statusCodes } from '../../../utils/string';
+import { HistoryControl } from '../../../panels/request/response/HistoryControl';
+import { SprocketEditor } from '../../../shared/input/SprocketEditor';
+import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
+import { statusCodes } from '../../../../utils/string';
+import { SearchableRequestDropdown } from './SearchableRequestDropdown';
 
 function headersToJson(headers: Record<string, string>) {
 	return JSON.stringify(
@@ -106,84 +93,70 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					{(['left', 'right'] as const).map((direction) => (
 						<Box key={direction}>
 							<Stack direction={'column'}>
-								<FormControl>
-									<FormLabel>Service</FormLabel>
-									<Autocomplete
-										disableClearable
-										startDecorator={iconFromTabType.service}
-										autoHighlight
-										value={{
-											label: selectedService[direction]?.name ?? 'No Service Selected',
-											value: selectedService[direction]?.id,
-										}}
-										onChange={(_event, newValue) => {
-											if (newValue != null) {
-												setSelectedService((selectedService) => ({
-													...selectedService,
-													[direction]: services[newValue.value],
-												}));
-												setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
-												setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-												setSelectedHistoryIndex((selectedHistoryIndex) => ({
-													...selectedHistoryIndex,
-													[direction]: 0,
-												}));
-											}
-										}}
-										options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
-									></Autocomplete>
-								</FormControl>
-								<FormControl>
-									<FormLabel>Endpoint</FormLabel>
-									<Autocomplete
-										disableClearable
-										startDecorator={iconFromTabType.endpoint}
-										autoHighlight
-										value={{
-											label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
-											value: selectedEndpoint[direction]?.id,
-										}}
-										onChange={(_event, newValue) => {
-											if (newValue != null) {
-												setSelectedEndpoint((selectedEndpoint) => ({
-													...selectedEndpoint,
-													[direction]: endpoints[newValue.value],
-												}));
-												setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-												setSelectedHistoryIndex((selectedHistoryIndex) => ({
-													...selectedHistoryIndex,
-													[direction]: 0,
-												}));
-											}
-										}}
-										options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
-									></Autocomplete>
-								</FormControl>
-								<FormControl>
-									<FormLabel>Request</FormLabel>
-									<Autocomplete
-										disableClearable
-										startDecorator={iconFromTabType.request}
-										autoHighlight
-										value={{
-											label: selectedRequest[direction]?.name ?? 'No Request Selected',
-											value: selectedRequest[direction]?.id,
-										}}
-										onChange={(_event, newValue) => {
-											if (newValue != null) {
-												setSelectedRequest((selectedRequest) => ({
-													...selectedRequest,
-													[direction]: requests[newValue.value],
-												}));
-												setSelectedHistoryIndex((selectedHistoryIndex) => ({
-													...selectedHistoryIndex,
-													[direction]: 0,
-												}));
-											}
-										}}
-										options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
-									></Autocomplete>
-								</FormControl>
+								<SearchableRequestDropdown
+									name={'service'}
+									value={{
+										label: selectedService[direction]?.name ?? 'No Service Selected',
+										value: selectedService[direction]?.id,
+									}}
+									onChange={(newValue) => {
+										if (newValue != null) {
+											setSelectedService((selectedService) => ({
+												...selectedService,
+												[direction]: services[newValue.value],
+											}));
+											setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
+											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({
+												...selectedHistoryIndex,
+												[direction]: 0,
+											}));
+										}
+									}}
+									options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
+								/>
+								<SearchableRequestDropdown
+									name={'endpoint'}
+									value={{
+										label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
+										value: selectedEndpoint[direction]?.id,
+									}}
+									onChange={(newValue) => {
+										if (newValue != null) {
+											setSelectedEndpoint((selectedEndpoint) => ({
+												...selectedEndpoint,
+												[direction]: endpoints[newValue.value],
+											}));
+											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({
+												...selectedHistoryIndex,
+												[direction]: 0,
+											}));
+										}
+									}}
+									options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
+								/>
+								<SearchableRequestDropdown
+									name={'request'}
+									value={{
+										label: selectedRequest[direction]?.name ?? 'No Request Selected',
+										value: selectedRequest[direction]?.id,
+									}}
+									onChange={(newValue) => {
+										if (newValue != null) {
+											setSelectedRequest((selectedRequest) => ({
+												...selectedRequest,
+												[direction]: requests[newValue.value],
+											}));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({
+												...selectedHistoryIndex,
+												[direction]: 0,
+											}));
+										}
+									}}
+									options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
+								/>
+
 								<FormControl>
 									<FormLabel>History Item</FormLabel>
 									<HistoryControl
@@ -201,8 +174,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 						</Box>
 					))}
 				</Stack>
-				{original && modified && (
-					<Sheet sx={{ width: '80vw' }}>
+				<Sheet sx={{ width: '80vw' }}>
+					{original && modified && (
 						<Tabs value={selectedTab} onChange={(_e, newTab) => setSelectedTab(newTab as number)}>
 							<TabList color="primary">
 								{['Response Body', 'Response Headers', 'Request Headers', 'Request Body', 'Event Log'].map(
@@ -306,8 +279,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								</Stack>
 							</TabPanel>
 						</Tabs>
-					</Sheet>
-				)}
+					)}
+				</Sheet>
 			</Stack>
 		</Sheet>
 	);

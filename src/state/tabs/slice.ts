@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TabType } from '../../types/state/state';
-import { ResponseDiffSelection } from '../../components/root/overlays/ResponseDiffOverlay';
+import { ResponseDiffSelection } from '../../components/root/overlays/ResponseDiffOverlay/ResponseDiffOverlay';
 
 export interface TabsState {
 	selected: string | null;
