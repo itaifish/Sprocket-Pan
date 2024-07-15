@@ -109,6 +109,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<FormControl>
 									<FormLabel>Service</FormLabel>
 									<Autocomplete
+										disableClearable
 										startDecorator={iconFromTabType.service}
 										autoHighlight
 										value={{
@@ -135,6 +136,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<FormControl>
 									<FormLabel>Endpoint</FormLabel>
 									<Autocomplete
+										disableClearable
 										startDecorator={iconFromTabType.endpoint}
 										autoHighlight
 										value={{
@@ -160,6 +162,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<FormControl>
 									<FormLabel>Request</FormLabel>
 									<Autocomplete
+										disableClearable
 										startDecorator={iconFromTabType.request}
 										autoHighlight
 										value={{
