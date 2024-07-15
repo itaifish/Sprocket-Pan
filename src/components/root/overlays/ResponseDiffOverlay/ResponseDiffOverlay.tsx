@@ -95,15 +95,12 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 							<Stack direction={'column'}>
 								<SearchableRequestDropdown
 									name={'service'}
-									value={{
-										label: selectedService[direction]?.name ?? 'No Service Selected',
-										value: selectedService[direction]?.id,
-									}}
+									selected={selectedService[direction]}
 									onChange={(newValue) => {
 										if (newValue != null) {
 											setSelectedService((selectedService) => ({
 												...selectedService,
-												[direction]: services[newValue.value],
+												[direction]: services[newValue.value as string],
 											}));
 											setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
 											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
@@ -113,19 +110,16 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
+									options={services}
 								/>
 								<SearchableRequestDropdown
 									name={'endpoint'}
-									value={{
-										label: selectedEndpoint[direction]?.name ?? 'No Endpoint Selected',
-										value: selectedEndpoint[direction]?.id,
-									}}
+									selected={selectedEndpoint[direction]}
 									onChange={(newValue) => {
 										if (newValue != null) {
 											setSelectedEndpoint((selectedEndpoint) => ({
 												...selectedEndpoint,
-												[direction]: endpoints[newValue.value],
+												[direction]: endpoints[newValue.value as string],
 											}));
 											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
 											setSelectedHistoryIndex((selectedHistoryIndex) => ({
@@ -134,19 +128,16 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
+									options={endpoints}
 								/>
 								<SearchableRequestDropdown
 									name={'request'}
-									value={{
-										label: selectedRequest[direction]?.name ?? 'No Request Selected',
-										value: selectedRequest[direction]?.id,
-									}}
+									selected={selectedRequest[direction]}
 									onChange={(newValue) => {
 										if (newValue != null) {
 											setSelectedRequest((selectedRequest) => ({
 												...selectedRequest,
-												[direction]: requests[newValue.value],
+												[direction]: requests[newValue.value as string],
 											}));
 											setSelectedHistoryIndex((selectedHistoryIndex) => ({
 												...selectedHistoryIndex,
@@ -154,7 +145,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
+									options={requests}
 								/>
 
 								<FormControl>
