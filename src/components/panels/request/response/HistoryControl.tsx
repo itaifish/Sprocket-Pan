@@ -11,7 +11,7 @@ interface HistoryControlProps {
 	value: ResponseState;
 	onChange: (state: ResponseState) => void;
 	historyLength: number;
-	onDelete: (index: number) => void;
+	onDelete?: (index: number) => void;
 }
 
 export function HistoryControl({ value, onChange, historyLength, onDelete }: HistoryControlProps) {
@@ -59,20 +59,23 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 					<ArrowRightIcon />
 				</IconButton>
 			</SprocketTooltip>
-			<SprocketTooltip text={'Delete Response'}>
-				<IconButton
-					disabled={value === 'error' || historyLength === 0}
-					aria-label="Delete Response"
-					onClick={() => {
-						onDelete(numValue);
-						if (numValue >= historyLength - 1) {
-							onChange('latest');
-						}
-					}}
-				>
-					<DeleteForever />
-				</IconButton>
-			</SprocketTooltip>
+
+			{onDelete && (
+				<SprocketTooltip text={'Delete Response'}>
+					<IconButton
+						disabled={value === 'error' || historyLength === 0}
+						aria-label="Delete Response"
+						onClick={() => {
+							onDelete(numValue);
+							if (numValue >= historyLength - 1) {
+								onChange('latest');
+							}
+						}}
+					>
+						<DeleteForever />
+					</IconButton>
+				</SprocketTooltip>
+			)}
 		</Stack>
 	);
 }

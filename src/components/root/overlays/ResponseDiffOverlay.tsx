@@ -3,14 +3,16 @@ import { selectEndpoints, selectRequests, selectServices } from '../../../state/
 import { Autocomplete, Box, Divider, FormControl, FormLabel, Sheet, Stack, Typography } from '@mui/joy';
 import { useState } from 'react';
 import { iconFromTabType } from '../../../types/application-data/application-data';
+import { HistoryControl } from '../../panels/request/response/HistoryControl';
 
-type SelectedResponse = {
+export type SelectedResponseDiffItem = {
 	requestId: string;
 	historyIndex: number;
 };
+export type ResponseDiffSelection = { left: SelectedResponseDiffItem; right: SelectedResponseDiffItem };
 
 interface ResponseDiffOverlayProps {
-	initialSelection: { left: SelectedResponse; right: SelectedResponse };
+	initialSelection: ResponseDiffSelection;
 }
 
 export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayProps) {
@@ -33,7 +35,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 		right: services[initialEndpoint.right.serviceId],
 	};
 
-	const [selectedHistoryIndex, setSelecctedHistoryIndex] = useState({
+	const [selectedHistoryIndex, setSelectedHistoryIndex] = useState({
 		left: initialSelection.left.historyIndex,
 		right: initialSelection.right.historyIndex,
 	});
@@ -65,7 +67,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 											setSelectedEndpoint((selectedEndpoint) => ({ ...selectedEndpoint, [direction]: null }));
 											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-											setSelecctedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
 										}
 									}}
 									options={Object.values(services).map((service) => ({ label: service.name, value: service.id }))}
@@ -84,7 +86,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 												[direction]: endpoints[newValue.value],
 											}));
 											setSelectedRequest((selectedRequest) => ({ ...selectedRequest, [direction]: null }));
-											setSelecctedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
 										}
 									}}
 									options={Object.values(endpoints).map((service) => ({ label: service.name, value: service.id }))}
@@ -102,7 +104,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 												...selectedRequest,
 												[direction]: requests[newValue.value],
 											}));
-											setSelecctedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
+											setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: 0 }));
 										}
 									}}
 									options={Object.values(requests).map((service) => ({ label: service.name, value: service.id }))}
@@ -110,6 +112,13 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 							</FormControl>
 							<FormControl>
 								<FormLabel>History Item</FormLabel>
+								<HistoryControl
+									value={selectedHistoryIndex[direction]}
+									historyLength={selectedRequest[direction].history.length}
+									onChange={(state) =>
+										setSelectedHistoryIndex((selectedHistoryIndex) => ({ ...selectedHistoryIndex, [direction]: state }))
+									}
+								/>
 							</FormControl>
 						</Stack>
 					</Box>
