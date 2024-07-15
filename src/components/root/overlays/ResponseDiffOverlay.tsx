@@ -1,6 +1,19 @@
 import { useSelector } from 'react-redux';
 import { selectEndpoints, selectRequests, selectServices } from '../../../state/active/selectors';
-import { Autocomplete, Box, Divider, FormControl, FormLabel, Sheet, Stack, Typography } from '@mui/joy';
+import {
+	Autocomplete,
+	Box,
+	Divider,
+	FormControl,
+	FormLabel,
+	Sheet,
+	Stack,
+	Tab,
+	TabList,
+	TabPanel,
+	Tabs,
+	Typography,
+} from '@mui/joy';
 import { useState } from 'react';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { HistoryControl } from '../../panels/request/response/HistoryControl';
@@ -43,7 +56,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 	const [selectedRequest, setSelectedRequest] = useState(initialRequest);
 	const [selectedEndpoint, setSelectedEndpoint] = useState(initialEndpoint);
 	const [selectedService, setSelectedService] = useState(initialService);
-
+	const [selectedTab, setSelectedTab] = useState(0);
 	const originalHistory = selectedRequest.left?.history;
 	const modifiedHistory = selectedRequest.right?.history;
 
@@ -53,7 +66,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 		modifiedHistory?.length > selectedHistoryIndex.right ? modifiedHistory[selectedHistoryIndex.right] : null;
 
 	return (
-		<Sheet>
+		<Sheet sx={{ overflowY: 'scroll' }}>
 			<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h3">
 				Compare Responses
 			</Typography>
@@ -156,16 +169,67 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					))}
 				</Stack>
 				{original && modified && (
-					<SprocketEditor
-						width={'80vw'}
-						height={'40vh'}
-						isDiff={true}
-						original={original.response.body}
-						modified={modified.response.body}
-						originalLanguage={original.response.bodyType?.toLocaleLowerCase()}
-						modifiedLanguage={modified.response.bodyType?.toLocaleLowerCase()}
-						options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
-					/>
+					<>
+						<Tabs value={selectedTab} onChange={(_e, newTab) => setSelectedTab(newTab as number)}>
+							<TabList color="primary">
+								{['Response Body', 'Headers', 'Request Body'].map((text, index) => (
+									<Tab color={selectedTab === index ? 'primary' : 'neutral'} value={index} key={index}>
+										{text}
+									</Tab>
+								))}
+							</TabList>
+							<TabPanel value={0}>
+								<>
+									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
+										Response Body
+									</Typography>
+									<SprocketEditor
+										width={'80vw'}
+										height={'40vh'}
+										isDiff={true}
+										original={original.response.body}
+										modified={modified.response.body}
+										originalLanguage={original.response.bodyType?.toLocaleLowerCase()}
+										modifiedLanguage={modified.response.bodyType?.toLocaleLowerCase()}
+										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+									/>
+								</>
+							</TabPanel>
+							<TabPanel value={1}>
+								<>
+									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
+										Headers
+									</Typography>
+									<SprocketEditor
+										width={'80vw'}
+										height={'40vh'}
+										isDiff={true}
+										original={JSON.stringify(original.response.headers)}
+										modified={JSON.stringify(modified.response.headers)}
+										language="json"
+										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+									/>
+								</>
+							</TabPanel>
+							<TabPanel value={2}>
+								<>
+									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
+										Request Body
+									</Typography>
+									<SprocketEditor
+										width={'80vw'}
+										height={'40vh'}
+										isDiff={true}
+										original={JSON.stringify(original.request.body)}
+										modified={JSON.stringify(modified.request.body)}
+										originalLanguage={original.request.bodyType?.toLocaleLowerCase()}
+										modifiedLanguage={modified.request.bodyType?.toLocaleLowerCase()}
+										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+									/>
+								</>
+							</TabPanel>
+						</Tabs>
+					</>
 				)}
 			</Stack>
 		</Sheet>
