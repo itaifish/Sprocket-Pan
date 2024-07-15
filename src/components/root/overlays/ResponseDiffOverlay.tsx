@@ -264,8 +264,17 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										width={'80vw'}
 										height={'40vh'}
 										isDiff={true}
-										original={JSON.stringify(original.request.body)}
-										modified={JSON.stringify(modified.request.body)}
+										// TODO: Remove this once we add the backwards compatibility logic
+										original={
+											typeof original.request.body === 'string'
+												? original.request.body
+												: JSON.stringify(original.request.body)
+										}
+										modified={
+											typeof modified.request.body === 'string'
+												? modified.request.body
+												: JSON.stringify(modified.request.body)
+										}
 										originalLanguage={original.request.bodyType?.toLocaleLowerCase()}
 										modifiedLanguage={modified.request.bodyType?.toLocaleLowerCase()}
 										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
