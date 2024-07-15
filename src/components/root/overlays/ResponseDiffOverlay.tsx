@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { HistoryControl } from '../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
+import { VisualEventLog } from '../../panels/request/response/VisualEventLog';
 
 function headersToJson(headers: Record<string, string>) {
 	return JSON.stringify(
@@ -197,14 +198,16 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					))}
 				</Stack>
 				{original && modified && (
-					<>
+					<Sheet sx={{ width: '80vw' }}>
 						<Tabs value={selectedTab} onChange={(_e, newTab) => setSelectedTab(newTab as number)}>
 							<TabList color="primary">
-								{['Response Body', 'Response Headers', 'Request Headers', 'Request Body'].map((text, index) => (
-									<Tab color={selectedTab === index ? 'primary' : 'neutral'} value={index} key={index}>
-										{text}
-									</Tab>
-								))}
+								{['Response Body', 'Response Headers', 'Request Headers', 'Request Body', 'Event Log'].map(
+									(text, index) => (
+										<Tab color={selectedTab === index ? 'primary' : 'neutral'} value={index} key={index}>
+											{text}
+										</Tab>
+									),
+								)}
 							</TabList>
 							<TabPanel value={0}>
 								<>
@@ -212,7 +215,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										Response Body
 									</Typography>
 									<SprocketEditor
-										width={'80vw'}
+										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
 										original={original.response.body}
@@ -229,7 +232,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										Response Headers
 									</Typography>
 									<SprocketEditor
-										width={'80vw'}
+										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
 										original={headersToJson(original.response.headers)}
@@ -245,7 +248,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										Request Headers
 									</Typography>
 									<SprocketEditor
-										width={'80vw'}
+										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
 										original={requestHeadersToJson(original.request.headers)}
@@ -261,7 +264,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										Request Body
 									</Typography>
 									<SprocketEditor
-										width={'80vw'}
+										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
 										// TODO: Remove this once we add the backwards compatibility logic
@@ -281,8 +284,17 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									/>
 								</>
 							</TabPanel>
+							<TabPanel value={4}>
+								<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
+									Event Log
+								</Typography>
+								<Stack direction={'row'} justifyContent={'space-between'}>
+									<VisualEventLog auditLog={original.auditLog ?? []} requestId={selectedRequest.left.id} />
+									<VisualEventLog auditLog={modified.auditLog ?? []} requestId={selectedRequest.right.id} />
+								</Stack>
+							</TabPanel>
 						</Tabs>
-					</>
+					</Sheet>
 				)}
 			</Stack>
 		</Sheet>
