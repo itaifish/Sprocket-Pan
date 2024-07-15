@@ -19,6 +19,7 @@ import { iconFromTabType } from '../../../types/application-data/application-dat
 import { HistoryControl } from '../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 import { VisualEventLog } from '../../panels/request/response/VisualEventLog';
+import { statusCodes } from '../../../utils/string';
 
 function headersToJson(headers: Record<string, string>) {
 	return JSON.stringify(
@@ -231,6 +232,14 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Response Headers
 									</Typography>
+									<Stack direction={'row'} justifyContent={'space-between'}>
+										<Typography>
+											{original.response.statusCode}: {statusCodes[original.response.statusCode]}
+										</Typography>
+										<Typography>
+											{modified.response.statusCode}: {statusCodes[modified.response.statusCode]}
+										</Typography>
+									</Stack>
 									<SprocketEditor
 										width={'100%'}
 										height={'40vh'}
