@@ -97,7 +97,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 		modifiedHistory?.length > selectedHistoryIndex.right ? modifiedHistory[selectedHistoryIndex.right] : null;
 
 	return (
-		<Sheet sx={{ overflowY: 'scroll' }}>
+		<Sheet sx={{ overflowY: 'scroll', px: '20px' }}>
 			<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h3">
 				Compare Responses
 			</Typography>
