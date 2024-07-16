@@ -1,7 +1,15 @@
-import { Select, Stack, Option, FormControl, FormLabel } from '@mui/joy';
+import { Select, Stack, Option, FormControl, FormLabel, Button, CircularProgress } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { InputSlider } from '../../shared/input/InputSlider';
 import { Settings } from '../../../types/settings/settings';
+import { emit } from '@tauri-apps/api/event';
+import { log } from '../../../utils/logging';
+import { useState } from 'react';
+import { sleep } from '../../../utils/misc';
+import { Constants } from '../../../utils/constants';
+import HelpIcon from '@mui/icons-material/Help';
+import CloudDoneIcon from '@mui/icons-material/CloudDone';
+import { SprocketTooltip } from '../../shared/SprocketTooltip';
 
 export interface SettingsTabProps {
 	settings: Settings;
@@ -9,6 +17,8 @@ export interface SettingsTabProps {
 }
 
 export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
+	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
+	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
 	return (
 		<Stack spacing={3}>
 			<InputSlider
@@ -69,6 +79,35 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 					<Option value={false}>Value Only</Option>
 				</Select>
 			</FormControl>
+			<Stack direction="row" spacing={2} alignItems={'center'}>
+				<Button
+					startDecorator={checkingForUpdate ? <CircularProgress /> : <></>}
+					onClick={async () => {
+						if (!checkingForUpdate) {
+							setCheckingForUpdate(true);
+							await Promise.all([
+								sleep(Constants.minimumScriptRunTimeMS),
+								emit('tauri://update').catch((e) => log.error(e)),
+							]);
+							setCheckingForUpdate(false);
+							setHasCheckedForUpdate(true);
+						}
+					}}
+					disabled={checkingForUpdate}
+					sx={{ maxWidth: '300px' }}
+				>
+					Check for update
+				</Button>
+				{hasCheckedForUpdate ? (
+					<SprocketTooltip text="You have already checked for updates">
+						<CloudDoneIcon sx={{ transform: 'scale(1.4)' }} color="success" />
+					</SprocketTooltip>
+				) : (
+					<SprocketTooltip text="You have not yet checked for updates">
+						<HelpIcon sx={{ transform: 'scale(1.4)' }} color="primary" />
+					</SprocketTooltip>
+				)}
+			</Stack>
 		</Stack>
 	);
 }
