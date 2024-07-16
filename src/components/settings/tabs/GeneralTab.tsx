@@ -1,4 +1,4 @@
-import { Select, Stack, Option, FormControl, FormLabel, Button, CircularProgress, Box } from '@mui/joy';
+import { Select, Stack, Option, FormControl, FormLabel, Button, CircularProgress } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { InputSlider } from '../../shared/input/InputSlider';
 import { Settings } from '../../../types/settings/settings';
@@ -87,7 +87,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 							setCheckingForUpdate(true);
 							await Promise.all([
 								sleep(Constants.minimumScriptRunTimeMS),
-								await emit('tauri://update').catch((e) => log.error(e)),
+								emit('tauri://update').catch((e) => log.error(e)),
 							]);
 							setCheckingForUpdate(false);
 							setHasCheckedForUpdate(true);
@@ -97,18 +97,16 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 					sx={{ maxWidth: '300px' }}
 				>
 					Check for update
-				</Button>{' '}
-				<Box sx={{ transform: 'scale(1.5)' }}>
-					{hasCheckedForUpdate ? (
-						<SprocketTooltip text="You have already checked for updates">
-							<CloudDoneIcon color="success" />
-						</SprocketTooltip>
-					) : (
-						<SprocketTooltip text="You have not yet checked for updates">
-							<HelpIcon color="primary" />
-						</SprocketTooltip>
-					)}
-				</Box>
+				</Button>
+				{hasCheckedForUpdate ? (
+					<SprocketTooltip text="You have already checked for updates">
+						<CloudDoneIcon sx={{ transform: 'scale(1.4)' }} color="success" />
+					</SprocketTooltip>
+				) : (
+					<SprocketTooltip text="You have not yet checked for updates">
+						<HelpIcon sx={{ transform: 'scale(1.4)' }} color="primary" />
+					</SprocketTooltip>
+				)}
 			</Stack>
 		</Stack>
 	);

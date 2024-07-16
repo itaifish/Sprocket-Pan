@@ -13,7 +13,8 @@ edition = "2021"
 tauri-build = { version = "1.5.3", features = [] }
 
 [dependencies]
-tauri = { version = "1.7.1", features = [ "updater",
+tauri = { version = "1.7.1", features = [
+	"updater",
 	"http-all",
 	"dialog-all",
 	"os-all",
