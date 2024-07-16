@@ -1,12 +1,26 @@
 import { useSelector } from 'react-redux';
 import { selectEndpoints, selectRequests, selectServices } from '../../../../state/active/selectors';
-import { Box, Divider, FormControl, FormLabel, Sheet, Stack, Tab, TabList, TabPanel, Tabs, Typography } from '@mui/joy';
+import {
+	Box,
+	Chip,
+	Divider,
+	FormControl,
+	FormLabel,
+	Sheet,
+	Stack,
+	Tab,
+	TabList,
+	TabPanel,
+	Tabs,
+	Typography,
+} from '@mui/joy';
 import { useState } from 'react';
 import { HistoryControl } from '../../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
 import { statusCodes } from '../../../../utils/string';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
+import { verbColors } from '../../../../utils/style';
 
 function headersToJson(headers: Record<string, string>) {
 	return JSON.stringify(
@@ -169,7 +183,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					{original && modified && (
 						<Tabs value={selectedTab} onChange={(_e, newTab) => setSelectedTab(newTab as number)}>
 							<TabList color="primary">
-								{['Response Body', 'Response Headers', 'Request Headers', 'Request Body', 'Event Log'].map(
+								{['Response Body', 'Response Headers', 'Request Body', 'Request Headers', 'Event Log'].map(
 									(text, index) => (
 										<Tab color={selectedTab === index ? 'primary' : 'neutral'} value={index} key={index}>
 											{text}
@@ -218,7 +232,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									/>
 								</>
 							</TabPanel>
-							<TabPanel value={2}>
+							<TabPanel value={3}>
 								<>
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Request Headers
@@ -234,11 +248,25 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									/>
 								</>
 							</TabPanel>
-							<TabPanel value={3}>
+							<TabPanel value={2}>
 								<>
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Request Body
 									</Typography>
+									<Stack direction={'row'} justifyContent={'space-between'} textAlign={'center'}>
+										<Box>
+											<Stack direction={'row'} spacing={0}>
+												<Chip color={verbColors[original.request.method]}>{original.request.method}</Chip>
+												<Typography level="body-md">{original.request.url}</Typography>
+											</Stack>
+										</Box>
+										<Box>
+											<Stack direction={'row'} spacing={0}>
+												<Chip color={verbColors[modified.request.method]}>{modified.request.method}</Chip>
+												<Typography level="body-md">{modified.request.url}</Typography>
+											</Stack>
+										</Box>
+									</Stack>
 									<SprocketEditor
 										width={'100%'}
 										height={'40vh'}
