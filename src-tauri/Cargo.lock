@@ -3057,7 +3057,6 @@ dependencies = [
  "heck 0.5.0",
  "http",
  "ignore",
- "indexmap 1.9.3",
  "minisign-verify",
  "objc",
  "once_cell",
