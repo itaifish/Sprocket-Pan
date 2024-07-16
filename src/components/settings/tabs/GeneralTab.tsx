@@ -87,7 +87,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 							setCheckingForUpdate(true);
 							await Promise.all([
 								sleep(Constants.minimumScriptRunTimeMS),
-								await emit('tauri://update').catch((e) => log.error(e)),
+								emit('tauri://update').catch((e) => log.error(e)),
 							]);
 							setCheckingForUpdate(false);
 							setHasCheckedForUpdate(true);
