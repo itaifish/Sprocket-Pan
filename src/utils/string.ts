@@ -71,6 +71,10 @@ export function formatMilliseconds(ms: number) {
 	return `${(ms / 1000).toFixed(3)} second${ms === 1000 ? '' : 's'}`;
 }
 
+export function getStatusCodeColor(statusCode: number) {
+	return statusCode < 200 ? 'neutral' : statusCode < 300 ? 'success' : statusCode < 400 ? 'primary' : 'danger';
+}
+
 export const statusCodes: Record<number, string> = {
 	100: 'Continue',
 	101: 'Switching Protocols',
