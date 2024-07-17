@@ -4,6 +4,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { keepStringLengthReasonable } from '../../../utils/string';
+import { SprocketTooltip } from '../SprocketTooltip';
 interface EditableTextProps {
 	text: string;
 	setText: (text: string) => void;
@@ -40,25 +41,29 @@ export function EditableText({
 			error={!isValid}
 			endDecorator={
 				<>
-					<IconButton
-						onClick={() => {
-							setIsEditing(false);
-						}}
-						sx={{ marginRight: '2px' }}
-					>
-						<CancelIcon fontSize="large" />
-					</IconButton>
-					<IconButton
-						onClick={() => {
-							if (isValid) {
-								setText(typingText);
+					<SprocketTooltip text="Cancel">
+						<IconButton
+							onClick={() => {
 								setIsEditing(false);
-							}
-						}}
-						disabled={!isValid}
-					>
-						<CheckIcon fontSize="large" />
-					</IconButton>
+							}}
+							sx={{ marginRight: '2px' }}
+						>
+							<CancelIcon fontSize="large" />
+						</IconButton>
+					</SprocketTooltip>
+					<SprocketTooltip text="Save">
+						<IconButton
+							onClick={() => {
+								if (isValid) {
+									setText(typingText);
+									setIsEditing(false);
+								}
+							}}
+							disabled={!isValid}
+						>
+							<CheckIcon fontSize="large" />
+						</IconButton>
+					</SprocketTooltip>
 				</>
 			}
 		/>
@@ -72,7 +77,9 @@ export function EditableText({
 			}}
 			{...props}
 		>
-			{<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />}
+			<SprocketTooltip text="Edit">
+				<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />
+			</SprocketTooltip>
 			{keepStringLengthReasonable(text, isTitle ? 100 : 30)}
 		</Typography>
 	);

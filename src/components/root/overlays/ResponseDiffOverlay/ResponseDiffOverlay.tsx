@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { HistoryControl } from '../../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
-import { statusCodes } from '../../../../utils/string';
+import { formatShortFullDate, statusCodes } from '../../../../utils/string';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
 import { verbColors } from '../../../../utils/style';
 
@@ -164,16 +164,23 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 
 								<FormControl>
 									<FormLabel>History Item</FormLabel>
-									<HistoryControl
-										value={selectedHistoryIndex[direction] ?? 0}
-										historyLength={selectedRequest[direction]?.history.length ?? 0}
-										onChange={(state) =>
-											setSelectedHistoryIndex((selectedHistoryIndex) => ({
-												...selectedHistoryIndex,
-												[direction]: state,
-											}))
-										}
-									/>
+									<Stack direction={'row'} alignItems={'center'}>
+										<HistoryControl
+											value={selectedHistoryIndex[direction] ?? 0}
+											historyLength={selectedRequest[direction]?.history.length ?? 0}
+											onChange={(state) =>
+												setSelectedHistoryIndex((selectedHistoryIndex) => ({
+													...selectedHistoryIndex,
+													[direction]: state,
+												}))
+											}
+										/>
+										{(selectedHistoryIndex[direction] ?? Number.MAX_SAFE_INTEGER) <
+											selectedRequest[direction]?.history.length &&
+											formatShortFullDate(
+												selectedRequest[direction]?.history[selectedHistoryIndex[direction]]?.request.dateTime,
+											)}
+									</Stack>
 								</FormControl>
 							</Stack>
 						</Box>

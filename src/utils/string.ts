@@ -38,12 +38,26 @@ const dateTimeFormatters = {
 		second: '2-digit',
 		fractionalSecondDigits: 3,
 	}),
+	shortDateFull: new Intl.DateTimeFormat('en-US', {
+		year: '2-digit',
+		month: '2-digit',
+		day: 'numeric',
+		hour12: true,
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		fractionalSecondDigits: 2,
+	}),
 	date: new Intl.DateTimeFormat('en-US', {
 		year: 'numeric',
 		month: 'long',
 		day: 'numeric',
 	}),
 };
+
+export function formatShortFullDate(date: Date | string | number) {
+	return dateTimeFormatters.shortDateFull.format(new Date(date));
+}
 
 export function formatFullDate(date: Date | string | number) {
 	return dateTimeFormatters.full.format(new Date(date));
