@@ -38,7 +38,7 @@ class SaveUpdateManager {
 
 	private constructor() {}
 
-	public currentVersion(): number {
+	public getCurrentVersion(): number {
 		return transformers.length;
 	}
 

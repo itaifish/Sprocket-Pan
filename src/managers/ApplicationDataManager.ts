@@ -31,7 +31,7 @@ export const defaultApplicationData: ApplicationData = {
 			post: ['request', 'endpoint', 'service'],
 		},
 	},
-	version: saveUpdateManager.currentVersion(),
+	version: saveUpdateManager.getCurrentVersion(),
 };
 
 export class ApplicationDataManager {
