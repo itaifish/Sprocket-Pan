@@ -28,8 +28,9 @@ export const cloneService = createAsyncThunk<string, CloneServiceInput, { state:
 
 export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootState }>(
 	'active/cloneServiceFromId',
-	async (id, thunk) => {
-		const service = thunk.getState().active.services[id];
+	async (oldId, thunk) => {
+		const { id, ...service } = thunk.getState().active.services[oldId];
+		const _id = id;
 		if (service != null) {
 			thunk.dispatch(cloneService({ data: service }));
 		}

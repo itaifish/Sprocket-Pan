@@ -41,10 +41,6 @@ export function createNewEndpointObject(serviceId: string): Endpoint {
 	};
 }
 
-export function cloneEndpoint(endpoint: Endpoint, serviceId: string): Endpoint {
-	return { ...structuredClone(endpoint), serviceId };
-}
-
 export function createNewServiceObject(): Service {
 	const newId = v4();
 	return {

@@ -7,7 +7,7 @@ import { createNewEnvironmentObject } from './util';
 import { closeTab } from '../../tabs/slice';
 
 interface AddNewEnvironment {
-	data?: Partial<Omit<Environment, 'id'>>;
+	data?: Partial<Omit<Environment, '__id'>>;
 }
 
 export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { state: RootState }>(
@@ -25,8 +25,8 @@ export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { s
 
 export const addNewEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
 	'active/addEnvironmentById',
-	async (id, thunk) => {
-		const environment = thunk.getState().active.environments[id];
+	async (oldId, thunk) => {
+		const { __id, ...environment } = thunk.getState().active.environments[oldId];
 		thunk.dispatch(addNewEnvironment({ data: environment }));
 	},
 );
