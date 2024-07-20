@@ -20,6 +20,7 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 
 	return (
 		<ListItem
+			id={`file_${scriptId}`}
 			nested
 			endAction={
 				<FileSystemDropdown

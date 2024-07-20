@@ -5,7 +5,7 @@ import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	let editorType = 'text';
-	const otherOptions = ['json', 'html', 'xml'];
+	const otherOptions = ['json', 'html', 'xml', 'yaml'];
 	for (const option of otherOptions) {
 		if (response.bodyType?.toLowerCase()?.includes(option)) {
 			editorType = option;

@@ -3,6 +3,7 @@ import {
 	EMPTY_HEADERS,
 	EndpointRequest,
 	EndpointResponse,
+	getRequestBodyCategory,
 	NetworkFetchRequest,
 	RawBodyType,
 	RawBodyTypes,
@@ -19,7 +20,7 @@ import { StateAccess } from '../state/types';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
-
+import yaml from 'js-yaml';
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -91,13 +92,13 @@ class NetworkRequestManager {
 		if (request.bodyType === 'none' || request.body == undefined) {
 			return undefined;
 		}
-		if (request.rawType === 'JSON') {
-			return JSON.parse(request.body as string) as Record<string, unknown>;
+		if (request.rawType === 'JSON' || request.rawType === 'Yaml') {
+			return yaml.load(request.body as string) as Record<string, unknown>;
 		}
 		if (request.rawType === 'XML') {
 			return (await xmlParse.parseStringPromise(request.body)) as Record<string, unknown>;
 		}
-		return request.body;
+		return request.body as Record<string, unknown> | undefined;
 	}
 
 	private parseRequestForNetworkCall(
@@ -107,8 +108,12 @@ class NetworkRequestManager {
 		if (parsedBody == undefined) {
 			return undefined;
 		}
-		if (request.rawType === 'JSON') {
+		const category = getRequestBodyCategory(request.bodyType);
+		if (request.rawType === 'JSON' || category === 'table') {
 			return JSON.stringify(parsedBody as Record<string, unknown>);
+		}
+		if (request.rawType === 'Yaml') {
+			return yaml.dump(parsedBody, { skipInvalid: true });
 		}
 		if (request.rawType === 'XML') {
 			// convert to xml
@@ -187,9 +192,20 @@ class NetworkRequestManager {
 		} as const satisfies NetworkFetchRequest;
 		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+		let networkBody: Body;
+		const category = getRequestBodyCategory(request.bodyType);
+		if (category === 'table') {
+			if (request.bodyType === 'x-www-form-urlencoded') {
+				networkBody = Body.form(body as Record<string, string>);
+			} else {
+				networkBody = Body.json(body as Record<string, string>);
+			}
+		} else {
+			networkBody = Body.text(networkRequest.body);
+		}
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
-			body: Body.text(networkRequest.body),
+			body: networkBody,
 			headers: headersToSend,
 			responseType: ResponseType.Text,
 		});

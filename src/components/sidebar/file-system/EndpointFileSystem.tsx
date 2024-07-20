@@ -7,6 +7,7 @@ import {
 	ListSubheader,
 	Chip,
 	ListItemContent,
+	Box,
 } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
@@ -38,59 +39,62 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 	const dispatch = useAppDispatch();
 
 	return (
-		<ListItem
-			nested
-			endAction={
-				<FileSystemDropdown
-					options={[
-						menuOptionDuplicate(() => dispatch(addNewEndpointById(endpoint.id))),
-						{
-							onClick: () => dispatch(addNewRequest({ endpointId: endpoint.id })),
-							label: 'Add Request',
-							Icon: AddBoxIcon,
-						},
-						menuOptionDelete(() => dispatch(addToDeleteQueue(endpoint.id))),
-					]}
-				/>
-			}
-		>
-			<ListItemButton
-				onClick={() => {
-					dispatch(addTabs({ [endpoint.id]: 'endpoint' }));
-					dispatch(setSelectedTab(endpoint.id));
-				}}
-				selected={isSelected}
+		<>
+			<Box id={`file_${endpointId}`}></Box>
+			<ListItem
+				nested
+				endAction={
+					<FileSystemDropdown
+						options={[
+							menuOptionDuplicate(() => dispatch(addNewEndpointById(endpoint.id))),
+							{
+								onClick: () => dispatch(addNewRequest({ endpointId: endpoint.id })),
+								label: 'Add Request',
+								Icon: AddBoxIcon,
+							},
+							menuOptionDelete(() => dispatch(addToDeleteQueue(endpoint.id))),
+						]}
+					/>
+				}
 			>
-				<ListItemDecorator>
-					<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-						<IconButton
-							size="sm"
-							onClick={(e) => {
-								setCollapsed((wasCollapsed) => !wasCollapsed);
-								e.preventDefault();
-								e.stopPropagation();
-							}}
-						>
-							{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
-						</IconButton>
-					</SprocketTooltip>
-				</ListItemDecorator>
-				<ListItemContent>{keepStringLengthReasonable(endpoint.name)}</ListItemContent>
-				<ListSubheader>
-					<Chip size="sm" variant="outlined" color={verbColors[endpoint.verb]}>
-						{endpoint.verb}
-					</Chip>
-				</ListSubheader>
-			</ListItemButton>
-			<List
-				aria-labelledby="nav-list-browse"
-				sx={{
-					'& .JoyListItemButton-root': { p: '8px' },
-					'--List-nestedInsetStart': '1rem',
-				}}
-			>
-				{!collapsed && requestIds.map((requestId) => <RequestFileSystem requestId={requestId} key={requestId} />)}
-			</List>
-		</ListItem>
+				<ListItemButton
+					onClick={() => {
+						dispatch(addTabs({ [endpoint.id]: 'endpoint' }));
+						dispatch(setSelectedTab(endpoint.id));
+					}}
+					selected={isSelected}
+				>
+					<ListItemDecorator>
+						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
+							<IconButton
+								size="sm"
+								onClick={(e) => {
+									setCollapsed((wasCollapsed) => !wasCollapsed);
+									e.preventDefault();
+									e.stopPropagation();
+								}}
+							>
+								{collapsed ? <FolderIcon fontSize="small" /> : <FolderOpenIcon fontSize="small" />}
+							</IconButton>
+						</SprocketTooltip>
+					</ListItemDecorator>
+					<ListItemContent>{keepStringLengthReasonable(endpoint.name)}</ListItemContent>
+					<ListSubheader>
+						<Chip size="sm" variant="outlined" color={verbColors[endpoint.verb]}>
+							{endpoint.verb}
+						</Chip>
+					</ListSubheader>
+				</ListItemButton>
+				<List
+					aria-labelledby="nav-list-browse"
+					sx={{
+						'& .JoyListItemButton-root': { p: '8px' },
+						'--List-nestedInsetStart': '1rem',
+					}}
+				>
+					{!collapsed && requestIds.map((requestId) => <RequestFileSystem requestId={requestId} key={requestId} />)}
+				</List>
+			</ListItem>
+		</>
 	);
 }

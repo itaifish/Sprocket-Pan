@@ -4,10 +4,15 @@ import DataObjectIcon from '@mui/icons-material/DataObject';
 import { useEffect, useRef, useState } from 'react';
 import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
-import { EndpointRequest, RequestBodyTypes, RawBodyTypes } from '../../../types/application-data/application-data';
+import {
+	EndpointRequest,
+	RequestBodyTypes,
+	RawBodyTypes,
+	getRequestBodyCategory,
+} from '../../../types/application-data/application-data';
 import { Constants } from '../../../utils/constants';
-import { log } from '../../../utils/logging';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
+import { EditableFormTable } from '../../shared/input/EditableFormTable';
 
 interface RequestBodyProps {
 	request: EndpointRequest;
@@ -16,8 +21,9 @@ interface RequestBodyProps {
 export function RequestBody({ request }: RequestBodyProps) {
 	const [editorText, setEditorText] = useState(typeof request.body === 'string' ? request.body : '');
 	const latestText = useRef(editorText);
-	const isRaw = request.bodyType === 'raw';
-
+	const requestBodyCategory = getRequestBodyCategory(request.bodyType);
+	const isRaw = requestBodyCategory === 'raw';
+	const isTable = requestBodyCategory === 'table';
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(updateRequest({ ...values, id: request.id }));
@@ -25,8 +31,9 @@ export function RequestBody({ request }: RequestBodyProps) {
 	// We update the text only after the user stops typing
 	useEffect(() => {
 		const delayDebounceFunc = setTimeout(() => {
-			update({ body: latestText.current });
-			log.info('update triggered');
+			if (isRaw) {
+				update({ body: latestText.current });
+			}
 		}, Constants.debounceTimeMS);
 
 		return () => clearTimeout(delayDebounceFunc);
@@ -60,6 +67,18 @@ export function RequestBody({ request }: RequestBodyProps) {
 									data.rawType = 'JSON';
 								} else {
 									data.rawType = undefined;
+								}
+								const bodyIsString = typeof request.body === 'string';
+								const bodyIsNullish = request.body == undefined;
+								const bodyIsTable = !bodyIsString && !bodyIsNullish;
+								if (bodyIsTable && value === 'raw') {
+									try {
+										data.body = JSON.stringify(request.body);
+									} catch (e) {
+										data.body = '';
+									}
+								} else if (bodyIsString && getRequestBodyCategory(value) === 'table') {
+									data.body = '';
 								}
 								update(data);
 							}
@@ -113,6 +132,12 @@ export function RequestBody({ request }: RequestBodyProps) {
 						latestText.current = value ?? '';
 					}}
 					language={editorLanguage}
+				/>
+			)}
+			{isTable && (
+				<EditableFormTable
+					data={request.body as Record<string, string>}
+					setData={(newData) => update({ body: newData })}
 				/>
 			)}
 		</Stack>

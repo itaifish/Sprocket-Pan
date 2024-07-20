@@ -13,7 +13,22 @@ export const RESTfulRequestVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HE
 export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
 export const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
-export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
+export function getRequestBodyCategory(requestBodyType: RequestBodyType) {
+	let _exaustive: never;
+	switch (requestBodyType) {
+		case 'none':
+			return 'none';
+		case 'raw':
+			return 'raw';
+		case 'form-data':
+		case 'x-www-form-urlencoded':
+			return 'table';
+		default:
+			_exaustive = requestBodyType;
+			return 'none';
+	}
+}
+export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML', 'Yaml'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;

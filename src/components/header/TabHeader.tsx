@@ -1,8 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { IconButton, ListItemDecorator, Sheet, Tab, TabList, TabPanel, Tabs, tabClasses } from '@mui/joy';
 import CloseIcon from '@mui/icons-material/Close';
-import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 
 import { useSelector } from 'react-redux';
 import { TabType } from '../../types/state/state';
@@ -20,7 +18,7 @@ import { setSelectedTab, closeTab } from '../../state/tabs/slice';
 import { keepStringLengthReasonable } from '../../utils/string';
 import { TabContent } from '../panels/TabContent';
 
-function getMapFromTabType(data: Pick<ApplicationData, `${TabType}s`>, tabType: TabType) {
+function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
 	return data[`${tabType}s`];
 }
 
@@ -31,39 +29,13 @@ export function TabHeader() {
 	const endpoints = useSelector(selectEndpoints);
 	const scripts = useSelector(selectScripts);
 	const { list, selected } = useSelector(selectTabsState);
-	const [disabled, setDisabled] = useState({ left: false, right: false });
 	const dispatch = useAppDispatch();
-	const getTabScroll = () => document.getElementById('tabScroll');
 	useEffect(() => {
 		document.getElementById(`tab_${selected}`)?.scrollIntoView();
+		const fileToScrollTo = document.getElementById(`file_${selected}`);
+		fileToScrollTo?.scrollIntoView({ block: 'center' });
 	}, [selected]);
-	const validateScroll = useCallback(() => {
-		const scrollEl = getTabScroll();
-		if (!scrollEl) {
-			setDisabled({ left: true, right: true });
-			return;
-		}
-		let left = false;
-		let right = false;
-		if (scrollEl.scrollLeft <= 0) {
-			left = true;
-		}
-		if (scrollEl.scrollLeft >= scrollEl.scrollWidth - scrollEl.clientWidth) {
-			right = true;
-		}
-		setDisabled({ left, right });
-	}, []);
 
-	useEffect(() => {
-		const tabScroll = getTabScroll();
-		tabScroll?.addEventListener('scroll', () => {
-			validateScroll();
-		});
-	}, []);
-
-	useEffect(() => {
-		validateScroll();
-	}, [list, selected]);
 	return (
 		<div style={{ width: '100%', height: '100%', overflowY: 'auto', maxHeight: '100vh' }}>
 			<Tabs
@@ -83,9 +55,9 @@ export function TabHeader() {
 					disableUnderline
 					id="tabScroll"
 					sx={{
-						overflow: 'auto',
+						overflowX: 'auto',
+						overflowY: 'hidden',
 						scrollSnapType: 'x mandatory',
-						'&::-webkit-scrollbar': { display: 'none' },
 						[`& .${tabClasses.root}`]: {
 							'&[aria-selected="true"]': {
 								color: `secondary.500`,
@@ -106,20 +78,6 @@ export function TabHeader() {
 						},
 					}}
 				>
-					<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px' }}>
-						<IconButton
-							size="lg"
-							color="primary"
-							variant="soft"
-							sx={{ boxShadow: '5px 5px 5px black' }}
-							onClick={() => {
-								getTabScroll()?.scrollBy({ left: -50, behavior: 'instant' });
-							}}
-							disabled={disabled.left}
-						>
-							<ArrowLeftIcon />
-						</IconButton>
-					</div>
 					{Object.entries(list).map(([tabId, tabType], index) => {
 						const tabData = getMapFromTabType({ environments, requests, services, endpoints, scripts }, tabType)[tabId];
 						const name = tabData.name ?? (tabData as Environment)?.__name ?? '';
@@ -147,21 +105,6 @@ export function TabHeader() {
 							</Tab>
 						);
 					})}
-
-					<div style={{ position: 'fixed', zIndex: 500, paddingTop: '45px', right: 40 }}>
-						<IconButton
-							size="lg"
-							color="primary"
-							variant="soft"
-							sx={{ boxShadow: '5px 5px 5px black' }}
-							onClick={() => {
-								document.getElementById('tabScroll')?.scrollBy({ left: 50, behavior: 'instant' });
-							}}
-							disabled={disabled.right}
-						>
-							<ArrowRightIcon />
-						</IconButton>
-					</div>
 				</TabList>
 				{Object.entries(list).map(([tabId, tabType], index) => (
 					<TabPanel value={tabId} key={index}>
