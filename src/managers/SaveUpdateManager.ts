@@ -22,7 +22,6 @@ much more difficult to get them out of order and much easier to fix if they do.
  * Updates response bodies to be strings, rather than Record<string, unknown>.
  */
 function toOne(data: any) {
-	console.log('running toOne');
 	for (const requestId in data.requests) {
 		for (const entry of data.requests[requestId].history) {
 			if (typeof entry.response.body !== 'string') {
@@ -32,7 +31,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toOne];
+const transformers = [toOne];
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();
@@ -44,7 +43,6 @@ class SaveUpdateManager {
 	}
 
 	public update(data: any) {
-		console.log(`data version is ${data.version}`);
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
 	}
