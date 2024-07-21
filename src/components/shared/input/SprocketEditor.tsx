@@ -1,38 +1,60 @@
 import { ReactNode, useEffect, useRef } from 'react';
-import { Editor, EditorProps, Monaco } from '@monaco-editor/react';
+import { DiffEditor, DiffEditorProps, Editor, EditorProps, Monaco } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { editor } from 'monaco-editor';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
 import { Box, Stack } from '@mui/joy';
 import { EditorActions } from './EditorActions';
 
-interface SprocketEditorProps extends Omit<EditorProps, 'onMount'> {
+type SprocketEditorProps<TEditorProps extends EditorProps | DiffEditorProps, TIsDiff> = Omit<
+	TEditorProps,
+	'onMount'
+> & {
 	ActionBarItems?: ReactNode;
 	formatOnChange?: boolean;
-}
+	isDiff?: TIsDiff;
+	onChange?: TIsDiff extends true ? never : EditorProps['onChange'];
+};
 
-export function SprocketEditor({
+export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>({
 	ActionBarItems = <Box />,
-	value,
 	formatOnChange = false,
+	isDiff = false,
 	...overrides
-}: SprocketEditorProps) {
+}: SprocketEditorProps<TIsDiff extends true ? DiffEditorProps : EditorProps, TIsDiff>) {
 	const editorTheme = useEditorTheme();
-	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-
+	const editorRef = useRef<editor.IStandaloneCodeEditor | editor.IStandaloneDiffEditor | null>(null);
+	const value = (overrides as EditorProps)?.value ?? (overrides as DiffEditorProps).original;
 	const format = async () => {
 		if (editorRef.current != null) {
-			if (overrides?.options?.readOnly) {
-				editorRef.current.updateOptions({ readOnly: false });
-				await editorRef.current.getAction('editor.action.formatDocument')?.run();
-				editorRef.current?.updateOptions({ readOnly: true });
+			let action: () => Promise<void>;
+			if (!isDiff) {
+				const current = editorRef.current as editor.IStandaloneCodeEditor;
+				action = async () => current?.getAction('editor.action.formatDocument')?.run();
 			} else {
-				await editorRef.current.getAction('editor.action.formatDocument')?.run();
+				const current = editorRef.current as editor.IStandaloneDiffEditor;
+				action = async () => {
+					const formatFirst = current.getOriginalEditor().getAction('editor.action.formatDocument')?.run();
+					const formatSecond = current.getModifiedEditor().getAction('editor.action.formatDocument')?.run();
+					await Promise.all([formatFirst, formatSecond]);
+				};
+			}
+			if (overrides?.options?.readOnly) {
+				editorRef.current?.updateOptions({ readOnly: false });
+				editorRef.current?.updateOptions({ originalEditable: true });
+				await action();
+				editorRef.current?.updateOptions({ readOnly: true });
+				editorRef.current?.updateOptions({ originalEditable: false });
+			} else {
+				await action();
 			}
 		}
 	};
 
-	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
+	const handleEditorDidMount = (
+		editor: editor.IStandaloneCodeEditor | editor.IStandaloneDiffEditor,
+		_monaco: Monaco,
+	) => {
 		editorRef.current = editor;
 		format();
 	};
@@ -47,13 +69,15 @@ export function SprocketEditor({
 		if (formatOnChange) format();
 	}, [value, editorRef.current, formatOnChange]);
 
+	const EditorType = isDiff ? DiffEditor : Editor;
+
 	return (
 		<Box>
 			<Stack direction="row" justifyContent="space-between" alignItems="end">
 				{ActionBarItems}
-				<EditorActions copyText={value} format={format} />
+				<EditorActions copyText={isDiff ? undefined : value} format={format} />
 			</Stack>
-			<Editor
+			<EditorType
 				language={'typescript'}
 				theme={editorTheme}
 				options={{ ...defaultEditorOptions, ...overrides?.options }}

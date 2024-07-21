@@ -25,6 +25,10 @@ export const selectNextForCreation = createSelector(selectTabsState, ({ createQu
 	return createQueue[0];
 });
 
+export const selectNextForDiff = createSelector(selectTabsState, ({ diffQueue }) => {
+	return diffQueue[0];
+});
+
 export const selectSearchText = createSelector(selectTabsState, (state) => state.searchText);
 
 export const selectFilteredIds = createSelector(

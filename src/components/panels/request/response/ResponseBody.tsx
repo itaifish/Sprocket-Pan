@@ -1,6 +1,6 @@
 import { Typography } from '@mui/joy';
 import { EndpointResponse } from '../../../../types/application-data/application-data';
-import { statusCodes } from '../../../../utils/string';
+import { getStatusCodeColor, statusCodes } from '../../../../utils/string';
 import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
@@ -17,7 +17,7 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 			ActionBarItems={
 				<>
 					{response.statusCode != 0 && (
-						<Typography>
+						<Typography color={getStatusCodeColor(response.statusCode)} level="body-lg">
 							{response.statusCode}: {statusCodes[response.statusCode]}
 						</Typography>
 					)}
