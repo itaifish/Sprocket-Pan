@@ -9,6 +9,7 @@ import {
 import swaggerParseManager from './SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
+import { saveUpdateManager } from './SaveUpdateManager';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},
@@ -30,6 +31,7 @@ export const defaultApplicationData: ApplicationData = {
 			post: ['request', 'endpoint', 'service'],
 		},
 	},
+	version: saveUpdateManager.getCurrentVersion(),
 };
 
 export class ApplicationDataManager {
@@ -171,6 +173,7 @@ export class ApplicationDataManager {
 			data.requests[responseHistory.id].history = responseHistory?.history ?? [];
 		});
 		data.workspaceMetadata = JSON.parse(metadata, dateTimeReviver) as WorkspaceMetadata;
+		saveUpdateManager.update(data);
 		return data;
 	}
 

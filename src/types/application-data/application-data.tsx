@@ -155,6 +155,7 @@ export type ApplicationData = {
 	selectedEnvironment?: string;
 	settings: Settings;
 	workspaceMetadata?: WorkspaceMetadata;
+	version: number | null;
 };
 
 export type EndpointResponse = {
