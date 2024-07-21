@@ -47,11 +47,11 @@ no-charge, royalty-free, irrevocable copyright license to reproduce, prepare Der
 sublicense, and distribute the Work and such Derivative Works in Source or Object form,
 under the following conditions:
 
-  2.1. You shall not use the Covered Software in the creation of an Artificial Intelligence training dataset,
+  2.1. You shall not use the source code of the Covered Software in the creation of an Artificial Intelligence training dataset,
   including but not limited to any use that contributes to the training or development of an AI model or algorithm,
   unless You obtain explicit written permission from the Contributor to do so.
 
-  2.2. You acknowledge that the Covered Software is not intended for use in the creation of an Artificial Intelligence training dataset,
+  2.2. You acknowledge that the source code of the Covered Software is not intended for use in the creation of an Artificial Intelligence training dataset,
   and that the Contributor has no obligation to provide support or assistance for any use that violates this license.
 
 3. Grant of Patent License.
