@@ -278,7 +278,6 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
-										// TODO: Remove this once we add the backwards compatibility logic
 										original={original.request.body}
 										modified={modified.request.body}
 										originalLanguage={original.request.bodyType?.toLocaleLowerCase()}

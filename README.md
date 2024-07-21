@@ -32,16 +32,20 @@ Key:
 - Refactor global state ✅
 - Refactor Environment input/output (Janky) ✅
 - Show debug logs option in settings ☐
-- Scratchpad (Requests / Scripts not associated with a service) ☐
+- Scratchpad (Requests / Scripts not associated with a service) ❗
+  - Scripts ✅
+  - Requests ❗
 - Secrets Handling ☐
   - Let certain fields in environments be secrets ☐
   - Don't export secrets in exports ☐
   - Maybe put secrets in a seperate file that can be gitignored? ☐
   - Secret encryption when stored locally? idk ☐
-- Inputs/outputs besides JSON ☐
+- Inputs/outputs besides JSON ❗
+  - Yaml / XML / HTML / raw text ✅
+  - Files ☐
 - Command Pallete ☐
 - Run Sprocket Pan in CLI ☐
-- Automatic Updates (No need to redownload the program) ☐
+- Automatic Updates (No need to redownload the program) ✅
 - Audit trail for requests ✅
 - Tabs ❗
   - Dragging and Dropping ☐
