@@ -2,6 +2,10 @@
 
 A tool for sending HTTP(S) requests over the internet. Similar to [Postman](https://www.postman.com/) and [Insomnia](https://insomnia.rest/).
 
+## Docs
+
+[Sprocket Pan Docs Website](https://sprocketpan.com)
+
 ## Recommended IDE Setup
 
 - [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
