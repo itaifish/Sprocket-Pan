@@ -4,6 +4,7 @@ import { closeTab } from '../../tabs/slice';
 import { addScript, deleteScript } from '../slice';
 import { Script } from '../../../types/application-data/application-data';
 import { v4 } from 'uuid';
+import { toValidFunctionName } from '../../../utils/string';
 
 export const deleteScriptById = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteScriptById',
@@ -20,7 +21,7 @@ export const createScript = createAsyncThunk<string, Partial<Omit<Script, 'id'>>
 		const newScript = {
 			content: '',
 			name: 'New Script',
-			scriptCallableName: 'newScript',
+			scriptCallableName: toValidFunctionName(newScriptData?.name ?? 'newScript'),
 			returnVariableName: null,
 			...newScriptData,
 			id: newId,
