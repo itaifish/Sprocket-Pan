@@ -16,7 +16,7 @@ import {
 	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -24,7 +24,7 @@ import { Constants } from '../../../utils/constants';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { asyncCallWithTimeout, getVariablesFromCode } from '../../../utils/functions';
+import { asyncCallWithTimeout, getVariablesFromCode, VariableFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -102,12 +102,23 @@ export function ScriptPanel({ id }: PanelProps) {
 	});
 
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
-
-	const scriptVariables = useMemo(() => {
-		const variables = getVariablesFromCode(script.content, Object.values(scripts));
-		return new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const));
+	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
+	useEffect(() => {
+		let active = true;
+		async function act() {
+			const variables = await getVariablesFromCode(script.content, Object.values(scripts));
+			if (!active) {
+				return;
+			}
+			setScriptVariables(
+				new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const)),
+			);
+		}
+		act();
+		return () => {
+			active = false;
+		};
 	}, [script.content]);
-
 	return (
 		<>
 			<EditableText
