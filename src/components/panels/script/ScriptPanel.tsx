@@ -37,6 +37,7 @@ import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButto
 import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
 import { sleep } from '../../../utils/misc';
+import { log } from '../../../utils/logging';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -50,7 +51,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
-
+	const isFirstRender = useRef(true);
 	const [isRunning, setRunning] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -104,6 +105,12 @@ export function ScriptPanel({ id }: PanelProps) {
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
 	useEffect(() => {
+		log.info(`Render: ${isFirstRender.current}`);
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return () => {};
+		}
+
 		let active = true;
 		async function act() {
 			const variables = await getVariablesFromCode(script.content, Object.values(scripts));
@@ -114,6 +121,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const)),
 			);
 		}
+
 		act();
 		return () => {
 			active = false;
