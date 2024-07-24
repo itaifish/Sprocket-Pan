@@ -38,10 +38,11 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 		debounceEventEmitter.emit('desync');
 	}, [localDataState]);
 
-	// on component unmount,we want to save the local state
+	// on component unmount,we want to save the local state, and clear our event emitter
 	useEffect(() => {
 		return () => {
 			props.setState(localDataState);
+			debounceEventEmitter.removeAllListeners();
 		};
 	}, []);
 
