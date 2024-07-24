@@ -41,6 +41,7 @@ import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { RecentRequestListItem } from './RecentRequestListItem';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
+import { log } from '../../../utils/logging';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -226,7 +227,7 @@ export function ServicePanel({ id }: PanelProps) {
 												setNewEnvironment={(newEnv) =>
 													update({
 														localEnvironments: {
-															...serviceData.localEnvironments,
+															...structuredClone(serviceData.localEnvironments),
 															[env.__id]: { ...newEnv, __name: env.__name, __id: env.__id } as Environment,
 														},
 													})
@@ -267,9 +268,12 @@ export function ServicePanel({ id }: PanelProps) {
 				action={`delete ${serviceData.localEnvironments[envToDelete ?? '']?.__name ?? envToDelete}`}
 				actionFunc={() => {
 					if (envToDelete) {
-						delete serviceData.localEnvironments[envToDelete];
+						const newData = structuredClone(serviceData.localEnvironments);
+						log.info(`Before: ${JSON.stringify(newData[envToDelete])}`);
+						delete newData[envToDelete];
+						log.info(`After: ${JSON.stringify(newData[envToDelete])}`);
 						update({
-							localEnvironments: { ...serviceData.localEnvironments },
+							localEnvironments: newData,
 						});
 					}
 				}}
