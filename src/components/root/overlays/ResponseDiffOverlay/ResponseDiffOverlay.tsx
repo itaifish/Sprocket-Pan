@@ -96,6 +96,16 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 	const modified =
 		modifiedHistory?.length > selectedHistoryIndex.right ? modifiedHistory[selectedHistoryIndex.right] : null;
 
+	const selectableEndpoints = {
+		left: selectedService?.left?.endpointIds.map((endpointId) => endpoints[endpointId]) ?? [],
+		right: selectedService?.right?.endpointIds.map((endpointId) => endpoints[endpointId]) ?? [],
+	};
+
+	const selectableRequests = {
+		left: selectedEndpoint?.left?.requestIds.map((requestId) => requests[requestId]) ?? [],
+		right: selectedEndpoint?.right?.requestIds.map((requestId) => requests[requestId]) ?? [],
+	};
+
 	return (
 		<Sheet sx={{ overflowY: 'scroll', px: '20px' }}>
 			<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h3">
@@ -124,7 +134,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={services}
+									options={Object.values(services)}
 								/>
 								<SearchableRequestDropdown
 									name={'endpoint'}
@@ -142,7 +152,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={endpoints}
+									options={selectableEndpoints[direction]}
 								/>
 								<SearchableRequestDropdown
 									name={'request'}
@@ -159,7 +169,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											}));
 										}
 									}}
-									options={requests}
+									options={selectableRequests[direction]}
 								/>
 
 								<FormControl>
