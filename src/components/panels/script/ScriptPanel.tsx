@@ -210,17 +210,13 @@ export function ScriptPanel({ id }: PanelProps) {
 				</FormControl>
 				<FormControl>
 					<FormLabel>Loading Status</FormLabel>
-					<Chip>
-						{isDebouncing && (
-							<>
-								Loading <HourglassTopIcon />
-							</>
-						)}
-						{!isDebouncing && (
-							<>
-								Ready <ThumbUpOffAltIcon color="primary"></ThumbUpOffAltIcon>
-							</>
-						)}
+					<Chip
+						endDecorator={isDebouncing ? <HourglassTopIcon /> : <ThumbUpOffAltIcon color="primary" />}
+						variant="outlined"
+						color={isDebouncing ? 'neutral' : 'primary'}
+						size="lg"
+					>
+						{isDebouncing ? 'Loading' : 'Ready'}
 					</Chip>
 				</FormControl>
 				<FormControl>
