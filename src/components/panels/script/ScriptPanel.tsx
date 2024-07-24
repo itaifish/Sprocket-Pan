@@ -37,7 +37,6 @@ import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButto
 import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
 import { sleep } from '../../../utils/misc';
-import { log } from '../../../utils/logging';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -105,7 +104,6 @@ export function ScriptPanel({ id }: PanelProps) {
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
 	useEffect(() => {
-		log.info(`Render: ${isFirstRender.current}`);
 		if (isFirstRender.current) {
 			isFirstRender.current = false;
 			return () => {};
