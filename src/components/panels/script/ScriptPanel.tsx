@@ -4,6 +4,7 @@ import { useAppDispatch } from '../../../state/store';
 import { updateScript } from '../../../state/active/slice';
 import {
 	Button,
+	Chip,
 	CircularProgress,
 	FormControl,
 	FormLabel,
@@ -16,7 +17,7 @@ import {
 	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -24,7 +25,7 @@ import { Constants } from '../../../utils/constants';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { asyncCallWithTimeout, getVariablesFromCode } from '../../../utils/functions';
+import { asyncCallWithTimeout, getVariablesFromCode, VariableFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -37,6 +38,8 @@ import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButto
 import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
 import { sleep } from '../../../utils/misc';
+import HourglassTopIcon from '@mui/icons-material/HourglassTop';
+import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -50,8 +53,9 @@ export function ScriptPanel({ id }: PanelProps) {
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
-
+	const isFirstRender = useRef(true);
 	const [isRunning, setRunning] = useState(false);
+	const [isDebouncing, setDebouncing] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 	const settings = useSelector(selectSettings);
@@ -90,7 +94,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	function update(values: Partial<Script>) {
 		dispatch(updateScript({ ...values, id: script.id }));
 	}
-	const { localDataState, setLocalDataState } = useDebounce({
+	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
 		state: script.content,
 		setState: (newText: string) => update({ content: newText }),
 		debounceOverride: Constants.longEditTimeMS,
@@ -102,12 +106,41 @@ export function ScriptPanel({ id }: PanelProps) {
 	});
 
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
+	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
 
-	const scriptVariables = useMemo(() => {
-		const variables = getVariablesFromCode(script.content, Object.values(scripts));
-		return new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const));
+	useEffect(() => {
+		const onDebounceSync = () => {
+			setDebouncing(false);
+		};
+		const onDebounceDeSync = () => {
+			setDebouncing(true);
+		};
+		debounceEventEmitter.on('desync', onDebounceDeSync);
+		debounceEventEmitter.on('sync', onDebounceSync);
+	}, []);
+
+	useEffect(() => {
+		if (isFirstRender.current) {
+			isFirstRender.current = false;
+			return () => {};
+		}
+
+		let active = true;
+		async function act() {
+			const variables = await getVariablesFromCode(script.content, Object.values(scripts));
+			if (!active) {
+				return;
+			}
+			setScriptVariables(
+				new Map(variables.map((variableFromCode) => [variableFromCode.name, variableFromCode] as const)),
+			);
+		}
+
+		act();
+		return () => {
+			active = false;
+		};
 	}, [script.content]);
-
 	return (
 		<>
 			<EditableText
@@ -175,44 +208,59 @@ export function ScriptPanel({ id }: PanelProps) {
 						))}
 					</Select>
 				</FormControl>
-				{!isRunning && (
-					<Button
-						color="success"
-						startDecorator={<PlayCircleIcon />}
+				<FormControl>
+					<FormLabel>Loading Status</FormLabel>
+					<Chip
+						endDecorator={isDebouncing ? <HourglassTopIcon /> : <ThumbUpOffAltIcon color="primary" />}
 						variant="outlined"
-						onClick={async () => {
-							setRunning(true);
-							const scriptToRun = { ...script, content: localDataState };
-							const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
-							await Promise.all([
-								asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
-								sleep(Constants.minimumScriptRunTimeMS),
-							]);
-							const output = await ranScript;
-							if (typeof output === 'function') {
-								setScriptOutputLang('javascript');
-								setScriptOutput((output as any).toString());
-							} else {
-								setScriptOutputLang('json');
-								setScriptOutput(JSON.stringify(output) ?? '');
-							}
-							setRunning(false);
-						}}
+						color={isDebouncing ? 'neutral' : 'primary'}
+						size="lg"
 					>
-						Run
-					</Button>
-				)}
-				{isRunning && (
-					<Button
-						color="warning"
-						startDecorator={<CancelIcon />}
-						endDecorator={<CircularProgress />}
-						variant="outlined"
-						onClick={() => setRunning(false)}
-					>
-						Cancel
-					</Button>
-				)}
+						{isDebouncing ? 'Loading' : 'Ready'}
+					</Chip>
+				</FormControl>
+				<FormControl>
+					<FormLabel>Action</FormLabel>
+					{!isRunning && (
+						<Button
+							color="success"
+							disabled={isDebouncing}
+							startDecorator={<PlayCircleIcon />}
+							variant="outlined"
+							onClick={async () => {
+								setRunning(true);
+								const scriptToRun = { ...script, content: localDataState };
+								const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
+								await Promise.all([
+									asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
+									sleep(Constants.minimumScriptRunTimeMS),
+								]);
+								const output = await ranScript;
+								if (typeof output === 'function') {
+									setScriptOutputLang('javascript');
+									setScriptOutput((output as any).toString());
+								} else {
+									setScriptOutputLang('json');
+									setScriptOutput(JSON.stringify(output) ?? '');
+								}
+								setRunning(false);
+							}}
+						>
+							Run
+						</Button>
+					)}
+					{isRunning && (
+						<Button
+							color="warning"
+							startDecorator={<CancelIcon />}
+							endDecorator={<CircularProgress />}
+							variant="outlined"
+							onClick={() => setRunning(false)}
+						>
+							Cancel
+						</Button>
+					)}
+				</FormControl>
 			</Stack>
 			<Stack direction={'row'} spacing={2}>
 				<FormatIcon actionFunction={() => format()} />

@@ -1,9 +1,8 @@
 import { Environment, Script } from '../types/application-data/application-data';
+import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
+import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 import { parseScript } from 'esprima';
 import { log } from './logging';
-import { ScriptTarget } from 'typescript';
-import { Project, TypeFormatFlags, ts } from 'ts-morph';
-import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -70,49 +69,51 @@ export const getTypesFromCode = (codeToEval: string, scripts: Script[]) => {
 	return typeMap;
 };
 
-type VariablesFromCode = Array<{
+export type VariableFromCode = {
 	name: string;
 	type: 'variable' | 'function' | 'class';
 	typescriptTypeString: string;
-}>;
+};
 
-export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): VariablesFromCode => {
-	try {
-		const types = getTypesFromCode(codeToEval, scripts);
-		let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
-		javascriptCode = `async function topLevelAsync() {
+export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): Promise<VariableFromCode[]> => {
+	return new Promise((resolve, _reject) => {
+		try {
+			const types = getTypesFromCode(codeToEval, scripts);
+			let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
+			javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
 		}`;
-		const scriptProgram = parseScript(javascriptCode, { tolerant: true });
-		const variables: VariablesFromCode = [];
-		if (scriptProgram.body[0].type === 'FunctionDeclaration') {
-			scriptProgram.body[0].body.body.forEach((bodyElement) => {
-				if (bodyElement.type === 'VariableDeclaration') {
-					bodyElement.declarations.forEach((declaration) => {
-						if (declaration.id.type == 'Identifier') {
-							const typescriptType = types.get(declaration.id.name);
-							if (typescriptType != undefined) {
-								variables.push({ name: declaration.id.name, type: 'variable', typescriptTypeString: typescriptType });
+			const scriptProgram = parseScript(javascriptCode, { tolerant: true });
+			const variables: VariableFromCode[] = [];
+			if (scriptProgram.body[0].type === 'FunctionDeclaration') {
+				scriptProgram.body[0].body.body.forEach((bodyElement) => {
+					if (bodyElement.type === 'VariableDeclaration') {
+						bodyElement.declarations.forEach((declaration) => {
+							if (declaration.id.type == 'Identifier') {
+								const typescriptType = types.get(declaration.id.name);
+								if (typescriptType != undefined) {
+									variables.push({ name: declaration.id.name, type: 'variable', typescriptTypeString: typescriptType });
+								}
 							}
-						}
-					});
-				} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
-					const typescriptType = types.get(bodyElement?.id?.name as string);
-					if (bodyElement.id?.name != null && typescriptType != null) {
-						variables.push({
-							name: bodyElement.id.name,
-							type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
-							typescriptTypeString: typescriptType,
 						});
+					} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
+						const typescriptType = types.get(bodyElement?.id?.name as string);
+						if (bodyElement.id?.name != null && typescriptType != null) {
+							variables.push({
+								name: bodyElement.id.name,
+								type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+								typescriptTypeString: typescriptType,
+							});
+						}
 					}
-				}
-			});
+				});
+			}
+			resolve(variables);
+		} catch (e) {
+			log.error(e);
+			resolve([]);
 		}
-		return variables;
-	} catch (e) {
-		log.error(e);
-		return [];
-	}
+	});
 };
 
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
