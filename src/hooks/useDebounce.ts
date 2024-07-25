@@ -45,6 +45,7 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 			if (props.writeOnClose) {
 				props.setState(localDataState);
 			}
+
 			debounceEventEmitter.removeAllListeners();
 		};
 	}, []);
