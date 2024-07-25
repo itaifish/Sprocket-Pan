@@ -22,6 +22,7 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 	isDiff = false,
 	...overrides
 }: SprocketEditorProps<TIsDiff extends true ? DiffEditorProps : EditorProps, TIsDiff>) {
+	const allEditorOptions = { ...defaultEditorOptions, ...overrides.options };
 	const editorTheme = useEditorTheme();
 	const editorRef = useRef<editor.IStandaloneCodeEditor | editor.IStandaloneDiffEditor | null>(null);
 	const value = (overrides as EditorProps)?.value ?? (overrides as DiffEditorProps).original;
@@ -40,11 +41,9 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 				};
 			}
 			if (overrides?.options?.readOnly) {
-				editorRef.current?.updateOptions({ readOnly: false });
-				editorRef.current?.updateOptions({ originalEditable: true });
+				editorRef.current?.updateOptions({ ...allEditorOptions, readOnly: false, originalEditable: true });
 				await action();
-				editorRef.current?.updateOptions({ readOnly: true });
-				editorRef.current?.updateOptions({ originalEditable: false });
+				editorRef.current?.updateOptions({ ...allEditorOptions, readOnly: true, originalEditable: false });
 			} else {
 				await action();
 			}
@@ -61,9 +60,9 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 
 	useEffect(() => {
 		if (overrides?.options != null) {
-			editorRef.current?.updateOptions(overrides.options);
+			editorRef.current?.updateOptions(allEditorOptions);
 		}
-	}, [overrides?.options]);
+	}, [allEditorOptions]);
 
 	useEffect(() => {
 		if (formatOnChange) format();
@@ -80,7 +79,7 @@ export function SprocketEditor<TIsDiff extends boolean | undefined = undefined>(
 			<EditorType
 				language={'typescript'}
 				theme={editorTheme}
-				options={{ ...defaultEditorOptions, ...overrides?.options }}
+				options={allEditorOptions}
 				onMount={handleEditorDidMount}
 				value={value}
 				{...overrides}

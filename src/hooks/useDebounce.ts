@@ -6,6 +6,7 @@ interface UseDebounceProps<T> {
 	state: T;
 	setState: React.Dispatch<React.SetStateAction<T>> | ((newState: T) => void);
 	debounceOverride?: number;
+	writeOnClose?: boolean;
 }
 
 export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
@@ -41,7 +42,10 @@ export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
 	// on component unmount,we want to save the local state, and clear our event emitter
 	useEffect(() => {
 		return () => {
-			props.setState(localDataState);
+			if (props.writeOnClose) {
+				props.setState(localDataState);
+			}
+
 			debounceEventEmitter.removeAllListeners();
 		};
 	}, []);

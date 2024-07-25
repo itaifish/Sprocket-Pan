@@ -226,7 +226,7 @@ export function ServicePanel({ id }: PanelProps) {
 												setNewEnvironment={(newEnv) =>
 													update({
 														localEnvironments: {
-															...serviceData.localEnvironments,
+															...structuredClone(serviceData.localEnvironments),
 															[env.__id]: { ...newEnv, __name: env.__name, __id: env.__id } as Environment,
 														},
 													})
@@ -267,9 +267,10 @@ export function ServicePanel({ id }: PanelProps) {
 				action={`delete ${serviceData.localEnvironments[envToDelete ?? '']?.__name ?? envToDelete}`}
 				actionFunc={() => {
 					if (envToDelete) {
-						delete serviceData.localEnvironments[envToDelete];
+						const newData = structuredClone(serviceData.localEnvironments);
+						delete newData[envToDelete];
 						update({
-							localEnvironments: { ...serviceData.localEnvironments },
+							localEnvironments: newData,
 						});
 					}
 				}}

@@ -15,7 +15,7 @@ type Option = { label: string; value?: string };
 
 interface SearchableRequestDropdownProps {
 	name: 'service' | 'request' | 'endpoint';
-	options: Record<string, Service | Endpoint | EndpointRequest>;
+	options: Array<Service | Endpoint | EndpointRequest>;
 	selected?: Service | Endpoint | EndpointRequest;
 	onChange: (newValue: Option) => void;
 }
@@ -40,7 +40,7 @@ export function SearchableRequestDropdown({ name, options, selected, onChange }:
 							onChange(newValue);
 						}
 					}}
-					options={Object.values(options).map((option) => ({ label: option.name, value: option.id }))}
+					options={options.map((option) => ({ label: option.name, value: option.id }))}
 				></Autocomplete>
 				<SprocketTooltip text={`Open ${title}`}>
 					<IconButton
