@@ -17,5 +17,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 				</CssVarsProvider>
 			</ThemeProvider>
 		</StyledEngineProvider>
+		,
 	</React.StrictMode>,
 );

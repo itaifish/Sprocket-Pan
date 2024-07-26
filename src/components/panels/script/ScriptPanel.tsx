@@ -53,7 +53,6 @@ export function ScriptPanel({ id }: PanelProps) {
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const { mode, systemMode } = useColorScheme();
 	const resolvedMode = mode === 'system' ? systemMode : mode;
-	const isFirstRender = useRef(true);
 	const [isRunning, setRunning] = useState(false);
 	const [isDebouncing, setDebouncing] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -120,11 +119,6 @@ export function ScriptPanel({ id }: PanelProps) {
 	}, []);
 
 	useEffect(() => {
-		if (isFirstRender.current) {
-			isFirstRender.current = false;
-			return () => {};
-		}
-
 		let active = true;
 		async function act() {
 			const variables = await getVariablesFromCode(script.content, Object.values(scripts));
