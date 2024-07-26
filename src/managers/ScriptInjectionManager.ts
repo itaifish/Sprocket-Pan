@@ -1,28 +1,32 @@
-import { EndpointResponse } from '../types/application-data/application-data';
+import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
+import { makeRequest } from '../state/active/thunks/requests';
+import { StateAccess } from '../state/types';
+import { EndpointResponse, Script } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
-import { applicationDataManager } from './ApplicationDataManager';
-import { AuditLog } from './AuditLogManager';
+import { AuditLog, auditLogManager } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
-import { networkRequestManager } from './NetworkRequestManager';
+import { scriptRunnerManager } from './ScriptRunnerManager';
 
-export function getScriptInjectionCode(requestId: string, response?: EndpointResponse, auditLog?: AuditLog) {
-	const getRequestAndData = () => {
-		const data = applicationDataManager.getApplicationData();
-		return {
-			request: data.requests[requestId],
-			data,
-		};
-	};
+export function getScriptInjectionCode(
+	requestId: string | null,
+	{ getState, dispatch }: StateAccess,
+	response?: EndpointResponse,
+	auditLog?: AuditLog,
+) {
+	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
 
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
-		const { data, request } = getRequestAndData();
+		const data = getState();
+		const request = getRequest();
+		if (request == null) {
+			level = 'global';
+		}
 		if (level === 'request') {
-			EnvironmentUtils.set(request.environmentOverride, key, value);
-			applicationDataManager.update('request', request.id, {
-				environmentOverride: { ...request.environmentOverride },
-			});
+			const newEnv = structuredClone(request!.environmentOverride);
+			EnvironmentUtils.set(newEnv, key, value);
+			dispatch(updateRequest({ id: request!.id, environmentOverride: newEnv }));
 		} else if (level === 'service') {
-			const endpoint = data.endpoints[request.endpointId];
+			const endpoint = data.endpoints[request!.endpointId];
 			if (!endpoint) {
 				return;
 			}
@@ -32,60 +36,99 @@ export function getScriptInjectionCode(requestId: string, response?: EndpointRes
 			}
 			const selectedEnvironment = service.selectedEnvironment;
 			if (selectedEnvironment) {
-				EnvironmentUtils.set(service.localEnvironments[selectedEnvironment], key, value);
-				applicationDataManager.update('service', endpoint.serviceId, {
-					localEnvironments: {
-						...service.localEnvironments,
-						[selectedEnvironment]: { ...service.localEnvironments[selectedEnvironment] },
-					},
-				});
+				const newEnv = structuredClone(service.localEnvironments[selectedEnvironment]);
+				EnvironmentUtils.set(newEnv, key, value);
+				dispatch(
+					updateService({
+						id: endpoint.serviceId,
+						localEnvironments: {
+							...service.localEnvironments,
+							[selectedEnvironment]: newEnv,
+						},
+					}),
+				);
 			}
 		} else if (level === 'global') {
 			const selectedEnvironment = data.selectedEnvironment;
-			if (selectedEnvironment) {
-				applicationDataManager.update('environment', selectedEnvironment, { [key]: value });
+			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
+			if (newEnv) {
+				EnvironmentUtils.set(newEnv, key, value);
+				dispatch(updateEnvironment(newEnv));
 			}
 		}
 	};
 
 	const setQueryParam = (key: string, value: string) => {
-		const { request } = getRequestAndData();
-		QueryParamUtils.add(request.queryParams, key, value);
-		applicationDataManager.update('request', request.id, {
-			queryParams: { ...request.queryParams },
-		});
+		const request = getRequest();
+		if (request == null) {
+			return;
+		}
+		const newQueryParams = structuredClone(request.queryParams);
+		QueryParamUtils.add(newQueryParams, key, value);
+		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
 	};
 
 	const setQueryParams = (key: string, values: string[]) => {
-		const { request } = getRequestAndData();
-		QueryParamUtils.set(request.queryParams, key, values);
-		applicationDataManager.update('request', request.id, {
-			queryParams: { ...request.queryParams },
-		});
+		const request = getRequest();
+		if (request == null) {
+			return;
+		}
+		const newQueryParams = structuredClone(request.queryParams);
+		QueryParamUtils.set(newQueryParams, key, values);
+		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
 	};
 
 	const setHeader = (key: string, value: string) => {
-		const { request } = getRequestAndData();
-		HeaderUtils.set(request.headers, key, value);
-		applicationDataManager.update('request', request.id, {
-			headers: { ...request.headers },
-		});
+		const request = getRequest();
+		if (request == null) {
+			return;
+		}
+		const newHeaders = structuredClone(request.headers);
+		HeaderUtils.set(newHeaders, key, value);
+		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
 	};
 
 	const getEnvironment = () => {
-		const { data, request } = getRequestAndData();
+		const data = getState();
+		const request = getRequest();
+		if (request == null) {
+			return environmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
+		}
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
 		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
 	};
 
 	const sendRequest = async (requestId: string) => {
-		const { data } = getRequestAndData();
-		await networkRequestManager.sendRequest(requestId, auditLog);
+		const data = getState();
+		await dispatch(makeRequest({ requestId, auditLog }));
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
+	const getRunnableScripts = () => {
+		const data = getState();
+		return Object.values(data.scripts).reduce(
+			(previousValue: Record<string, () => Promise<unknown>>, currentValue: Script) => {
+				return {
+					...previousValue,
+					[currentValue.scriptCallableName]: async () => {
+						if (auditLog) {
+							auditLogManager.addToAuditLog(auditLog, 'before', 'standaloneScript', currentValue.id);
+						}
+						const result = await scriptRunnerManager.runTypescriptContextless(currentValue);
+						if (auditLog) {
+							auditLogManager.addToAuditLog(auditLog, 'after', 'standaloneScript', currentValue.id);
+						}
+						return result as unknown;
+					},
+				};
+			},
+			{},
+		);
+	};
+
 	return {
+		...getRunnableScripts(),
 		setEnvironmentVariable,
 		setQueryParam,
 		setQueryParams,
@@ -93,13 +136,16 @@ export function getScriptInjectionCode(requestId: string, response?: EndpointRes
 		getEnvironment,
 		sendRequest,
 		get data() {
-			return structuredClone(applicationDataManager.getApplicationData());
+			return structuredClone(getState());
 		},
 		get activeRequest() {
-			return structuredClone(applicationDataManager.getApplicationData().requests[requestId]);
+			return requestId != null ? structuredClone(getState().requests[requestId]) : null;
 		},
 		get response() {
-			const { request } = getRequestAndData();
+			const request = getRequest();
+			if (request == null) {
+				return null;
+			}
 			const latestResponse =
 				response ?? (request.history && request.history.length > 0)
 					? request.history[request.history.length - 1]

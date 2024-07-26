@@ -1,10 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { selectRootState } from '../store';
+import { workspacesSlice } from './slice';
 
-export const selectWorkspacesState = createSelector(selectRootState, (state) => state.workspaces);
-
-export const selectWorkspacesList = createSelector(selectWorkspacesState, (state) =>
-	[...state.list].sort((a, b) => b.lastModified.getTime() - a.lastModified.getTime()),
+export const selectWorkspacesList = createSelector(workspacesSlice.selectSlice, (state) =>
+	[...state.list].sort((a, b) => b.lastModified - a.lastModified),
 );
 
-export const selectActiveWorkspace = createSelector(selectWorkspacesState, (state) => state.selected);
+export const selectActiveWorkspace = createSelector(workspacesSlice.selectSlice, (state) => state.selected);

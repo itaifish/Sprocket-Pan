@@ -22,26 +22,57 @@ export function toValidFolderName(text: string) {
 	return text.replace(/([^a-z0-9_]+)/gi, '-');
 }
 
-const defaultDateTimeFormatter = new Intl.DateTimeFormat('en-US', {
-	year: 'numeric',
-	month: 'long',
-	day: 'numeric',
-	hour12: true,
-	hour: '2-digit',
-	minute: '2-digit',
-	second: '2-digit',
-	fractionalSecondDigits: 3,
-});
+export function toValidFunctionName(text: string) {
+	// replace groups that aren't a letter, number or underscore with an underscore
+	return text.replace(/([^a-z0-9_]+)/gi, '_');
+}
 
-export function formatDate(date: Date | string) {
-	if (typeof date === 'string') {
-		date = new Date(date);
-	}
-	return defaultDateTimeFormatter.format(date);
+const dateTimeFormatters = {
+	full: new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour12: true,
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		fractionalSecondDigits: 3,
+	}),
+	shortDateFull: new Intl.DateTimeFormat('en-US', {
+		year: '2-digit',
+		month: '2-digit',
+		day: 'numeric',
+		hour12: true,
+		hour: '2-digit',
+		minute: '2-digit',
+		second: '2-digit',
+		fractionalSecondDigits: 2,
+	}),
+	date: new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+	}),
+};
+
+export function formatShortFullDate(date: Date | string | number) {
+	return dateTimeFormatters.shortDateFull.format(new Date(date));
+}
+
+export function formatFullDate(date: Date | string | number) {
+	return dateTimeFormatters.full.format(new Date(date));
+}
+
+export function formatDate(date: Date | string | number) {
+	return dateTimeFormatters.date.format(new Date(date));
 }
 
 export function formatMilliseconds(ms: number) {
 	return `${(ms / 1000).toFixed(3)} second${ms === 1000 ? '' : 's'}`;
+}
+
+export function getStatusCodeColor(statusCode: number) {
+	return statusCode < 200 ? 'neutral' : statusCode < 300 ? 'success' : statusCode < 400 ? 'primary' : 'danger';
 }
 
 export const statusCodes: Record<number, string> = {

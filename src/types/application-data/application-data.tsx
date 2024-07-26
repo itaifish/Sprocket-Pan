@@ -5,6 +5,7 @@ import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { TabType } from '../state/state';
+import CodeIcon from '@mui/icons-material/Code';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -12,7 +13,22 @@ export const RESTfulRequestVerbs = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HE
 export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
 export const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
-export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML'] as const;
+export function getRequestBodyCategory(requestBodyType: RequestBodyType) {
+	let _exaustive: never;
+	switch (requestBodyType) {
+		case 'none':
+			return 'none';
+		case 'raw':
+			return 'raw';
+		case 'form-data':
+		case 'x-www-form-urlencoded':
+			return 'table';
+		default:
+			_exaustive = requestBodyType;
+			return 'none';
+	}
+}
+export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML', 'Yaml'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
@@ -43,8 +59,9 @@ export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
 	url: string;
 	headers: SPHeaders;
-	body: Record<string, unknown>;
-	dateTime: Date;
+	body: string;
+	bodyType?: RawBodyType;
+	dateTime: number;
 };
 
 export type HistoricalEndpointResponse = {
@@ -114,7 +131,19 @@ export type WorkspaceMetadata = {
 	description: string;
 	// undefined is the default workspace
 	fileName: string | undefined;
-	lastModified: Date;
+	lastModified: number;
+};
+
+export type Script = {
+	name: string;
+	scriptCallableName: string;
+	returnVariableName: string | null;
+	returnVariableType?: {
+		isClass?: boolean;
+		typeText: string;
+	};
+	id: string;
+	content: string;
 };
 
 export type ApplicationData = {
@@ -122,9 +151,11 @@ export type ApplicationData = {
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
+	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
 	workspaceMetadata?: WorkspaceMetadata;
+	version: number | null;
 };
 
 export type EndpointResponse = {
@@ -132,7 +163,7 @@ export type EndpointResponse = {
 	body: string;
 	bodyType: RawBodyType;
 	headers: Record<string, string>;
-	dateTime: Date;
+	dateTime: number;
 };
 
 export const iconFromTabType: Record<TabType, JSX.Element> = {
@@ -140,4 +171,5 @@ export const iconFromTabType: Record<TabType, JSX.Element> = {
 	environment: <TableChartIcon />,
 	request: <TextSnippetIcon />,
 	service: <FolderOpenSharpIcon />,
+	script: <CodeIcon />,
 };

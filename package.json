@@ -1,7 +1,7 @@
 {
 	"name": "sprocket_pan",
 	"private": true,
-	"version": "0.9.0",
+	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
@@ -12,7 +12,8 @@
 		"lint": "eslint src/ --fix",
 		"build:types": "tsc",
 		"build:executable": "tauri build",
-		"postinstall": "patch-package"
+		"postinstall": "patch-package",
+		"devtools": "react-devtools"
 	},
 	"dependencies": {
 		"@apidevtools/swagger-parser": "^10.1.0",
@@ -26,8 +27,10 @@
 		"@mui/material": "^5.14.11",
 		"@reduxjs/toolkit": "^2.2.1",
 		"@tauri-apps/api": "^1.4.0",
+		"esprima": "^4.0.1",
 		"js-yaml": "^4.1.0",
 		"minidenticons": "^4.2.0",
+		"monaco-editor": "^0.50.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-markdown": "^9.0.0",
@@ -35,11 +38,13 @@
 		"react-redux": "^9.1.0",
 		"tauri-plugin-log-api": "https://github.com/tauri-apps/tauri-plugin-log",
 		"tauri-plugin-window-state-api": "https://github.com/tauri-apps/tauri-plugin-window-state#v1",
+		"ts-morph": "^23.0.0",
 		"uuid": "^9.0.1",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
 		"@tauri-apps/cli": "^1.4.0",
+		"@types/esprima": "^4.0.6",
 		"@types/js-yaml": "^4.0.6",
 		"@types/react": "^18.2.15",
 		"@types/react-dom": "^18.2.7",
@@ -57,6 +62,7 @@
 		"openapi-types": "^9.3.0",
 		"patch-package": "^8.0.0",
 		"prettier": "^3.0.3",
+		"react-devtools": "^5.2.0",
 		"typescript": "^5.2.2",
 		"vite": "^4.4.4",
 		"vite-plugin-eslint": "^1.8.1",

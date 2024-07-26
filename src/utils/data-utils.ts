@@ -1,4 +1,4 @@
-import { TableData } from '../components/molecules/editing/EditableTable';
+import { TableData } from '../components/shared/input/EditableData';
 import {
 	EMPTY_ENVIRONMENT,
 	EMPTY_QUERY_PARAMS,

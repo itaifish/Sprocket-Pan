@@ -1,12 +1,17 @@
 import { Typography } from '@mui/joy';
 import { ApplicationData, Environment } from '../types/application-data/application-data';
-import { applicationDataManager } from './ApplicationDataManager';
 import { getDataArrayFromEnvKeys } from '../utils/functions';
+import { asEnv } from '../utils/types';
 
 type Snippet = {
 	value: string;
 	variableName?: string;
 };
+
+type PickedApplicationData = Pick<
+	ApplicationData,
+	'selectedEnvironment' | 'services' | 'environments' | 'requests' | 'settings'
+>;
 
 class EnvironmentContextResolver {
 	public static readonly INSTANCE = new EnvironmentContextResolver();
@@ -14,7 +19,7 @@ class EnvironmentContextResolver {
 
 	public stringWithVarsToTypography(
 		text: string,
-		data: ApplicationData,
+		data: PickedApplicationData,
 		serviceId?: string,
 		requestId?: string,
 		typographyProps?: React.ComponentProps<typeof Typography>,
@@ -63,7 +68,7 @@ class EnvironmentContextResolver {
 		);
 	}
 
-	public resolveVariablesForString(text: string, data: ApplicationData, serviceId?: string, requestId?: string) {
+	public resolveVariablesForString(text: string, data: PickedApplicationData, serviceId?: string, requestId?: string) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
@@ -71,7 +76,7 @@ class EnvironmentContextResolver {
 	public resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
 		context: {
-			data: ApplicationData;
+			data: PickedApplicationData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -89,7 +94,7 @@ class EnvironmentContextResolver {
 		object: T,
 		key: TKey,
 		context: {
-			data: ApplicationData;
+			data: PickedApplicationData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -140,7 +145,7 @@ class EnvironmentContextResolver {
 
 	public parseStringWithEnvironmentOverrides(
 		text: string,
-		data: ApplicationData,
+		data: PickedApplicationData,
 		serviceId?: string,
 		requestId?: string,
 	) {
@@ -148,12 +153,8 @@ class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	public buildEnvironmentVariables(
-		data: ApplicationData = applicationDataManager.getApplicationData(),
-		serviceId?: string,
-		requestId?: string,
-	) {
-		let env: Environment = { __name: '', __id: '', __data: [] } as unknown as Environment;
+	public buildEnvironmentVariables(data: PickedApplicationData, serviceId?: string, requestId?: string) {
+		let env: Environment = asEnv({ __name: '', __id: '', __data: [] });
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };
 		}

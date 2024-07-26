@@ -1,9 +1,9 @@
 import { EventEmitter } from '@tauri-apps/api/shell';
 
 export type RequestEvent = {
-	timestamp: Date;
+	timestamp: number;
 	chronology: 'before' | 'after';
-	eventType: `${'pre' | 'post'}${'Service' | 'Endpoint' | 'Request'}Script` | 'request' | 'root';
+	eventType: `${'pre' | 'post'}${'Service' | 'Endpoint' | 'Request'}Script` | 'request' | 'root' | 'standaloneScript';
 	associatedId?: string;
 	error?: string;
 };
@@ -37,7 +37,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 		error?: string,
 	) {
 		const newRequestEvent: RequestEvent = {
-			timestamp: new Date(),
+			timestamp: new Date().getTime(),
 			chronology,
 			eventType,
 			error,
@@ -49,6 +49,9 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 
 	getEventDataType(event: RequestEvent) {
 		const dataTypes = ['Service', 'Endpoint', 'Request', 'request'] as const;
+		if (event.eventType === 'standaloneScript') {
+			return 'script';
+		}
 		for (const dt of dataTypes) {
 			if (event.eventType.includes(dt)) {
 				return dt.toLocaleLowerCase() as Lowercase<typeof dt>;
