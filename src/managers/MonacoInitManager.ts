@@ -185,7 +185,7 @@ export const defaultEditorOptions = {
 	tabSize: 2,
 	insertSpaces: false,
 	wordWrap: 'bounded',
-	wrappingStrategy: 'advanced',
+	wrappingStrategy: 'simple',
 	wrappingIndent: 'same',
 } as const satisfies editor.IStandaloneEditorConstructionOptions;
 
