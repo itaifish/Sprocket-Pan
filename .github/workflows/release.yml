@@ -100,7 +100,7 @@ jobs:
               draft: false,
               prerelease: false
             }))?.data;
-            console.log(JSON.stringify(updatedRelease));
+
             const latestJsonAsset = updatedRelease?.assets?.find(x => x.name === "latest.json");
             const body = updatedRelease?.body;
             if (body && latestJsonAsset) {
