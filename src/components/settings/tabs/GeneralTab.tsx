@@ -31,14 +31,14 @@ export interface SettingsTabProps {
 export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
-	const [version, setVersion] = useState('Loading...');
+	const [version, setVersion] = useState('Loading Version...');
 	const updateVersion = async () => {
 		const newVersion = await getVersion();
 		setVersion(newVersion);
 	};
 	useEffect(() => {
 		updateVersion();
-	}, [hasCheckedForUpdate]);
+	}, []);
 	return (
 		<Stack spacing={3}>
 			<InputSlider
