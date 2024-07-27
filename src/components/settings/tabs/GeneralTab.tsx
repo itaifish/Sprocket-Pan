@@ -1,15 +1,27 @@
-import { Select, Stack, Option, FormControl, FormLabel, Button, CircularProgress } from '@mui/joy';
+import {
+	Select,
+	Stack,
+	Option,
+	FormControl,
+	FormLabel,
+	Button,
+	CircularProgress,
+	Divider,
+	Typography,
+	Link,
+} from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { InputSlider } from '../../shared/input/InputSlider';
 import { Settings } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { log } from '../../../utils/logging';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { sleep } from '../../../utils/misc';
 import { Constants } from '../../../utils/constants';
 import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
+import { getVersion } from '@tauri-apps/api/app';
 
 export interface SettingsTabProps {
 	settings: Settings;
@@ -19,6 +31,14 @@ export interface SettingsTabProps {
 export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
+	const [version, setVersion] = useState('Loading Version...');
+	const updateVersion = async () => {
+		const newVersion = await getVersion();
+		setVersion(newVersion);
+	};
+	useEffect(() => {
+		updateVersion();
+	}, []);
 	return (
 		<Stack spacing={3}>
 			<InputSlider
@@ -79,6 +99,13 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 					<Option value={false}>Value Only</Option>
 				</Select>
 			</FormControl>
+			<Divider />
+			<Typography level="body-md">
+				Version {version} -{' '}
+				<Link href="https://sprocketpan.com" target="_blank">
+					View the docs
+				</Link>
+			</Typography>
 			<Stack direction="row" spacing={2} alignItems={'center'}>
 				<Button
 					startDecorator={checkingForUpdate ? <CircularProgress /> : <></>}

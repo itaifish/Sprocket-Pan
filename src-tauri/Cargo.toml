@@ -1,6 +1,6 @@
 [package]
 name = "sprocket_pan"
-version = "1.0.1"
+version = "1.0.2"
 description = "Sprocket Pan"
 authors = ["Itai Fish", "KateLynn Pullen"]
 license = ""
@@ -14,6 +14,7 @@ tauri-build = { version = "1.5.3", features = [] }
 
 [dependencies]
 tauri = { version = "1.7.1", features = [
+	"app-all",
 	"updater",
 	"http-all",
 	"dialog-all",
