@@ -87,7 +87,7 @@ interface AddNewRequest {
 export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: RootState }>(
 	'active/addRequest',
 	async ({ endpointId, data = {} }, thunk) => {
-		const newRequest = { ...createNewRequestObject(endpointId), ...data };
+		const newRequest: EndpointRequest = { ...createNewRequestObject(endpointId), ...data, history: [], endpointId };
 		thunk.dispatch(insertRequest(newRequest));
 		thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
 	},
