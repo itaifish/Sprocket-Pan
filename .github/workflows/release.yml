@@ -93,17 +93,17 @@ jobs:
           release_id: ${{ needs.create-release.outputs.release_id }}
         with:
           script: |
-            const updatedRelease = await github.rest.repos.updateRelease({
+            const updatedRelease = (await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
               draft: false,
               prerelease: false
-            });
+            }))?.data;
 
-            const lastestJsonAsset = updatedRelease?.assets?.find(x => x.name === "latest.json");
+            const latestJsonAsset = updatedRelease?.assets?.find(x => x.name === "latest.json");
             const body = updatedRelease?.body;
-            if (body && lastestJsonAsset) {
+            if (body && latestJsonAsset) {
               const notes = body.slice(body.search("What's Changed")); 
               const downloadUrl = latestJsonAsset.browser_download_url;
               const response = await fetch(downloadUrl);
