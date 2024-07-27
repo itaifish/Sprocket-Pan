@@ -93,16 +93,38 @@ jobs:
           release_id: ${{ needs.create-release.outputs.release_id }}
         with:
           script: |
-            const asset = await github.rest.repos.getReleaseAsset({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              
-            });
-
-            github.rest.repos.updateRelease({
+            const updatedRelease = await github.rest.repos.updateRelease({
               owner: context.repo.owner,
               repo: context.repo.repo,
               release_id: process.env.release_id,
               draft: false,
               prerelease: false
             });
+
+            const lastestJsonAsset = updatedRelease?.assets?.find(x => x.name === "latest.json");
+            const body = updatedRelease?.body;
+            if (body && lastestJsonAsset) {
+              const notes = body.slice(body.search("What's Changed")); 
+              const downloadUrl = latestJsonAsset.browser_download_url;
+              const response = await fetch(downloadUrl);
+              const jsonAssetBody = await response.json();
+              jsonAssetBody.notes = notes;
+
+              await github.rest.repos.deleteReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                asset_id: latestJsonAsset.id
+              });
+
+              const strToAB = (str) =>
+                  new Uint8Array(str.split('')
+                  .map(c => c.charCodeAt(0))).buffer;
+
+              await github.rest.repos.uploadReleaseAsset({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: process.env.release_id,
+                name: "latest.json",
+                data: strToAB(JSON.stringify(jsonAssetBody))
+              });
+            }
