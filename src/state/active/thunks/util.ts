@@ -22,7 +22,7 @@ export function createNewRequestObject(endpointId: string): EndpointRequest {
 		endpointId: endpointId,
 		id: newId,
 		history: [],
-	};
+	} satisfies EndpointRequest;
 }
 
 export function createNewEndpointObject(serviceId: string): Endpoint {

@@ -20,7 +20,13 @@ interface AddNewEndpoint {
 export const addNewEndpoint = createAsyncThunk<void, AddNewEndpoint, { state: RootState }>(
 	'active/addEndpoint',
 	async ({ serviceId, data: { requestIds, ...data } = {} }, thunk) => {
-		const newEndpoint = { ...createNewEndpointObject(serviceId), ...structuredClone(data) };
+		const newEndpoint: Endpoint = {
+			...createNewEndpointObject(serviceId),
+			...structuredClone(data),
+			defaultRequest: null,
+			requestIds: [],
+			serviceId,
+		};
 		thunk.dispatch(insertEndpoint(newEndpoint));
 		thunk.dispatch(addEndpointToService({ endpointId: newEndpoint.id, serviceId }));
 		const requests = thunk.getState().active.requests;
