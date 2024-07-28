@@ -11,6 +11,7 @@ import {
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
+import { log } from '../../utils/logging';
 
 export interface ActiveWorkspaceSlice extends ApplicationData {
 	lastModified: number;
@@ -57,40 +58,50 @@ export const activeSlice = createSlice({
 	reducers: {
 		setFullState: (state, action: PayloadAction<ApplicationData>) => {
 			Object.assign(state, action.payload);
+			log.debug(`setFullState called`, 0);
 		},
 		setSavedNow: (state) => {
 			state.lastSaved = new Date().getTime();
+			log.debug(`setSavedNow called at time ${state.lastSaved}`, 0);
 		},
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
+			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
 			const service = action.payload;
+			log.debug(`insertService called with service ${JSON.stringify(service)}`);
 			Object.assign(state.services, { [service.id]: service });
 		},
 		updateService: (state, action: PayloadAction<Update<Service>>) => {
 			const { id, ...updateFields } = action.payload;
+			log.debug(`updateService called for fields ${JSON.stringify(updateFields)} on service ${id}`);
 			Object.assign(state.services[id], updateFields);
 		},
 		insertEndpoint: (state, action: PayloadAction<Endpoint>) => {
 			const endpoint = action.payload;
+			log.debug(`insertEndpoint called with endpoint ${JSON.stringify(endpoint)}`);
 			Object.assign(state.endpoints, { [endpoint.id]: endpoint });
 		},
 		updateEndpoint: (state, action: PayloadAction<Update<Endpoint>>) => {
 			const { id, ...updateFields } = action.payload;
+			log.debug(`updateEndpoint called for fields ${JSON.stringify(updateFields)} on endpoint ${id}`);
 			Object.assign(state.endpoints[id], updateFields);
 		},
 		insertRequest: (state, action: PayloadAction<EndpointRequest>) => {
 			const request = action.payload;
+			log.debug(`insertRequest called with request ${JSON.stringify(request)}`);
 			Object.assign(state.requests, { [request.id]: request });
 		},
 		updateRequest: (state, action: PayloadAction<Update<EndpointRequest>>) => {
 			const { id, ...updateFields } = action.payload;
+			log.debug(`updateRequest called for fields ${JSON.stringify(updateFields)} on request ${id}`);
 			Object.assign(state.requests[id], updateFields);
 		},
 		insertEnvironment: (state, action: PayloadAction<Environment>) => {
 			const environment = action.payload;
+			log.debug(`insertEnvironment called with environment ${JSON.stringify(environment)}`);
 			Object.assign(state.environments, { [environment.__id]: environment });
 		},
 		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
@@ -98,24 +109,31 @@ export const activeSlice = createSlice({
 			if (__id == null) {
 				throw new Error('attempted to update environment with null __id');
 			}
+			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${__id}`);
 			Object.assign(state.environments[__id], updateFields);
 		},
 		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
+			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
 			Object.assign(state.settings, action.payload);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
+			log.debug(`selectEnvironment called on env ${action.payload}`);
 			state.selectedEnvironment = action.payload;
 		},
 		deleteServiceFromState: (state, action: PayloadAction<string>) => {
+			log.debug(`deleteServiceFromState called on service ${action.payload}`);
 			delete state.services[action.payload];
 		},
 		deleteEndpointFromState: (state, action: PayloadAction<string>) => {
+			log.debug(`deleteEndpointFromState called on endpoint ${action.payload}`);
 			delete state.endpoints[action.payload];
 		},
 		deleteRequestFromState: (state, action: PayloadAction<string>) => {
+			log.debug(`deleteRequestFromState called on endpoint ${action.payload}`);
 			delete state.requests[action.payload];
 		},
 		deleteEnvironmentFromState: (state, action: PayloadAction<string>) => {
+			log.debug(`deleteEnvironmentFromState called on env ${action.payload}`);
 			delete state.environments[action.payload];
 		},
 		// more specific logic
@@ -126,26 +144,31 @@ export const activeSlice = createSlice({
 			if (endpoint.defaultRequest == null) {
 				endpoint.defaultRequest = requestId;
 			}
+			log.debug(`addRequestToEndpoint called on endpoint ${endpointId} for request ${requestId}`);
 		},
 		removeRequestFromEndpoint: (state, action: PayloadAction<string>) => {
 			const requestId = action.payload;
 			const { endpointId } = state.requests[requestId];
 			state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter((id) => id !== requestId);
+			log.debug(`removeRequestFromEndpoint called on request ${requestId} for its endpoint ${endpointId} `);
 		},
 		addEndpointToService: (state, action: PayloadAction<AddEndpointToService>) => {
 			const { endpointId, serviceId } = action.payload;
 			state.services[serviceId].endpointIds.push(endpointId);
+			log.debug(`addEndpointToService called on service ${serviceId} for endpoint ${endpointId}`);
 		},
 		removeEndpointFromService: (state, action: PayloadAction<string>) => {
 			const endpointId = action.payload;
 			const { serviceId } = state.endpoints[endpointId];
 			state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((id) => id !== endpointId);
+			log.debug(`removeEndpointFromService called on endpoint ${endpointId} for its service ${serviceId}`);
 		},
 		deleteAllHistory: (state) => {
 			const requestIds = Object.keys(state.requests);
 			for (const requestId in requestIds) {
 				state.requests[requestId].history = [];
 			}
+			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
 			const { requestId, networkRequest, response, auditLog } = action.payload;
@@ -161,6 +184,8 @@ export const activeSlice = createSlice({
 			if (state.settings.maxHistoryLength > 0 && reqToUpdate.history.length > state.settings.maxHistoryLength) {
 				reqToUpdate.history.shift();
 			}
+			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);
+			log.trace(`new history item:\n${JSON.stringify(reqToUpdate.history[reqToUpdate.history.length - 1])}`);
 		},
 		deleteResponseFromHistory: (state, action: PayloadAction<DeleteResponseFromHistory>) => {
 			const { requestId, historyIndex } = action.payload;
@@ -168,16 +193,20 @@ export const activeSlice = createSlice({
 			if (reqToUpdate == null) {
 				throw new Error('addResponseToHistory called with no associated request');
 			}
+			log.debug(`deleteResponseFromHistory called for request ${requestId} history item index ${historyIndex}`);
 			reqToUpdate.history.splice(historyIndex, 1);
 		},
 		updateScript: (state, action: PayloadAction<Update<Script>>) => {
 			const { id, ...updateFields } = action.payload;
+			log.debug(`updateScript called for fields ${JSON.stringify(updateFields)} on script ${id}`);
 			Object.assign(state.scripts[id], updateFields);
 		},
-		addScript: (state, action: PayloadAction<Script>) => {
+		insertScript: (state, action: PayloadAction<Script>) => {
+			log.debug(`insertScript called with script ${JSON.stringify(action.payload)}`);
 			state.scripts[action.payload.id] = action.payload;
 		},
 		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
+			log.debug(`deleteScript called on script ${action.payload.scriptId}`);
 			delete state.scripts[action.payload.scriptId];
 		},
 	},
@@ -208,7 +237,7 @@ export const {
 	deleteAllHistory,
 	addResponseToHistory,
 	deleteResponseFromHistory,
-	addScript,
+	insertScript,
 	deleteScript,
 	updateScript,
 } = activeSlice.actions;
