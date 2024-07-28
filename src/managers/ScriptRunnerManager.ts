@@ -5,6 +5,7 @@ import { StateAccess } from '../state/types';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { Constants } from '../utils/constants';
+import { log } from '../utils/logging';
 
 class ScriptRunnerManager {
 	public static readonly INSTANCE = new ScriptRunnerManager();
@@ -33,7 +34,10 @@ class ScriptRunnerManager {
 			associatedId: string;
 		},
 	) {
+		let scriptName = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
+		scriptName = (script as Script)?.name ? `Script [${(script as Script)?.name}]` : scriptName;
 		try {
+			log.info(`Running ${scriptName}`);
 			const runnableScript: Script =
 				typeof script === 'string'
 					? { scriptCallableName: '_', content: script, id: '', returnVariableName: null, name: 'wrapper' }
@@ -54,7 +58,6 @@ class ScriptRunnerManager {
 			return result;
 		} catch (e) {
 			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-			const scriptName = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
 			const returnError = {
 				errorStr,
 				errorType: `Invalid ${scriptName}`,
@@ -68,6 +71,7 @@ class ScriptRunnerManager {
 					JSON.stringify(returnError),
 				);
 			}
+			log.warn(`Error when calling script ${scriptName}: \n${errorStr}`, 0);
 			return { error: returnError };
 		}
 	}
