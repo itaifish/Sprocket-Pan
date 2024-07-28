@@ -1,8 +1,19 @@
 import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { setModifiedNow } from './slice';
+import { log } from '../../utils/logging';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
+
+const ignoreKeys = new Set([
+	'workspaces/select/fulfilled',
+	'workspaces/setWorkspaces',
+	'workspaces/setSelectedWorkspace',
+	'active/saveData/fulfilled',
+	'active/setModifiedNow',
+]);
+
+const ignoreNames = ['tabs'];
 
 isModifiedListener.startListening({
 	predicate: (_, currentState, previousState) => {
@@ -15,7 +26,11 @@ isModifiedListener.startListening({
 			currentState.active.lastSaved === previousState.active.lastSaved
 		);
 	},
-	effect: (_, { dispatch }) => {
+	effect: (action, { dispatch }) => {
+		if (ignoreKeys.has(action.type) || ignoreNames.some((x) => action.type.startsWith(x))) {
+			return;
+		}
+		log.info(action.type);
 		dispatch(setModifiedNow());
 	},
 });
