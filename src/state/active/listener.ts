@@ -1,7 +1,6 @@
 import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { setModifiedNow } from './slice';
-import { log } from '../../utils/logging';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
@@ -30,7 +29,6 @@ isModifiedListener.startListening({
 		if (ignoreKeys.has(action.type) || ignoreNames.some((x) => action.type.startsWith(x))) {
 			return;
 		}
-		log.info(action.type);
 		dispatch(setModifiedNow());
 	},
 });
