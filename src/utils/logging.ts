@@ -46,7 +46,7 @@ class Logger {
 		}
 		const stack = new Error().stack
 			?.split('\n')
-			.slice(3, 3 + Math.max(logStackLength ?? 4, 1))
+			.slice(3, 3 + Math.max(logStackLength ?? 4, 0))
 			.join('\n')
 			.replaceAll(/http:\/\/localhost:[0-9]+\//gm, '')
 			.replaceAll(/\?t=[0-9]+:[0-9]+:[0-9]+/gm, '');

@@ -21,6 +21,16 @@ much more difficult to get them out of order and much easier to fix if they do.
 /**
  * Updates response bodies to be strings, rather than Record<string, unknown>.
  */
+function toTwo(data: any) {
+	for (const requestId in data.requests) {
+		for (const entry of data.requests[requestId].history) {
+			if (typeof entry.request.body !== 'string') {
+				entry.request.body = JSON.stringify(entry.request.body);
+			}
+		}
+	}
+}
+
 function toOne(data: any) {
 	for (const requestId in data.requests) {
 		for (const entry of data.requests[requestId].history) {
@@ -31,7 +41,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne];
+const transformers = [toOne, toTwo] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();
