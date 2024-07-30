@@ -184,7 +184,7 @@ export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []
 export const defaultEditorOptions = {
 	tabSize: 2,
 	insertSpaces: false,
-	wordWrap: 'bounded',
+	wordWrap: 'on',
 	wrappingStrategy: 'simple',
 	wrappingIndent: 'same',
 } as const satisfies editor.IStandaloneEditorConstructionOptions;
