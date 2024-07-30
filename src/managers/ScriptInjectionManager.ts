@@ -100,8 +100,8 @@ export function getScriptInjectionCode(
 	};
 
 	const sendRequest = async (requestId: string) => {
-		const data = getState();
 		await dispatch(makeRequest({ requestId, auditLog }));
+		const data = getState();
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
