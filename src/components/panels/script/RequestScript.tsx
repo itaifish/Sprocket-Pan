@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
 import { Constants } from '../../../utils/constants';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
+import { useDebounce } from '../../../hooks/useDebounce';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;
@@ -9,24 +9,20 @@ interface RequestScriptProps {
 }
 
 export function RequestScript(props: RequestScriptProps) {
-	const [editorText, setEditorText] = useState(props.scriptText ?? '');
-	const latestText = useRef(editorText);
-
-	useEffect(() => {
-		const delayDebounceFunc = setTimeout(() => {
-			props.updateScript(latestText.current);
-		}, Constants.debounceTimeMS);
-
-		return () => clearTimeout(delayDebounceFunc);
-	}, [latestText.current]);
+	const { localDataState, setLocalDataState } = useDebounce({
+		state: props.scriptText ?? '',
+		setState: (newText: string) => props.updateScript(newText),
+		debounceOverride: Constants.longEditTimeMS,
+	});
 
 	return (
 		<SprocketEditor
 			height={'55vh'}
-			value={editorText}
+			value={localDataState}
 			onChange={(value) => {
-				setEditorText(value ?? '');
-				latestText.current = value ?? '';
+				if (value != null) {
+					setLocalDataState(value);
+				}
 			}}
 			language={'typescript'}
 		/>

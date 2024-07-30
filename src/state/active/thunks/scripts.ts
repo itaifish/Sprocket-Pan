@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
 import { closeTab } from '../../tabs/slice';
-import { addScript, deleteScript } from '../slice';
+import { insertScript, deleteScript } from '../slice';
 import { Script } from '../../../types/application-data/application-data';
 import { v4 } from 'uuid';
 import { toValidFunctionName } from '../../../utils/string';
@@ -26,7 +26,7 @@ export const createScript = createAsyncThunk<string, Partial<Omit<Script, 'id'>>
 			...newScriptData,
 			id: newId,
 		};
-		thunk.dispatch(addScript(newScript));
+		thunk.dispatch(insertScript(newScript));
 		return newId;
 	},
 );

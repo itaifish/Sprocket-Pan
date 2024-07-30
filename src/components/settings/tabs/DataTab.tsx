@@ -1,7 +1,7 @@
 import { Box, Button, Grid } from '@mui/joy';
 import { useState } from 'react';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import { appLocalDataDir } from '@tauri-apps/api/path';
+import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import { invoke } from '@tauri-apps/api';
@@ -10,6 +10,7 @@ import { deleteAllHistory } from '../../../state/active/slice';
 import { saveActiveData } from '../../../state/active/thunks/environments';
 import { useAppDispatch } from '../../../state/store';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
+import { log } from '../../../utils/logging';
 
 interface DataTabProps {
 	onQuit: () => void;
@@ -43,6 +44,18 @@ export function DataTab({ onQuit, goToWorkspaceSelection }: DataTabProps) {
 						variant="outlined"
 					>
 						Open Data Folder
+					</Button>
+					<Button
+						sx={{ width: '200px' }}
+						startDecorator={<FolderOpenIcon />}
+						onClick={async () => {
+							const logDir = await appLogDir();
+							const data = `${logDir}${log.LOG_FILE_NAME}`;
+							invoke('show_in_explorer', { path: data });
+						}}
+						variant="outlined"
+					>
+						Open Logs Folder
 					</Button>
 				</Grid>
 				<Grid xs={6}>

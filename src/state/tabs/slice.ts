@@ -1,11 +1,12 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TabType } from '../../types/state/state';
 import { ResponseDiffSelection } from '../../components/root/overlays/ResponseDiffOverlay/ResponseDiffOverlay';
+import { log } from '../../utils/logging';
 
 export interface TabsState {
 	selected: string | null;
 	list: Record<string, TabType>;
-	history: any;
+	history: { type: TabType; id: string }[];
 	historyLocation: number;
 	deleteQueue: string[];
 	diffQueue: ResponseDiffSelection[];
@@ -71,6 +72,7 @@ export const tabsSlice = createSlice({
 					type: state.list[payload],
 					id: payload,
 				});
+				log.trace(`Selecting ${state.list[payload]} tab`, 1);
 				state.historyLocation = state.history.length - 1;
 			}
 		},

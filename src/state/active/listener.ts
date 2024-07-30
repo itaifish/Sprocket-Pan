@@ -4,6 +4,16 @@ import { setModifiedNow } from './slice';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
+const ignoreKeys = new Set([
+	'workspaces/select/fulfilled',
+	'workspaces/setWorkspaces',
+	'workspaces/setSelectedWorkspace',
+	'active/saveData/fulfilled',
+	'active/setModifiedNow',
+]);
+
+const ignoreNames = ['tabs'];
+
 isModifiedListener.startListening({
 	predicate: (_, currentState, previousState) => {
 		// we want lastModified to be updated in all cases where it hasn't been
@@ -15,7 +25,10 @@ isModifiedListener.startListening({
 			currentState.active.lastSaved === previousState.active.lastSaved
 		);
 	},
-	effect: (_, { dispatch }) => {
+	effect: (action, { dispatch }) => {
+		if (ignoreKeys.has(action.type) || ignoreNames.some((x) => action.type.startsWith(x))) {
+			return;
+		}
 		dispatch(setModifiedNow());
 	},
 });
