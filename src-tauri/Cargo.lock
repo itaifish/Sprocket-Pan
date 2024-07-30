@@ -2829,7 +2829,7 @@ dependencies = [
 
 [[package]]
 name = "sprocket_pan"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "fork",
  "log",
