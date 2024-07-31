@@ -6,6 +6,7 @@ import { setSelectedWorkspace } from './slice';
 import { applicationDataManager } from '../../managers/ApplicationDataManager';
 import { setFullState } from '../active/slice';
 import { log } from '../../utils/logging';
+import { clearTabs, setSearchText } from '../tabs/slice';
 
 const root = 'workspaces';
 
@@ -37,6 +38,8 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 		const data = await applicationDataManager.initializeWorkspace(workspace);
 		if (data) {
 			await Promise.all([
+				thunk.dispatch(clearTabs()),
+				thunk.dispatch(setSearchText('')),
 				thunk.dispatch(setSelectedWorkspace(data.workspaceMetadata)),
 				thunk.dispatch(setFullState(data)),
 			]);

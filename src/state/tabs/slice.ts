@@ -76,6 +76,11 @@ export const tabsSlice = createSlice({
 				state.historyLocation = state.history.length - 1;
 			}
 		},
+		clearTabs: (state) => {
+			state.list = {};
+			state.history = [];
+			state.historyLocation = 0;
+		},
 		setSelectedTabFromHistory: (state, { payload }: PayloadAction<number | null>) => {
 			if (payload != null) {
 				const tabData = state.history[payload];
@@ -101,4 +106,5 @@ export const {
 	addTabs,
 	closeTab,
 	setSelectedTabFromHistory,
+	clearTabs,
 } = tabsSlice.actions;
