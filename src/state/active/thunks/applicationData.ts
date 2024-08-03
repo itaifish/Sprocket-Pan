@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { ParsedServiceApplicationData } from '../../../managers/SwaggerParseManager';
+import { ParsedServiceApplicationData } from '../../../managers/parsers/SwaggerParseManager';
 import { insertEndpoint, insertRequest, insertService } from '../slice';
 import { log } from '../../../utils/logging';
 

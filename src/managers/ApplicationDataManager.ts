@@ -6,7 +6,7 @@ import {
 	HistoricalEndpointResponse,
 	WorkspaceMetadata,
 } from '../types/application-data/application-data';
-import swaggerParseManager from './SwaggerParseManager';
+import swaggerParseManager from './parsers/SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
 import { saveUpdateManager } from './SaveUpdateManager';
