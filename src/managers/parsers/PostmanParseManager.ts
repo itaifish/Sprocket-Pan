@@ -43,6 +43,16 @@ class PostmanParseManager {
 	public static readonly INSTANCE = new PostmanParseManager();
 
 	private constructor() {}
+
+	importPostmanCollection(collection: PostmanCollection) {
+		const {
+			item,
+			info: { name, description },
+			variable,
+			auth,
+			event,
+		} = collection;
+	}
 }
 
 export const postmanParseManager = PostmanParseManager.INSTANCE;
