@@ -1,6 +1,7 @@
 import { TableData } from '../components/shared/input/EditableData';
 import {
 	EMPTY_ENVIRONMENT,
+	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Environment,
 	OrderedKeyValuePair,
@@ -68,11 +69,19 @@ export class HeaderUtils extends UniqueKeyValuePairUtils {
 	private constructor() {
 		super();
 	}
+
+	static new() {
+		return structuredClone(EMPTY_HEADERS);
+	}
 }
 
 export class QueryParamUtils extends KeyValuePairUtils {
 	private constructor() {
 		super();
+	}
+
+	static new() {
+		return structuredClone(EMPTY_QUERY_PARAMS);
 	}
 
 	static fromTableData<TID extends string | number>(tableData: TableData<TID>) {
