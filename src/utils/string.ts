@@ -8,6 +8,16 @@ export function keepStringLengthReasonable(string: string, reasonableLength = 30
 	return `${string.slice(0, reasonableLength - 3)}...`;
 }
 
+export function getLongestCommonSubstringStartingAtBeginning(string1: string, string2: string): string {
+	let i;
+	for (i = 0; i < string1.length && i < string2.length; i++) {
+		if (string1.charAt(i) !== string2.charAt(i)) {
+			break;
+		}
+	}
+	return string1.substring(0, i);
+}
+
 export function capitalizeWord<T extends string>(word: T): Capitalize<T> {
 	return (word.charAt(0).toUpperCase() + word.slice(1)) as Capitalize<T>;
 }

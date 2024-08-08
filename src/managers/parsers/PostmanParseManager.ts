@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import {
 	Endpoint,
 	EndpointRequest,
+	Environment,
 	QueryParams,
 	RawBodyType,
 	RequestBodyType,
@@ -38,7 +39,7 @@ import type {
 	Description as V210Description,
 } from './parseTypes/postman2.1Types';
 import mime from 'mime';
-import { camelCaseToTitle } from '../../utils/string';
+import { camelCaseToTitle, getLongestCommonSubstringStartingAtBeginning } from '../../utils/string';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -60,25 +61,69 @@ type Header = V200Header | V210Header;
 
 type Description = V200Description | V210Description;
 
+type ImportedGrouping = {
+	services: Service[];
+	endpoints: Endpoint[];
+	requests: EndpointRequest[];
+};
+
 class PostmanParseManager {
 	public static readonly INSTANCE = new PostmanParseManager();
 
 	private constructor() {}
 
 	importPostmanCollection(collection: PostmanCollection) {
-		const {
-			item,
-			info: { name, description, version },
-			variable,
-			auth,
-			event,
-		} = collection;
+		const { item, info, variable, auth, event } = collection;
+		const items = this.importItems(info, item);
+		const env = this.importVariables((variable as { [key: string]: string }[]) || []);
+		const preRequestScript = this.importPreRequestScript(event);
+		const postRequestScript = this.importAfterResponseScript(event);
 	}
 
-	importItems = (
-		info: PostmanCollection['info'],
-		items: PostmanCollection['item'],
-	): { services: Service[]; endpoints: Endpoint[]; requests: EndpointRequest[] } => {
+	private consolidateUnderGroupedServices(items: ImportedGrouping): ImportedGrouping {
+		const services: Service[] = [];
+		const endpoints: Endpoint[] = [];
+		const requests: EndpointRequest[] = [];
+
+		const groupings = new Map<string, string>();
+
+		endpoints.forEach((endpoint) => {
+			try {
+				const url = new URL(endpoint.url);
+				const root = url.origin;
+				const currentRootPath = groupings.get(root);
+				if (currentRootPath != undefined) {
+					const sharedPath = getLongestCommonSubstringStartingAtBeginning(currentRootPath, url.pathname);
+					groupings.set(root, sharedPath);
+				} else {
+					groupings.set(root, url.pathname);
+				}
+			} catch (e) {
+				// throws when URL is invalid
+				groupings.set(endpoint.url, endpoint.url);
+			}
+		});
+		// clear existing matches since we're making new ones
+		services.forEach((service) => (service.endpointIds = []));
+		endpoints.forEach((endpoint) => {
+			
+		});
+
+		return { services, endpoints, requests };
+	}
+
+	private importVariables(variables: { [key: string]: string }[]): Environment {
+		const env = EnvironmentUtils.new();
+		variables.forEach((variable) => {
+			const { key, value } = variable;
+			if (key) {
+				EnvironmentUtils.set(env, key, value);
+			}
+		});
+		return env;
+	}
+
+	private importItems = (info: PostmanCollection['info'], items: PostmanCollection['item']): ImportedGrouping => {
 		const rootService: Service = {
 			name: info.name,
 			id: v4(),
@@ -116,7 +161,7 @@ class PostmanParseManager {
 		return { services, endpoints, requests };
 	};
 
-	importRequestItem = (
+	private importRequestItem = (
 		{ request, name = '', event }: Item,
 		parentId: string,
 	): { request: EndpointRequest; endpoint: Endpoint } | null => {
@@ -177,14 +222,14 @@ class PostmanParseManager {
 		return { request: newRequest, endpoint: newEndpoint };
 	};
 
-	importDescription(description?: Description | string | null) {
+	private importDescription(description?: Description | string | null) {
 		if (typeof description === 'string') {
 			return description;
 		}
 		return description?.content ?? 'Imported from Postman';
 	}
 
-	importHeaders = (headers?: Header[] | string): SPHeaders => {
+	private importHeaders = (headers?: Header[] | string): SPHeaders => {
 		const result = HeaderUtils.new();
 		if (typeof headers === 'string' || typeof headers === 'undefined') {
 			return result;
@@ -195,7 +240,7 @@ class PostmanParseManager {
 		return result;
 	};
 
-	importParameters = (parameters: QueryParam[]): QueryParams => {
+	private importParameters = (parameters: QueryParam[]): QueryParams => {
 		const result = QueryParamUtils.new();
 		if (!parameters || parameters?.length === 0) {
 			return result;
@@ -204,7 +249,7 @@ class PostmanParseManager {
 		return result;
 	};
 
-	importBody = (
+	private importBody = (
 		body: Body,
 		contentType?: RawBodyType,
 	): { body: EndpointRequest['body']; bodyType: RequestBodyType; rawType: RawBodyType | undefined } => {
@@ -256,7 +301,7 @@ class PostmanParseManager {
 		}
 	};
 
-	importUrl = (url?: Url | string) => {
+	private importUrl = (url?: Url | string) => {
 		if (!url) {
 			return '';
 		}
@@ -276,7 +321,7 @@ class PostmanParseManager {
 		return '';
 	};
 
-	importPreRequestScript = (events: EventList | undefined): string => {
+	private importPreRequestScript = (events: EventList | undefined): string => {
 		if (events == null) {
 			return '';
 		}
@@ -298,7 +343,7 @@ class PostmanParseManager {
 		return scriptContent;
 	};
 
-	importAfterResponseScript = (events: EventList | undefined): string => {
+	private importAfterResponseScript = (events: EventList | undefined): string => {
 		if (events == null) {
 			return '';
 		}
