@@ -3,8 +3,11 @@ import {
 	Endpoint,
 	EndpointRequest,
 	QueryParams,
+	RawBodyType,
+	RequestBodyType,
 	RESTfulRequestVerb,
 	RESTfulRequestVerbs,
+	Service,
 	SPHeaders,
 } from '../../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
@@ -34,6 +37,8 @@ import type {
 	UrlEncodedParameter as V210UrlEncodedParameter,
 	Description as V210Description,
 } from './parseTypes/postman2.1Types';
+import mime from 'mime';
+import { camelCaseToTitle } from '../../utils/string';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -63,27 +68,52 @@ class PostmanParseManager {
 	importPostmanCollection(collection: PostmanCollection) {
 		const {
 			item,
-			info: { name, description },
+			info: { name, description, version },
 			variable,
 			auth,
 			event,
 		} = collection;
 	}
 
-	importItems = (items: PostmanCollection['item'], parentId = '__WORKSPACE_ID__'): any => {
-		// @ts-expect-error this is because there are devergent behaviors for how the function treats this collection.  This is handled appropriately in the function itself in different branches.
-		return items.reduce((accumulator: ImportRequest[], item: Item | Folder) => {
-			if (Object.prototype.hasOwnProperty.call(item, 'request')) {
-				return [...accumulator, this.importRequestItem(item as Item, parentId)];
-			}
+	importItems = (
+		info: PostmanCollection['info'],
+		items: PostmanCollection['item'],
+	): { services: Service[]; endpoints: Endpoint[]; requests: EndpointRequest[] } => {
+		const rootService: Service = {
+			name: info.name,
+			id: v4(),
+			description: this.importDescription(info.description),
+			version: info.version
+				? typeof info.version === 'string'
+					? info.version
+					: `${info.version.major}.${info.version.minor}.${info.version.patch}`
+				: '1.0.0',
+			endpointIds: [],
+			localEnvironments: {},
+			baseUrl: '',
+		};
 
-			const requestGroup = this.importFolderItem(item as Folder, parentId);
-			return [
-				...accumulator,
-				requestGroup,
-				...this.importItems(item.item as PostmanCollection['item'], requestGroup._id),
-			];
-		}, []);
+		const services: Service[] = [rootService];
+		const endpoints: Endpoint[] = [];
+		const requests: EndpointRequest[] = [];
+
+		items.forEach((item) => {
+			if (Object.prototype.hasOwnProperty.call(item, 'request')) {
+				const res = this.importRequestItem(item as Item, rootService.id);
+				if (res != null) {
+					const { request, endpoint } = res;
+					requests.push(request);
+					endpoints.push(endpoint);
+				}
+			} else {
+				const newItems = this.importItems(info, item.item as PostmanCollection['item']);
+				services.push(...newItems.services);
+				endpoints.push(...newItems.endpoints);
+				requests.push(...newItems.requests);
+			}
+		});
+
+		return { services, endpoints, requests };
 	};
 
 	importRequestItem = (
@@ -104,10 +134,15 @@ class PostmanParseManager {
 		}
 
 		const preRequestScript = this.importPreRequestScript(event);
-		const afterResponseScript = this.importAfterResponseScript(event);
+		const postRequestScript = this.importAfterResponseScript(event);
 
 		const endpointId = v4();
 		const requestId = v4();
+
+		const { body, bodyType, rawType } = this.importBody(
+			request.body,
+			(camelCaseToTitle(mime.getExtension(headers['Content-Type']) ?? '') as RawBodyType) || undefined,
+		);
 
 		const newRequest: EndpointRequest = {
 			id: requestId,
@@ -117,6 +152,9 @@ class PostmanParseManager {
 			queryParams: QueryParamUtils.new(),
 			history: [],
 			environmentOverride: EnvironmentUtils.new(),
+			body,
+			bodyType,
+			rawType,
 		};
 
 		const newEndpoint: Endpoint = {
@@ -132,6 +170,8 @@ class PostmanParseManager {
 			serviceId: parentId,
 			baseQueryParams: parameters,
 			defaultRequest: requestId,
+			preRequestScript,
+			postRequestScript,
 		};
 
 		return { request: newRequest, endpoint: newEndpoint };
@@ -162,6 +202,58 @@ class PostmanParseManager {
 		}
 		parameters.forEach(({ key, value }) => QueryParamUtils.add(result, key ?? 'Unknown Key', value ?? ''));
 		return result;
+	};
+
+	importBody = (
+		body: Body,
+		contentType?: RawBodyType,
+	): { body: EndpointRequest['body']; bodyType: RequestBodyType; rawType: RawBodyType | undefined } => {
+		const defaultReturn = {
+			body: undefined,
+			bodyType: 'none',
+			rawType: undefined,
+		} as const;
+
+		switch (body?.mode) {
+			case null:
+				return defaultReturn;
+			case 'raw':
+				return {
+					body: body.raw,
+					bodyType: 'raw',
+					rawType: contentType,
+				};
+			case 'urlencoded':
+				return {
+					body: body.urlencoded?.reduce(
+						(acc, curr) => {
+							Object.assign(acc, { [curr.key]: curr.value });
+							return acc;
+						},
+						{} as Record<string, string>,
+					),
+					bodyType: 'x-www-form-urlencoded',
+					rawType: undefined,
+				};
+
+			case 'formdata':
+				return {
+					body: body.formdata?.reduce(
+						(acc, curr) => {
+							Object.assign(acc, { [curr.key]: curr.value });
+							return acc;
+						},
+						{} as Record<string, string>,
+					),
+					bodyType: 'form-data',
+					rawType: undefined,
+				};
+			// TODO
+			// case 'graphql':
+			// 	return this.importBodyGraphQL(body.graphql);
+			default:
+				return defaultReturn;
+		}
 	};
 
 	importUrl = (url?: Url | string) => {
