@@ -63,6 +63,10 @@ export class EnvironmentUtils extends UniqueKeyValuePairUtils {
 	private constructor() {
 		super();
 	}
+
+	static new() {
+		return structuredClone(EMPTY_ENVIRONMENT);
+	}
 }
 
 export class HeaderUtils extends UniqueKeyValuePairUtils {
