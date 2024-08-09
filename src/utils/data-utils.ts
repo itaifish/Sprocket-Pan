@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import { TableData } from '../components/shared/input/EditableData';
 import {
 	EMPTY_ENVIRONMENT,
@@ -7,6 +8,7 @@ import {
 	OrderedKeyValuePair,
 	QueryParams,
 } from '../types/application-data/application-data';
+import { asEnv } from './types';
 
 export abstract class KeyValuePairUtils {
 	static toTableData<TKVP extends QueryParams | Environment>(kvp: TKVP) {
@@ -64,8 +66,8 @@ export class EnvironmentUtils extends UniqueKeyValuePairUtils {
 		super();
 	}
 
-	static new() {
-		return structuredClone(EMPTY_ENVIRONMENT);
+	static new(): Environment {
+		return asEnv({ ...structuredClone(EMPTY_ENVIRONMENT), __id: v4() });
 	}
 }
 

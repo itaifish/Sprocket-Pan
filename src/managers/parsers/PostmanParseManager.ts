@@ -79,7 +79,7 @@ class PostmanParseManager {
 	private constructor() {}
 
 	importPostmanCollection(collection: PostmanCollection) {
-		const { item, info, variable, auth, event } = collection;
+		const { item, info, variable, event } = collection;
 		const items = this.importItems(info, item);
 		const env = this.importVariables((variable as { [key: string]: string }[]) || []);
 		const preRequestScript = this.importPreRequestScript(event);
@@ -103,6 +103,7 @@ class PostmanParseManager {
 			endpoints,
 			requests,
 			scripts,
+			environments: [{ [env.__id]: env }],
 		};
 	}
 
