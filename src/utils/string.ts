@@ -8,6 +8,25 @@ export function keepStringLengthReasonable(string: string, reasonableLength = 30
 	return `${string.slice(0, reasonableLength - 3)}...`;
 }
 
+function getLongestCommonSubstringStartingAtBeginningIndex(string1: string, string2: string): number {
+	let i;
+	for (i = 0; i < string1.length && i < string2.length; i++) {
+		if (string1.charAt(i) !== string2.charAt(i)) {
+			break;
+		}
+	}
+	return i;
+}
+
+export function getLongestCommonSubstringStartingAtBeginning(string1: string, string2: string): string {
+	return string1.substring(0, getLongestCommonSubstringStartingAtBeginningIndex(string1, string2));
+}
+
+export function getStringDifference(string1: string, string2: string): string {
+	const longerString = string1.length > string2.length ? string1 : string2;
+	return longerString.substring(getLongestCommonSubstringStartingAtBeginningIndex(string1, string2));
+}
+
 export function capitalizeWord<T extends string>(word: T): Capitalize<T> {
 	return (word.charAt(0).toUpperCase() + word.slice(1)) as Capitalize<T>;
 }

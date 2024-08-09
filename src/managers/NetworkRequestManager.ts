@@ -7,6 +7,7 @@ import {
 	NetworkFetchRequest,
 	RawBodyType,
 	RawBodyTypes,
+	rawBodyTypeToMime,
 	SPHeaders,
 } from '../types/application-data/application-data';
 import { queryParamsToStringReplaceVars } from '../utils/application';
@@ -21,6 +22,8 @@ import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
+
+const contentType = 'Content-Type';
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -174,6 +177,7 @@ class NetworkRequestManager {
 				),
 			);
 		});
+
 		const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
 		let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
 			environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
@@ -190,8 +194,7 @@ class NetworkRequestManager {
 			dateTime: new Date().getTime(),
 			bodyType: request.rawType,
 		} as const satisfies NetworkFetchRequest;
-		const { __data, ...headersToSend } = networkRequest.headers;
-		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+
 		let networkBody: Body;
 		const category = getRequestBodyCategory(request.bodyType);
 		if (category === 'table') {
@@ -202,7 +205,15 @@ class NetworkRequestManager {
 			}
 		} else {
 			networkBody = Body.text(networkRequest.body);
+			// auto-set content type if not already set
+			if (request.headers[contentType] == undefined) {
+				HeaderUtils.set(headers, contentType, rawBodyTypeToMime(networkRequest.bodyType));
+			}
 		}
+
+		const { __data, ...headersToSend } = networkRequest.headers;
+		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
 			body: networkBody,

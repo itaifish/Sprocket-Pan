@@ -7,15 +7,15 @@ import {
 	RESTfulRequestVerb,
 	RESTfulRequestVerbs,
 	Service,
-} from '../types/application-data/application-data';
-import { log } from '../utils/logging';
+} from '../../types/application-data/application-data';
+import { log } from '../../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { QueryParamUtils } from '../utils/data-utils';
+import { QueryParamUtils } from '../../utils/data-utils';
 
 export type ParsedServiceApplicationData = {
 	services: Service[];

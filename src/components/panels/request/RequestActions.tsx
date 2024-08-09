@@ -55,6 +55,9 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 	}
 
 	async function sendRequest() {
+		if (isLoading) {
+			return;
+		}
 		setLoading(true);
 		try {
 			const result = await dispatch(makeRequest({ requestId: request.id })).unwrap();
@@ -114,11 +117,11 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 			<Grid xs={5} xl={3}>
 				<Stack direction={'row'} spacing={2}>
 					<Button
-						color="primary"
+						color={isLoading ? 'warning' : 'primary'}
 						startDecorator={isLoading ? <CircularProgress /> : <SendIcon />}
 						onClick={sendRequest}
 					>
-						Send
+						Send{isLoading ? 'ing' : ''}
 					</Button>
 					<ParticleEffectButton
 						hidden={hidden}

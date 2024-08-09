@@ -1,16 +1,24 @@
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, MenuItem } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { addToCreateQueue } from '../../../state/tabs/slice';
+import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
+	const ref = useRef(null);
+	const emitterForOutsideClicks = useOutsideAlerter(ref as any);
+	useEffect(() => {
+		emitterForOutsideClicks.addListener('outsideClick', () => {
+			setMenuOpen(false);
+		});
+	}, [emitterForOutsideClicks]);
 	const newEntities = [
 		{
 			name: 'Service',
@@ -39,7 +47,7 @@ export function NewButton() {
 					>
 						<AddBoxIcon />
 					</MenuButton>
-					<Menu>
+					<Menu ref={ref}>
 						{newEntities.map((entity, index) => (
 							<Box key={index}>
 								<MenuItem

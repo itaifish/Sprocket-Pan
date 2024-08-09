@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::{Manager, Window};
-use tauri_plugin_log::LogTarget;
+use tauri_plugin_log::{LogTarget, RotationStrategy};
 
 mod commands;
 
@@ -29,6 +29,8 @@ fn main() {
         })
         .plugin(
             tauri_plugin_log::Builder::default()
+                .rotation_strategy(RotationStrategy::KeepAll)
+                .max_file_size(10_000)
                 .targets([LogTarget::LogDir, LogTarget::Stdout, LogTarget::Webview])
                 .build(),
         )

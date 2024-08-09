@@ -1,11 +1,14 @@
+import { v4 } from 'uuid';
 import { TableData } from '../components/shared/input/EditableData';
 import {
 	EMPTY_ENVIRONMENT,
+	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Environment,
 	OrderedKeyValuePair,
 	QueryParams,
 } from '../types/application-data/application-data';
+import { asEnv } from './types';
 
 export abstract class KeyValuePairUtils {
 	static toTableData<TKVP extends QueryParams | Environment>(kvp: TKVP) {
@@ -62,17 +65,29 @@ export class EnvironmentUtils extends UniqueKeyValuePairUtils {
 	private constructor() {
 		super();
 	}
+
+	static new(): Environment {
+		return asEnv({ ...structuredClone(EMPTY_ENVIRONMENT), __id: v4(), __name: 'New Environment' });
+	}
 }
 
 export class HeaderUtils extends UniqueKeyValuePairUtils {
 	private constructor() {
 		super();
 	}
+
+	static new() {
+		return structuredClone(EMPTY_HEADERS);
+	}
 }
 
 export class QueryParamUtils extends KeyValuePairUtils {
 	private constructor() {
 		super();
+	}
+
+	static new() {
+		return structuredClone(EMPTY_QUERY_PARAMS);
 	}
 
 	static fromTableData<TID extends string | number>(tableData: TableData<TID>) {
