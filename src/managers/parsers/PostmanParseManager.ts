@@ -76,6 +76,11 @@ type ImportedGrouping = {
 	requests: EndpointRequest[];
 };
 
+/**
+ * Code and types inspired by / partially borrowed and modified from
+ * https://github.com/Kong/insomnia/blob/570c1c005541c2c3715b522aab5f53d642a52f7a/packages/insomnia/src/utils/importers/importers/postman.ts
+ */
+
 class PostmanParseManager {
 	public static readonly INSTANCE = new PostmanParseManager();
 
