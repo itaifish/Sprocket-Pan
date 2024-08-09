@@ -8,6 +8,7 @@ import {
 	RequestBodyType,
 	RESTfulRequestVerb,
 	RESTfulRequestVerbs,
+	Script,
 	Service,
 	SPHeaders,
 } from '../../types/application-data/application-data';
@@ -39,7 +40,12 @@ import type {
 	Description as V210Description,
 } from './parseTypes/postman2.1Types';
 import mime from 'mime';
-import { camelCaseToTitle, getLongestCommonSubstringStartingAtBeginning } from '../../utils/string';
+import {
+	camelCaseToTitle,
+	getLongestCommonSubstringStartingAtBeginning,
+	getStringDifference,
+	toValidFunctionName,
+} from '../../utils/string';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -78,9 +84,29 @@ class PostmanParseManager {
 		const env = this.importVariables((variable as { [key: string]: string }[]) || []);
 		const preRequestScript = this.importPreRequestScript(event);
 		const postRequestScript = this.importAfterResponseScript(event);
+		const scripts: Script[] = [];
+		[preRequestScript, postRequestScript].forEach((script, index) => {
+			if (script) {
+				const name = index === 0 ? 'Postman Pre-Request Script' : 'Postman After-Response Script';
+				scripts.push({
+					name,
+					scriptCallableName: toValidFunctionName(name),
+					returnVariableName: null,
+					id: v4(),
+					content: script,
+				});
+			}
+		});
+		const { services, endpoints, requests } = this.consolidateUnderGroupedServices(items);
+		return {
+			services,
+			endpoints,
+			requests,
+			scripts,
+		};
 	}
 
-	private consolidateUnderGroupedServices(items: ImportedGrouping): ImportedGrouping {
+	private consolidateUnderGroupedServices(items: ReturnType<PostmanParseManager['importItems']>): ImportedGrouping {
 		const services: Service[] = [];
 		const endpoints: Endpoint[] = [];
 		const requests: EndpointRequest[] = [];
@@ -103,11 +129,28 @@ class PostmanParseManager {
 				groupings.set(endpoint.url, endpoint.url);
 			}
 		});
-		// clear existing matches since we're making new ones
-		services.forEach((service) => (service.endpointIds = []));
+
+		// map of full preceeding url to service
+		const serviceMap = new Map<string, Service>();
+
 		endpoints.forEach((endpoint) => {
-			
+			let urlRoot: string;
+			try {
+				urlRoot = new URL(endpoint.url).origin;
+			} catch (e) {
+				urlRoot = endpoint.url;
+			}
+			let existingService = serviceMap.get(urlRoot);
+			if (existingService == null) {
+				existingService = { ...structuredClone(items.service), id: v4(), baseUrl: urlRoot };
+				serviceMap.set(urlRoot, existingService);
+			}
+			existingService.endpointIds.push(endpoint.id);
+			endpoint.serviceId = existingService.id;
+			endpoint.url = getStringDifference(endpoint.url, urlRoot);
 		});
+
+		services.push(...serviceMap.values());
 
 		return { services, endpoints, requests };
 	}
@@ -123,7 +166,10 @@ class PostmanParseManager {
 		return env;
 	}
 
-	private importItems = (info: PostmanCollection['info'], items: PostmanCollection['item']): ImportedGrouping => {
+	private importItems = (
+		info: PostmanCollection['info'],
+		items: PostmanCollection['item'],
+	): Omit<ImportedGrouping, 'services'> & { service: Service } => {
 		const rootService: Service = {
 			name: info.name,
 			id: v4(),
@@ -138,7 +184,6 @@ class PostmanParseManager {
 			baseUrl: '',
 		};
 
-		const services: Service[] = [rootService];
 		const endpoints: Endpoint[] = [];
 		const requests: EndpointRequest[] = [];
 
@@ -152,13 +197,12 @@ class PostmanParseManager {
 				}
 			} else {
 				const newItems = this.importItems(info, item.item as PostmanCollection['item']);
-				services.push(...newItems.services);
 				endpoints.push(...newItems.endpoints);
 				requests.push(...newItems.requests);
 			}
 		});
 
-		return { services, endpoints, requests };
+		return { service: rootService, endpoints, requests };
 	};
 
 	private importRequestItem = (
