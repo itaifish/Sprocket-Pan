@@ -10,6 +10,7 @@ import swaggerParseManager from './parsers/SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
 import { saveUpdateManager } from './SaveUpdateManager';
+import { postmanParseManager } from './parsers/PostmanParseManager';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},
@@ -51,6 +52,12 @@ export class ApplicationDataManager {
 	public async loadSwaggerFile(url: string) {
 		const newService = await swaggerParseManager.parseSwaggerFile('filePath', url);
 		return newService;
+	}
+
+	public async loadPostmanFile(url: string) {
+		const newData = await postmanParseManager.parsePostmanFile('filePath', url);
+		log.info(`new Data: ${JSON.stringify(newData)}`);
+		return newData;
 	}
 
 	public async saveData(data: ApplicationData) {

@@ -67,7 +67,7 @@ export class EnvironmentUtils extends UniqueKeyValuePairUtils {
 	}
 
 	static new(): Environment {
-		return asEnv({ ...structuredClone(EMPTY_ENVIRONMENT), __id: v4() });
+		return asEnv({ ...structuredClone(EMPTY_ENVIRONMENT), __id: v4(), __name: 'New Environment' });
 	}
 }
 

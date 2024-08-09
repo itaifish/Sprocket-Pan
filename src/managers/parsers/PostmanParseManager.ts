@@ -46,6 +46,9 @@ import {
 	getStringDifference,
 	toValidFunctionName,
 } from '../../utils/string';
+import { readTextFile } from '@tauri-apps/api/fs';
+import { log } from '../../utils/logging';
+import yaml from 'js-yaml';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -78,6 +81,28 @@ class PostmanParseManager {
 
 	private constructor() {}
 
+	public async parsePostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string) {
+		try {
+			const loadedFile = await this.loadPostmanFile(inputType, inputValue);
+			const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile));
+			return input;
+		} catch (e) {
+			log.error(e);
+			return Promise.reject(e);
+		}
+	}
+
+	private parsePostmanInput(input: string) {
+		return yaml.load(input) as PostmanCollection;
+	}
+
+	private async loadPostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<string> {
+		if (inputType === 'fileContents') {
+			return inputValue;
+		}
+		return await readTextFile(inputValue);
+	}
+
 	importPostmanCollection(collection: PostmanCollection) {
 		const { item, info, variable, event } = collection;
 		const items = this.importItems(info, item);
@@ -103,18 +128,16 @@ class PostmanParseManager {
 			endpoints,
 			requests,
 			scripts,
-			environments: [{ [env.__id]: env }],
+			environments: [env],
 		};
 	}
 
 	private consolidateUnderGroupedServices(items: ReturnType<PostmanParseManager['importItems']>): ImportedGrouping {
 		const services: Service[] = [];
-		const endpoints: Endpoint[] = [];
-		const requests: EndpointRequest[] = [];
 
 		const groupings = new Map<string, string>();
 
-		endpoints.forEach((endpoint) => {
+		items.endpoints.forEach((endpoint) => {
 			try {
 				const url = new URL(endpoint.url);
 				const root = url.origin;
@@ -127,19 +150,42 @@ class PostmanParseManager {
 				}
 			} catch (e) {
 				// throws when URL is invalid
-				groupings.set(endpoint.url, endpoint.url);
+				// if there are variables anywhere in the endpoint url
+				const foundVariables = endpoint.url.match(/{.+?}/);
+				if (foundVariables != null) {
+					// skip ahead to end of first variable, as the starting point
+					const startingPoint = foundVariables[0].length + (foundVariables.index ?? 0);
+					const root = endpoint.url.substring(0, startingPoint);
+					const extendedPath = endpoint.url.substring(startingPoint);
+					log.info({ root, extendedPath });
+					const currentRootPath = groupings.get(root);
+					if (currentRootPath != undefined) {
+						const sharedPath = getLongestCommonSubstringStartingAtBeginning(currentRootPath, extendedPath);
+						groupings.set(root, sharedPath);
+					} else {
+						groupings.set(root, extendedPath);
+					}
+				} else {
+					groupings.set(endpoint.url, endpoint.url);
+				}
 			}
 		});
 
 		// map of full preceeding url to service
 		const serviceMap = new Map<string, Service>();
 
-		endpoints.forEach((endpoint) => {
+		items.endpoints.forEach((endpoint) => {
 			let urlRoot: string;
 			try {
 				urlRoot = new URL(endpoint.url).origin;
 			} catch (e) {
-				urlRoot = endpoint.url;
+				const foundVariables = endpoint.url.match(/{.+?}/);
+				if (foundVariables != null) {
+					const startingPoint = foundVariables[0].length + (foundVariables.index ?? 0);
+					urlRoot = endpoint.url.substring(0, startingPoint);
+				} else {
+					urlRoot = endpoint.url;
+				}
 			}
 			let existingService = serviceMap.get(urlRoot);
 			if (existingService == null) {
@@ -153,7 +199,7 @@ class PostmanParseManager {
 
 		services.push(...serviceMap.values());
 
-		return { services, endpoints, requests };
+		return { services, endpoints: items.endpoints, requests: items.requests };
 	}
 
 	private importVariables(variables: { [key: string]: string }[]): Environment {
@@ -164,6 +210,7 @@ class PostmanParseManager {
 				EnvironmentUtils.set(env, key, value);
 			}
 		});
+		env.__name = 'Postman Variables';
 		return env;
 	}
 
@@ -187,7 +234,6 @@ class PostmanParseManager {
 
 		const endpoints: Endpoint[] = [];
 		const requests: EndpointRequest[] = [];
-
 		items.forEach((item) => {
 			if (Object.prototype.hasOwnProperty.call(item, 'request')) {
 				const res = this.importRequestItem(item as Item, rootService.id);
@@ -195,6 +241,8 @@ class PostmanParseManager {
 					const { request, endpoint } = res;
 					requests.push(request);
 					endpoints.push(endpoint);
+				} else {
+					log.trace(`res is null for item ${item.name}`);
 				}
 			} else {
 				const newItems = this.importItems(info, item.item as PostmanCollection['item']);
@@ -205,6 +253,16 @@ class PostmanParseManager {
 
 		return { service: rootService, endpoints, requests };
 	};
+
+	private convertVariablesToSprocketVariables<TOnlyReturnsUndefinedIfInputIsUndefined extends string | undefined>(
+		postmanString: TOnlyReturnsUndefinedIfInputIsUndefined,
+	): TOnlyReturnsUndefinedIfInputIsUndefined {
+		if (postmanString == undefined) {
+			return undefined as TOnlyReturnsUndefinedIfInputIsUndefined;
+		}
+		// replace double curlies with single curlies
+		return postmanString.replaceAll(/{({.*?})}/g, '$1') as TOnlyReturnsUndefinedIfInputIsUndefined;
+	}
 
 	private importRequestItem = (
 		{ request, name = '', event }: Item,
@@ -280,7 +338,11 @@ class PostmanParseManager {
 			return result;
 		}
 		headers.forEach((header) => {
-			HeaderUtils.set(result, header.key, header.value);
+			HeaderUtils.set(
+				result,
+				this.convertVariablesToSprocketVariables(header.key),
+				this.convertVariablesToSprocketVariables(header.value),
+			);
 		});
 		return result;
 	};
@@ -290,7 +352,13 @@ class PostmanParseManager {
 		if (!parameters || parameters?.length === 0) {
 			return result;
 		}
-		parameters.forEach(({ key, value }) => QueryParamUtils.add(result, key ?? 'Unknown Key', value ?? ''));
+		parameters.forEach(({ key, value }) =>
+			QueryParamUtils.add(
+				result,
+				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
+				this.convertVariablesToSprocketVariables(value ?? ''),
+			),
+		);
 		return result;
 	};
 
@@ -309,7 +377,7 @@ class PostmanParseManager {
 				return defaultReturn;
 			case 'raw':
 				return {
-					body: body.raw,
+					body: this.convertVariablesToSprocketVariables(body.raw),
 					bodyType: 'raw',
 					rawType: contentType,
 				};
@@ -347,23 +415,18 @@ class PostmanParseManager {
 	};
 
 	private importUrl = (url?: Url | string) => {
+		let res: string = '';
 		if (!url) {
-			return '';
+			res = '';
+		} else if (typeof url === 'object' && url.query && url.raw?.includes('?')) {
+			// remove ? and everything after it if there are QueryParams strictly defined
+			res = url.raw?.slice(0, url.raw.indexOf('?')) || '';
+		} else if (typeof url === 'object' && url.raw) {
+			res = url.raw;
+		} else if (typeof url === 'string') {
+			res = url;
 		}
-
-		// remove ? and everything after it if there are QueryParams strictly defined
-		if (typeof url === 'object' && url.query && url.raw?.includes('?')) {
-			return url.raw?.slice(0, url.raw.indexOf('?')) || '';
-		}
-
-		if (typeof url === 'object' && url.raw) {
-			return url.raw;
-		}
-
-		if (typeof url === 'string') {
-			return url;
-		}
-		return '';
+		return this.convertVariablesToSprocketVariables(res);
 	};
 
 	private importPreRequestScript = (events: EventList | undefined): string => {
