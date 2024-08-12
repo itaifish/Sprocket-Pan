@@ -57,17 +57,17 @@ type EventList = V200EventList | V210EventList;
 
 type Authetication = V200Auth | V210Auth;
 
-type Body = V200Request1['body'] | V210Request1['body'];
+export type Body = V200Request1['body'] | V210Request1['body'];
 
 type UrlEncodedParameter = V200UrlEncodedParameter | V210UrlEncodedParameter;
 
 type FormParameter = V200FormParameter | V210FormParameter;
 
-type Item = V200Item | V210Item;
+export type Item = V200Item | V210Item;
 
 type Folder = V200Folder | V210Folder;
 
-type Header = V200Header | V210Header;
+export type Header = V200Header | V210Header;
 
 type Description = V200Description | V210Description;
 
@@ -76,6 +76,8 @@ type ImportedGrouping = {
 	endpoints: Endpoint[];
 	requests: EndpointRequest[];
 };
+
+type ImportSource = 'Postman' | 'Insomnia';
 
 /**
  * Code and types inspired by / partially borrowed and modified from
@@ -90,7 +92,7 @@ class PostmanParseManager {
 	public async parsePostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string) {
 		try {
 			const loadedFile = await this.loadPostmanFile(inputType, inputValue);
-			const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile));
+			const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile), 'Postman');
 			return input;
 		} catch (e) {
 			log.error(e);
@@ -109,9 +111,9 @@ class PostmanParseManager {
 		return await readTextFile(inputValue);
 	}
 
-	importPostmanCollection(collection: PostmanCollection) {
+	importPostmanCollection(collection: PostmanCollection, importSource: ImportSource) {
 		const { item, info, variable, event } = collection;
-		const items = this.importItems(info, item);
+		const items = this.importItems(info, item, importSource);
 		const env = this.importVariables((variable as { [key: string]: string }[]) || []);
 		const preRequestScript = this.importPreRequestScript(event);
 		const postRequestScript = this.importAfterResponseScript(event);
@@ -219,11 +221,12 @@ class PostmanParseManager {
 	private importItems = (
 		info: PostmanCollection['info'],
 		items: PostmanCollection['item'],
+		importSource: ImportSource,
 	): Omit<ImportedGrouping, 'services'> & { service: Service } => {
 		const rootService: Service = {
 			name: info.name,
 			id: v4(),
-			description: this.importDescription(info.description),
+			description: this.importDescription(info.description, importSource),
 			version: info.version
 				? typeof info.version === 'string'
 					? info.version
@@ -238,7 +241,7 @@ class PostmanParseManager {
 		const requests: EndpointRequest[] = [];
 		items.forEach((item) => {
 			if (Object.prototype.hasOwnProperty.call(item, 'request')) {
-				const res = this.importRequestItem(item as Item, rootService.id);
+				const res = this.importRequestItem(item as Item, rootService.id, importSource);
 				if (res != null) {
 					const { request, endpoint } = res;
 					requests.push(request);
@@ -247,7 +250,7 @@ class PostmanParseManager {
 					log.trace(`res is null for item ${item.name}`);
 				}
 			} else {
-				const newItems = this.importItems(info, item.item as PostmanCollection['item']);
+				const newItems = this.importItems(info, item.item as PostmanCollection['item'], importSource);
 				endpoints.push(...newItems.endpoints);
 				requests.push(...newItems.requests);
 			}
@@ -269,6 +272,7 @@ class PostmanParseManager {
 	private importRequestItem = (
 		{ request, name = '', event }: Item,
 		parentId: string,
+		importSource: ImportSource,
 	): { request: EndpointRequest; endpoint: Endpoint } | null => {
 		if (typeof request === 'string') {
 			return null;
@@ -316,7 +320,7 @@ class PostmanParseManager {
 				: 'GET',
 			baseHeaders: headers,
 			name,
-			description: this.importDescription(request.description),
+			description: this.importDescription(request.description, importSource),
 			serviceId: parentId,
 			baseQueryParams: parameters,
 			defaultRequest: requestId,
@@ -327,11 +331,11 @@ class PostmanParseManager {
 		return { request: newRequest, endpoint: newEndpoint };
 	};
 
-	private importDescription(description?: Description | string | null) {
+	private importDescription(description: Description | string | null | undefined, importSource: ImportSource) {
 		if (typeof description === 'string') {
 			return description;
 		}
-		return description?.content ?? 'Imported from Postman';
+		return description?.content ?? `Imported from ${importSource}`;
 	}
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {

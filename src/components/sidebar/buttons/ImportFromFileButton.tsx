@@ -8,6 +8,8 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { useEffect, useRef, useState } from 'react';
 import OpenApiIcon from '../../../assets/buttonIcons/openapi.svg';
 import PostmanIcon from '../../../assets/buttonIcons/postman.svg';
+import InsomniaIcon from '../../../assets/buttonIcons/insomnia.svg';
+
 import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 
 export function ImportFromFileButton() {
@@ -71,6 +73,29 @@ export function ImportFromFileButton() {
 									<Avatar src={PostmanIcon} size="sm" />
 								</IconButton>
 								Import from Postman Collection
+							</ListItemDecorator>
+						</MenuItem>
+						<MenuItem
+							onClick={async () => {
+								const selectedUrl = await open({
+									filters: [
+										{ name: 'Insomnia Collection', extensions: ['json', 'yml', 'yaml'] },
+										{ name: 'All Files', extensions: ['*'] },
+									],
+								});
+								if (selectedUrl && typeof selectedUrl === 'string') {
+									const loadedData = await applicationDataManager.loadInsomniaFile(selectedUrl);
+									if (loadedData) {
+										dispatch(InjectLoadedData(loadedData));
+									}
+								}
+							}}
+						>
+							<ListItemDecorator>
+								<IconButton aria-label={`Import from Insomnia`} size="sm" color="primary">
+									<Avatar src={InsomniaIcon} size="sm" />
+								</IconButton>
+								Import from Insomnia Collection
 							</ListItemDecorator>
 						</MenuItem>
 					</Menu>
