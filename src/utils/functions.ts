@@ -167,7 +167,7 @@ export const noEnvironmentsReplacer = (key: string, value: unknown) => {
 	if (key === 'environmentOverride') {
 		return replaceAllEnvironmentValuesWithEmptyString(value as Environment);
 	}
-	value;
+	return value;
 };
 
 export const getDataArrayFromEnvKeys = (env: Environment) => {
