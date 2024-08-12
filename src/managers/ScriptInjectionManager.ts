@@ -87,7 +87,15 @@ export function getScriptInjectionCode(
 		HeaderUtils.set(newHeaders, key, value);
 		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
 	};
-
+	const deleteHeader = (key: string) => {
+		const request = getRequest();
+		if (request == null) {
+			return;
+		}
+		const newHeaders = structuredClone(request.headers);
+		HeaderUtils.delete(newHeaders, key);
+		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
+	};
 	const getEnvironment = () => {
 		const data = getState();
 		const request = getRequest();
@@ -133,6 +141,7 @@ export function getScriptInjectionCode(
 		setQueryParam,
 		setQueryParams,
 		setHeader,
+		deleteHeader,
 		getEnvironment,
 		sendRequest,
 		get data() {

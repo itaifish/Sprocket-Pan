@@ -10,7 +10,7 @@ import swaggerParseManager from './parsers/SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
 import { saveUpdateManager } from './SaveUpdateManager';
-import { postmanParseManager } from './parsers/PostmanParseManager';
+import { postmanParseManager } from './parsers/postman/PostmanParseManager';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},

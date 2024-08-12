@@ -11,8 +11,8 @@ import {
 	Script,
 	Service,
 	SPHeaders,
-} from '../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
+} from '../../../types/application-data/application-data';
+import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../../utils/data-utils';
 import type {
 	Auth as V200Auth,
 	EventList as V200EventList,
@@ -25,7 +25,7 @@ import type {
 	Request1 as V200Request1,
 	UrlEncodedParameter as V200UrlEncodedParameter,
 	Description as V200Description,
-} from './parseTypes/postman2.0Types';
+} from '../parseTypes/postman2.0Types';
 import type {
 	Auth as V210Auth,
 	EventList as V210EventList,
@@ -38,17 +38,18 @@ import type {
 	QueryParam,
 	UrlEncodedParameter as V210UrlEncodedParameter,
 	Description as V210Description,
-} from './parseTypes/postman2.1Types';
+} from '../parseTypes/postman2.1Types';
 import mime from 'mime';
 import {
 	camelCaseToTitle,
 	getLongestCommonSubstringStartingAtBeginning,
 	getStringDifference,
 	toValidFunctionName,
-} from '../../utils/string';
+} from '../../../utils/string';
 import { readTextFile } from '@tauri-apps/api/fs';
-import { log } from '../../utils/logging';
+import { log } from '../../../utils/logging';
 import yaml from 'js-yaml';
+import { postmanScriptParseManager } from './PostmanScriptParseManager';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -449,7 +450,7 @@ class PostmanParseManager {
 					: scriptOrRows.exec
 				: '';
 
-		return scriptContent;
+		return this.importScript(scriptContent);
 	};
 
 	private importAfterResponseScript = (events: EventList | undefined): string => {
@@ -470,8 +471,12 @@ class PostmanParseManager {
 				: scriptOrRows.exec
 			: '';
 
-		return scriptContent;
+		return this.importScript(scriptContent);
 	};
+
+	private importScript(postmanScript: string) {
+		return postmanScriptParseManager.convertPostmanScriptToSprocketPan(postmanScript);
+	}
 }
 
 export const postmanParseManager = PostmanParseManager.INSTANCE;
