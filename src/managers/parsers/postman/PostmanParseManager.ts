@@ -114,13 +114,13 @@ class PostmanParseManager {
 	importPostmanCollection(collection: PostmanCollection, importSource: ImportSource) {
 		const { item, info, variable, event } = collection;
 		const items = this.importItems(info, item, importSource);
-		const env = this.importVariables((variable as { [key: string]: string }[]) || []);
+		const env = this.importVariables((variable as { [key: string]: string }[]) || [], importSource);
 		const preRequestScript = this.importPreRequestScript(event);
 		const postRequestScript = this.importAfterResponseScript(event);
 		const scripts: Script[] = [];
 		[preRequestScript, postRequestScript].forEach((script, index) => {
 			if (script) {
-				const name = index === 0 ? 'Postman Pre-Request Script' : 'Postman After-Response Script';
+				const name = index === 0 ? `${importSource} Pre-Request Script` : `${importSource} After-Response Script`;
 				scripts.push({
 					name,
 					scriptCallableName: toValidFunctionName(name),
@@ -206,7 +206,7 @@ class PostmanParseManager {
 		return { services, endpoints: items.endpoints, requests: items.requests };
 	}
 
-	private importVariables(variables: { [key: string]: string }[]): Environment {
+	private importVariables(variables: { [key: string]: string }[], importSource: ImportSource): Environment {
 		const env = EnvironmentUtils.new();
 		variables.forEach((variable) => {
 			const { key, value } = variable;
@@ -214,7 +214,7 @@ class PostmanParseManager {
 				EnvironmentUtils.set(env, key, value);
 			}
 		});
-		env.__name = 'Postman Variables';
+		env.__name = `${importSource} Variables`;
 		return env;
 	}
 
