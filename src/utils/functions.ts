@@ -117,6 +117,24 @@ export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): Pro
 	});
 };
 
+type Replacer = (key: string, value: unknown) => unknown;
+
+export function combineReplacers(replacers: Replacer[]): Replacer {
+	return (key: string, value: unknown) => {
+		replacers.forEach((replacer) => {
+			value = replacer(key, value);
+		});
+		return value;
+	};
+}
+
+export const noSettingsReplacer: Replacer = (key, value) => {
+	if (key === 'settings') {
+		return undefined;
+	}
+	return value;
+};
+
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
 	if (key === 'history') {
 		return [];
@@ -135,7 +153,7 @@ const replaceAllEnvironmentValuesWithEmptyString = (environment: Environment) =>
 	return copy;
 };
 
-export const noHistoryMetadataOrEnvironmentsReplacer = (key: string, value: unknown) => {
+export const noEnvironmentsReplacer = (key: string, value: unknown) => {
 	if (key === 'environments' || key === 'localEnvironments') {
 		const record = value as Record<string, Environment>;
 		return Object.values(record).reduce(
@@ -149,7 +167,7 @@ export const noHistoryMetadataOrEnvironmentsReplacer = (key: string, value: unkn
 	if (key === 'environmentOverride') {
 		return replaceAllEnvironmentValuesWithEmptyString(value as Environment);
 	}
-	return noHistoryAndMetadataReplacer(key, value);
+	value;
 };
 
 export const getDataArrayFromEnvKeys = (env: Environment) => {

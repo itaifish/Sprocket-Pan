@@ -17,7 +17,12 @@ import { useSelector } from 'react-redux';
 import { saveActiveData } from '../../../state/active/thunks/applicationData';
 import { selectAllItems } from '../../../state/active/selectors';
 import { writeTextFile } from '@tauri-apps/api/fs';
-import { noHistoryAndMetadataReplacer, noHistoryMetadataOrEnvironmentsReplacer } from '../../../utils/functions';
+import {
+	noHistoryAndMetadataReplacer,
+	noEnvironmentsReplacer,
+	combineReplacers,
+	noSettingsReplacer,
+} from '../../../utils/functions';
 
 interface DataTabProps {
 	onQuit: () => void;
@@ -50,7 +55,9 @@ export function DataTab({ onQuit, goToWorkspaceSelection }: DataTabProps) {
 		}
 		const dataToWrite = JSON.stringify(
 			state,
-			exportEnvironments ? noHistoryAndMetadataReplacer : noHistoryMetadataOrEnvironmentsReplacer,
+			exportEnvironments
+				? combineReplacers([noHistoryAndMetadataReplacer, noSettingsReplacer])
+				: combineReplacers([noEnvironmentsReplacer, noHistoryAndMetadataReplacer, noSettingsReplacer]),
 		);
 
 		await writeTextFile(filePath, dataToWrite);

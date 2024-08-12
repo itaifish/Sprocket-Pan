@@ -1,6 +1,16 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
-import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, MenuItem } from '@mui/joy';
+import {
+	Avatar,
+	Box,
+	Dropdown,
+	IconButton,
+	ListItemDecorator,
+	Menu,
+	MenuButton,
+	MenuItem,
+	useColorScheme,
+} from '@mui/joy';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
 import { useAppDispatch } from '../../../state/store';
@@ -9,8 +19,12 @@ import { useEffect, useRef, useState } from 'react';
 import OpenApiIcon from '../../../assets/buttonIcons/openapi.svg';
 import PostmanIcon from '../../../assets/buttonIcons/postman.svg';
 import InsomniaIcon from '../../../assets/buttonIcons/insomnia.svg';
+import SprocketIconDark from '../../../assets/logo.svg';
+import SprocketIconLight from '../../../assets/logo-light.svg';
 
 import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { readTextFile } from '@tauri-apps/api/fs';
+import { ApplicationData } from '../../../types/application-data/application-data';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
@@ -22,6 +36,7 @@ export function ImportFromFileButton() {
 			setMenuOpen(false);
 		});
 	}, [emitterForOutsideClicks]);
+	const { mode, systemMode } = useColorScheme();
 	return (
 		<SprocketTooltip text="Import From File" disabled={menuOpen}>
 			<Box>
@@ -33,6 +48,39 @@ export function ImportFromFileButton() {
 						<CreateNewFolderIcon />
 					</MenuButton>
 					<Menu ref={ref}>
+						<MenuItem
+							onClick={async () => {
+								const selectedUrl = await open({
+									filters: [
+										{ name: 'Sprocketpan Workspace', extensions: ['json'] },
+										{ name: 'All Files', extensions: ['*'] },
+									],
+								});
+								if (selectedUrl && typeof selectedUrl === 'string') {
+									const loadedDataString = await readTextFile(selectedUrl);
+									const asData: Partial<ApplicationData> = JSON.parse(loadedDataString);
+									const toInject = {
+										services: Object.values(asData.services ?? {}),
+										endpoints: Object.values(asData.endpoints ?? {}),
+										requests: Object.values(asData.requests ?? {}),
+										environments: Object.values(asData.environments ?? {}),
+										scripts: Object.values(asData.scripts ?? {}),
+									};
+									dispatch(InjectLoadedData(toInject));
+								}
+							}}
+						>
+							<ListItemDecorator>
+								<IconButton aria-label={`Import from Sprocketpan`} size="sm" color="primary">
+									<Avatar
+										src={systemMode === 'dark' ? SprocketIconLight : SprocketIconDark}
+										size="sm"
+										color="primary"
+									/>
+								</IconButton>
+								Import from Sprocketpan Workspace
+							</ListItemDecorator>
+						</MenuItem>
 						<MenuItem
 							onClick={async () => {
 								const selectedUrl = await open({
