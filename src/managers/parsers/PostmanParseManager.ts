@@ -142,17 +142,20 @@ class PostmanParseManager {
 
 		const groupings = new Map<string, string>();
 
+		const updateGroupings = (root: string, path: string) => {
+			const currentRootPath = groupings.get(root);
+			if (currentRootPath != undefined) {
+				const sharedPath = getLongestCommonSubstringStartingAtBeginning(currentRootPath, path);
+				groupings.set(root, sharedPath);
+			} else {
+				groupings.set(root, path);
+			}
+		};
+
 		items.endpoints.forEach((endpoint) => {
 			try {
 				const url = new URL(endpoint.url);
-				const root = url.origin;
-				const currentRootPath = groupings.get(root);
-				if (currentRootPath != undefined) {
-					const sharedPath = getLongestCommonSubstringStartingAtBeginning(currentRootPath, url.pathname);
-					groupings.set(root, sharedPath);
-				} else {
-					groupings.set(root, url.pathname);
-				}
+				updateGroupings(url.origin, url.pathname);
 			} catch (e) {
 				// throws when URL is invalid
 				// if there are variables anywhere in the endpoint url
@@ -162,14 +165,7 @@ class PostmanParseManager {
 					const startingPoint = foundVariables[0].length + (foundVariables.index ?? 0);
 					const root = endpoint.url.substring(0, startingPoint);
 					const extendedPath = endpoint.url.substring(startingPoint);
-					log.info({ root, extendedPath });
-					const currentRootPath = groupings.get(root);
-					if (currentRootPath != undefined) {
-						const sharedPath = getLongestCommonSubstringStartingAtBeginning(currentRootPath, extendedPath);
-						groupings.set(root, sharedPath);
-					} else {
-						groupings.set(root, extendedPath);
-					}
+					updateGroupings(root, extendedPath);
 				} else {
 					groupings.set(endpoint.url, endpoint.url);
 				}
