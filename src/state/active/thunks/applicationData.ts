@@ -1,9 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
 import { ParsedServiceApplicationData } from '../../../managers/parsers/SwaggerParseManager';
-import { insertEndpoint, insertEnvironment, insertRequest, insertScript, insertService } from '../slice';
+import { insertEndpoint, insertEnvironment, insertRequest, insertScript, insertService, setSavedNow } from '../slice';
 import { log } from '../../../utils/logging';
 import { Environment, Script } from '../../../types/application-data/application-data';
+import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 
 type ParsedApplicationData = ParsedServiceApplicationData & { environments?: Environment[]; scripts?: Script[] };
 
@@ -26,5 +27,15 @@ export const InjectLoadedData = createAsyncThunk<void, ParsedApplicationData, { 
 		for (const script of loadedData?.scripts ?? []) {
 			thunk.dispatch(insertScript(script));
 		}
+	},
+);
+
+export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
+	'active/saveData',
+	async (_, thunk) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { lastModified, lastSaved, ...data } = thunk.getState().active;
+		thunk.dispatch(setSavedNow());
+		await applicationDataManager.saveData(data);
 	},
 );

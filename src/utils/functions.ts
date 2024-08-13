@@ -3,6 +3,7 @@ import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
 import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 import { parseScript } from 'esprima';
 import { log } from './logging';
+import { EnvironmentUtils } from './data-utils';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -116,12 +117,55 @@ export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): Pro
 	});
 };
 
+type Replacer = (key: string, value: unknown) => unknown;
+
+export function combineReplacers(replacers: Replacer[]): Replacer {
+	return (key: string, value: unknown) => {
+		replacers.forEach((replacer) => {
+			value = replacer(key, value);
+		});
+		return value;
+	};
+}
+
+export const noSettingsReplacer: Replacer = (key, value) => {
+	if (key === 'settings') {
+		return undefined;
+	}
+	return value;
+};
+
 export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
 	if (key === 'history') {
 		return [];
 	}
 	if (key === 'workspaceMetadata') {
 		return undefined;
+	}
+	return value;
+};
+
+const replaceAllEnvironmentValuesWithEmptyString = (environment: Environment) => {
+	const copy = structuredClone(environment);
+	for (const item of environment.__data) {
+		EnvironmentUtils.set(copy, item.key, '');
+	}
+	return copy;
+};
+
+export const noEnvironmentsReplacer = (key: string, value: unknown) => {
+	if (key === 'environments' || key === 'localEnvironments') {
+		const record = value as Record<string, Environment>;
+		return Object.values(record).reduce(
+			(acc, curr) => {
+				Object.assign(acc, { [curr.__id]: replaceAllEnvironmentValuesWithEmptyString(curr) });
+				return acc;
+			},
+			{} as Record<string, Environment>,
+		);
+	}
+	if (key === 'environmentOverride') {
+		return replaceAllEnvironmentValuesWithEmptyString(value as Environment);
 	}
 	return value;
 };

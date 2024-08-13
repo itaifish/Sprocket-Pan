@@ -125,7 +125,7 @@ export type Service<TBaseUrl extends string = string> = {
 	version: string;
 	baseUrl: TBaseUrl;
 	localEnvironments: {
-		[environmentName: string]: Environment;
+		[environmentId: string]: Environment;
 	};
 	selectedEnvironment?: string;
 	endpointIds: string[];
