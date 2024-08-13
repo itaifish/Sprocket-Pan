@@ -36,7 +36,7 @@ export function ImportFromFileButton() {
 			setMenuOpen(false);
 		});
 	}, [emitterForOutsideClicks]);
-	const { mode, systemMode } = useColorScheme();
+	const { systemMode } = useColorScheme();
 	return (
 		<SprocketTooltip text="Import From File" disabled={menuOpen}>
 			<Box>
