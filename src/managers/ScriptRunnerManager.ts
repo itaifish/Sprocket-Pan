@@ -4,7 +4,6 @@ import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
 import { StateAccess } from '../state/types';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
-import { Constants } from '../utils/constants';
 import { log } from '../utils/logging';
 
 class ScriptRunnerManager {
@@ -51,7 +50,10 @@ class ScriptRunnerManager {
 			_this.sprocketPan = sprocketPan;
 			_this.fetch = fetch;
 			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
-			const result = await asyncCallWithTimeout<TReturnType>(scriptTask, Constants.scriptsTimeoutMS);
+			const result = await asyncCallWithTimeout<TReturnType>(
+				scriptTask,
+				stateAccess.getState().settings.timeoutDurationMS,
+			);
 			if (auditInfo) {
 				auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
 			}
