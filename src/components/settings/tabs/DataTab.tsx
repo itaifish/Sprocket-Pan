@@ -64,7 +64,7 @@ export function DataTab({ onQuit, goToWorkspaceSelection }: DataTabProps) {
 	};
 
 	return (
-		<Box>
+		<Box sx={{ maxWidth: '700px' }}>
 			<Stack spacing={2}>
 				<Box>
 					<Typography>Data</Typography>
