@@ -6,10 +6,12 @@ import {
 	HistoricalEndpointResponse,
 	WorkspaceMetadata,
 } from '../types/application-data/application-data';
-import swaggerParseManager from './SwaggerParseManager';
+import swaggerParseManager from './parsers/SwaggerParseManager';
 import { noHistoryAndMetadataReplacer } from '../utils/functions';
 import { dateTimeReviver } from '../utils/json-parse';
 import { saveUpdateManager } from './SaveUpdateManager';
+import { postmanParseManager } from './parsers/postman/PostmanParseManager';
+import { insomniaParseManager } from './parsers/InsomniaParseManager';
 
 export const defaultApplicationData: ApplicationData = {
 	services: {},
@@ -51,6 +53,16 @@ export class ApplicationDataManager {
 	public async loadSwaggerFile(url: string) {
 		const newService = await swaggerParseManager.parseSwaggerFile('filePath', url);
 		return newService;
+	}
+
+	public async loadPostmanFile(url: string) {
+		const newData = await postmanParseManager.parsePostmanFile('filePath', url);
+		return newData;
+	}
+
+	public async loadInsomniaFile(url: string) {
+		const newData = await insomniaParseManager.parseInsomniaFile('filePath', url);
+		return newData;
 	}
 
 	public async saveData(data: ApplicationData) {

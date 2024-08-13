@@ -36,6 +36,7 @@ function getSprocketPanType(scripts: Script[]) {
 		setQueryParam: (key: string, value: string) => void;
 		setQueryParams: (key: string, values: string[]) => void;
 		setHeader: (key: string, value: string) => void;
+		deleteHeader: (key: string) => void;
 		getEnvironment: () => Record<string, string>;
 		sendRequest: (requestId: string) => Promise<EndpointResponse>;
 		readonly data: ApplicationData;

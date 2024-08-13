@@ -6,6 +6,7 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { TabType } from '../state/state';
 import CodeIcon from '@mui/icons-material/Code';
+import mime from 'mime';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -30,6 +31,12 @@ export function getRequestBodyCategory(requestBodyType: RequestBodyType) {
 }
 export const RawBodyTypes = ['Text', 'JSON', 'JavaScript', 'HTML', 'XML', 'Yaml'] as const;
 export type RawBodyType = (typeof RawBodyTypes)[number];
+export function rawBodyTypeToMime(rawType: RawBodyType | undefined) {
+	if (rawType === 'JavaScript') {
+		return mime.getType('js') as string;
+	}
+	return mime.getType(rawType?.toLocaleLowerCase() ?? 'txt') ?? 'text/plain';
+}
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
 	endpointId: string;
@@ -118,7 +125,7 @@ export type Service<TBaseUrl extends string = string> = {
 	version: string;
 	baseUrl: TBaseUrl;
 	localEnvironments: {
-		[environmentName: string]: Environment;
+		[environmentId: string]: Environment;
 	};
 	selectedEnvironment?: string;
 	endpointIds: string[];
