@@ -18,6 +18,18 @@ and not even know, especially while refactoring. By naming them, it becomes
 much more difficult to get them out of order and much easier to fix if they do.
 */
 
+import { ApplicationData } from '../types/application-data/application-data';
+import { defaultApplicationData } from './ApplicationDataManager';
+
+/**
+ * Update the settings to add scriptTimeoutDurationMS
+ */
+function toThree(data: ApplicationData | any) {
+	if (data.settings.scriptTimeoutDurationMS == undefined) {
+		data.settings.scriptTimeoutDurationMS = defaultApplicationData.settings.scriptTimeoutDurationMS;
+	}
+}
+
 /**
  * Updates response bodies to be strings, rather than Record<string, unknown>.
  */
@@ -41,7 +53,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo] as const;
+const transformers = [toOne, toTwo, toThree] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();

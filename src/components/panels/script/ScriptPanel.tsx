@@ -222,22 +222,28 @@ export function ScriptPanel({ id }: PanelProps) {
 							startDecorator={<PlayCircleIcon />}
 							variant="outlined"
 							onClick={async () => {
-								setRunning(true);
-								const scriptToRun = { ...script, content: localDataState };
-								const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
-								await Promise.all([
-									asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
-									sleep(Constants.minimumScriptRunTimeMS),
-								]);
-								const output = await ranScript;
-								if (typeof output === 'function') {
-									setScriptOutputLang('javascript');
-									setScriptOutput((output as any).toString());
-								} else {
+								try {
+									setRunning(true);
+									const scriptToRun = { ...script, content: localDataState };
+									const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
+									await Promise.all([
+										asyncCallWithTimeout(ranScript, settings.scriptTimeoutDurationMS),
+										sleep(Constants.minimumScriptRunTimeMS),
+									]);
+									const output = await ranScript;
+									if (typeof output === 'function') {
+										setScriptOutputLang('javascript');
+										setScriptOutput((output as any).toString());
+									} else {
+										setScriptOutputLang('json');
+										setScriptOutput(JSON.stringify(output) ?? '');
+									}
+								} catch (e) {
 									setScriptOutputLang('json');
-									setScriptOutput(JSON.stringify(output) ?? '');
+									setScriptOutput(JSON.stringify({ error: (e as any)?.message ?? 'An error occurred' }));
+								} finally {
+									setRunning(false);
 								}
-								setRunning(false);
 							}}
 						>
 							Run

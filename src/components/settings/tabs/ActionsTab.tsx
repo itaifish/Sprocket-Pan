@@ -1,13 +1,14 @@
 import { SettingsTabProps } from './GeneralTab';
-import { Box, Sheet, Stack, FormControl, FormLabel, Input, FormHelperText, Chip, Typography } from '@mui/joy';
+import { Box, Sheet, Stack, FormControl, FormLabel, Input, FormHelperText, Chip, Typography, Divider } from '@mui/joy';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { ScriptChips } from '../ScriptChips';
 
-export function RequestsTab({ settings, setSettings }: SettingsTabProps) {
+export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
+			<Typography level="title-md">Requests</Typography>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
 					Network Call Timeout Duration
@@ -58,6 +59,33 @@ export function RequestsTab({ settings, setSettings }: SettingsTabProps) {
 					endDecorator={'Records'}
 				/>
 				<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
+			</FormControl>
+			<Divider></Divider>
+			<Typography level="title-md">Scripts</Typography>
+			<FormControl sx={{ width: 300 }}>
+				<FormLabel id="script-timeout-label" htmlFor="script-timeout-input">
+					Script Timeout Duration
+				</FormLabel>
+				<Input
+					sx={{ width: 200 }}
+					value={settings.scriptTimeoutDurationMS / 1000}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						const value = +e.target.value;
+						if (!isNaN(value)) {
+							setSettings({ scriptTimeoutDurationMS: value * 1000 });
+						}
+					}}
+					slotProps={{
+						input: {
+							id: 'script-timeout-input',
+							// TODO: Material UI set aria-labelledby correctly & automatically
+							// but Base UI and Joy UI don't yet.
+							'aria-labelledby': 'script-timeout-label script-timeout-input',
+						},
+					}}
+					startDecorator={<HourglassBottomIcon />}
+					endDecorator={'Seconds'}
+				/>
 			</FormControl>
 			<Box>
 				<Typography>Script Strategy Order</Typography>
