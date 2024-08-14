@@ -25,6 +25,7 @@ export const defaultApplicationData: ApplicationData = {
 		debugLogs: true,
 		zoomLevel: 100,
 		timeoutDurationMS: 1_000 * 30,
+		scriptTimeoutDurationMS: 1_000 * 10,
 		defaultTheme: 'system-default',
 		maxHistoryLength: -1,
 		displayVariableNames: true,

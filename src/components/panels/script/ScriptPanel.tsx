@@ -226,7 +226,7 @@ export function ScriptPanel({ id }: PanelProps) {
 								const scriptToRun = { ...script, content: localDataState };
 								const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
 								await Promise.all([
-									asyncCallWithTimeout(ranScript, settings.timeoutDurationMS),
+									asyncCallWithTimeout(ranScript, settings.scriptTimeoutDurationMS),
 									sleep(Constants.minimumScriptRunTimeMS),
 								]);
 								const output = await ranScript;
