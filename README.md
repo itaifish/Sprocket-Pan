@@ -31,12 +31,12 @@ Key:
 ✅: Complete
 
 - Add workspaces ✅
-- Import / Export work ❗
+- Import / Export work ✅
   - Imports from:
-    - Sprocket Pan ☐
-    - Postman ☐
-    - Insomnia ☐
-    - Swagger / OpenAPI ❗
+    - Sprocket Pan ✅
+    - Postman ✅
+    - Insomnia ✅
+    - Swagger / OpenAPI ✅
 - Refactor global state ✅
 - Refactor Environment input/output (Janky) ✅
 - Show debug logs option in settings ☐
