@@ -22,6 +22,7 @@ import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
+import { log } from '../utils/logging';
 
 const contentType = 'Content-Type';
 class NetworkRequestManager {
@@ -140,43 +141,48 @@ class NetworkRequestManager {
 			});
 		}
 		const headers: SPHeaders = structuredClone(EMPTY_HEADERS);
+		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders.__data)}`);
 		// endpoint headers and then request headers
-		endpoint.baseHeaders.__data.forEach((header) => {
-			const parsedKey = environmentContextResolver.resolveVariablesForString(
-				header.key,
-				data,
-				endpoint.serviceId,
-				request.id,
-			);
-			HeaderUtils.set(
-				headers,
-				parsedKey,
-				environmentContextResolver.resolveVariablesForString(
-					endpoint.baseHeaders[header.key],
+		endpoint.baseHeaders.__data
+			.filter((header) => header?.key != null && header?.value != null)
+			.forEach((header) => {
+				const parsedKey = environmentContextResolver.resolveVariablesForString(
+					header.key,
 					data,
 					endpoint.serviceId,
 					request.id,
-				),
-			);
-		});
-		request.headers.__data.forEach((header) => {
-			const parsedKey = environmentContextResolver.resolveVariablesForString(
-				header.key,
-				data,
-				endpoint.serviceId,
-				request.id,
-			);
-			HeaderUtils.set(
-				headers,
-				parsedKey,
-				environmentContextResolver.resolveVariablesForString(
-					request.headers[header.key],
+				);
+				HeaderUtils.set(
+					headers,
+					parsedKey,
+					environmentContextResolver.resolveVariablesForString(
+						endpoint.baseHeaders[header.key],
+						data,
+						endpoint.serviceId,
+						request.id,
+					),
+				);
+			});
+		request.headers.__data
+			.filter((header) => header?.key != null && header?.value != null)
+			.forEach((header) => {
+				const parsedKey = environmentContextResolver.resolveVariablesForString(
+					header.key,
 					data,
 					endpoint.serviceId,
 					request.id,
-				),
-			);
-		});
+				);
+				HeaderUtils.set(
+					headers,
+					parsedKey,
+					environmentContextResolver.resolveVariablesForString(
+						request.headers[header.key],
+						data,
+						endpoint.serviceId,
+						request.id,
+					),
+				);
+			});
 
 		const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
 		let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>

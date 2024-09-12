@@ -12,7 +12,7 @@ import { selectSettings } from '../../state/active/selectors';
 import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
 import { DataTab } from './tabs/DataTab';
 import { GeneralTab } from './tabs/GeneralTab';
-import { RequestsTab } from './tabs/RequestsTab';
+import { ActionsTab } from './tabs/ActionsTab';
 
 const style = {
 	position: 'absolute' as const,
@@ -54,14 +54,14 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
 						<TabList>
 							<Tab>General</Tab>
-							<Tab>Requests</Tab>
+							<Tab>Actions</Tab>
 							<Tab>Data</Tab>
 						</TabList>
 						<TabPanel value={0}>
 							<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
 						</TabPanel>
 						<TabPanel value={1}>
-							<RequestsTab settings={unsavedSettings} setSettings={setSettings} />
+							<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
 						</TabPanel>
 						<TabPanel value={2}>
 							<DataTab

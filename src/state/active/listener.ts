@@ -9,7 +9,10 @@ const ignoreKeys = new Set([
 	'workspaces/setWorkspaces',
 	'workspaces/setSelectedWorkspace',
 	'active/saveData/fulfilled',
+	'active/saveData/pending',
 	'active/setModifiedNow',
+	'active/runScipt/fulfilled',
+	'active/runScipt/pending',
 ]);
 
 const ignoreNames = ['tabs'];
@@ -29,6 +32,8 @@ isModifiedListener.startListening({
 		if (ignoreKeys.has(action.type) || ignoreNames.some((x) => action.type.startsWith(x))) {
 			return;
 		}
+		// uncomment to see action
+		// log.info(action.type);
 		dispatch(setModifiedNow());
 	},
 });

@@ -119,6 +119,9 @@ class EnvironmentContextResolver {
 	}
 
 	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
+		if (text == null) {
+			return [];
+		}
 		text = text.toString();
 		let state: 'variable' | 'text' = 'text';
 		let startVariablePos = 0;
