@@ -28,7 +28,7 @@ export abstract class KeyValuePairUtils {
 export abstract class UniqueKeyValuePairUtils extends KeyValuePairUtils {
 	static set(environment: OrderedKeyValuePair, key: string, value: string) {
 		const oldValue = environment[key];
-		if (!oldValue) {
+		if (oldValue === undefined) {
 			environment.__data.push({ key, value });
 		} else {
 			const index = environment.__data.findIndex((x) => x.key === key);
@@ -42,7 +42,7 @@ export abstract class UniqueKeyValuePairUtils extends KeyValuePairUtils {
 	}
 
 	static delete(environment: OrderedKeyValuePair, key: string) {
-		if (!environment[key]) {
+		if (environment[key] === undefined) {
 			return;
 		}
 		const index = environment.__data.findIndex((x) => x.key === key);
