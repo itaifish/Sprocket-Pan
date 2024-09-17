@@ -107,7 +107,7 @@ class NetworkRequestManager {
 
 	private parseRequestForNetworkCall(
 		request: EndpointRequest,
-		parsedBody: Record<string, unknown> | string | undefined,
+		parsedBody: Record<string, unknown> | unknown[] | string | undefined,
 	) {
 		if (parsedBody == undefined) {
 			return undefined;
@@ -132,7 +132,7 @@ class NetworkRequestManager {
 		const service = data.services[endpoint.serviceId];
 		const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
 		const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
-		let body = await this.parseRequestForEnvironmentOverrides(request);
+		let body: Record<string, unknown> | unknown[] | undefined = await this.parseRequestForEnvironmentOverrides(request);
 		if (body != undefined && typeof body != 'string') {
 			body = environmentContextResolver.resolveVariablesForMappedObject(body, {
 				data,
