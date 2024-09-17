@@ -125,17 +125,19 @@ export function EditableData(props: EditableDataProps) {
 			return 'null';
 		}
 		return tableDataToString(
-			runningTableData.map((tdItem) => ({
-				key: environmentContextResolver
-					.parseStringWithEnvironment(tdItem.key, environment)
-					.map((x) => x.value)
-					.join(''),
-				value: environmentContextResolver
-					.parseStringWithEnvironment(tdItem.value, environment)
-					.map((x) => x.value)
-					.join(''),
-				id: tdItem.id,
-			})),
+			runningTableData
+				.filter((tdItem) => tdItem.key != null && tdItem.value != null)
+				.map((tdItem) => ({
+					key: environmentContextResolver
+						.parseStringWithEnvironment(tdItem.key, environment)
+						.map((x) => x.value)
+						.join(''),
+					value: environmentContextResolver
+						.parseStringWithEnvironment(tdItem.value, environment)
+						.map((x) => x.value)
+						.join(''),
+					id: tdItem.id,
+				})),
 			props.unique,
 		);
 	};

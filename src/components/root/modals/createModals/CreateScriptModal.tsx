@@ -12,13 +12,13 @@ import {
 	ModalDialog,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType, Script } from '../../../types/application-data/application-data';
+import { iconFromTabType, Script } from '../../../../types/application-data/application-data';
 import { useEffect, useState } from 'react';
-import { toValidFunctionName } from '../../../utils/string';
+import { toValidFunctionName } from '../../../../utils/string';
 import { InfoOutlined } from '@mui/icons-material';
-import { useAppDispatch } from '../../../state/store';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
-import { createScript } from '../../../state/active/thunks/scripts';
+import { useAppDispatch } from '../../../../state/store';
+import { addTabs, setSelectedTab } from '../../../../state/tabs/slice';
+import { createScript } from '../../../../state/active/thunks/scripts';
 
 export function CreateScriptModal({ open, closeFunc }: CreateModalsProps) {
 	const [scriptName, setScriptName] = useState('');

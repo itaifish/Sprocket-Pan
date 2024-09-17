@@ -1,9 +1,9 @@
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../state/store';
-import { selectNextForDiff } from '../../state/tabs/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { selectNextForDiff } from '../../../state/tabs/selectors';
 import { DialogTitle, Divider, Modal, ModalClose, ModalDialog } from '@mui/joy';
-import { popDiffQueue } from '../../state/tabs/slice';
-import { ResponseDiffOverlay } from './overlays/ResponseDiffOverlay/ResponseDiffOverlay';
+import { popDiffQueue } from '../../../state/tabs/slice';
+import { ResponseDiffOverlay } from '../overlays/ResponseDiffOverlay/ResponseDiffOverlay';
 
 export function DiffQueueModals() {
 	const nextForDiff = useSelector(selectNextForDiff);

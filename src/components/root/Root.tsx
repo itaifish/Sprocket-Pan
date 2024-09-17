@@ -5,11 +5,9 @@ import { useColorScheme } from '@mui/joy';
 import invoke from '../../utils/invoke';
 import { selectDefaultTheme, selectZoomLevel } from '../../state/active/selectors';
 import { WorkspaceSelector } from '../workspaces/WorkspaceSelector';
-import { MonacoListener } from './MonacoListener';
-import { DeleteQueueModals } from './DeleteQueueModals';
 import { Workspace } from './Workspace';
-import { CreateQueueModals } from './CreateQueueModals';
-import { DiffQueueModals } from './DiffQueueModals';
+import { ModalsWrapper } from './modals/ModalsWrapper';
+import { ListenerWrapper } from './listeners/ListenerWrapper';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -36,10 +34,8 @@ export function Root() {
 	return (
 		<>
 			<Workspace />
-			<DeleteQueueModals />
-			<CreateQueueModals />
-			<DiffQueueModals />
-			<MonacoListener />
+			<ModalsWrapper />
+			<ListenerWrapper />
 		</>
 	);
 }

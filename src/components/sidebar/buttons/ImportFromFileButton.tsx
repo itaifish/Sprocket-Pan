@@ -22,7 +22,7 @@ import InsomniaIcon from '../../../assets/buttonIcons/insomnia.svg';
 import SprocketIconDark from '../../../assets/logo.svg';
 import SprocketIconLight from '../../../assets/logo-light.svg';
 
-import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 import { readTextFile } from '@tauri-apps/api/fs';
 import { ApplicationData } from '../../../types/application-data/application-data';
 
@@ -30,7 +30,7 @@ export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const ref = useRef(null);
-	const emitterForOutsideClicks = useOutsideAlerter(ref as any);
+	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
 	useEffect(() => {
 		emitterForOutsideClicks.addListener('outsideClick', () => {
 			setMenuOpen(false);

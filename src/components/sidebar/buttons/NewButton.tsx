@@ -7,13 +7,13 @@ import CodeIcon from '@mui/icons-material/Code';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { addToCreateQueue } from '../../../state/tabs/slice';
-import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
 	const ref = useRef(null);
-	const emitterForOutsideClicks = useOutsideAlerter(ref as any);
+	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
 	useEffect(() => {
 		emitterForOutsideClicks.addListener('outsideClick', () => {
 			setMenuOpen(false);

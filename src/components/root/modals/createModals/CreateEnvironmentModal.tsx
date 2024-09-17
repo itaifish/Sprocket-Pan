@@ -12,13 +12,13 @@ import {
 	ModalDialog,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { Environment, iconFromTabType } from '../../../types/application-data/application-data';
+import { Environment, iconFromTabType } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectEnvironments } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { addNewEnvironment } from '../../../state/active/thunks/environments';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { selectEnvironments } from '../../../../state/active/selectors';
+import { useAppDispatch } from '../../../../state/store';
+import { addNewEnvironment } from '../../../../state/active/thunks/environments';
+import { addTabs, setSelectedTab } from '../../../../state/tabs/slice';
 
 export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const [envName, setEnvName] = useState('');

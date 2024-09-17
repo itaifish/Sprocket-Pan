@@ -1,10 +1,10 @@
 import { useSelector } from 'react-redux';
-import { selectNextForCreation } from '../../state/tabs/selectors';
-import { useAppDispatch } from '../../state/store';
-import { TabType } from '../../types/state/state';
+import { selectNextForCreation } from '../../../state/tabs/selectors';
+import { useAppDispatch } from '../../../state/store';
+import { TabType } from '../../../types/state/state';
 import { CreateModalsProps } from './createModals/createModalsProps';
 import { CreateServiceModal } from './createModals/CreateServiceModal';
-import { removeFromCreateQueue } from '../../state/tabs/slice';
+import { removeFromCreateQueue } from '../../../state/tabs/slice';
 import { CreateEnvironmentModal } from './createModals/CreateEnvironmentModal';
 import { CreateScriptModal } from './createModals/CreateScriptModal';
 
