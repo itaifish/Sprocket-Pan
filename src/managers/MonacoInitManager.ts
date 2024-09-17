@@ -180,7 +180,6 @@ export function getMonacoInjectedTypeCode(scripts: Script[]) {
 
 export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
 	updateModelDefinition(monaco, getMonacoInjectedTypeCode(scripts));
-	// monaco.languages.typescript.typescriptDefaults.addExtraLib()
 }
 
 export const defaultEditorOptions = {
