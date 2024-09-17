@@ -82,12 +82,16 @@ class EnvironmentContextResolver {
 		},
 	) {
 		const { data, serviceId, requestId } = context;
-		const newObj: Record<string, unknown> = {};
-		Object.keys(object).forEach((key) => {
-			const newKey = this.resolveVariablesForString(key, data, serviceId, requestId);
-			newObj[newKey] = this.resolveVariableForObjectKey(object, key, context);
-		});
-		return newObj;
+		if (!Array.isArray(object)) {
+			const newObj: Record<string, unknown> = {};
+			Object.keys(object).forEach((key) => {
+				const newKey = this.resolveVariablesForString(key, data, serviceId, requestId);
+				newObj[newKey] = this.resolveVariableForObjectKey(object, key, context);
+			});
+			return newObj;
+		} else {
+			return object.map((_item, index) => this.resolveVariableForObjectKey(object, index, context));
+		}
 	}
 
 	private resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(

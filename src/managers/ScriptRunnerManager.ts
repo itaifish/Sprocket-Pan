@@ -5,6 +5,7 @@ import { StateAccess } from '../state/types';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { log } from '../utils/logging';
+import * as http from '@tauri-apps/api/http';
 
 class ScriptRunnerManager {
 	public static readonly INSTANCE = new ScriptRunnerManager();
@@ -48,7 +49,7 @@ class ScriptRunnerManager {
 			const _this = globalThis as any;
 			_this.sp = sprocketPan;
 			_this.sprocketPan = sprocketPan;
-			_this.fetch = fetch;
+			_this.http = http;
 			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
 			const result = await asyncCallWithTimeout<TReturnType>(
 				scriptTask,
