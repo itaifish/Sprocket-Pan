@@ -152,7 +152,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 													? 'This is the current request'
 													: `This is the ${camelCaseToTitle(
 															requestEvent.eventType,
-													  ).toLocaleLowerCase()} for this request`
+														).toLocaleLowerCase()} for this request`
 											}
 										>
 											<WhereToVoteIcon color="success" />
