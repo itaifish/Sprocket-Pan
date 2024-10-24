@@ -2,7 +2,7 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 import { workspacesSlice } from './workspaces/slice';
 import { activeSlice } from './active/slice';
-import { isModifiedListener } from './active/listener';
+import { isModifiedListener, settingsChangedListener } from './active/listener';
 import { tabsSlice } from './tabs/slice';
 
 const rootReducer = combineReducers({
@@ -15,7 +15,8 @@ export function setupStore(preloadedState?: Partial<RootState>) {
 	return configureStore({
 		reducer: rootReducer,
 		preloadedState,
-		middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(isModifiedListener.middleware),
+		middleware: (getDefaultMiddleware) =>
+			getDefaultMiddleware().concat(isModifiedListener.middleware).concat(settingsChangedListener.middleware),
 	});
 }
 

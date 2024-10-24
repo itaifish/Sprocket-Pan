@@ -1,6 +1,8 @@
 import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { setModifiedNow } from './slice';
+import { updateAutosaveInterval } from './thunks/workspaceMetadata';
+import { log } from '../../utils/logging';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
@@ -38,6 +40,19 @@ isModifiedListener.startListening({
 	},
 });
 
+const settingsChangedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
+
+settingsChangedListener.startListening({
+	predicate: (_, currentState, previousState) => {
+		return currentState.active.settings.autoSaveIntervalMS != previousState.active.settings.autoSaveIntervalMS;
+	},
+	effect: (action, { dispatch, getState }) => {
+		const newInterval = getState().active.settings.autoSaveIntervalMS;
+		log.info(`Autosave interval updated to ${newInterval}`);
+		dispatch(updateAutosaveInterval(newInterval));
+	},
+});
+
 // TODO: add listener to save and then construct redo/undo functionality?
 
-export { isModifiedListener };
+export { isModifiedListener, settingsChangedListener };
