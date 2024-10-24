@@ -120,6 +120,14 @@ export function EditableData(props: EditableDataProps) {
 		setRunningTableData(props.tableData);
 	}, [props.tableData]);
 
+	const save = () => {
+		const tableData = stringToTableData(editorText, props.unique);
+		if (tableData != null) {
+			props.setTableData(tableData);
+			setChanged(false);
+		}
+	};
+
 	const getEnvParsedRunningTableData = () => {
 		if (runningTableData == null) {
 			return 'null';
@@ -141,7 +149,13 @@ export function EditableData(props: EditableDataProps) {
 	};
 
 	return (
-		<>
+		<div
+			onKeyDown={(e) => {
+				if (e.key === 's' && e.ctrlKey) {
+					save();
+				}
+			}}
+		>
 			<Stack direction="row" justifyContent="end" alignItems="end">
 				<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
 					<IconButton
@@ -180,11 +194,7 @@ export function EditableData(props: EditableDataProps) {
 					<IconButton
 						disabled={!hasChanged || runningTableData == null}
 						onClick={() => {
-							const tableData = stringToTableData(editorText, props.unique);
-							if (tableData != null) {
-								props.setTableData(tableData);
-								setChanged(false);
-							}
+							save();
 						}}
 					>
 						<Badge invisible={!hasChanged || runningTableData == null} color="primary">
@@ -210,6 +220,6 @@ export function EditableData(props: EditableDataProps) {
 				options={defaultEditorOptions}
 				onMount={handleEditorDidMount}
 			/>
-		</>
+		</div>
 	);
 }
