@@ -10,9 +10,6 @@ import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableSer
 export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 
-	console.log('the root re-rendered');
-	console.log({ activeWorkspace });
-
 	return (
 		<Box
 			sx={{

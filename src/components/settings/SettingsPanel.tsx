@@ -65,6 +65,8 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						</TabPanel>
 						<TabPanel value={2}>
 							<DataTab
+								settings={unsavedSettings}
+								setSettings={setSettings}
 								onQuit={() => setQuitWithoutSavingModalOpen(true)}
 								goToWorkspaceSelection={goToWorkspaceSelection}
 							/>

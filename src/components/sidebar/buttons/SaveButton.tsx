@@ -17,12 +17,13 @@ export function SaveButton() {
 	async function save() {
 		setLoading(true);
 		try {
-			await dispatch(saveActiveData()).unwrap();
+			dispatch(saveActiveData())
+				.unwrap()
+				.then(() => setTimeout(() => setLoading(false), 500));
 		} catch (e) {
 			const err = e as Error;
 			log.error(`${err.message}\n${err.stack}`);
 		}
-		setTimeout(() => setLoading(false), 500);
 	}
 
 	return (

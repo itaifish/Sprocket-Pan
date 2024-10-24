@@ -22,6 +22,15 @@ import { ApplicationData } from '../types/application-data/application-data';
 import { defaultApplicationData } from './ApplicationDataManager';
 
 /**
+ * Add and enable autosave
+ */
+function toFour(data: ApplicationData | any) {
+	if (data.settings.autoSaveIntervalMS == undefined) {
+		data.settings.autoSaveIntervalMS = 60_000 * 5;
+	}
+}
+
+/**
  * Update the settings to add scriptTimeoutDurationMS
  */
 function toThree(data: ApplicationData | any) {
@@ -53,7 +62,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree] as const;
+const transformers = [toOne, toTwo, toThree, toFour] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();
