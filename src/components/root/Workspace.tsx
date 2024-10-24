@@ -6,9 +6,19 @@ import { SearchInputField } from '../sidebar/SearchInputField';
 import { SideDrawer } from '../sidebar/SideDrawer';
 import { SideDrawerActions } from '../sidebar/SideDrawerActions';
 import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
+import { selectSettings } from '../../state/active/selectors';
+import { useEffect } from 'react';
+import { useAppDispatch } from '../../state/store';
+import { updateAutosaveInterval } from '../../state/active/thunks/workspaceMetadata';
 
 export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
+	const settings = useSelector(selectSettings);
+	const dispatch = useAppDispatch();
+
+	useEffect(() => {
+		dispatch(updateAutosaveInterval(settings.autoSaveIntervalMS));
+	}, []);
 
 	return (
 		<Box
