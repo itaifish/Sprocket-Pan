@@ -67,8 +67,8 @@ class SwaggerParseManager {
 			(swaggerApi as OpenAPIV2.Document).swagger != null
 				? '2'
 				: (swaggerApi as OpenAPIV3.Document).openapi.charAt(3) === '0'
-					? '3'
-					: '3.1';
+				? '3'
+				: '3.1';
 		const swaggerV3 = swaggerApi as OpenAPIV3.Document;
 		let baseUrl = (swaggerApi as OpenAPIV2.Document)?.host;
 		if ((swaggerV3?.servers?.length as number) > 0) {
@@ -187,10 +187,10 @@ class SwaggerParseManager {
 							const body = is3_1
 								? this.getExampleSwaggerBodyObjectV3_1(
 										typedRequestBody.content[contentType].schema as OpenAPIV3_1.SchemaObject,
-									)
+								  )
 								: this.getExampleSwaggerBodyObject(
 										typedRequestBody.content[contentType].schema as OpenAPIV3.SchemaObject,
-									);
+								  );
 							if (contentType.includes('json')) {
 								newRequests.push({
 									...newRequestBase,
@@ -413,7 +413,7 @@ class SwaggerParseManager {
 		} else {
 			nonArrayType = type as 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
 		}
-		const example = (object.example ?? (object?.examples?.length ?? 0) > 0) ? object.examples![0] : null;
+		const example = object.example ?? (object?.examples?.length ?? 0) > 0 ? object.examples![0] : null;
 		if (example) {
 			return example;
 		}

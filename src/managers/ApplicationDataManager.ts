@@ -26,6 +26,7 @@ export const defaultApplicationData: ApplicationData = {
 		zoomLevel: 100,
 		timeoutDurationMS: 1_000 * 30,
 		scriptTimeoutDurationMS: 1_000 * 10,
+		autoSaveIntervalMS: 60_000 * 5,
 		defaultTheme: 'system-default',
 		maxHistoryLength: -1,
 		displayVariableNames: true,
@@ -119,7 +120,7 @@ export class ApplicationDataManager {
 				}
 				await writeFile(
 					{
-						contents: JSON.stringify(metadata, undefined, 4),
+						contents: JSON.stringify(metadata, undefined),
 						path: paths.metadata,
 					},
 					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },

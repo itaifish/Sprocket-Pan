@@ -47,15 +47,15 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	body: TRequestBodyType extends 'none'
 		? undefined
 		: TRequestBodyType extends 'raw'
-			? string
-			: TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded'
-				? Record<string, string>
-				: Record<string, string> | string | undefined;
+		? string
+		: TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded'
+		? Record<string, string>
+		: Record<string, string> | string | undefined;
 	rawType: TRequestBodyType extends 'raw'
 		? RawBodyType
 		: TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded'
-			? undefined
-			: RawBodyType | undefined;
+		? undefined
+		: RawBodyType | undefined;
 	preRequestScript?: string;
 	postRequestScript?: string;
 	environmentOverride: Environment;

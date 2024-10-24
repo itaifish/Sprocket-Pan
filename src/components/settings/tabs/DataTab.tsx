@@ -1,4 +1,16 @@
-import { Box, Button, Grid, Stack, Typography } from '@mui/joy';
+import {
+	Box,
+	Button,
+	Divider,
+	FormControl,
+	FormHelperText,
+	FormLabel,
+	Grid,
+	Input,
+	Stack,
+	Switch,
+	Typography,
+} from '@mui/joy';
 import { useState } from 'react';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
@@ -23,13 +35,17 @@ import {
 	combineReplacers,
 	noSettingsReplacer,
 } from '../../../utils/functions';
+import { Settings } from '../../../types/settings/settings';
+import TimerIcon from '@mui/icons-material/Timer';
 
 interface DataTabProps {
 	onQuit: () => void;
 	goToWorkspaceSelection: () => void;
+	settings: Settings;
+	setSettings: (settings: Partial<Settings>) => void;
 }
 
-export function DataTab({ onQuit, goToWorkspaceSelection }: DataTabProps) {
+export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings }: DataTabProps) {
 	const dispatch = useAppDispatch();
 	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -66,6 +82,67 @@ export function DataTab({ onQuit, goToWorkspaceSelection }: DataTabProps) {
 	return (
 		<Box sx={{ maxWidth: '700px' }}>
 			<Stack spacing={2}>
+				<Box>
+					<Typography>Saving</Typography>
+					<Divider />
+					<Grid container justifyContent={'left'} spacing={4} sx={{ mt: '10px' }}>
+						<Grid xs={6}>
+							<FormControl orientation="horizontal" sx={{ width: 300, justifyContent: 'space-between' }}>
+								<div>
+									<FormLabel>Autosave</FormLabel>
+									<FormHelperText sx={{ mt: 0 }}>
+										Sprocket Pan will automatically save at a recurring interval
+									</FormHelperText>
+								</div>
+								<Switch
+									checked={settings.autoSaveIntervalMS != undefined}
+									onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+										setSettings({ autoSaveIntervalMS: event.target.checked ? 60_000 * 5 : undefined })
+									}
+									color={settings.autoSaveIntervalMS != undefined ? 'success' : 'neutral'}
+									variant={settings.autoSaveIntervalMS != undefined ? 'solid' : 'outlined'}
+									endDecorator={settings.autoSaveIntervalMS != undefined ? 'Enabled' : 'Disabled'}
+									slotProps={{
+										endDecorator: {
+											sx: {
+												minWidth: 24,
+											},
+										},
+									}}
+								/>
+							</FormControl>
+						</Grid>
+						{settings.autoSaveIntervalMS != undefined && (
+							<Grid xs={4}>
+								<FormControl sx={{ width: 300 }}>
+									<FormLabel id="autosave-duration-label" htmlFor="autosave-duration-input">
+										Autosave Interval Duration
+									</FormLabel>
+									<Input
+										sx={{ width: 300 }}
+										value={(settings.autoSaveIntervalMS ?? 0) / 60_000}
+										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+											const value = +e.target.value;
+											if (!isNaN(value) && value > 0) {
+												setSettings({ autoSaveIntervalMS: value * 60_000 });
+											}
+										}}
+										slotProps={{
+											input: {
+												id: 'autosave-duration-input',
+												// TODO: Material UI set aria-labelledby correctly & automatically
+												// but Base UI and Joy UI don't yet.
+												'aria-labelledby': 'autosave-duration-label autosave-duration-input',
+											},
+										}}
+										startDecorator={<TimerIcon />}
+										endDecorator={'Minutes'}
+									/>
+								</FormControl>
+							</Grid>
+						)}
+					</Grid>
+				</Box>
 				<Box>
 					<Typography>Data</Typography>
 					<Grid container justifyContent={'left'} spacing={4}>

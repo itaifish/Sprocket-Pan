@@ -22,6 +22,7 @@ export type Settings = {
 	defaultTheme: 'light' | 'dark' | 'system-default';
 	maxHistoryLength: number;
 	displayVariableNames: boolean;
+	autoSaveIntervalMS: number | undefined;
 	scriptRunnerStrategy: {
 		pre: ScriptRunnerStrategy;
 		post: ScriptRunnerStrategy;

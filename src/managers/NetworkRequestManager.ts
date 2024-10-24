@@ -195,13 +195,13 @@ class NetworkRequestManager {
 		const networkRequest = {
 			url: `${url}${queryParamStr}`,
 			method: endpoint.verb,
-			body: this.parseRequestForNetworkCall(request, body) ?? JSON.stringify({}),
+			body: this.parseRequestForNetworkCall(request, body) ?? '',
 			headers: headers,
 			dateTime: new Date().getTime(),
 			bodyType: request.rawType,
 		} as const satisfies NetworkFetchRequest;
 
-		let networkBody: Body;
+		let networkBody: Body | undefined;
 		const category = getRequestBodyCategory(request.bodyType);
 		if (category === 'table') {
 			if (request.bodyType === 'x-www-form-urlencoded') {
@@ -209,12 +209,14 @@ class NetworkRequestManager {
 			} else {
 				networkBody = Body.json(body as Record<string, string>);
 			}
-		} else {
+		} else if (category !== 'none') {
 			networkBody = Body.text(networkRequest.body);
 			// auto-set content type if not already set
 			if (request.headers[contentType] == undefined) {
 				HeaderUtils.set(headers, contentType, rawBodyTypeToMime(networkRequest.bodyType));
 			}
+		} else {
+			networkBody = undefined;
 		}
 
 		const { __data, ...headersToSend } = networkRequest.headers;
