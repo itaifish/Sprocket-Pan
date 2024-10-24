@@ -156,7 +156,7 @@ export function getScriptInjectionCode(
 				return null;
 			}
 			const latestResponse =
-				(response ?? (request.history && request.history.length > 0))
+				response ?? (request.history && request.history.length > 0)
 					? request.history[request.history.length - 1]
 					: null;
 			return latestResponse;
