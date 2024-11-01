@@ -1,4 +1,4 @@
-import { Badge, IconButton, Stack, useColorScheme } from '@mui/joy';
+import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
 import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -149,13 +149,7 @@ export function EditableData(props: EditableDataProps) {
 	};
 
 	return (
-		<div
-			onKeyDown={(e) => {
-				if (e.key === 's' && e.ctrlKey) {
-					save();
-				}
-			}}
-		>
+		<>
 			<Stack direction="row" justifyContent="end" alignItems="end">
 				<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
 					<IconButton
@@ -205,21 +199,30 @@ export function EditableData(props: EditableDataProps) {
 				<CopyToClipboardButton copyText={editorText} />
 				<FormatIcon actionFunction={() => format()} />
 			</Stack>
-			<Editor
-				height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
-				value={editorText}
-				onChange={(value) => {
-					if (value != editorText) {
-						setEditorText(value ?? '');
-						setChanged(true);
-						setRunningTableData(value ? stringToTableData(value, props.unique) : null);
+			<Box
+				onKeyDown={(e) => {
+					if (e.key === 's' && e.ctrlKey) {
+						save();
 					}
 				}}
-				language={'json'}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
-				options={defaultEditorOptions}
-				onMount={handleEditorDidMount}
-			/>
-		</div>
+				height={'100%'}
+			>
+				<Editor
+					height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
+					value={editorText}
+					onChange={(value) => {
+						if (value != editorText) {
+							setEditorText(value ?? '');
+							setChanged(true);
+							setRunningTableData(value ? stringToTableData(value, props.unique) : null);
+						}
+					}}
+					language={'json'}
+					theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+					options={defaultEditorOptions}
+					onMount={handleEditorDidMount}
+				/>
+			</Box>
+		</>
 	);
 }
