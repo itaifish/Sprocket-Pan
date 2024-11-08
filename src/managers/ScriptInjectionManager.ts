@@ -1,11 +1,14 @@
-import { updateEnvironment, updateRequest, updateService } from '../state/active/slice';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { Update, updateEnvironment, updateRequest, updateService } from '../state/active/slice';
 import { makeRequest } from '../state/active/thunks/requests';
 import { StateAccess } from '../state/types';
-import { EndpointResponse, Script } from '../types/application-data/application-data';
+import { EndpointRequest, EndpointResponse, Script } from '../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
 import { AuditLog, auditLogManager } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
+
+type KeyValuePair = { key: string; value: string };
 
 export function getScriptInjectionCode(
 	requestId: string | null,
@@ -13,6 +16,35 @@ export function getScriptInjectionCode(
 	response?: EndpointResponse,
 	auditLog?: AuditLog,
 ) {
+	const modifyRequest = (
+		requestId: string,
+		modifications: { body?: Record<string, unknown>; queryParams?: KeyValuePair[]; headers?: KeyValuePair[] },
+	) => {
+		const state = getState();
+		const request = state.requests[requestId];
+		if (request == null) {
+			return;
+		}
+
+		const update: PayloadAction<Update<EndpointRequest>>['payload'] = { id: requestId };
+
+		if (modifications.body != undefined) {
+			update.bodyType = 'raw';
+			update.rawType = 'JSON';
+			update.body = JSON.stringify(modifications.body);
+		}
+		if (modifications.queryParams != undefined) {
+			update.queryParams = QueryParamUtils.fromTableData(
+				modifications.queryParams.map((kvp, index) => ({ ...kvp, id: index })),
+			);
+		}
+		if (modifications.headers != undefined) {
+			update.headers = HeaderUtils.fromTableData(modifications.headers.map((kvp, index) => ({ ...kvp, id: index })));
+		}
+
+		dispatch(updateRequest(update));
+	};
+
 	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
 
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
@@ -144,6 +176,7 @@ export function getScriptInjectionCode(
 		deleteHeader,
 		getEnvironment,
 		sendRequest,
+		modifyRequest,
 		get data() {
 			return structuredClone(getState());
 		},

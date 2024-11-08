@@ -52,7 +52,7 @@ interface DeleteScript {
 	scriptId: string;
 }
 
-type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
+export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
 	name: 'active',

@@ -39,6 +39,11 @@ function getSprocketPanType(scripts: Script[]) {
 		deleteHeader: (key: string) => void;
 		getEnvironment: () => Record<string, string>;
 		sendRequest: (requestId: string) => Promise<EndpointResponse>;
+		modifyRequest: (requestId: string, modifications: {
+							body?: Record<string, unknown> | undefined;
+							queryParams?: { key: string, value: string}[] | undefined;
+							headers?: { key: string, value: string}[] | undefined;
+						}) => void;
 		readonly data: ApplicationData;
 		readonly response: HistoricalEndpointResponse | null;
 		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
