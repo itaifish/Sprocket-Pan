@@ -7,8 +7,18 @@ import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-ut
 import { AuditLog, auditLogManager } from './AuditLogManager';
 import { environmentContextResolver } from './EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
+import { http } from '@tauri-apps/api';
+import { Body, HttpVerb } from '@tauri-apps/api/http';
 
 type KeyValuePair = { key: string; value: string };
+
+type HttpOptions = {
+	method: HttpVerb;
+	headers?: Record<string, unknown>;
+	query?: Record<string, unknown>;
+	body?: Record<string, unknown>;
+	timeout?: number;
+};
 
 export function getScriptInjectionCode(
 	requestId: string | null,
@@ -43,6 +53,14 @@ export function getScriptInjectionCode(
 		}
 
 		dispatch(updateRequest(update));
+	};
+
+	const fetch = <T = unknown>(url: string, request: HttpOptions) => {
+		const modifiedRequest = {
+			...request,
+			body: request.body != undefined ? Body.json(request.body) : undefined,
+		};
+		return http.fetch<T>(url, modifiedRequest);
 	};
 
 	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
@@ -176,6 +194,7 @@ export function getScriptInjectionCode(
 		deleteHeader,
 		getEnvironment,
 		sendRequest,
+		fetch,
 		modifyRequest,
 		get data() {
 			return structuredClone(getState());

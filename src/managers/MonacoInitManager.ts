@@ -47,6 +47,23 @@ function getSprocketPanType(scripts: Script[]) {
 		readonly data: ApplicationData;
 		readonly response: HistoricalEndpointResponse | null;
 		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
+		readonly fetch: <T>(
+				url: string,
+				request: {
+					method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+					headers?: Record<string, unknown> | undefined;
+					query?: Record<string, unknown> | undefined;
+					body?: Record<string, unknown> | undefined;
+					timeout?: number | undefined;
+				},
+			) => Promise<{
+				url: string;
+				status: number;
+				ok: boolean;
+				headers: Record<string, string>;
+				rawHeaders: Record<string, string[]>;
+				data: T;
+			}>;
 		${scripts.reduce(
 			(runningScriptOutput, script) =>
 				`${runningScriptOutput}
