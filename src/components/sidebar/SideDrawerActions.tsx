@@ -7,7 +7,7 @@ import { UndoRedoTabsButton } from '../header/UndoRedoTabsButton';
 
 export function SideDrawerActions() {
 	return (
-		<Stack direction={'row'} spacing={3}>
+		<Stack direction={'row'} spacing={3} justifyContent="space-between">
 			<Stack direction={'row'} spacing={2}>
 				<ImportFromFileButton />
 				<NewButton />

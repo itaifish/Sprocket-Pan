@@ -1,8 +1,9 @@
-import { Box, IconButton, Modal } from '@mui/joy';
+import { IconButton } from '@mui/joy';
 import { useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
 import { SettingsPanel } from './SettingsPanel';
+import { SprocketModal } from '../shared/modals/SprocketModal';
 
 export function OpenSettingsButton() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -14,7 +15,7 @@ export function OpenSettingsButton() {
 					<SettingsIcon />
 				</IconButton>
 			</SprocketTooltip>
-			<Modal
+			<SprocketModal
 				open={isOpen}
 				onClose={(_event, reason) => {
 					if (reason != 'backdropClick') {
@@ -24,10 +25,8 @@ export function OpenSettingsButton() {
 				aria-labelledby="Settings"
 				aria-describedby="Setting popout panel"
 			>
-				<Box>
-					<SettingsPanel closePanel={() => setIsOpen(false)} />
-				</Box>
-			</Modal>
+				<SettingsPanel closePanel={() => setIsOpen(false)} />
+			</SprocketModal>
 		</>
 	);
 }

@@ -1,4 +1,4 @@
-import { Box, Grid, Card, Typography } from '@mui/joy';
+import { Box, Grid, Card, Typography, Sheet, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { selectActiveWorkspace } from '../../state/workspaces/selectors';
 import { TabHeader } from '../header/TabHeader';
@@ -15,6 +15,7 @@ export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const settings = useSelector(selectSettings);
 	const dispatch = useAppDispatch();
+	const theme = useTheme();
 
 	useEffect(() => {
 		dispatch(updateAutosaveInterval(settings.autoSaveIntervalMS));
@@ -30,11 +31,23 @@ export function Workspace() {
 			<Grid container spacing={0}>
 				<Grid xs={'auto'}>
 					<SideDrawer open={true}>
-						<Card sx={{ position: 'fixed', zIndex: 120 }}>
-							<SideDrawerActions />
-							<SearchInputField />
-						</Card>
-						<Typography sx={{ paddingTop: '200px', textAlign: 'center' }} level="h3">
+						<Sheet
+							sx={{
+								position: 'sticky',
+								top: 0,
+								left: 0,
+								right: 0,
+								zIndex: 120,
+								outline: `20px solid ${theme.palette.background.surface}`,
+								marginBottom: '20px',
+							}}
+						>
+							<Card>
+								<SideDrawerActions />
+								<SearchInputField />
+							</Card>
+						</Sheet>
+						<Typography sx={{ marginTop: 3, textAlign: 'center' }} level="h3">
 							{activeWorkspace?.name ?? 'Sprocket Pan'}
 						</Typography>
 						<NavigableServicesFileSystem />
