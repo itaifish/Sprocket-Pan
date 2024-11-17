@@ -1,7 +1,6 @@
 import { Box, IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
-import { useState } from 'react';
 import { keepStringLengthReasonable } from '../../../../utils/string';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
@@ -14,6 +13,7 @@ import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds, selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
+import { updateService } from '../../../../state/active/slice';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -23,9 +23,18 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	const service = useSelector((state) => selectServicesById(state, serviceId));
 	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service.endpointIds));
 	const isSelected = useSelector((state) => selectIsActiveTab(state, service.id));
-	const [collapsed, setCollapsed] = useState(false);
 
 	const dispatch = useAppDispatch();
+
+	const collapsed = service.userInterfaceData?.fileCollapsed ?? false;
+	const setCollapsed = (isCollapsed: boolean) => {
+		dispatch(
+			updateService({
+				id: serviceId,
+				userInterfaceData: { ...service.userInterfaceData, fileCollapsed: isCollapsed },
+			}),
+		);
+	};
 
 	return (
 		<>
@@ -57,7 +66,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
 							<IconButton
 								onClick={(e) => {
-									setCollapsed((wasCollapsed) => !wasCollapsed);
+									setCollapsed(!collapsed);
 									e.preventDefault();
 									e.stopPropagation();
 								}}
