@@ -25,6 +25,13 @@ export function EditableText({
 	useEffect(() => {
 		setIsValid(isValidFunc(typingText));
 	}, [typingText, isValidFunc]);
+
+	const commitInput = () => {
+		if (isValid) {
+			setText(typingText);
+			setIsEditing(false);
+		}
+	};
 	return isEditing ? (
 		<Input
 			size={isTitle ? 'lg' : 'md'}
@@ -38,6 +45,11 @@ export function EditableText({
 			variant="outlined"
 			value={typingText}
 			onChange={(e) => setTypingText(e.target.value)}
+			onKeyDown={(e) => {
+				if (e.key === 'Enter') {
+					commitInput();
+				}
+			}}
 			error={!isValid}
 			endDecorator={
 				<>
@@ -54,10 +66,7 @@ export function EditableText({
 					<SprocketTooltip text="Save">
 						<IconButton
 							onClick={() => {
-								if (isValid) {
-									setText(typingText);
-									setIsEditing(false);
-								}
+								commitInput();
 							}}
 							disabled={!isValid}
 						>

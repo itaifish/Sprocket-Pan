@@ -27,7 +27,9 @@ module.exports = {
 			files: ['**/*.ts', '**/*.tsx'],
 			plugins: ['@typescript-eslint'],
 			extends: [
-				'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+				'plugin:@typescript-eslint/recommended',
+				'prettier',
+				'plugin:prettier/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
 			],
 			rules: {
 				'@typescript-eslint/no-empty-interface': [
