@@ -13,10 +13,12 @@ import { AuditLog } from '../../managers/AuditLogManager';
 import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 import { log } from '../../utils/logging';
 
-export interface ActiveWorkspaceSlice extends ApplicationData {
+export type ActiveWorkspaceMetadata = {
 	lastModified: number;
 	lastSaved: number;
-}
+	autosaveInterval?: NodeJS.Timeout | undefined;
+};
+export type ActiveWorkspaceSlice = ApplicationData & ActiveWorkspaceMetadata;
 
 const initialState: ActiveWorkspaceSlice = {
 	...defaultApplicationData,
@@ -50,7 +52,7 @@ interface DeleteScript {
 	scriptId: string;
 }
 
-type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
+export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
 	name: 'active',
@@ -67,6 +69,12 @@ export const activeSlice = createSlice({
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
 			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
+		},
+		setAutosaveInterval: (state, action: PayloadAction<NodeJS.Timeout | undefined>) => {
+			if (state.autosaveInterval != undefined) {
+				clearInterval(state.autosaveInterval);
+			}
+			state.autosaveInterval = action.payload;
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
@@ -216,6 +224,7 @@ export const {
 	setFullState,
 	setSavedNow,
 	setModifiedNow,
+	setAutosaveInterval,
 	insertService,
 	updateService,
 	insertEndpoint,

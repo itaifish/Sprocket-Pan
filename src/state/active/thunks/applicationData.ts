@@ -30,12 +30,9 @@ export const InjectLoadedData = createAsyncThunk<void, ParsedApplicationData, { 
 	},
 );
 
-export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
-	'active/saveData',
-	async (_, thunk) => {
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { lastModified, lastSaved, ...data } = thunk.getState().active;
-		thunk.dispatch(setSavedNow());
-		await applicationDataManager.saveData(data);
-	},
-);
+export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>('active/saveData', (_, thunk) => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const { lastModified, lastSaved, ...data } = thunk.getState().active;
+	thunk.dispatch(setSavedNow());
+	return applicationDataManager.saveData(data);
+});
