@@ -26,8 +26,8 @@ export function SideDrawer({ open, children }: SideDrawerProps) {
 					height: '100vh',
 					p: 2,
 					boxShadow: 'lg',
-					bgcolor: 'background.surface',
 					overflowY: 'scroll',
+					position: 'relative',
 				}}
 			>
 				{children}
