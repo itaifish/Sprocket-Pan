@@ -11,7 +11,6 @@ import {
 } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
-import { useState } from 'react';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { keepStringLengthReasonable } from '../../../utils/string';
@@ -25,18 +24,28 @@ import { selectEndpointById } from '../../../state/active/selectors';
 import { selectFilteredNestedIds, selectIsActiveTab } from '../../../state/tabs/selectors';
 import { FileSystemDropdown, menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
+import { updateEndpoint } from '../../../state/active/slice';
 
 interface EndpointFileSystemProps {
 	endpointId: string;
 }
 
 export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
-	const [collapsed, setCollapsed] = useState(false);
 	const endpoint = useSelector((state) => selectEndpointById(state, endpointId));
 	const isSelected = useSelector((state) => selectIsActiveTab(state, endpointId));
 	const requestIds = useSelector((state) => selectFilteredNestedIds(state, endpoint.requestIds));
 
 	const dispatch = useAppDispatch();
+
+	const collapsed = endpoint.userInterfaceData?.fileCollapsed ?? false;
+	const setCollapsed = (isCollapsed: boolean) => {
+		dispatch(
+			updateEndpoint({
+				id: endpointId,
+				userInterfaceData: { ...endpoint.userInterfaceData, fileCollapsed: isCollapsed },
+			}),
+		);
+	};
 
 	return (
 		<>
@@ -69,7 +78,7 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 							<IconButton
 								size="sm"
 								onClick={(e) => {
-									setCollapsed((wasCollapsed) => !wasCollapsed);
+									setCollapsed(!collapsed);
 									e.preventDefault();
 									e.stopPropagation();
 								}}

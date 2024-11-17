@@ -1,11 +1,12 @@
 import { v4 } from 'uuid';
 import {
-	EMPTY_ENVIRONMENT,
 	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
 	Environment,
+	newEnvironment,
+	newUIRepresentable,
 	Service,
 } from '../../../types/application-data/application-data';
 
@@ -18,10 +19,11 @@ export function createNewRequestObject(endpointId: string): EndpointRequest {
 		body: undefined,
 		bodyType: 'none',
 		rawType: undefined,
-		environmentOverride: structuredClone(EMPTY_ENVIRONMENT),
+		environmentOverride: newEnvironment(),
 		endpointId: endpointId,
 		id: newId,
 		history: [],
+		...newUIRepresentable(),
 	} satisfies EndpointRequest;
 }
 
@@ -38,6 +40,7 @@ export function createNewEndpointObject(serviceId: string): Endpoint {
 		requestIds: [],
 		id: newId,
 		defaultRequest: null,
+		...newUIRepresentable(),
 	};
 }
 
@@ -51,6 +54,7 @@ export function createNewServiceObject(): Service {
 		localEnvironments: {},
 		endpointIds: [],
 		id: newId,
+		...newUIRepresentable(),
 	};
 }
 

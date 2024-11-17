@@ -118,14 +118,30 @@ export const EMPTY_QUERY_PARAMS: QueryParams = {
 	__data: [],
 } as unknown as QueryParams;
 
-export const EMPTY_ENVIRONMENT: Environment = {
+const EMPTY_ENVIRONMENT: Environment = {
 	__data: [],
 } as unknown as Environment;
+
+export function newEnvironment() {
+	return structuredClone(EMPTY_ENVIRONMENT);
+}
 
 export const EMPTY_HEADERS: SPHeaders = {
 	__data: [],
 } as unknown as SPHeaders;
 
+const EMPTY_UI_REPRESENTABLE: UIRepresentable = {
+	userInterfaceData: {
+		fileCollapsed: false,
+		priority: 0,
+	},
+};
+
+export function newUIRepresentable() {
+	const newUIRepresentable = { ...structuredClone(EMPTY_UI_REPRESENTABLE) };
+	newUIRepresentable.userInterfaceData.priority = Math.random();
+	return newUIRepresentable;
+}
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
 	name: string;

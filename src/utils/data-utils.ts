@@ -1,10 +1,10 @@
 import { v4 } from 'uuid';
 import { TableData } from '../components/shared/input/EditableData';
 import {
-	EMPTY_ENVIRONMENT,
 	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Environment,
+	newEnvironment,
 	OrderedKeyValuePair,
 	QueryParams,
 } from '../types/application-data/application-data';
@@ -55,7 +55,7 @@ export abstract class UniqueKeyValuePairUtils extends KeyValuePairUtils {
 	}
 
 	static fromTableData<TID extends string | number>(tableData: TableData<TID>) {
-		const initialData = structuredClone(EMPTY_ENVIRONMENT);
+		const initialData = newEnvironment();
 		tableData.forEach((td) => this.set(initialData, td.key, td.value));
 		return initialData;
 	}
@@ -67,7 +67,7 @@ export class EnvironmentUtils extends UniqueKeyValuePairUtils {
 	}
 
 	static new(): Environment {
-		return asEnv({ ...structuredClone(EMPTY_ENVIRONMENT), __id: v4(), __name: 'New Environment' });
+		return asEnv({ ...newEnvironment(), __id: v4(), __name: 'New Environment' });
 	}
 }
 

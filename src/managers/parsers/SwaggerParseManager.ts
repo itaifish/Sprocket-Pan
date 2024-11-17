@@ -1,9 +1,10 @@
 import {
-	EMPTY_ENVIRONMENT,
 	EMPTY_HEADERS,
 	EMPTY_QUERY_PARAMS,
 	Endpoint,
 	EndpointRequest,
+	newEnvironment,
+	newUIRepresentable,
 	RESTfulRequestVerb,
 	RESTfulRequestVerbs,
 	Service,
@@ -84,6 +85,7 @@ class SwaggerParseManager {
 				baseUrl,
 				localEnvironments: {},
 				endpointIds: [],
+				...newUIRepresentable(),
 			},
 		];
 		return { services, ...this.mapPaths(swaggerApi.paths, version, services[0]) };
@@ -138,6 +140,7 @@ class SwaggerParseManager {
 						name: `${method}: ${pathsUri}`,
 						requestIds: [],
 						defaultRequest: null,
+						...newUIRepresentable(),
 					};
 					service.endpointIds.push(defaultEndpointData.id);
 					const parameters = pathData.parameters ?? [];
@@ -152,7 +155,8 @@ class SwaggerParseManager {
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: structuredClone(EMPTY_ENVIRONMENT),
+						environmentOverride: newEnvironment(),
+						...newUIRepresentable(),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -259,6 +263,7 @@ class SwaggerParseManager {
 					name: `${method}: ${pathsUri}`,
 					requestIds: [],
 					defaultRequest: null,
+					...newUIRepresentable(),
 				};
 				service.endpointIds.push(defaultEndpointData.id);
 				if (!pathData || typeof pathData === 'string') {
@@ -282,7 +287,8 @@ class SwaggerParseManager {
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: EMPTY_ENVIRONMENT,
+					environmentOverride: newEnvironment(),
+					...newUIRepresentable(),
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {
