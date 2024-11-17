@@ -13,7 +13,7 @@ interface CloneServiceInput {
 export const cloneService = createAsyncThunk<string, CloneServiceInput, { state: RootState }>(
 	'active/cloneService',
 	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
-		const newService = { ...createNewServiceObject(), ...structuredClone(data) };
+		const newService = { ...createNewServiceObject(), ...structuredClone(data), name: `${data.name} (Copy)` };
 		thunk.dispatch(insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
 		// clone endpoints, if we're cloning the service

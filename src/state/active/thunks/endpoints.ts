@@ -43,7 +43,9 @@ export const addNewEndpointById = createAsyncThunk<void, string, { state: RootSt
 	async (oldId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, userInterfaceData, ...endpoint } = thunk.getState().active.endpoints[oldId];
-		thunk.dispatch(addNewEndpoint({ serviceId: endpoint.serviceId, data: endpoint }));
+		thunk.dispatch(
+			addNewEndpoint({ serviceId: endpoint.serviceId, data: { ...endpoint, name: `${endpoint.name} (Copy)` } }),
+		);
 	},
 );
 

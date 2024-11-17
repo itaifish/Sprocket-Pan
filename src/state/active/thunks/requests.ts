@@ -98,7 +98,9 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 	async (requestId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, userInterfaceData, ...request } = thunk.getState().active.requests[requestId];
-		thunk.dispatch(addNewRequest({ endpointId: request.endpointId, data: request }));
+		thunk.dispatch(
+			addNewRequest({ endpointId: request.endpointId, data: { ...request, name: `${request.name} (Copy)` } }),
+		);
 	},
 );
 
