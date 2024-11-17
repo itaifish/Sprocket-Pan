@@ -96,8 +96,8 @@ export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: Root
 export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootState }>(
 	'active/addRequestFromId',
 	async (requestId, thunk) => {
-		const { id, ...request } = thunk.getState().active.requests[requestId];
-		const _id = id;
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { id, userInterfaceData, ...request } = thunk.getState().active.requests[requestId];
 		thunk.dispatch(addNewRequest({ endpointId: request.endpointId, data: request }));
 	},
 );
