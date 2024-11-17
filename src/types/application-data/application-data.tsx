@@ -37,6 +37,14 @@ export function rawBodyTypeToMime(rawType: RawBodyType | undefined) {
 	}
 	return mime.getType(rawType?.toLocaleLowerCase() ?? 'txt') ?? 'text/plain';
 }
+
+export type UIRepresentable = {
+	userInterfaceData: {
+		fileCollapsed: boolean;
+		priority: number;
+	};
+};
+
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
 	endpointId: string;
@@ -60,7 +68,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	postRequestScript?: string;
 	environmentOverride: Environment;
 	history: HistoricalEndpointResponse[];
-};
+} & UIRepresentable;
 
 export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
@@ -90,7 +98,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	serviceId: string;
 	requestIds: string[];
 	defaultRequest: string | null;
-};
+} & UIRepresentable;
 
 export type OrderedKeyValuePair<
 	TKey extends string | number = string,
@@ -131,7 +139,7 @@ export type Service<TBaseUrl extends string = string> = {
 	endpointIds: string[];
 	preRequestScript?: string;
 	postRequestScript?: string;
-};
+} & UIRepresentable;
 
 export type WorkspaceMetadata = {
 	name: string;

@@ -19,7 +19,33 @@ much more difficult to get them out of order and much easier to fix if they do.
 */
 
 import { ApplicationData } from '../types/application-data/application-data';
+import { ValuesOf } from '../types/utils/utils';
 import { defaultApplicationData } from './ApplicationDataManager';
+
+/**
+ * add user interface data
+ */
+function toFive(data: ApplicationData | any) {
+	const toUpdate = ['services', 'endpoints', 'requests'] as const;
+	toUpdate.forEach((updateStr) => {
+		const allDataOfType: ApplicationData[ValuesOf<typeof toUpdate>][string][] = Object.values(data[updateStr]);
+		const sortedOrder = allDataOfType.sort((a, b) =>
+			a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()),
+		);
+		const sortedOrderAsMap = new Map<string, number>();
+		sortedOrder.forEach((item, index) => {
+			sortedOrderAsMap.set(item.id, index);
+		});
+		allDataOfType.forEach((dataObject) => {
+			if (dataObject.userInterfaceData == undefined) {
+				dataObject.userInterfaceData = {
+					fileCollapsed: false,
+					priority: sortedOrderAsMap.get(dataObject.id) ?? Math.random() * sortedOrder.length,
+				};
+			}
+		});
+	});
+}
 
 /**
  * Add and enable autosave
@@ -62,7 +88,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();
