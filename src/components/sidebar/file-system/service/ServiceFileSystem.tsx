@@ -1,7 +1,6 @@
 import { Box, IconButton, List, ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
 import FolderSharpIcon from '@mui/icons-material/FolderSharp';
-import { keepStringLengthReasonable } from '../../../../utils/string';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useAppDispatch } from '../../../../state/store';
@@ -14,6 +13,7 @@ import { selectFilteredNestedIds, selectIsActiveTab } from '../../../../state/ta
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { updateService } from '../../../../state/active/slice';
+import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -75,7 +75,9 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 							</IconButton>
 						</SprocketTooltip>
 					</ListItemDecorator>
-					<ListSubheader>{keepStringLengthReasonable(service.name)}</ListSubheader>
+					<ListSubheader sx={{ width: '100%' }}>
+						<EllipsisSpan>{service.name}</EllipsisSpan>
+					</ListSubheader>
 				</ListItemButton>
 				<List
 					aria-labelledby="nav-list-browse"

@@ -13,7 +13,6 @@ import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import FolderIcon from '@mui/icons-material/Folder';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { keepStringLengthReasonable } from '../../../utils/string';
 import { verbColors } from '../../../utils/style';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpointById } from '../../../state/active/thunks/endpoints';
@@ -25,6 +24,7 @@ import { selectFilteredNestedIds, selectIsActiveTab } from '../../../state/tabs/
 import { FileSystemDropdown, menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { updateEndpoint } from '../../../state/active/slice';
+import { EllipsisTypography } from '../../shared/EllipsisTypography';
 
 interface EndpointFileSystemProps {
 	endpointId: string;
@@ -87,7 +87,9 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 							</IconButton>
 						</SprocketTooltip>
 					</ListItemDecorator>
-					<ListItemContent>{keepStringLengthReasonable(endpoint.name)}</ListItemContent>
+					<ListItemContent>
+						<EllipsisTypography>{endpoint.name}</EllipsisTypography>
+					</ListItemContent>
 					<ListSubheader>
 						<Chip size="sm" variant="outlined" color={verbColors[endpoint.verb]}>
 							{endpoint.verb}

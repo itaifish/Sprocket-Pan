@@ -1,6 +1,5 @@
 import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { keepStringLengthReasonable } from '../../../utils/string';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequestFromId } from '../../../state/active/thunks/requests';
 import { addTabs, addToDeleteQueue, setSelectedTab } from '../../../state/tabs/slice';
@@ -8,6 +7,7 @@ import { selectEndpointById, selectRequestsById } from '../../../state/active/se
 import { useSelector } from 'react-redux';
 import { selectIsActiveTab } from '../../../state/tabs/selectors';
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
+import { EllipsisSpan } from '../../shared/EllipsisTypography';
 
 interface RequestFileSystemProps {
 	requestId: string;
@@ -44,7 +44,9 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 				<ListItemDecorator>
 					<TextSnippetIcon fontSize="small" />
 				</ListItemDecorator>
-				<ListSubheader>{keepStringLengthReasonable(request.name)}</ListSubheader>
+				<ListSubheader sx={{ width: '100%' }}>
+					<EllipsisSpan>{request.name}</EllipsisSpan>
+				</ListSubheader>
 			</ListItemButton>
 		</ListItem>
 	);
