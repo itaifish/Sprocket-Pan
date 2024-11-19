@@ -8,8 +8,8 @@ import { addNewEnvironmentById } from '../../../../state/active/thunks/environme
 import { useAppDispatch } from '../../../../state/store';
 import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { addToDeleteQueue, addTabs, setSelectedTab } from '../../../../state/tabs/slice';
-import { keepStringLengthReasonable } from '../../../../utils/string';
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
+import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -50,7 +50,9 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 				<ListItemDecorator>
 					<TableChartIcon fontSize="small" />
 				</ListItemDecorator>
-				<ListSubheader>{keepStringLengthReasonable(environment.__name)}</ListSubheader>
+				<ListSubheader sx={{ width: '100%' }}>
+					<EllipsisSpan>{environment.__name}</EllipsisSpan>
+				</ListSubheader>
 			</ListItemButton>
 		</ListItem>
 	);

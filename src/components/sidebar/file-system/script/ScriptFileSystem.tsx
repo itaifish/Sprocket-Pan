@@ -4,10 +4,10 @@ import { selectScript } from '../../../../state/active/selectors';
 import { useAppDispatch } from '../../../../state/store';
 import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { addToDeleteQueue, addTabs, setSelectedTab } from '../../../../state/tabs/slice';
-import { keepStringLengthReasonable } from '../../../../utils/string';
 import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import CodeIcon from '@mui/icons-material/Code';
 import { createScript } from '../../../../state/active/thunks/scripts';
+import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 
 interface ScriptFileSystemProps {
 	scriptId: string;
@@ -50,7 +50,9 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 				<ListItemDecorator>
 					<CodeIcon fontSize="small" />
 				</ListItemDecorator>
-				<ListSubheader>{keepStringLengthReasonable(script.name)}</ListSubheader>
+				<ListSubheader sx={{ width: '100%' }}>
+					<EllipsisSpan>{script.name}</EllipsisSpan>
+				</ListSubheader>
 			</ListItemButton>
 		</ListItem>
 	);
