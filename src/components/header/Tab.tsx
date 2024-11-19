@@ -1,36 +1,22 @@
 import { ListItemDecorator, IconButton, Tab as MuiTab, Stack } from '@mui/joy';
 import { Environment } from 'monaco-editor';
 import { useSelector } from 'react-redux';
-import {
-	selectEnvironments,
-	selectServices,
-	selectRequests,
-	selectEndpoints,
-	selectScripts,
-} from '../../state/active/selectors';
+import { selectTabInfoById } from '../../state/active/selectors';
 import { closeTab } from '../../state/tabs/slice';
-import { ApplicationData, iconFromTabType } from '../../types/application-data/application-data';
+import { iconFromTabType } from '../../types/application-data/application-data';
 import { TabType } from '../../types/state/state';
 import { Close } from '@mui/icons-material';
 import { useAppDispatch } from '../../state/store';
 import { EllipsisTypography } from '../shared/EllipsisTypography';
 
-function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
-	return data[`${tabType}s`];
-}
-
 interface TabProps {
 	tab: [string, TabType];
 }
 
-export function Tab({ tab: [tabId, tabType] }: TabProps) {
-	const environments = useSelector(selectEnvironments);
-	const services = useSelector(selectServices);
-	const requests = useSelector(selectRequests);
-	const endpoints = useSelector(selectEndpoints);
-	const scripts = useSelector(selectScripts);
+export function Tab({ tab }: TabProps) {
+	const [tabId, tabType] = tab;
 	const dispatch = useAppDispatch();
-	const tabData = getMapFromTabType({ environments, requests, services, endpoints, scripts }, tabType)[tabId];
+	const tabData = useSelector((state) => selectTabInfoById(state, tab));
 	const name = tabData?.name ?? (tabData as Environment)?.__name ?? '';
 	return (
 		<MuiTab

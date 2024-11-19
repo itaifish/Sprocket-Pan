@@ -2,6 +2,8 @@ import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
 import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
 import { queryParamsToString } from '../../utils/application';
+import { TabType } from '../../types/state/state';
+import { ApplicationData } from '../../types/application-data/application-data';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -78,6 +80,24 @@ export const selectScripts = createSelector(selectActiveState, (state) => state.
 export const selectScript = createSelector(
 	[selectScripts, (_, scriptName: string) => scriptName],
 	(scripts, scriptName) => scripts[scriptName],
+);
+
+export const selectPossibleTabInfo = createSelector(
+	[selectEnvironments, selectServices, selectRequests, selectEndpoints, selectScripts],
+	(environments, services, requests, endpoints, scripts) => {
+		return { environments, requests, services, endpoints, scripts };
+	},
+);
+
+function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
+	return data[`${tabType}s`];
+}
+
+export const selectTabInfoById = createSelector(
+	[selectPossibleTabInfo, (_, tab: [string, TabType]) => tab],
+	(data, [tabId, tabType]) => {
+		return getMapFromTabType(data, tabType)[tabId];
+	},
 );
 
 export const selectHasBeenModifiedSinceLastSave = createSelector(
