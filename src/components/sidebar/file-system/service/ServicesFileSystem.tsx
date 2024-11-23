@@ -1,37 +1,27 @@
-import { Box, List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
+import { Box, ListDivider } from '@mui/joy';
 import { ServiceFileSystem } from './ServiceFileSystem';
-import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectServices } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
-import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
+import { useAppDispatch } from '../../../../state/store';
+import { setSearchText } from '../../../../state/tabs/slice';
+import { SearchField } from '../../../shared/SearchField';
+import { FileSystemSection } from '../FileSystemSection';
 
 export function ServicesFileSystem() {
-	const [servicesCollapsed, setServicesCollapsed] = useState(false);
 	const services = useSelector(selectServices);
 	const serviceIdsUnfiltered = Object.values(services).map((srv) => srv.id);
 	const serviceIds = useSelector((state) => selectFilteredNestedIds(state, serviceIdsUnfiltered));
+	const dispatch = useAppDispatch();
 
 	return (
-		<ListItem nested>
-			<ListSubheader>
-				Services
-				<CollapseExpandButton collapsed={servicesCollapsed} setCollapsed={setServicesCollapsed} />
-			</ListSubheader>
-			<List
-				aria-labelledby="nav-list-browse"
-				sx={{
-					'& .JoyListItemButton-root': { p: '8px' },
-				}}
-			>
-				{!servicesCollapsed &&
-					serviceIds.map((serviceId) => (
-						<Box key={serviceId}>
-							<ServiceFileSystem serviceId={serviceId} />
-							<ListDivider />
-						</Box>
-					))}
-			</List>
-		</ListItem>
+		<FileSystemSection header="Services" actions={<SearchField onChange={(text) => dispatch(setSearchText(text))} />}>
+			{serviceIds.map((serviceId) => (
+				<Box key={serviceId}>
+					<ServiceFileSystem serviceId={serviceId} />
+					<ListDivider />
+				</Box>
+			))}
+		</FileSystemSection>
 	);
 }

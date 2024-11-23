@@ -2,7 +2,6 @@ import { Box, Grid, Card, Typography, Sheet, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { selectActiveWorkspace } from '../../state/workspaces/selectors';
 import { TabHeader } from '../header/TabHeader';
-import { SearchInputField } from '../sidebar/SearchInputField';
 import { SideDrawer } from '../sidebar/SideDrawer';
 import { SideDrawerActions } from '../sidebar/SideDrawerActions';
 import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
@@ -44,7 +43,6 @@ export function Workspace() {
 						>
 							<Card>
 								<SideDrawerActions />
-								<SearchInputField />
 							</Card>
 						</Sheet>
 						<Typography sx={{ marginTop: 3, textAlign: 'center' }} level="h3">
