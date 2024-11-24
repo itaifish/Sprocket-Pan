@@ -22,6 +22,15 @@ import { WorkspaceData } from '../types/application-data/application-data';
 import { defaultWorkspaceData } from './WorkspaceDataManager';
 
 /**
+ * Add and enable list styling
+ */
+function toSix(data: ApplicationData | any) {
+	if (data.settings.listStyle == undefined) {
+		data.settings.listStyle = 'default';
+	}
+}
+
+/**
  * add user interface data
  */
 function toSeven(data: WorkspaceData | any) {
