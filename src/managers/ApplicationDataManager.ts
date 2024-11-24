@@ -34,6 +34,7 @@ export const defaultApplicationData: ApplicationData = {
 			pre: ['service', 'endpoint', 'request'],
 			post: ['request', 'endpoint', 'service'],
 		},
+		listStyle: 'default',
 	},
 	version: saveUpdateManager.getCurrentVersion(),
 };
