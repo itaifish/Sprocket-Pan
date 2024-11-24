@@ -51,7 +51,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 			]}
 			buttonContent={
 				<>
-					<ListItemDecorator>
+					<ListItemDecorator sx={{ mr: '1px' }}>
 						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
 							<IconButton
 								onClick={(e) => {
