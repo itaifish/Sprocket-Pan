@@ -6,7 +6,7 @@ import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
 import { useAppDispatch } from '../../../../state/store';
 import { setSearchText } from '../../../../state/tabs/slice';
 import { SearchField } from '../../../shared/SearchField';
-import { FileSystemSection } from '../FileSystemSection';
+import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -15,13 +15,13 @@ export function ServicesFileSystem() {
 	const dispatch = useAppDispatch();
 
 	return (
-		<FileSystemSection header="Services" actions={<SearchField onChange={(text) => dispatch(setSearchText(text))} />}>
+		<FileSystemTrunk header="Services" actions={<SearchField onChange={(text) => dispatch(setSearchText(text))} />}>
 			{serviceIds.map((serviceId) => (
 				<Box key={serviceId}>
 					<ServiceFileSystem serviceId={serviceId} />
 					<ListDivider />
 				</Box>
 			))}
-		</FileSystemSection>
+		</FileSystemTrunk>
 	);
 }

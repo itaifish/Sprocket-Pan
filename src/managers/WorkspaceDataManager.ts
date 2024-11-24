@@ -2,7 +2,7 @@ import { BaseDirectory, createDir, exists, readTextFile, writeFile } from '@taur
 import { log } from '../utils/logging';
 import { path } from '@tauri-apps/api';
 import {
-	ApplicationData,
+	WorkspaceData,
 	HistoricalEndpointResponse,
 	WorkspaceMetadata,
 } from '../types/application-data/application-data';
@@ -13,18 +13,15 @@ import { saveUpdateManager } from './SaveUpdateManager';
 import { postmanParseManager } from './parsers/postman/PostmanParseManager';
 import { insomniaParseManager } from './parsers/InsomniaParseManager';
 
-export const defaultApplicationData: ApplicationData = {
+export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
 	endpoints: {},
 	requests: {},
 	environments: {},
 	scripts: {},
 	selectedEnvironment: undefined,
-	workspaceMetadata: undefined,
-	workspaceUiMetadata: {
-		idSpecific: {},
-	},
-	globalUiMetadata: {
+	metadata: undefined,
+	uiMetadata: {
 		idSpecific: {},
 	},
 	settings: {
@@ -45,17 +42,17 @@ export const defaultApplicationData: ApplicationData = {
 	version: saveUpdateManager.getCurrentVersion(),
 };
 
-export class ApplicationDataManager {
+export class WorkspaceDataManager {
 	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
 	public static readonly DATA_FOLDER_NAME = 'data' as const;
 	public static readonly DATA_FILE_NAME = 'data' as const;
 	private static readonly PATH =
-		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const;
+		`${WorkspaceDataManager.DATA_FOLDER_NAME}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}.json` as const;
 	private static readonly HISTORY_PATH =
-		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const;
+		`${WorkspaceDataManager.DATA_FOLDER_NAME}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}_history.json` as const;
 	private static readonly METADATA_PATH =
-		`${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_metadata.json` as const;
-	public static readonly INSTANCE = new ApplicationDataManager();
+		`${WorkspaceDataManager.DATA_FOLDER_NAME}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}_metadata.json` as const;
+	public static readonly INSTANCE = new WorkspaceDataManager();
 
 	private constructor() {}
 
@@ -74,11 +71,11 @@ export class ApplicationDataManager {
 		return newData;
 	}
 
-	public async saveData(data: ApplicationData) {
-		const selectedWorkspace = data.workspaceMetadata;
+	public async saveData(data: WorkspaceData) {
+		const selectedWorkspace = data.metadata;
 		const paths = this.getWorkspacePath(selectedWorkspace?.fileName);
 		const saveData = async () => {
-			const doesExist = await exists(paths.data, { dir: ApplicationDataManager.DEFAULT_DIRECTORY });
+			const doesExist = await exists(paths.data, { dir: WorkspaceDataManager.DEFAULT_DIRECTORY });
 			if (!doesExist) {
 				log.warn(`File does not exist, exiting...`);
 				return 'doesNotExist' as const;
@@ -86,13 +83,13 @@ export class ApplicationDataManager {
 				log.trace(`File already exists, updating...`);
 				await writeFile(
 					{ contents: JSON.stringify(data, noHistoryAndMetadataReplacer), path: paths.data },
-					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+					{ dir: WorkspaceDataManager.DEFAULT_DIRECTORY },
 				);
 			}
 		};
 		const saveHistory = async () => {
 			const doesExist = await exists(paths.history, {
-				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+				dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 			});
 			if (!doesExist) {
 				log.warn(`File does not exist, exiting...`);
@@ -107,21 +104,21 @@ export class ApplicationDataManager {
 						contents: JSON.stringify(historyOnly, undefined),
 						path: paths.history,
 					},
-					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+					{ dir: WorkspaceDataManager.DEFAULT_DIRECTORY },
 				);
 			}
 		};
 
 		const saveMetadata = async () => {
 			const doesExist = await exists(paths.metadata, {
-				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+				dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 			});
 			if (!doesExist) {
 				log.warn(`File does not exist, exiting...`);
 				return 'doesNotExist' as const;
 			} else {
 				log.trace(`File already exists, updating...`);
-				let metadata = data.workspaceMetadata;
+				let metadata = data.metadata;
 				if (metadata != null) {
 					metadata = { ...metadata, lastModified: new Date().getTime() };
 				}
@@ -130,7 +127,7 @@ export class ApplicationDataManager {
 						contents: JSON.stringify(metadata, undefined),
 						path: paths.metadata,
 					},
-					{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
+					{ dir: WorkspaceDataManager.DEFAULT_DIRECTORY },
 				);
 			}
 		};
@@ -144,18 +141,18 @@ export class ApplicationDataManager {
 	public getWorkspacePath(workspace?: string) {
 		if (workspace == null) {
 			return {
-				root: `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}` as const,
-				data: ApplicationDataManager.PATH,
-				history: ApplicationDataManager.HISTORY_PATH,
-				metadata: ApplicationDataManager.METADATA_PATH,
+				root: `${WorkspaceDataManager.DATA_FOLDER_NAME}${path.sep}` as const,
+				data: WorkspaceDataManager.PATH,
+				history: WorkspaceDataManager.HISTORY_PATH,
+				metadata: WorkspaceDataManager.METADATA_PATH,
 			};
 		}
-		const root = `${ApplicationDataManager.DATA_FOLDER_NAME}${path.sep}${workspace}` as const;
+		const root = `${WorkspaceDataManager.DATA_FOLDER_NAME}${path.sep}${workspace}` as const;
 		return {
 			root,
-			data: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}.json` as const,
-			history: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_history.json` as const,
-			metadata: `${root}${path.sep}${ApplicationDataManager.DATA_FILE_NAME}_metadata.json` as const,
+			data: `${root}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}.json` as const,
+			history: `${root}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}_history.json` as const,
+			metadata: `${root}${path.sep}${WorkspaceDataManager.DATA_FILE_NAME}_metadata.json` as const,
 		};
 	}
 
@@ -174,18 +171,18 @@ export class ApplicationDataManager {
 	private async loadDataFromFile(workspace: WorkspaceMetadata | undefined) {
 		const paths = this.getWorkspacePath(workspace?.fileName);
 		const contentsTask = readTextFile(paths.data, {
-			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 		});
 		const metadataTask = readTextFile(paths.metadata, {
-			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 		});
 		const history = await readTextFile(paths.history, {
-			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 		});
 		const contents = await contentsTask;
 		const metadata = await metadataTask;
 
-		const data = JSON.parse(contents, dateTimeReviver) as ApplicationData;
+		const data = JSON.parse(contents, dateTimeReviver) as WorkspaceData;
 		const parsedHistory = JSON.parse(history, dateTimeReviver) as {
 			id: string;
 			history: HistoricalEndpointResponse[];
@@ -193,7 +190,7 @@ export class ApplicationDataManager {
 		parsedHistory.forEach((responseHistory) => {
 			data.requests[responseHistory.id].history = responseHistory?.history ?? [];
 		});
-		data.workspaceMetadata = JSON.parse(metadata, dateTimeReviver) as WorkspaceMetadata;
+		data.metadata = JSON.parse(metadata, dateTimeReviver) as WorkspaceMetadata;
 		saveUpdateManager.update(data);
 		return data;
 	}
@@ -204,14 +201,14 @@ export class ApplicationDataManager {
 	 */
 	private async createDataFolderIfNotExists() {
 		log.trace(`createDataFolderIfNotExists called`);
-		const dataFolderLocalPath = ApplicationDataManager.DATA_FOLDER_NAME;
+		const dataFolderLocalPath = WorkspaceDataManager.DATA_FOLDER_NAME;
 		const doesExist = await exists(dataFolderLocalPath, {
-			dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+			dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 		});
 		if (!doesExist) {
 			log.debug(`Folder does not exist, creating...`);
 			await createDir(dataFolderLocalPath, {
-				dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+				dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 				recursive: true,
 			});
 			return 'created' as const;
@@ -228,21 +225,18 @@ export class ApplicationDataManager {
 		log.trace(`createDataFolderIfNotExists called`);
 		const paths = this.getWorkspacePath(workspace?.fileName);
 		const pathsAndDataToCreate = [
-			{ path: paths.data, content: defaultApplicationData },
+			{ path: paths.data, content: defaultWorkspaceData },
 			{ path: paths.history, content: [] },
-			{ path: paths.metadata, content: workspace ?? defaultApplicationData.workspaceMetadata },
+			{ path: paths.metadata, content: workspace ?? defaultWorkspaceData.metadata },
 		];
 		const createIfNotExistsPromises = pathsAndDataToCreate.map(({ path, content }) => {
 			const action = async () => {
 				const doesExist = await exists(path, {
-					dir: ApplicationDataManager.DEFAULT_DIRECTORY,
+					dir: WorkspaceDataManager.DEFAULT_DIRECTORY,
 				});
 				if (!doesExist) {
 					log.debug(`File does not exist, creating...`);
-					await writeFile(
-						{ contents: JSON.stringify(content), path },
-						{ dir: ApplicationDataManager.DEFAULT_DIRECTORY },
-					);
+					await writeFile({ contents: JSON.stringify(content), path }, { dir: WorkspaceDataManager.DEFAULT_DIRECTORY });
 					// we only care if we had to create a new metadata file as to whether or not to use default data
 					if (path !== paths.metadata) {
 						return 'alreadyExists' as const;
@@ -260,4 +254,4 @@ export class ApplicationDataManager {
 	}
 }
 
-export const applicationDataManager = ApplicationDataManager.INSTANCE;
+export const workspaceDataManager = WorkspaceDataManager.INSTANCE;

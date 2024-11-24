@@ -3,7 +3,7 @@ import { activeSlice } from './slice';
 import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
 import { queryParamsToString } from '../../utils/application';
 import { TabType } from '../../types/state/state';
-import { ApplicationData } from '../../types/application-data/application-data';
+import { WorkspaceData } from '../../types/application-data/application-data';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -68,7 +68,7 @@ export const selectFullRequestInfoById = createSelector(
 // TODO: remember to actually deep merge these if there's any nested properties that matter in the future
 export const selectUiMetadata = createSelector(selectActiveState, (state) => ({
 	...state.globalUiMetadata,
-	...state.workspaceUiMetadata,
+	...state.uiMetadata,
 }));
 
 export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
@@ -102,7 +102,7 @@ export const selectPossibleTabInfo = createSelector(
 	},
 );
 
-function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
+function getMapFromTabType<TTabType extends TabType>(data: Pick<WorkspaceData, `${TTabType}s`>, tabType: TTabType) {
 	return data[`${tabType}s`];
 }
 

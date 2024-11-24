@@ -9,19 +9,19 @@ import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { Folder, FolderOpen } from '@mui/icons-material';
 import { setUiMetadataById } from '../../../../state/active/slice';
 
-interface FileSystemStemProps extends FileSystemLeafProps {
+interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
 	folderSize?: 'md' | 'sm';
 }
 
-export function FileSystemStem({
+export function FileSystemBranch({
 	buttonContent,
 	children,
 	menuOptions,
 	tabType,
 	id,
 	folderSize = 'md',
-}: FileSystemStemProps) {
+}: FileSystemBranchProps) {
 	const style = LIST_STYLING[useSelector(selectSettings).listStyle];
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id)).collapsed ?? false;

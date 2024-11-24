@@ -10,7 +10,7 @@ import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
-import { FileSystemStem } from '../tree/FileSystemStem';
+import { FileSystemBranch } from '../tree/FileSystemBranch';
 import { addNewRequest } from '../../../../state/active/thunks/requests';
 
 interface ServiceFileSystemProps {
@@ -24,7 +24,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	const dispatch = useAppDispatch();
 
 	return (
-		<FileSystemStem
+		<FileSystemBranch
 			id={serviceId}
 			tabType="service"
 			menuOptions={[
@@ -50,6 +50,6 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 			{endpointIds.map((endpointId) => (
 				<EndpointFileSystem endpointId={endpointId} key={endpointId} />
 			))}
-		</FileSystemStem>
+		</FileSystemBranch>
 	);
 }

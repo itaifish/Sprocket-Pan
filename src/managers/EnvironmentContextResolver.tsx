@@ -1,5 +1,5 @@
 import { Typography } from '@mui/joy';
-import { ApplicationData, Environment } from '../types/application-data/application-data';
+import { WorkspaceData, Environment } from '../types/application-data/application-data';
 import { getDataArrayFromEnvKeys } from '../utils/functions';
 import { asEnv } from '../utils/types';
 
@@ -8,8 +8,8 @@ type Snippet = {
 	variableName?: string;
 };
 
-type PickedApplicationData = Pick<
-	ApplicationData,
+type PickedWorkspaceData = Pick<
+	WorkspaceData,
 	'selectedEnvironment' | 'services' | 'environments' | 'requests' | 'settings'
 >;
 
@@ -19,7 +19,7 @@ class EnvironmentContextResolver {
 
 	public stringWithVarsToTypography(
 		text: string,
-		data: PickedApplicationData,
+		data: PickedWorkspaceData,
 		serviceId?: string,
 		requestId?: string,
 		typographyProps?: React.ComponentProps<typeof Typography>,
@@ -68,7 +68,7 @@ class EnvironmentContextResolver {
 		);
 	}
 
-	public resolveVariablesForString(text: string, data: PickedApplicationData, serviceId?: string, requestId?: string) {
+	public resolveVariablesForString(text: string, data: PickedWorkspaceData, serviceId?: string, requestId?: string) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
@@ -76,7 +76,7 @@ class EnvironmentContextResolver {
 	public resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
 		context: {
-			data: PickedApplicationData;
+			data: PickedWorkspaceData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -98,7 +98,7 @@ class EnvironmentContextResolver {
 		object: T,
 		key: TKey,
 		context: {
-			data: PickedApplicationData;
+			data: PickedWorkspaceData;
 			serviceId?: string;
 			requestId?: string;
 		},
@@ -152,7 +152,7 @@ class EnvironmentContextResolver {
 
 	public parseStringWithEnvironmentOverrides(
 		text: string,
-		data: PickedApplicationData,
+		data: PickedWorkspaceData,
 		serviceId?: string,
 		requestId?: string,
 	) {
@@ -160,7 +160,7 @@ class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	public buildEnvironmentVariables(data: PickedApplicationData, serviceId?: string, requestId?: string) {
+	public buildEnvironmentVariables(data: PickedWorkspaceData, serviceId?: string, requestId?: string) {
 		let env: Environment = asEnv({ __name: '', __id: '', __data: [] });
 		if (data.selectedEnvironment) {
 			env = { ...data.environments[data.selectedEnvironment] };

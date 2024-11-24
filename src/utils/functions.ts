@@ -139,7 +139,7 @@ export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
 	if (key === 'history') {
 		return [];
 	}
-	if (key === 'workspaceMetadata') {
+	if (key === 'metadata') {
 		return undefined;
 	}
 	return value;

@@ -8,7 +8,7 @@ import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableSer
 import { selectSettings } from '../../state/active/selectors';
 import { useEffect } from 'react';
 import { useAppDispatch } from '../../state/store';
-import { updateAutosaveInterval } from '../../state/active/thunks/workspaceMetadata';
+import { updateAutosaveInterval } from '../../state/active/thunks/metadata';
 
 export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);

@@ -167,7 +167,13 @@ export type UiMetadata = {
 	idSpecific: Record<string, IdSpecificUiMetadata>;
 };
 
-export type ApplicationData = {
+export type GlobalData = {
+	uiMetadata: UiMetadata;
+	settings: Settings;
+	workspaces: WorkspaceMetadata[];
+};
+
+export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
@@ -175,9 +181,8 @@ export type ApplicationData = {
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
-	workspaceMetadata?: WorkspaceMetadata;
-	workspaceUiMetadata: UiMetadata;
-	globalUiMetadata: UiMetadata;
+	metadata?: WorkspaceMetadata;
+	uiMetadata: UiMetadata;
 	version: number | null;
 };
 

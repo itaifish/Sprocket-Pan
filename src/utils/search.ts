@@ -1,5 +1,5 @@
 import {
-	ApplicationData,
+	WorkspaceData,
 	Endpoint,
 	EndpointRequest,
 	Environment,
@@ -41,7 +41,7 @@ function requestMatches(request: EndpointRequest, text: string) {
 	}
 }
 
-type DataSearchContext = Pick<ApplicationData, 'endpoints' | 'requests' | 'services'>;
+type DataSearchContext = Pick<WorkspaceData, 'endpoints' | 'requests' | 'services'>;
 
 export function getValidIdsFromSearchTerm(
 	searchText: string,

@@ -1,14 +1,14 @@
 import { List, ListItem, ListSubheader, Stack } from '@mui/joy';
 import { PropsWithChildren, useState } from 'react';
-import { CollapseExpandButton } from '../buttons/CollapseExpandButton';
+import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
 
-interface FileSystemSectionProps extends PropsWithChildren {
+interface FileSystemTrunkProps extends PropsWithChildren {
 	header: string | React.ReactNode;
 	actions?: React.ReactNode;
 	isCollapsed?: boolean;
 }
 
-export function FileSystemSection({ children, header, actions, isCollapsed = false }: FileSystemSectionProps) {
+export function FileSystemTrunk({ children, header, actions, isCollapsed = false }: FileSystemTrunkProps) {
 	const [collapsed, setCollapsed] = useState(isCollapsed);
 	return (
 		<ListItem nested>

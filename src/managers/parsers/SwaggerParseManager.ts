@@ -17,7 +17,7 @@ import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
 import { QueryParamUtils } from '../../utils/data-utils';
 
-export type ParsedServiceApplicationData = {
+export type ParsedServiceWorkspaceData = {
 	services: Service[];
 	endpoints: Endpoint[];
 	requests: EndpointRequest[];
@@ -35,7 +35,7 @@ class SwaggerParseManager {
 	public async parseSwaggerFile(
 		inputType: 'fileContents' | 'filePath',
 		inputValue: string,
-	): Promise<ParsedServiceApplicationData> {
+	): Promise<ParsedServiceWorkspaceData> {
 		try {
 			const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
 			const input = this.parseSwaggerInput(loadedFile);
@@ -44,7 +44,7 @@ class SwaggerParseManager {
 				log.warn(`parser is: ${JSON.stringify(this.parser)}`);
 				throw new Error('Waiting on parser to load');
 			}
-			return this.mapApiToApplicationData(api);
+			return this.mapApiToWorkspaceData(api);
 		} catch (e) {
 			log.error(e);
 			return Promise.reject(e);
@@ -62,7 +62,7 @@ class SwaggerParseManager {
 		return await readTextFile(inputValue);
 	}
 
-	private mapApiToApplicationData(swaggerApi: OpenAPI.Document): ParsedServiceApplicationData {
+	private mapApiToWorkspaceData(swaggerApi: OpenAPI.Document): ParsedServiceWorkspaceData {
 		const version =
 			(swaggerApi as OpenAPIV2.Document).swagger != null
 				? '2'
@@ -93,7 +93,7 @@ class SwaggerParseManager {
 		paths: OpenAPI.Document['paths'],
 		version: '2' | '3' | '3.1',
 		service: Service,
-	): Omit<ParsedServiceApplicationData, 'services'> {
+	): Omit<ParsedServiceWorkspaceData, 'services'> {
 		const empty = {
 			endpoints: [],
 			requests: [],

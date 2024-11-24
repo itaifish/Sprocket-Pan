@@ -1,5 +1,5 @@
 import {
-	ApplicationData,
+	WorkspaceData,
 	EMPTY_HEADERS,
 	EndpointRequest,
 	EndpointResponse,
@@ -126,7 +126,7 @@ class NetworkRequestManager {
 		return parsedBody as string;
 	}
 
-	public async sendRequest(requestId: string, data: ApplicationData, auditLog: AuditLog = []) {
+	public async sendRequest(requestId: string, data: WorkspaceData, auditLog: AuditLog = []) {
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];

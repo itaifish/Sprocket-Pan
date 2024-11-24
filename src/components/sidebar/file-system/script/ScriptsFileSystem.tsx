@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import { useMemo, useState } from 'react';
 import { selectScripts } from '../../../../state/active/selectors';
 import { SearchField } from '../../../shared/SearchField';
-import { FileSystemSection } from '../FileSystemSection';
+import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { searchScripts } from '../../../../utils/search';
 
 export function ScriptsFileSystem() {
@@ -14,13 +14,13 @@ export function ScriptsFileSystem() {
 	const filteredScriptIds = useMemo(() => searchScripts(scripts, searchText), [scripts, searchText]);
 
 	return (
-		<FileSystemSection header="Scripts" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
+		<FileSystemTrunk header="Scripts" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
 			{filteredScriptIds.map((scriptId, index) => (
 				<Box key={index}>
 					{index !== 0 && <ListDivider />}
 					<ScriptFileSystem scriptId={scriptId} />
 				</Box>
 			))}
-		</FileSystemSection>
+		</FileSystemTrunk>
 	);
 }

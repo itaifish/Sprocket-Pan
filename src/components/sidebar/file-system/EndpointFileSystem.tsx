@@ -11,7 +11,7 @@ import { selectEndpointById } from '../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../state/tabs/selectors';
 import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { EllipsisTypography } from '../../shared/EllipsisTypography';
-import { FileSystemStem } from './tree/FileSystemStem';
+import { FileSystemBranch } from './tree/FileSystemBranch';
 
 interface EndpointFileSystemProps {
 	endpointId: string;
@@ -24,7 +24,7 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 	const dispatch = useAppDispatch();
 
 	return (
-		<FileSystemStem
+		<FileSystemBranch
 			id={endpointId}
 			tabType="endpoint"
 			menuOptions={[
@@ -53,6 +53,6 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 			{requestIds.map((requestId) => (
 				<RequestFileSystem requestId={requestId} key={requestId} />
 			))}
-		</FileSystemStem>
+		</FileSystemBranch>
 	);
 }
