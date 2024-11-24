@@ -15,7 +15,7 @@ import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { updateEndpoint } from '../../../state/active/slice';
 import { EllipsisTypography } from '../../shared/EllipsisTypography';
-import { FileSystemStem } from './FileSystemEntry';
+import { FileSystemStem } from './tree/FileSystemStem';
 
 interface EndpointFileSystemProps {
 	endpointId: string;

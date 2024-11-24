@@ -9,7 +9,7 @@ import { useAppDispatch } from '../../../../state/store';
 import { addToDeleteQueue } from '../../../../state/tabs/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
-import { FileSystemLeaf } from '../FileSystemEntry';
+import { FileSystemLeaf } from '../tree/FileSystemLeaf';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;

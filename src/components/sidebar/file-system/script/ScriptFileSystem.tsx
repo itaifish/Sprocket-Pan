@@ -7,7 +7,7 @@ import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import CodeIcon from '@mui/icons-material/Code';
 import { createScript } from '../../../../state/active/thunks/scripts';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
-import { FileSystemLeaf } from '../FileSystemEntry';
+import { FileSystemLeaf } from '../tree/FileSystemLeaf';
 
 interface ScriptFileSystemProps {
 	scriptId: string;

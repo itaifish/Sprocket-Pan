@@ -14,7 +14,7 @@ import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { updateService } from '../../../../state/active/slice';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
-import { FileSystemStem } from '../FileSystemEntry';
+import { FileSystemStem } from '../tree/FileSystemStem';
 
 interface ServiceFileSystemProps {
 	serviceId: string;

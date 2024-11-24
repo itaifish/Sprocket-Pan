@@ -7,7 +7,7 @@ import { selectSettings } from '../../../state/active/selectors';
 import { LIST_STYLING } from '../../../styles/list';
 
 export function NavigableServicesFileSystem() {
-	const style = LIST_STYLING[useSelector(selectSettings).listStyle ?? 'default']; //I want to not to have to do ?? 'default'
+	const style = LIST_STYLING[useSelector(selectSettings).listStyle];
 	return (
 		<>
 			<List

@@ -7,7 +7,7 @@ import { selectEndpointById, selectRequestsById } from '../../../state/active/se
 import { useSelector } from 'react-redux';
 import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
 import { EllipsisSpan } from '../../shared/EllipsisTypography';
-import { FileSystemLeaf } from './FileSystemEntry';
+import { FileSystemLeaf } from './tree/FileSystemLeaf';
 
 interface RequestFileSystemProps {
 	requestId: string;
