@@ -23,6 +23,15 @@ import { ValuesOf } from '../types/utils/utils';
 import { defaultApplicationData } from './ApplicationDataManager';
 
 /**
+ * Add and enable list styling
+ */
+function toSix(data: ApplicationData | any) {
+	if (data.settings.listStyle == undefined) {
+		data.settings.listStyle = 'default';
+	}
+}
+
+/**
  * add user interface data
  */
 function toFive(data: ApplicationData | any) {
@@ -88,7 +97,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();

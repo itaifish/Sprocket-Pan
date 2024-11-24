@@ -1,15 +1,4 @@
-import {
-	Select,
-	Stack,
-	Option,
-	FormControl,
-	FormLabel,
-	Button,
-	CircularProgress,
-	Divider,
-	Typography,
-	Link,
-} from '@mui/joy';
+import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { InputSlider } from '../../shared/input/InputSlider';
 import { Settings } from '../../../types/settings/settings';
@@ -22,6 +11,7 @@ import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
+import { SprocketSelect } from '../../shared/SprocketSelect';
 
 export interface SettingsTabProps {
 	settings: Settings;
@@ -49,56 +39,44 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 				icon={<ZoomInIcon />}
 				range={{ min: 20, max: 300 }}
 			/>
-			<FormControl sx={{ width: 240 }}>
-				<FormLabel id="select-default-theme-label" htmlFor="select-default-theme-button">
-					Theme
-				</FormLabel>
-				<Select
-					value={settings.defaultTheme}
-					placeholder="Theme"
-					onChange={(_e, value) => {
-						if (value != null) {
-							setSettings({ defaultTheme: value });
-						}
-					}}
-					slotProps={{
-						button: {
-							id: 'select-default-theme-button',
-							// TODO: Material UI set aria-labelledby correctly & automatically
-							// but Base UI and Joy UI don't yet.
-							'aria-labelledby': 'select-default-theme-label select-default-theme-button',
-						},
-					}}
-				>
-					<Option value="light">Light Mode</Option>
-					<Option value="dark">Dark Mode</Option>
-					<Option value="system-default">System Default</Option>
-				</Select>
-			</FormControl>
-			<FormControl sx={{ width: 240 }}>
-				<FormLabel id="select-default-theme-label" htmlFor="select-default-theme-button">
-					Display Variable Names
-				</FormLabel>
-				<Select
-					value={settings.displayVariableNames}
-					onChange={(_e, value) => {
-						if (value != null) {
-							setSettings({ displayVariableNames: value });
-						}
-					}}
-					slotProps={{
-						button: {
-							id: 'select-display-names-button',
-							// TODO: Material UI set aria-labelledby correctly & automatically
-							// but Base UI and Joy UI don't yet.
-							'aria-labelledby': 'select-display-names-label select-display-names-button',
-						},
-					}}
-				>
-					<Option value={true}>Key and Value</Option>
-					<Option value={false}>Value Only</Option>
-				</Select>
-			</FormControl>
+			<SprocketSelect
+				sx={{ width: 240 }}
+				label="Theme"
+				value={settings.defaultTheme}
+				onChange={(value) => {
+					setSettings({ defaultTheme: value as Settings['defaultTheme'] });
+				}}
+				options={[
+					{ value: 'light', label: 'Light Mode' },
+					{ value: 'dark', label: 'Dark Mode' },
+					{ value: 'system-default', label: 'System Default' },
+				]}
+			/>
+			<SprocketSelect
+				sx={{ width: 240 }}
+				label="Display Variable Names"
+				value={settings.displayVariableNames}
+				onChange={(value) => {
+					setSettings({ displayVariableNames: value });
+				}}
+				options={[
+					{ value: true, label: 'Key and Value' },
+					{ value: false, label: 'Value Only' },
+				]}
+			/>
+			<SprocketSelect
+				sx={{ width: 240 }}
+				label="List Style"
+				value={settings.listStyle}
+				onChange={(value) => {
+					setSettings({ listStyle: value as Settings['listStyle'] });
+				}}
+				options={[
+					{ value: 'compact', label: 'Compact' },
+					{ value: 'default', label: 'Default' },
+					{ value: 'cozy', label: 'Cozy' },
+				]}
+			/>
 			<Divider />
 			<Typography level="body-md">
 				Version {version} -{' '}

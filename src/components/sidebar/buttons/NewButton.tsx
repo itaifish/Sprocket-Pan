@@ -1,4 +1,4 @@
-import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, MenuItem } from '@mui/joy';
+import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useEffect, useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
@@ -8,6 +8,7 @@ import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { addToCreateQueue } from '../../../state/tabs/slice';
 import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -50,7 +51,7 @@ export function NewButton() {
 					<Menu ref={ref}>
 						{newEntities.map((entity, index) => (
 							<Box key={index}>
-								<MenuItem
+								<DropdownMenuItem
 									onClick={() => {
 										dispatch(entity.createFunc());
 										setMenuOpen(false);
@@ -62,7 +63,7 @@ export function NewButton() {
 										</IconButton>
 										New {entity.name}
 									</ListItemDecorator>
-								</MenuItem>
+								</DropdownMenuItem>
 							</Box>
 						))}
 					</Menu>

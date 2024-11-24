@@ -28,6 +28,7 @@ export function SideDrawer({ open, children }: SideDrawerProps) {
 					p: 2,
 					boxShadow: 'lg',
 					overflowY: 'scroll',
+					overflowX: 'hidden',
 					position: 'relative',
 					resize: 'horizontal',
 				}}

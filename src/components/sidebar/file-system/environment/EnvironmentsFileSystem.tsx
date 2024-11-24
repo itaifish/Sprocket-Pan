@@ -1,36 +1,31 @@
-import { List, ListDivider, ListItem, ListSubheader } from '@mui/joy';
+import { ListDivider } from '@mui/joy';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectEnvironmentIds } from '../../../../state/active/selectors';
-import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
-import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
+import { selectEnvironments } from '../../../../state/active/selectors';
+import { SearchField } from '../../../shared/SearchField';
+import { FileSystemSection } from '../FileSystemSection';
+import { searchEnvironments } from '../../../../utils/search';
 
 export function EnvironmentsFileSystem() {
-	const [environmentsCollapsed, setEnvironmentsCollapsed] = useState(false);
-	const environmentIdsUnfiltered = useSelector(selectEnvironmentIds);
-	const environmentIds = useSelector((state) => selectFilteredNestedIds(state, environmentIdsUnfiltered));
+	const environments = useSelector(selectEnvironments);
+	const [searchText, setSearchText] = useState('');
+
+	console.log(searchText);
+
+	const filteredEnvironmentIds = useMemo(
+		() => searchEnvironments(environments, searchText),
+		[environments, searchText],
+	);
 
 	return (
-		<ListItem nested>
-			<ListSubheader>
-				Environments
-				<CollapseExpandButton collapsed={environmentsCollapsed} setCollapsed={setEnvironmentsCollapsed} />
-			</ListSubheader>
-			<List
-				aria-labelledby="nav-list-browse"
-				sx={{
-					'& .JoyListItemButton-root': { p: '8px' },
-				}}
-			>
-				{!environmentsCollapsed &&
-					environmentIds.map((environmentId, index) => (
-						<div key={environmentId}>
-							{index !== 0 && <ListDivider />}
-							<EnvironmentFileSystem environmentId={environmentId} />
-						</div>
-					))}
-			</List>
-		</ListItem>
+		<FileSystemSection header="Environments" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
+			{filteredEnvironmentIds.map((environmentId, index) => (
+				<div key={environmentId}>
+					{index !== 0 && <ListDivider />}
+					<EnvironmentFileSystem environmentId={environmentId} />
+				</div>
+			))}
+		</FileSystemSection>
 	);
 }
