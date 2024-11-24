@@ -1,8 +1,9 @@
-import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton, MenuItem } from '@mui/joy';
+import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton } from '@mui/joy';
 import { MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
+import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
 
 export interface FileSystemMenuOption {
 	label: string;
@@ -16,7 +17,7 @@ interface FileSystemMenuOptionProps extends FileSystemMenuOption {
 
 export function FileSystemMenuOption({ label, onClick, Icon, closeMenu }: FileSystemMenuOptionProps) {
 	return (
-		<MenuItem
+		<DropdownMenuItem
 			onClick={() => {
 				closeMenu();
 				onClick();
@@ -29,7 +30,7 @@ export function FileSystemMenuOption({ label, onClick, Icon, closeMenu }: FileSy
 				</IconButton>
 				{label}
 			</ListItemDecorator>
-		</MenuItem>
+		</DropdownMenuItem>
 	);
 }
 

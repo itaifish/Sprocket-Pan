@@ -1,16 +1,6 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
-import {
-	Avatar,
-	Box,
-	Dropdown,
-	IconButton,
-	ListItemDecorator,
-	Menu,
-	MenuButton,
-	MenuItem,
-	useColorScheme,
-} from '@mui/joy';
+import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
 import { applicationDataManager } from '../../../managers/ApplicationDataManager';
 import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
 import { useAppDispatch } from '../../../state/store';
@@ -25,6 +15,7 @@ import SprocketIconLight from '../../../assets/logo-light.svg';
 import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 import { readTextFile } from '@tauri-apps/api/fs';
 import { ApplicationData } from '../../../types/application-data/application-data';
+import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
@@ -48,7 +39,7 @@ export function ImportFromFileButton() {
 						<CreateNewFolderIcon />
 					</MenuButton>
 					<Menu ref={ref}>
-						<MenuItem
+						<DropdownMenuItem
 							onClick={async () => {
 								const selectedUrl = await open({
 									filters: [
@@ -80,8 +71,8 @@ export function ImportFromFileButton() {
 								</IconButton>
 								Import from Sprocketpan Workspace
 							</ListItemDecorator>
-						</MenuItem>
-						<MenuItem
+						</DropdownMenuItem>
+						<DropdownMenuItem
 							onClick={async () => {
 								const selectedUrl = await open({
 									filters: [
@@ -101,8 +92,8 @@ export function ImportFromFileButton() {
 								</IconButton>
 								Import from Swagger/OpenAPI
 							</ListItemDecorator>
-						</MenuItem>
-						<MenuItem
+						</DropdownMenuItem>
+						<DropdownMenuItem
 							onClick={async () => {
 								const selectedUrl = await open({
 									filters: [
@@ -122,8 +113,8 @@ export function ImportFromFileButton() {
 								</IconButton>
 								Import from Postman Collection
 							</ListItemDecorator>
-						</MenuItem>
-						<MenuItem
+						</DropdownMenuItem>
+						<DropdownMenuItem
 							onClick={async () => {
 								const selectedUrl = await open({
 									filters: [
@@ -145,7 +136,7 @@ export function ImportFromFileButton() {
 								</IconButton>
 								Import from Insomnia Collection
 							</ListItemDecorator>
-						</MenuItem>
+						</DropdownMenuItem>
 					</Menu>
 				</Dropdown>
 			</Box>
