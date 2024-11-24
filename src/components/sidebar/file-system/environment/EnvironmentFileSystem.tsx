@@ -1,4 +1,4 @@
-import { ListItem, ListItemButton, ListItemDecorator, ListSubheader } from '@mui/joy';
+import { ListItemDecorator, ListSubheader } from '@mui/joy';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import { useSelector } from 'react-redux';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
@@ -6,10 +6,10 @@ import { selectSelectedEnvironment, selectEnvironmentsById } from '../../../../s
 import { selectEnvironment } from '../../../../state/active/slice';
 import { addNewEnvironmentById } from '../../../../state/active/thunks/environments';
 import { useAppDispatch } from '../../../../state/store';
-import { selectIsActiveTab } from '../../../../state/tabs/selectors';
-import { addToDeleteQueue, addTabs, setSelectedTab } from '../../../../state/tabs/slice';
-import { FileSystemDropdown, menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
+import { addToDeleteQueue } from '../../../../state/tabs/slice';
+import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
+import { FileSystemLeaf } from '../FileSystemEntry';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -18,42 +18,29 @@ interface EnvironmentFileSystemProps {
 export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const envSelected = selectedEnvironment === environmentId;
-	const isSelected = useSelector((state) => selectIsActiveTab(state, environmentId));
 	const environment = useSelector((state) => selectEnvironmentsById(state, environmentId));
 	const dispatch = useAppDispatch();
 	return (
-		<ListItem
-			id={`file_${environmentId}`}
-			nested
-			endAction={
-				<FileSystemDropdown
-					options={[
-						{
-							onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.__id)),
-							Icon: CheckCircleOutlinedIcon,
-							label: envSelected ? 'Deselect' : 'Select',
-						},
-						menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.__id))),
-						menuOptionDelete(() => dispatch(addToDeleteQueue(environment.__id))),
-					]}
-				/>
-			}
+		<FileSystemLeaf
+			id={environmentId}
+			tabType="environment"
+			color={envSelected ? 'success' : 'neutral'}
+			menuOptions={[
+				{
+					onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.__id)),
+					Icon: CheckCircleOutlinedIcon,
+					label: envSelected ? 'Deselect' : 'Select',
+				},
+				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.__id))),
+				menuOptionDelete(() => dispatch(addToDeleteQueue(environment.__id))),
+			]}
 		>
-			<ListItemButton
-				onClick={() => {
-					dispatch(addTabs({ [environment.__id]: 'environment' }));
-					dispatch(setSelectedTab(environment.__id));
-				}}
-				color={envSelected ? 'success' : 'neutral'}
-				selected={isSelected}
-			>
-				<ListItemDecorator>
-					<TableChartIcon fontSize="small" />
-				</ListItemDecorator>
-				<ListSubheader sx={{ width: '100%' }}>
-					<EllipsisSpan>{environment.__name}</EllipsisSpan>
-				</ListSubheader>
-			</ListItemButton>
-		</ListItem>
+			<ListItemDecorator>
+				<TableChartIcon fontSize="small" />
+			</ListItemDecorator>
+			<ListSubheader sx={{ width: '100%' }}>
+				<EllipsisSpan>{environment.__name}</EllipsisSpan>
+			</ListSubheader>
+		</FileSystemLeaf>
 	);
 }

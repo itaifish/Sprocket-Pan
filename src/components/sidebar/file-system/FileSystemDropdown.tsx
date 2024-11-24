@@ -4,7 +4,7 @@ import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
 
-interface FileSystemMenuOption {
+export interface FileSystemMenuOption {
 	label: string;
 	onClick: () => void;
 	Icon: any;
@@ -21,6 +21,7 @@ export function FileSystemMenuOption({ label, onClick, Icon, closeMenu }: FileSy
 				closeMenu();
 				onClick();
 			}}
+			sx={{ pr: 3 }}
 		>
 			<ListItemDecorator>
 				<IconButton size="sm">
