@@ -74,7 +74,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						sx={{ mr: '10px' }}
 						onClick={props.closePanel}
 					>
-						Cancel
+						{hasChanged ? 'Cancel' : 'Close'}
 					</Button>
 				</Box>
 			</Box>
