@@ -6,7 +6,6 @@ import {
 	EndpointRequest,
 	Environment,
 	newEnvironment,
-	newUIRepresentable,
 	Service,
 } from '../../../types/application-data/application-data';
 
@@ -23,7 +22,6 @@ export function createNewRequestObject(endpointId: string): EndpointRequest {
 		endpointId: endpointId,
 		id: newId,
 		history: [],
-		...newUIRepresentable(),
 	} satisfies EndpointRequest;
 }
 
@@ -40,7 +38,6 @@ export function createNewEndpointObject(serviceId: string): Endpoint {
 		requestIds: [],
 		id: newId,
 		defaultRequest: null,
-		...newUIRepresentable(),
 	};
 }
 
@@ -54,7 +51,6 @@ export function createNewServiceObject(): Service {
 		localEnvironments: {},
 		endpointIds: [],
 		id: newId,
-		...newUIRepresentable(),
 	};
 }
 

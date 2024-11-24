@@ -1,6 +1,4 @@
-import { IconButton, ListItemDecorator, ListSubheader } from '@mui/joy';
-import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
-import FolderSharpIcon from '@mui/icons-material/FolderSharp';
+import { ListSubheader } from '@mui/joy';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useAppDispatch } from '../../../../state/store';
@@ -11,8 +9,6 @@ import { useSelector } from 'react-redux';
 import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { updateService } from '../../../../state/active/slice';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemStem } from '../tree/FileSystemStem';
 import { addNewRequest } from '../../../../state/active/thunks/requests';
@@ -26,16 +22,6 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service.endpointIds));
 
 	const dispatch = useAppDispatch();
-
-	const collapsed = service.userInterfaceData?.fileCollapsed ?? false;
-	const setCollapsed = (isCollapsed: boolean) => {
-		dispatch(
-			updateService({
-				id: serviceId,
-				userInterfaceData: { ...service.userInterfaceData, fileCollapsed: isCollapsed },
-			}),
-		);
-	};
 
 	return (
 		<FileSystemStem
@@ -56,27 +42,14 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 				menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
 			]}
 			buttonContent={
-				<>
-					<ListItemDecorator sx={{ mr: '1px' }}>
-						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-							<IconButton
-								onClick={(e) => {
-									setCollapsed(!collapsed);
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-							>
-								{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
-							</IconButton>
-						</SprocketTooltip>
-					</ListItemDecorator>
-					<ListSubheader sx={{ width: '100%' }}>
-						<EllipsisSpan>{service.name}</EllipsisSpan>
-					</ListSubheader>
-				</>
+				<ListSubheader sx={{ ml: '1px', width: '100%' }}>
+					<EllipsisSpan>{service.name}</EllipsisSpan>
+				</ListSubheader>
 			}
 		>
-			{!collapsed && endpointIds.map((endpointId) => <EndpointFileSystem endpointId={endpointId} key={endpointId} />)}
+			{endpointIds.map((endpointId) => (
+				<EndpointFileSystem endpointId={endpointId} key={endpointId} />
+			))}
 		</FileSystemStem>
 	);
 }

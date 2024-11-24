@@ -21,6 +21,12 @@ export const defaultApplicationData: ApplicationData = {
 	scripts: {},
 	selectedEnvironment: undefined,
 	workspaceMetadata: undefined,
+	workspaceUiMetadata: {
+		idSpecific: {},
+	},
+	globalUiMetadata: {
+		idSpecific: {},
+	},
 	settings: {
 		debugLogs: true,
 		zoomLevel: 100,

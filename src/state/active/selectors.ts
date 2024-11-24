@@ -65,6 +65,19 @@ export const selectFullRequestInfoById = createSelector(
 	},
 );
 
+// TODO: remember to actually deep merge these if there's any nested properties that matter in the future
+export const selectUiMetadata = createSelector(selectActiveState, (state) => ({
+	...state.globalUiMetadata,
+	...state.workspaceUiMetadata,
+}));
+
+export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
+
+export const selectUiMetadataById = createSelector(
+	[selectIdSpecificUiMetadata, (_, id: string) => id],
+	(state, id) => state[id],
+);
+
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);

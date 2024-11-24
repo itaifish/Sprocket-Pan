@@ -5,6 +5,7 @@ import {
 	EndpointRequest,
 	EndpointResponse,
 	Environment,
+	IdSpecificUiMetadata,
 	NetworkFetchRequest,
 	Script,
 	Service,
@@ -123,6 +124,10 @@ export const activeSlice = createSlice({
 		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
 			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
 			Object.assign(state.settings, action.payload);
+		},
+		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
+			const { id, ...updateFields } = action.payload;
+			Object.assign(state.workspaceUiMetadata.idSpecific[id], updateFields);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
@@ -249,4 +254,5 @@ export const {
 	insertScript,
 	deleteScript,
 	updateScript,
+	setUiMetadataById,
 } = activeSlice.actions;
