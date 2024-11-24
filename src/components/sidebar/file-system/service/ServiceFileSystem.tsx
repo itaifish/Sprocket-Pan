@@ -15,6 +15,7 @@ import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { updateService } from '../../../../state/active/slice';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemStem } from '../tree/FileSystemStem';
+import { addNewRequest } from '../../../../state/active/thunks/requests';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -43,7 +44,12 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 			menuOptions={[
 				menuOptionDuplicate(() => dispatch(cloneServiceFromId(service.id))),
 				{
-					onClick: () => dispatch(addNewEndpoint({ serviceId: service.id })),
+					onClick: async () => {
+						const newEndpoint = await dispatch(addNewEndpoint({ serviceId: service.id }));
+						if (typeof newEndpoint.payload === 'string') {
+							await dispatch(addNewRequest({ endpointId: newEndpoint.payload }));
+						}
+					},
 					label: 'Add Endpoint',
 					Icon: AddBoxIcon,
 				},
