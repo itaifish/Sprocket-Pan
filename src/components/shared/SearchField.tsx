@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IconButton, IconButtonProps, Input } from '@mui/joy';
+import { IconButton, Input } from '@mui/joy';
 import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Constants } from '../../utils/constants';
@@ -9,16 +9,6 @@ export interface SearchFieldProps {
 	onChange: (text: string) => void;
 	debounce?: number;
 	slideout?: boolean;
-}
-
-function SearchHoverClear(props: IconButtonProps) {
-	return (
-		<SprocketTooltip text="clear search">
-			<IconButton {...props}>
-				<ClearRounded color="primary" />
-			</IconButton>
-		</SprocketTooltip>
-	);
 }
 
 export function SearchField({ onChange, debounce, slideout = true }: SearchFieldProps) {
@@ -57,7 +47,11 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 					isTyping && localDataState !== '' ? (
 						<PendingOutlined color="secondary" />
 					) : (
-						<SearchHoverClear onClick={cancel} />
+						<SprocketTooltip text="clear search">
+							<IconButton onClick={cancel}>
+								<ClearRounded color="primary" />
+							</IconButton>
+						</SprocketTooltip>
 					)
 				}
 				sx={{
