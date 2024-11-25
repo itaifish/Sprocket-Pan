@@ -142,6 +142,13 @@ export const noHistoryReplacer = (key: string, value: unknown) => {
 	return value;
 };
 
+export function noMetadataReplacer(key: string, value: unknown) {
+	if (key === 'metadata') {
+		return undefined;
+	}
+	return value;
+}
+
 const replaceAllEnvironmentValuesWithEmptyString = (environment: Environment) => {
 	const copy = structuredClone(environment);
 	for (const item of environment.__data) {

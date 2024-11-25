@@ -11,8 +11,8 @@ import {
 	Service,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
-import { defaultWorkspaceData } from '../../managers/WorkspaceDataManager';
 import { log } from '../../utils/logging';
+import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
@@ -127,6 +127,9 @@ export const activeSlice = createSlice({
 		},
 		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
 			const { id, ...updateFields } = action.payload;
+			if (state.uiMetadata.idSpecific[id] == null) {
+				state.uiMetadata.idSpecific[id] = {};
+			}
 			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {

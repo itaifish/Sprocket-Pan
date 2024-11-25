@@ -17,7 +17,6 @@ import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import { invoke } from '@tauri-apps/api';
-import { WorkspaceDataManager } from '../../../managers/WorkspaceDataManager';
 import { deleteAllHistory } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
@@ -30,13 +29,15 @@ import { saveActiveData } from '../../../state/active/thunks/applicationData';
 import { selectAllItems } from '../../../state/active/selectors';
 import { writeTextFile } from '@tauri-apps/api/fs';
 import {
-	noHistoryAndMetadataReplacer,
+	noMetadataReplacer,
+	noHistoryReplacer,
 	noEnvironmentsReplacer,
 	combineReplacers,
 	noSettingsReplacer,
 } from '../../../utils/functions';
 import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';
+import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
 
 interface DataTabProps {
 	onQuit: () => void;
@@ -72,8 +73,8 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 		const dataToWrite = JSON.stringify(
 			state,
 			exportEnvironments
-				? combineReplacers([noHistoryAndMetadataReplacer, noSettingsReplacer])
-				: combineReplacers([noEnvironmentsReplacer, noHistoryAndMetadataReplacer, noSettingsReplacer]),
+				? combineReplacers([noHistoryReplacer, noSettingsReplacer, noMetadataReplacer])
+				: combineReplacers([noEnvironmentsReplacer, noHistoryReplacer, noMetadataReplacer, noSettingsReplacer]),
 		);
 
 		await writeTextFile(filePath, dataToWrite);
@@ -152,7 +153,7 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 								startDecorator={<FolderOpenIcon />}
 								onClick={async () => {
 									const localDir = await appLocalDataDir();
-									const data = `${localDir}${WorkspaceDataManager.DATA_FOLDER_NAME}`;
+									const data = `${localDir}${FileSystemWorker.DATA_FOLDER_NAME}`;
 									invoke('show_in_explorer', { path: data });
 								}}
 								variant="outlined"

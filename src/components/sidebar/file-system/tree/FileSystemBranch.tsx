@@ -24,7 +24,7 @@ export function FileSystemBranch({
 }: FileSystemBranchProps) {
 	const style = LIST_STYLING[useSelector(selectSettings).listStyle];
 	const dispatch = useAppDispatch();
-	const collapsed = useSelector((state) => selectUiMetadataById(state, id)).collapsed ?? false;
+	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const setCollapsed = (value: boolean) => {
 		dispatch(setUiMetadataById({ id: id, collapsed: value }));
 	};

@@ -1,7 +1,7 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
-import { WorkspaceDataManager } from '../../../managers/WorkspaceDataManager';
+import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';

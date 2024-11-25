@@ -19,16 +19,7 @@ much more difficult to get them out of order and much easier to fix if they do.
 */
 
 import { WorkspaceData } from '../types/application-data/application-data';
-import { defaultWorkspaceData } from './WorkspaceDataManager';
-
-/**
- * Add and enable list styling
- */
-function toSix(data: ApplicationData | any) {
-	if (data.settings.listStyle == undefined) {
-		data.settings.listStyle = 'default';
-	}
-}
+import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
 /**
  * add user interface data

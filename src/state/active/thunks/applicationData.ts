@@ -4,7 +4,7 @@ import { ParsedServiceWorkspaceData } from '../../../managers/parsers/SwaggerPar
 import { insertEndpoint, insertEnvironment, insertRequest, insertScript, insertService, setSavedNow } from '../slice';
 import { log } from '../../../utils/logging';
 import { Environment, Script } from '../../../types/application-data/application-data';
-import { workspaceDataManager } from '../../../managers/WorkspaceDataManager';
+import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 
@@ -34,5 +34,5 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const { lastModified, lastSaved, ...data } = thunk.getState().active;
 	thunk.dispatch(setSavedNow());
-	return workspaceDataManager.saveData(data);
+	return WorkspaceDataManager.saveData(data);
 });

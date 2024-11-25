@@ -8,10 +8,16 @@ import { addToDeleteQueue } from '../../../../state/tabs/slice';
 import { useSelector } from 'react-redux';
 import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
-import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
+import {
+	menuOptionDuplicate,
+	menuOptionDelete,
+	menuOptionCollapseAll,
+	menuOptionExpandAll,
+} from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemBranch } from '../tree/FileSystemBranch';
 import { addNewRequest } from '../../../../state/active/thunks/requests';
+import { collapseAll, expandAll } from '../../../../state/ui/thunks';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -39,6 +45,8 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 					label: 'Add Endpoint',
 					Icon: AddBoxIcon,
 				},
+				menuOptionCollapseAll(() => dispatch(collapseAll(service.endpointIds))),
+				menuOptionExpandAll(() => dispatch(expandAll([service.id, ...service.endpointIds]))),
 				menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
 			]}
 			buttonContent={
