@@ -4,11 +4,13 @@ import { workspacesSlice } from './workspaces/slice';
 import { activeSlice } from './active/slice';
 import { isModifiedListener, settingsChangedListener } from './active/listener';
 import { tabsSlice } from './tabs/slice';
+import { uiSlice } from './ui/slice';
 
 const rootReducer = combineReducers({
 	[workspacesSlice.name]: workspacesSlice.reducer,
 	[activeSlice.name]: activeSlice.reducer,
 	[tabsSlice.name]: tabsSlice.reducer,
+	[uiSlice.name]: uiSlice.reducer,
 });
 
 export function setupStore(preloadedState?: Partial<RootState>) {

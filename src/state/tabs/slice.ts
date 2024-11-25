@@ -50,7 +50,7 @@ export const tabsSlice = createSlice({
 				1,
 			);
 		},
-		popDiffQueue: (state, { payload }: PayloadAction<void>) => {
+		popDiffQueue: (state) => {
 			state.diffQueue.pop();
 		},
 		setSearchText: (state, { payload }: PayloadAction<string>) => {
