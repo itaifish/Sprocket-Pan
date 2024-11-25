@@ -1,11 +1,11 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { Update, updateEnvironment, updateRequest, updateService } from '../state/active/slice';
-import { makeRequest } from '../state/active/thunks/requests';
-import { StateAccess } from '../state/types';
-import { EndpointRequest, EndpointResponse, Script } from '../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../utils/data-utils';
-import { AuditLog, auditLogManager } from './AuditLogManager';
-import { environmentContextResolver } from './EnvironmentContextResolver';
+import { Update, updateEnvironment, updateRequest, updateService } from '../../state/active/slice';
+import { makeRequest } from '../../state/active/thunks/requests';
+import { StateAccess } from '../../state/types';
+import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
+import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
+import { AuditLog, auditLogManager } from '../AuditLogManager';
+import { environmentContextResolver } from '../EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';

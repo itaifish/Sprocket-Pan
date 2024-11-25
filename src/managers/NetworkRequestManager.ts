@@ -18,7 +18,7 @@ import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
-import { scriptRunnerManager } from './ScriptRunnerManager';
+import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';

@@ -135,12 +135,9 @@ export const noSettingsReplacer: Replacer = (key, value) => {
 	return value;
 };
 
-export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
+export const noHistoryReplacer = (key: string, value: unknown) => {
 	if (key === 'history') {
 		return [];
-	}
-	if (key === 'metadata') {
-		return undefined;
 	}
 	return value;
 };

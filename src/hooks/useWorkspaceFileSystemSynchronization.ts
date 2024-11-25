@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { fileSystemManager } from '../managers/FileSystemManager';
+import { fileSystemManager } from '../managers/file-system/FileSystemManager';
 import { useAppDispatch } from '../state/store';
 import { setWorkspaces } from '../state/workspaces/slice';
+import { FILE_SYSTEM_CHANGE_EVENT } from '../managers/file-system/FileSystemManager';
 
 export function useWorkspaceFileSystemSynchronization() {
 	const dispatch = useAppDispatch();
@@ -11,9 +12,9 @@ export function useWorkspaceFileSystemSynchronization() {
 	}
 	useEffect(() => {
 		updateWorkspaceSlice();
-		fileSystemManager.on('workspacesChanged', updateWorkspaceSlice);
+		fileSystemManager.on(FILE_SYSTEM_CHANGE_EVENT, updateWorkspaceSlice);
 		return () => {
-			fileSystemManager.removeListener('workspacesChanged', updateWorkspaceSlice);
+			fileSystemManager.removeListener(FILE_SYSTEM_CHANGE_EVENT, updateWorkspaceSlice);
 		};
 	}, []);
 }
