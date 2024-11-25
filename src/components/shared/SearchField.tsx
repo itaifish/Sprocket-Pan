@@ -26,7 +26,7 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 	const [active, setActive] = useState(false);
 
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
-		state: '',
+		state: null,
 		setState: onChange,
 		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
 	});
@@ -65,7 +65,7 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 					width: '50px',
 					flex: 1,
 				}}
-				value={localDataState}
+				value={localDataState || ''}
 				onChange={(e) => setLocalDataState(e.target.value)}
 			/>
 		);
