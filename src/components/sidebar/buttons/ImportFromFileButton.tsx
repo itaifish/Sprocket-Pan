@@ -1,7 +1,7 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
-import { applicationDataManager } from '../../../managers/ApplicationDataManager';
+import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
@@ -14,7 +14,7 @@ import SprocketIconLight from '../../../assets/logo-light.svg';
 
 import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 import { readTextFile } from '@tauri-apps/api/fs';
-import { ApplicationData } from '../../../types/application-data/application-data';
+import { WorkspaceData } from '../../../types/application-data/application-data';
 import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
 
 export function ImportFromFileButton() {
@@ -49,7 +49,7 @@ export function ImportFromFileButton() {
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
 									const loadedDataString = await readTextFile(selectedUrl);
-									const asData: Partial<ApplicationData> = JSON.parse(loadedDataString);
+									const asData: Partial<WorkspaceData> = JSON.parse(loadedDataString);
 									const toInject = {
 										services: Object.values(asData.services ?? {}),
 										endpoints: Object.values(asData.endpoints ?? {}),
@@ -81,7 +81,7 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await applicationDataManager.loadSwaggerFile(selectedUrl);
+									const loadedData = await WorkspaceDataManager.loadSwaggerFile(selectedUrl);
 									dispatch(InjectLoadedData(loadedData));
 								}
 							}}
@@ -102,7 +102,7 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await applicationDataManager.loadPostmanFile(selectedUrl);
+									const loadedData = await WorkspaceDataManager.loadPostmanFile(selectedUrl);
 									dispatch(InjectLoadedData(loadedData));
 								}
 							}}
@@ -123,7 +123,7 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await applicationDataManager.loadInsomniaFile(selectedUrl);
+									const loadedData = await WorkspaceDataManager.loadInsomniaFile(selectedUrl);
 									if (loadedData) {
 										dispatch(InjectLoadedData(loadedData));
 									}

@@ -50,7 +50,7 @@ export const tabsSlice = createSlice({
 				1,
 			);
 		},
-		popDiffQueue: (state, { payload }: PayloadAction<void>) => {
+		popDiffQueue: (state) => {
 			state.diffQueue.pop();
 		},
 		setSearchText: (state, { payload }: PayloadAction<string>) => {
@@ -94,17 +94,4 @@ export const tabsSlice = createSlice({
 	},
 });
 
-export const {
-	setSearchText,
-	addToDeleteQueue,
-	removeFromDeleteQueue,
-	addToCreateQueue,
-	removeFromCreateQueue,
-	addToDiffQueue,
-	popDiffQueue,
-	setSelectedTab,
-	addTabs,
-	closeTab,
-	setSelectedTabFromHistory,
-	clearTabs,
-} = tabsSlice.actions;
+export const tabsActions = tabsSlice.actions;

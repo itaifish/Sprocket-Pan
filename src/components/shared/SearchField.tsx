@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { IconButton, IconButtonProps, Input } from '@mui/joy';
+import { IconButton, Input } from '@mui/joy';
 import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
 import { useDebounce } from '../../hooks/useDebounce';
 import { Constants } from '../../utils/constants';
@@ -11,22 +11,12 @@ export interface SearchFieldProps {
 	slideout?: boolean;
 }
 
-function SearchHoverClear(props: IconButtonProps) {
-	return (
-		<SprocketTooltip text="clear search">
-			<IconButton {...props}>
-				<ClearRounded color="primary" />
-			</IconButton>
-		</SprocketTooltip>
-	);
-}
-
 export function SearchField({ onChange, debounce, slideout = true }: SearchFieldProps) {
 	const [isTyping, setTyping] = useState(false);
 	const [active, setActive] = useState(false);
 
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
-		state: '',
+		state: null,
 		setState: onChange,
 		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
 	});
@@ -57,7 +47,11 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 					isTyping && localDataState !== '' ? (
 						<PendingOutlined color="secondary" />
 					) : (
-						<SearchHoverClear onClick={cancel} />
+						<SprocketTooltip text="clear search">
+							<IconButton onClick={cancel}>
+								<ClearRounded color="primary" />
+							</IconButton>
+						</SprocketTooltip>
 					)
 				}
 				sx={{
@@ -65,7 +59,7 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 					width: '50px',
 					flex: 1,
 				}}
-				value={localDataState}
+				value={localDataState || ''}
 				onChange={(e) => setLocalDataState(e.target.value)}
 			/>
 		);

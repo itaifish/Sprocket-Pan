@@ -6,9 +6,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppDispatch } from '../../state/store';
-import { loadAndSelectWorkspace } from '../../state/workspaces/thunks';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
 import { TextAvatar } from '../shared/TextAvatar';
+import { loadAndSelectWorkspace } from '../../state/global/thunks';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;

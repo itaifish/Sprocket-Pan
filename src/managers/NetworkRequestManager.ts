@@ -1,5 +1,5 @@
 import {
-	ApplicationData,
+	WorkspaceData,
 	EMPTY_HEADERS,
 	EndpointRequest,
 	EndpointResponse,
@@ -18,7 +18,7 @@ import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
-import { scriptRunnerManager } from './ScriptRunnerManager';
+import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
@@ -126,7 +126,7 @@ class NetworkRequestManager {
 		return parsedBody as string;
 	}
 
-	public async sendRequest(requestId: string, data: ApplicationData, auditLog: AuditLog = []) {
+	public async sendRequest(requestId: string, data: WorkspaceData, auditLog: AuditLog = []) {
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];

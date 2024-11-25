@@ -18,48 +18,35 @@ and not even know, especially while refactoring. By naming them, it becomes
 much more difficult to get them out of order and much easier to fix if they do.
 */
 
-import { ApplicationData } from '../types/application-data/application-data';
-import { ValuesOf } from '../types/utils/utils';
-import { defaultApplicationData } from './ApplicationDataManager';
+import { WorkspaceData } from '../types/application-data/application-data';
+import { defaultWorkspaceData } from './data/WorkspaceDataManager';
+
+/**
+ * add user interface data
+ */
+function toSeven(data: WorkspaceData | any) {
+	data.uiMetadata = { idSpecific: {} };
+	data.globalUiMetadata = { idSpecific: {} };
+}
 
 /**
  * Add and enable list styling
  */
-function toSix(data: ApplicationData | any) {
+function toSix(data: WorkspaceData | any) {
 	if (data.settings.listStyle == undefined) {
 		data.settings.listStyle = 'default';
 	}
 }
 
 /**
- * add user interface data
+ * add user interface data (safely removed due to no longer being supported by contemporary UI)
  */
-function toFive(data: ApplicationData | any) {
-	const toUpdate = ['services', 'endpoints', 'requests'] as const;
-	toUpdate.forEach((updateStr) => {
-		const allDataOfType: ApplicationData[ValuesOf<typeof toUpdate>][string][] = Object.values(data[updateStr]);
-		const sortedOrder = allDataOfType.sort((a, b) =>
-			a.name.toLocaleLowerCase().localeCompare(b.name.toLocaleLowerCase()),
-		);
-		const sortedOrderAsMap = new Map<string, number>();
-		sortedOrder.forEach((item, index) => {
-			sortedOrderAsMap.set(item.id, index);
-		});
-		allDataOfType.forEach((dataObject) => {
-			if (dataObject.userInterfaceData == undefined) {
-				dataObject.userInterfaceData = {
-					fileCollapsed: false,
-					priority: sortedOrderAsMap.get(dataObject.id) ?? Math.random() * sortedOrder.length,
-				};
-			}
-		});
-	});
-}
+function toFive() {}
 
 /**
  * Add and enable autosave
  */
-function toFour(data: ApplicationData | any) {
+function toFour(data: WorkspaceData | any) {
 	if (data.settings.autoSaveIntervalMS == undefined) {
 		data.settings.autoSaveIntervalMS = 60_000 * 5;
 	}
@@ -68,9 +55,9 @@ function toFour(data: ApplicationData | any) {
 /**
  * Update the settings to add scriptTimeoutDurationMS
  */
-function toThree(data: ApplicationData | any) {
+function toThree(data: WorkspaceData | any) {
 	if (data.settings.scriptTimeoutDurationMS == undefined) {
-		data.settings.scriptTimeoutDurationMS = defaultApplicationData.settings.scriptTimeoutDurationMS;
+		data.settings.scriptTimeoutDurationMS = defaultWorkspaceData.settings.scriptTimeoutDurationMS;
 	}
 }
 
@@ -97,7 +84,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();
@@ -108,7 +95,7 @@ class SaveUpdateManager {
 		return transformers.length;
 	}
 
-	public update(data: any) {
+	public update(data: WorkspaceData | any) {
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
 	}

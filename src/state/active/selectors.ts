@@ -3,7 +3,8 @@ import { activeSlice } from './slice';
 import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
 import { queryParamsToString } from '../../utils/application';
 import { TabType } from '../../types/state/state';
-import { ApplicationData } from '../../types/application-data/application-data';
+import { WorkspaceData } from '../../types/application-data/application-data';
+import { selectGlobalState } from '../global/selectors';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -65,6 +66,19 @@ export const selectFullRequestInfoById = createSelector(
 	},
 );
 
+// TODO: remember to actually deep merge these if there's any nested properties that matter in the future
+export const selectUiMetadata = createSelector([selectActiveState, selectGlobalState], (activeState, globalState) => ({
+	...globalState.uiMetadata,
+	...activeState.uiMetadata,
+}));
+
+export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
+
+export const selectUiMetadataById = createSelector(
+	[selectIdSpecificUiMetadata, (_, id: string) => id],
+	(state, id) => state[id],
+);
+
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);
@@ -89,7 +103,7 @@ export const selectPossibleTabInfo = createSelector(
 	},
 );
 
-function getMapFromTabType<TTabType extends TabType>(data: Pick<ApplicationData, `${TTabType}s`>, tabType: TTabType) {
+function getMapFromTabType<TTabType extends TabType>(data: Pick<WorkspaceData, `${TTabType}s`>, tabType: TTabType) {
 	return data[`${tabType}s`];
 }
 

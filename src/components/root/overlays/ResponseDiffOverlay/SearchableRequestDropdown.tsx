@@ -9,7 +9,7 @@ import { camelCaseToTitle } from '../../../../utils/string';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../../state/store';
-import { addTabs, popDiffQueue, setSelectedTab } from '../../../../state/tabs/slice';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 type Option = { label: string; value?: string };
 
@@ -48,9 +48,9 @@ export function SearchableRequestDropdown({ name, options, selected, onChange }:
 						color={'primary'}
 						onClick={() => {
 							if (!!selected) {
-								dispatch(addTabs({ [selected.id]: name }));
-								dispatch(setSelectedTab(selected.id));
-								dispatch(popDiffQueue());
+								dispatch(tabsActions.addTabs({ [selected.id]: name }));
+								dispatch(tabsActions.setSelectedTab(selected.id));
+								dispatch(tabsActions.popDiffQueue());
 							}
 						}}
 					>

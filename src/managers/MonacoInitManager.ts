@@ -44,7 +44,7 @@ function getSprocketPanType(scripts: Script[]) {
 							queryParams?: { key: string, value: string}[] | undefined;
 							headers?: { key: string, value: string}[] | undefined;
 						}) => void;
-		readonly data: ApplicationData;
+		readonly data: WorkspaceData;
 		readonly response: HistoricalEndpointResponse | null;
 		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
 		readonly fetch: <T>(
@@ -178,7 +178,7 @@ export function getMonacoInjectedTypeCode(scripts: Script[]) {
 			};
 		};
 
-		type ApplicationData = {
+		type WorkspaceData = {
 			services: Record<string, Service>;
 			endpoints: Record<string, Endpoint>;
 			requests: Record<string, EndpointRequest>;

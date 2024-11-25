@@ -4,8 +4,8 @@ import { Stack, IconButton } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../state/store';
 import { selectPeekHistory } from '../../state/tabs/selectors';
-import { setSelectedTabFromHistory } from '../../state/tabs/slice';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
+import { tabsActions } from '../../state/tabs/slice';
 
 export function UndoRedoTabsButton() {
 	const { previous: goBackIndex, next: goForwardIndex } = useSelector(selectPeekHistory);
@@ -17,7 +17,7 @@ export function UndoRedoTabsButton() {
 				<IconButton
 					variant="outlined"
 					disabled={goBackIndex == null}
-					onClick={() => dispatch(setSelectedTabFromHistory(goBackIndex))}
+					onClick={() => dispatch(tabsActions.setSelectedTabFromHistory(goBackIndex))}
 				>
 					<UndoRoundedIcon />
 				</IconButton>
@@ -26,7 +26,7 @@ export function UndoRedoTabsButton() {
 				<IconButton
 					variant="outlined"
 					disabled={goForwardIndex == null}
-					onClick={() => dispatch(setSelectedTabFromHistory(goForwardIndex))}
+					onClick={() => dispatch(tabsActions.setSelectedTabFromHistory(goForwardIndex))}
 				>
 					<RedoRoundedIcon />
 				</IconButton>

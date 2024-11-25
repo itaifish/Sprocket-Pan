@@ -1,21 +1,23 @@
-import { IconButton, ListItemDecorator, ListSubheader } from '@mui/joy';
-import FolderOpenSharpIcon from '@mui/icons-material/FolderOpenSharp';
-import FolderSharpIcon from '@mui/icons-material/FolderSharp';
+import { ListSubheader } from '@mui/joy';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useAppDispatch } from '../../../../state/store';
 import { addNewEndpoint } from '../../../../state/active/thunks/endpoints';
 import { cloneServiceFromId } from '../../../../state/active/thunks/services';
-import { addToDeleteQueue } from '../../../../state/tabs/slice';
 import { useSelector } from 'react-redux';
 import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
-import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { updateService } from '../../../../state/active/slice';
+import {
+	menuOptionDuplicate,
+	menuOptionDelete,
+	menuOptionCollapseAll,
+	menuOptionExpandAll,
+} from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
-import { FileSystemStem } from '../tree/FileSystemStem';
+import { FileSystemBranch } from '../tree/FileSystemBranch';
 import { addNewRequest } from '../../../../state/active/thunks/requests';
+import { collapseAll, expandAll } from '../../../../state/ui/thunks';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -27,18 +29,8 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 
 	const dispatch = useAppDispatch();
 
-	const collapsed = service.userInterfaceData?.fileCollapsed ?? false;
-	const setCollapsed = (isCollapsed: boolean) => {
-		dispatch(
-			updateService({
-				id: serviceId,
-				userInterfaceData: { ...service.userInterfaceData, fileCollapsed: isCollapsed },
-			}),
-		);
-	};
-
 	return (
-		<FileSystemStem
+		<FileSystemBranch
 			id={serviceId}
 			tabType="service"
 			menuOptions={[
@@ -53,30 +45,19 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 					label: 'Add Endpoint',
 					Icon: AddBoxIcon,
 				},
-				menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
+				menuOptionCollapseAll(() => dispatch(collapseAll(service.endpointIds))),
+				menuOptionExpandAll(() => dispatch(expandAll([service.id, ...service.endpointIds]))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(service.id))),
 			]}
 			buttonContent={
-				<>
-					<ListItemDecorator sx={{ mr: '1px' }}>
-						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-							<IconButton
-								onClick={(e) => {
-									setCollapsed(!collapsed);
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-							>
-								{collapsed ? <FolderSharpIcon fontSize="small" /> : <FolderOpenSharpIcon fontSize="small" />}
-							</IconButton>
-						</SprocketTooltip>
-					</ListItemDecorator>
-					<ListSubheader sx={{ width: '100%' }}>
-						<EllipsisSpan>{service.name}</EllipsisSpan>
-					</ListSubheader>
-				</>
+				<ListSubheader sx={{ ml: '1px', width: '100%' }}>
+					<EllipsisSpan>{service.name}</EllipsisSpan>
+				</ListSubheader>
 			}
 		>
-			{!collapsed && endpointIds.map((endpointId) => <EndpointFileSystem endpointId={endpointId} key={endpointId} />)}
-		</FileSystemStem>
+			{endpointIds.map((endpointId) => (
+				<EndpointFileSystem endpointId={endpointId} key={endpointId} />
+			))}
+		</FileSystemBranch>
 	);
 }

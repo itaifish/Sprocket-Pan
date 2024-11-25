@@ -18,10 +18,10 @@ import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { Constants } from '../../../utils/constants';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
+import { tabsActions } from '../../../state/tabs/slice';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const endpoints = useSelector(selectEndpoints);
@@ -100,8 +100,8 @@ export function EndpointPanel({ id }: PanelProps) {
 							disabled={!endpointData.defaultRequest}
 							onClick={() => {
 								if (endpointData.defaultRequest) {
-									dispatch(addTabs({ [endpointData.defaultRequest]: 'request' }));
-									dispatch(setSelectedTab(endpointData.defaultRequest));
+									dispatch(tabsActions.addTabs({ [endpointData.defaultRequest]: 'request' }));
+									dispatch(tabsActions.setSelectedTab(endpointData.defaultRequest));
 								}
 							}}
 						>

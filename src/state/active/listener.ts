@@ -1,15 +1,16 @@
 import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { setModifiedNow } from './slice';
-import { updateAutosaveInterval } from './thunks/workspaceMetadata';
+import { updateAutosaveInterval } from './thunks/metadata';
 import { log } from '../../utils/logging';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
+// TODO: we can actually do this with action matching
 const ignoreKeys = new Set([
-	'workspaces/select/fulfilled',
-	'workspaces/setWorkspaces',
-	'workspaces/setSelectedWorkspace',
+	'global/select/fulfilled',
+	'global/setWorkspaces',
+	'global/setSelectedWorkspace',
 	'active/saveData/fulfilled',
 	'active/saveData/pending',
 	'active/setModifiedNow',

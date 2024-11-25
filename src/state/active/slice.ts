@@ -1,27 +1,28 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import {
-	ApplicationData,
+	WorkspaceData,
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
 	Environment,
+	IdSpecificUiMetadata,
 	NetworkFetchRequest,
 	Script,
 	Service,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
-import { defaultApplicationData } from '../../managers/ApplicationDataManager';
 import { log } from '../../utils/logging';
+import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
 	lastSaved: number;
 	autosaveInterval?: NodeJS.Timeout | undefined;
 };
-export type ActiveWorkspaceSlice = ApplicationData & ActiveWorkspaceMetadata;
+export type ActiveWorkspaceSlice = WorkspaceData & ActiveWorkspaceMetadata;
 
 const initialState: ActiveWorkspaceSlice = {
-	...defaultApplicationData,
+	...defaultWorkspaceData,
 	lastModified: 0,
 	lastSaved: 0,
 };
@@ -58,7 +59,7 @@ export const activeSlice = createSlice({
 	name: 'active',
 	initialState: initialState,
 	reducers: {
-		setFullState: (state, action: PayloadAction<ApplicationData>) => {
+		setFullState: (state, action: PayloadAction<WorkspaceData>) => {
 			Object.assign(state, action.payload);
 			log.debug(`setFullState called`, 0);
 		},
@@ -120,9 +121,16 @@ export const activeSlice = createSlice({
 			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${__id}`);
 			Object.assign(state.environments[__id], updateFields);
 		},
-		insertSettings: (state, action: PayloadAction<ApplicationData['settings']>) => {
+		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
 			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
 			Object.assign(state.settings, action.payload);
+		},
+		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
+			const { id, ...updateFields } = action.payload;
+			if (state.uiMetadata.idSpecific[id] == null) {
+				state.uiMetadata.idSpecific[id] = {};
+			}
+			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
@@ -249,4 +257,5 @@ export const {
 	insertScript,
 	deleteScript,
 	updateScript,
+	setUiMetadataById,
 } = activeSlice.actions;

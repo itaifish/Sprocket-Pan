@@ -38,13 +38,6 @@ export function rawBodyTypeToMime(rawType: RawBodyType | undefined) {
 	return mime.getType(rawType?.toLocaleLowerCase() ?? 'txt') ?? 'text/plain';
 }
 
-export type UIRepresentable = {
-	userInterfaceData: {
-		fileCollapsed: boolean;
-		priority: number;
-	};
-};
-
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
 	endpointId: string;
@@ -68,7 +61,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	postRequestScript?: string;
 	environmentOverride: Environment;
 	history: HistoricalEndpointResponse[];
-} & UIRepresentable;
+};
 
 export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
@@ -98,7 +91,7 @@ export type Endpoint<TUrlBase extends string = string> = {
 	serviceId: string;
 	requestIds: string[];
 	defaultRequest: string | null;
-} & UIRepresentable;
+};
 
 export type OrderedKeyValuePair<
 	TKey extends string | number = string,
@@ -130,18 +123,6 @@ export const EMPTY_HEADERS: SPHeaders = {
 	__data: [],
 } as unknown as SPHeaders;
 
-const EMPTY_UI_REPRESENTABLE: UIRepresentable = {
-	userInterfaceData: {
-		fileCollapsed: false,
-		priority: 0,
-	},
-};
-
-export function newUIRepresentable() {
-	const newUIRepresentable = { ...structuredClone(EMPTY_UI_REPRESENTABLE) };
-	newUIRepresentable.userInterfaceData.priority = Math.random();
-	return newUIRepresentable;
-}
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
 	name: string;
@@ -155,7 +136,7 @@ export type Service<TBaseUrl extends string = string> = {
 	endpointIds: string[];
 	preRequestScript?: string;
 	postRequestScript?: string;
-} & UIRepresentable;
+};
 
 export type WorkspaceMetadata = {
 	name: string;
@@ -177,7 +158,22 @@ export type Script = {
 	content: string;
 };
 
-export type ApplicationData = {
+export type IdSpecificUiMetadata = {
+	collapsed?: boolean;
+	priority?: number;
+};
+
+export type UiMetadata = {
+	idSpecific: Record<string, IdSpecificUiMetadata>;
+};
+
+export type GlobalData = {
+	uiMetadata: UiMetadata;
+	settings: Settings;
+	workspaces: WorkspaceMetadata[];
+};
+
+export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
@@ -185,7 +181,8 @@ export type ApplicationData = {
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
-	workspaceMetadata?: WorkspaceMetadata;
+	metadata?: WorkspaceMetadata;
+	uiMetadata: UiMetadata;
 	version: number | null;
 };
 

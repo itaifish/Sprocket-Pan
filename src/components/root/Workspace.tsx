@@ -1,6 +1,5 @@
 import { Box, Grid, Card, Typography, Sheet, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { selectActiveWorkspace } from '../../state/workspaces/selectors';
 import { TabHeader } from '../header/TabHeader';
 import { SideDrawer } from '../sidebar/SideDrawer';
 import { SideDrawerActions } from '../sidebar/SideDrawerActions';
@@ -8,7 +7,8 @@ import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableSer
 import { selectSettings } from '../../state/active/selectors';
 import { useEffect } from 'react';
 import { useAppDispatch } from '../../state/store';
-import { updateAutosaveInterval } from '../../state/active/thunks/workspaceMetadata';
+import { updateAutosaveInterval } from '../../state/active/thunks/metadata';
+import { selectActiveWorkspace } from '../../state/global/selectors';
 
 export function Workspace() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);

@@ -1,5 +1,4 @@
 import { useSelector } from 'react-redux';
-import { selectActiveWorkspace } from '../../state/workspaces/selectors';
 import { useEffect } from 'react';
 import { useColorScheme } from '@mui/joy';
 import invoke from '../../utils/invoke';
@@ -8,6 +7,7 @@ import { WorkspaceSelector } from '../workspaces/WorkspaceSelector';
 import { Workspace } from './Workspace';
 import { ModalsWrapper } from './modals/ModalsWrapper';
 import { ListenerWrapper } from './listeners/ListenerWrapper';
+import { selectActiveWorkspace } from '../../state/global/selectors';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);

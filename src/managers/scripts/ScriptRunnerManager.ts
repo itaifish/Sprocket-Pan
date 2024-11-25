@@ -1,10 +1,10 @@
 import ts from 'typescript';
-import { EndpointResponse, Script } from '../types/application-data/application-data';
-import { asyncCallWithTimeout, evalAsync } from '../utils/functions';
-import { StateAccess } from '../state/types';
-import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
+import { EndpointResponse, Script } from '../../types/application-data/application-data';
+import { asyncCallWithTimeout, evalAsync } from '../../utils/functions';
+import { StateAccess } from '../../state/types';
+import { AuditLog, RequestEvent, auditLogManager } from '../AuditLogManager';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
-import { log } from '../utils/logging';
+import { log } from '../../utils/logging';
 
 class ScriptRunnerManager {
 	public static readonly INSTANCE = new ScriptRunnerManager();

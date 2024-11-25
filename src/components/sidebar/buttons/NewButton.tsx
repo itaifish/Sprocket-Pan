@@ -6,9 +6,9 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { addToCreateQueue } from '../../../state/tabs/slice';
 import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
+import { tabsActions } from '../../../state/tabs/slice';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -23,17 +23,17 @@ export function NewButton() {
 	const newEntities = [
 		{
 			name: 'Service',
-			createFunc: () => addToCreateQueue('service'),
+			createFunc: () => tabsActions.addToCreateQueue('service'),
 			icon: <CreateNewFolderSharpIcon fontSize="small" />,
 		},
 		{
 			name: 'Environment',
-			createFunc: () => addToCreateQueue('environment'),
+			createFunc: () => tabsActions.addToCreateQueue('environment'),
 			icon: <TableChartIcon fontSize="small" />,
 		},
 		{
 			name: 'Script',
-			createFunc: () => addToCreateQueue('script'),
+			createFunc: () => tabsActions.addToCreateQueue('script'),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];
