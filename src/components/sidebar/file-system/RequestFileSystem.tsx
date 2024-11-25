@@ -2,12 +2,12 @@ import { ListItemDecorator, ListSubheader } from '@mui/joy';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { useAppDispatch } from '../../../state/store';
 import { addNewRequestFromId } from '../../../state/active/thunks/requests';
-import { addToDeleteQueue } from '../../../state/tabs/slice';
 import { selectEndpointById, selectRequestsById } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
 import { EllipsisSpan } from '../../shared/EllipsisTypography';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
+import { tabsActions } from '../../../state/tabs/slice';
 
 interface RequestFileSystemProps {
 	requestId: string;
@@ -26,7 +26,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 			color={isDefaultRequest ? 'primary' : 'neutral'}
 			menuOptions={[
 				menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
-				menuOptionDelete(() => dispatch(addToDeleteQueue(request.id))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
 			]}
 		>
 			<ListItemDecorator>

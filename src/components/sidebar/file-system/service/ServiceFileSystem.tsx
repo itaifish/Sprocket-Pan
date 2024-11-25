@@ -4,7 +4,6 @@ import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useAppDispatch } from '../../../../state/store';
 import { addNewEndpoint } from '../../../../state/active/thunks/endpoints';
 import { cloneServiceFromId } from '../../../../state/active/thunks/services';
-import { addToDeleteQueue } from '../../../../state/tabs/slice';
 import { useSelector } from 'react-redux';
 import { selectServicesById } from '../../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
@@ -18,6 +17,7 @@ import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemBranch } from '../tree/FileSystemBranch';
 import { addNewRequest } from '../../../../state/active/thunks/requests';
 import { collapseAll, expandAll } from '../../../../state/ui/thunks';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -47,7 +47,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 				},
 				menuOptionCollapseAll(() => dispatch(collapseAll(service.endpointIds))),
 				menuOptionExpandAll(() => dispatch(expandAll([service.id, ...service.endpointIds]))),
-				menuOptionDelete(() => dispatch(addToDeleteQueue(service.id))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(service.id))),
 			]}
 			buttonContent={
 				<ListSubheader sx={{ ml: '1px', width: '100%' }}>

@@ -5,13 +5,13 @@ import { verbColors } from '../../../utils/style';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpointById } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
-import { addToDeleteQueue } from '../../../state/tabs/slice';
 import { useSelector } from 'react-redux';
 import { selectEndpointById } from '../../../state/active/selectors';
 import { selectFilteredNestedIds } from '../../../state/tabs/selectors';
 import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { EllipsisTypography } from '../../shared/EllipsisTypography';
 import { FileSystemBranch } from './tree/FileSystemBranch';
+import { tabsActions } from '../../../state/tabs/slice';
 
 interface EndpointFileSystemProps {
 	endpointId: string;
@@ -34,7 +34,7 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 					label: 'Add Request',
 					Icon: AddBoxIcon,
 				},
-				menuOptionDelete(() => dispatch(addToDeleteQueue(endpoint.id))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(endpoint.id))),
 			]}
 			folderSize="sm"
 			buttonContent={

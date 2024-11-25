@@ -6,10 +6,10 @@ import { selectSelectedEnvironment, selectEnvironmentsById } from '../../../../s
 import { selectEnvironment } from '../../../../state/active/slice';
 import { addNewEnvironmentById } from '../../../../state/active/thunks/environments';
 import { useAppDispatch } from '../../../../state/store';
-import { addToDeleteQueue } from '../../../../state/tabs/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -32,7 +32,7 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 					label: envSelected ? 'Deselect' : 'Select',
 				},
 				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.__id))),
-				menuOptionDelete(() => dispatch(addToDeleteQueue(environment.__id))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.__id))),
 			]}
 		>
 			<ListItemDecorator>

@@ -4,7 +4,7 @@ import { RootState } from '../../store';
 import { insertService, deleteEndpointFromState, deleteServiceFromState } from '../slice';
 import { createNewServiceObject } from './util';
 import { addNewEndpoint } from './endpoints';
-import { closeTab } from '../../tabs/slice';
+import { tabsActions } from '../../tabs/slice';
 
 interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
@@ -30,7 +30,7 @@ export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootSt
 	'active/cloneServiceFromId',
 	async (oldId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { id, userInterfaceData, ...service } = thunk.getState().active.services[oldId];
+		const { id, ...service } = thunk.getState().active.services[oldId];
 		if (service != null) {
 			thunk.dispatch(cloneService({ data: service }));
 		}
@@ -45,10 +45,10 @@ export const deleteService = createAsyncThunk<void, string, { state: RootState }
 			throw new Error('attempted to delete service that does not exist');
 		}
 		for (const endpointId in service.endpointIds) {
-			thunk.dispatch(closeTab(endpointId));
+			thunk.dispatch(tabsActions.closeTab(endpointId));
 			thunk.dispatch(deleteEndpointFromState(endpointId));
 		}
-		thunk.dispatch(closeTab(service.id));
+		thunk.dispatch(tabsActions.closeTab(service.id));
 		thunk.dispatch(deleteServiceFromState(service.id));
 	},
 );

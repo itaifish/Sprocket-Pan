@@ -11,10 +11,10 @@ import {
 import EventIcon from '@mui/icons-material/Event';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../state/store';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { EndpointRequest, iconFromTabType } from '../../../types/application-data/application-data';
 import { formatFullDate } from '../../../utils/string';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
+import { tabsActions } from '../../../state/tabs/slice';
 
 interface RecentRequestListItemProps {
 	request: EndpointRequest;
@@ -42,8 +42,8 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 							<IconButton
 								color="primary"
 								onClick={() => {
-									dispatch(addTabs({ [request.id]: 'request' }));
-									dispatch(setSelectedTab(request.id));
+									dispatch(tabsActions.addTabs({ [request.id]: 'request' }));
+									dispatch(tabsActions.setSelectedTab(request.id));
 								}}
 							>
 								<OpenInNewIcon />

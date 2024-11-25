@@ -23,7 +23,6 @@ import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { log } from '../../../utils/logging';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { save as saveFile } from '@tauri-apps/api/dialog';
-import { selectActiveWorkspace } from '../../../state/workspaces/selectors';
 import { useSelector } from 'react-redux';
 import { saveActiveData } from '../../../state/active/thunks/applicationData';
 import { selectAllItems } from '../../../state/active/selectors';
@@ -38,6 +37,7 @@ import {
 import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';
 import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
+import { selectActiveWorkspace } from '../../../state/global/selectors';
 
 interface DataTabProps {
 	onQuit: () => void;

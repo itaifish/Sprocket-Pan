@@ -5,3 +5,5 @@ export const uiSlice = createSlice({
 	initialState: {},
 	reducers: {},
 });
+
+export const uiActions = uiSlice.actions;

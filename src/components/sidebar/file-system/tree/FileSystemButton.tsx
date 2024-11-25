@@ -2,10 +2,10 @@ import { Box, ListItemButton, Stack } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { FileSystemDropdown, FileSystemMenuOption } from '../FileSystemDropdown';
 import { useAppDispatch } from '../../../../state/store';
-import { addTabs, setSelectedTab } from '../../../../state/tabs/slice';
 import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { useSelector } from 'react-redux';
 import { TabType } from '../../../../types/state/state';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 export interface FileSystemButtonProps extends PropsWithChildren {
 	id: string;
@@ -27,8 +27,8 @@ export function FileSystemButton({ id, children, tabType, color = 'neutral', men
 			<ListItemButton
 				sx={{ flex: 1 }}
 				onClick={() => {
-					dispatch(addTabs({ [id]: tabType }));
-					dispatch(setSelectedTab(id));
+					dispatch(tabsActions.addTabs({ [id]: tabType }));
+					dispatch(tabsActions.setSelectedTab(id));
 				}}
 				selected={isSelected}
 				color={color}

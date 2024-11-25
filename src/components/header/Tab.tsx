@@ -2,12 +2,12 @@ import { ListItemDecorator, IconButton, Tab as MuiTab, Stack } from '@mui/joy';
 import { Environment } from 'monaco-editor';
 import { useSelector } from 'react-redux';
 import { selectTabInfoById } from '../../state/active/selectors';
-import { closeTab } from '../../state/tabs/slice';
 import { iconFromTabType } from '../../types/application-data/application-data';
 import { TabType } from '../../types/state/state';
 import { Close } from '@mui/icons-material';
 import { useAppDispatch } from '../../state/store';
 import { EllipsisTypography } from '../shared/EllipsisTypography';
+import { tabsActions } from '../../state/tabs/slice';
 
 interface TabProps {
 	tab: [string, TabType];
@@ -36,7 +36,7 @@ export function Tab({ tab }: TabProps) {
 					<IconButton
 						color="danger"
 						onClick={(e) => {
-							dispatch(closeTab(tabId));
+							dispatch(tabsActions.closeTab(tabId));
 							e.stopPropagation();
 						}}
 						size="sm"

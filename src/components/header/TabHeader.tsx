@@ -4,9 +4,9 @@ import { Sheet, TabPanel, Tabs } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../state/store';
 import { selectTabsState } from '../../state/tabs/selectors';
-import { setSelectedTab } from '../../state/tabs/slice';
 import { TabContent } from '../panels/TabContent';
 import { TabRow } from './TabRow';
+import { tabsActions } from '../../state/tabs/slice';
 
 export function TabHeader() {
 	const { list, selected } = useSelector(selectTabsState);
@@ -25,7 +25,7 @@ export function TabHeader() {
 				value={selected}
 				onChange={(_event, newValue) => {
 					const newTabId = newValue as string;
-					dispatch(setSelectedTab(newTabId));
+					dispatch(tabsActions.setSelectedTab(newTabId));
 				}}
 			>
 				<TabRow list={list} />

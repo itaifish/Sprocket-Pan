@@ -16,8 +16,8 @@ import {
 import { useEffect, useState } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppDispatch } from '../../state/store';
-import { createWorkspace } from '../../state/workspaces/thunks';
 import { toValidFolderName } from '../../utils/string';
+import { createWorkspace } from '../../state/global/thunks';
 
 interface CreateNewWorkspaceModalProps {
 	open: boolean;

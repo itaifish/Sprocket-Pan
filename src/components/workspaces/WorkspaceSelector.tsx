@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { Box, Card, CardContent, Grid, Link, Typography, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { selectWorkspacesList } from '../../state/workspaces/selectors';
 import { useWorkspaceFileSystemSynchronization } from '../../hooks/useWorkspaceFileSystemSynchronization';
 import { useAppDispatch } from '../../state/store';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { deleteWorkspace } from '../../state/workspaces/thunks';
 import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
 import { CreateNewWorkspaceModal } from './CreateNewWorkspaceModal';
 import { WorkspaceEntry } from './WorkspaceEntry';
+import { selectWorkspacesList } from '../../state/global/selectors';
+import { deleteWorkspace } from '../../state/global/thunks';
 
 export function WorkspaceSelector() {
 	useWorkspaceFileSystemSynchronization();

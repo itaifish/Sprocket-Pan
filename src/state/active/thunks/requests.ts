@@ -11,10 +11,10 @@ import {
 import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
-import { closeTab } from '../../tabs/slice';
 import { SprocketError } from '../../../types/state/state';
 import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
+import { tabsActions } from '../../tabs/slice';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -107,7 +107,7 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteRequest',
 	async (id, thunk) => {
-		thunk.dispatch(closeTab(id));
+		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(removeRequestFromEndpoint(id));
 		thunk.dispatch(deleteRequestFromState(id));
 	},

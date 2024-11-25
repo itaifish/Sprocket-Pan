@@ -1,13 +1,13 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
-import { workspacesSlice } from './workspaces/slice';
 import { activeSlice } from './active/slice';
 import { isModifiedListener, settingsChangedListener } from './active/listener';
 import { tabsSlice } from './tabs/slice';
 import { uiSlice } from './ui/slice';
+import { globalSlice } from './global/slice';
 
 const rootReducer = combineReducers({
-	[workspacesSlice.name]: workspacesSlice.reducer,
+	[globalSlice.name]: globalSlice.reducer,
 	[activeSlice.name]: activeSlice.reducer,
 	[tabsSlice.name]: tabsSlice.reducer,
 	[uiSlice.name]: uiSlice.reducer,

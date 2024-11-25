@@ -94,17 +94,4 @@ export const tabsSlice = createSlice({
 	},
 });
 
-export const {
-	setSearchText,
-	addToDeleteQueue,
-	removeFromDeleteQueue,
-	addToCreateQueue,
-	removeFromCreateQueue,
-	addToDiffQueue,
-	popDiffQueue,
-	setSelectedTab,
-	addTabs,
-	closeTab,
-	setSelectedTabFromHistory,
-	clearTabs,
-} = tabsSlice.actions;
+export const tabsActions = tabsSlice.actions;

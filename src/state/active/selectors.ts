@@ -4,6 +4,7 @@ import { environmentContextResolver } from '../../managers/EnvironmentContextRes
 import { queryParamsToString } from '../../utils/application';
 import { TabType } from '../../types/state/state';
 import { WorkspaceData } from '../../types/application-data/application-data';
+import { selectGlobalState } from '../global/selectors';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -66,9 +67,9 @@ export const selectFullRequestInfoById = createSelector(
 );
 
 // TODO: remember to actually deep merge these if there's any nested properties that matter in the future
-export const selectUiMetadata = createSelector(selectActiveState, (state) => ({
-	...state.globalUiMetadata,
-	...state.uiMetadata,
+export const selectUiMetadata = createSelector([selectActiveState, selectGlobalState], (activeState, globalState) => ({
+	...globalState.uiMetadata,
+	...activeState.uiMetadata,
 }));
 
 export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
