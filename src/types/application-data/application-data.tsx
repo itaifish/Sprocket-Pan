@@ -37,6 +37,7 @@ export function rawBodyTypeToMime(rawType: RawBodyType | undefined) {
 	}
 	return mime.getType(rawType?.toLocaleLowerCase() ?? 'txt') ?? 'text/plain';
 }
+
 export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
 	id: string;
 	endpointId: string;
@@ -110,9 +111,13 @@ export const EMPTY_QUERY_PARAMS: QueryParams = {
 	__data: [],
 } as unknown as QueryParams;
 
-export const EMPTY_ENVIRONMENT: Environment = {
+const EMPTY_ENVIRONMENT: Environment = {
 	__data: [],
 } as unknown as Environment;
+
+export function newEnvironment() {
+	return structuredClone(EMPTY_ENVIRONMENT);
+}
 
 export const EMPTY_HEADERS: SPHeaders = {
 	__data: [],
@@ -153,7 +158,22 @@ export type Script = {
 	content: string;
 };
 
-export type ApplicationData = {
+export type IdSpecificUiMetadata = {
+	collapsed?: boolean;
+	priority?: number;
+};
+
+export type UiMetadata = {
+	idSpecific: Record<string, IdSpecificUiMetadata>;
+};
+
+export type GlobalData = {
+	uiMetadata: UiMetadata;
+	settings: Settings;
+	workspaces: WorkspaceMetadata[];
+};
+
+export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
@@ -161,7 +181,8 @@ export type ApplicationData = {
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
-	workspaceMetadata?: WorkspaceMetadata;
+	metadata?: WorkspaceMetadata;
+	uiMetadata: UiMetadata;
 	version: number | null;
 };
 

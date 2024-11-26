@@ -1,6 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AuditLog, RequestEvent } from '../../../managers/AuditLogManager';
-import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { RootState } from '../../store';
 import {
 	addRequestToEndpoint,
@@ -12,9 +11,10 @@ import {
 import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
-import { closeTab } from '../../tabs/slice';
-import { scriptRunnerManager } from '../../../managers/ScriptRunnerManager';
 import { SprocketError } from '../../../types/state/state';
+import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
+import { networkRequestManager } from '../../../managers/NetworkRequestManager';
+import { tabsActions } from '../../tabs/slice';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -96,16 +96,18 @@ export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: Root
 export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootState }>(
 	'active/addRequestFromId',
 	async (requestId, thunk) => {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...request } = thunk.getState().active.requests[requestId];
-		const _id = id;
-		thunk.dispatch(addNewRequest({ endpointId: request.endpointId, data: request }));
+		thunk.dispatch(
+			addNewRequest({ endpointId: request.endpointId, data: { ...request, name: `${request.name} (Copy)` } }),
+		);
 	},
 );
 
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteRequest',
 	async (id, thunk) => {
-		thunk.dispatch(closeTab(id));
+		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(removeRequestFromEndpoint(id));
 		thunk.dispatch(deleteRequestFromState(id));
 	},

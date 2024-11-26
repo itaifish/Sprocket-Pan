@@ -135,15 +135,19 @@ export const noSettingsReplacer: Replacer = (key, value) => {
 	return value;
 };
 
-export const noHistoryAndMetadataReplacer = (key: string, value: unknown) => {
+export const noHistoryReplacer = (key: string, value: unknown) => {
 	if (key === 'history') {
 		return [];
 	}
-	if (key === 'workspaceMetadata') {
+	return value;
+};
+
+export function noMetadataReplacer(key: string, value: unknown) {
+	if (key === 'metadata') {
 		return undefined;
 	}
 	return value;
-};
+}
 
 const replaceAllEnvironmentValuesWithEmptyString = (environment: Environment) => {
 	const copy = structuredClone(environment);

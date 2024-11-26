@@ -16,8 +16,8 @@ import { useAppDispatch } from '../../../state/store';
 import {
 	EndpointRequest,
 	QueryParams,
-	EMPTY_ENVIRONMENT,
 	Environment,
+	newEnvironment,
 } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
@@ -92,7 +92,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			</TabPanel>
 			<TabPanel value="environment">
 				<EnvironmentEditableTable
-					environment={(request.environmentOverride ?? EMPTY_ENVIRONMENT) as Environment}
+					environment={(request.environmentOverride ?? newEnvironment()) as Environment}
 					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
 					varsEnv={varsEnv}
 				/>

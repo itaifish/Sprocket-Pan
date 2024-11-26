@@ -31,11 +31,11 @@ import {
 	selectScripts,
 } from '../../../../state/active/selectors';
 import { useAppDispatch } from '../../../../state/store';
-import { addTabs, setSelectedTab } from '../../../../state/tabs/slice';
 import { iconFromTabType } from '../../../../types/application-data/application-data';
 import { camelCaseToTitle, formatMilliseconds } from '../../../../utils/string';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { CollapseExpandButton } from '../../../sidebar/buttons/CollapseExpandButton';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 const indentationSize = 20;
 
@@ -137,8 +137,8 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 												onClick={() => {
 													if (associatedItem != null) {
 														const id = requestEvent.associatedId as string;
-														dispatch(addTabs({ [id]: dataType }));
-														dispatch(setSelectedTab(id));
+														dispatch(tabsActions.addTabs({ [id]: dataType }));
+														dispatch(tabsActions.setSelectedTab(id));
 													}
 												}}
 											>

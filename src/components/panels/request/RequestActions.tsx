@@ -15,7 +15,6 @@ import { useAppDispatch } from '../../../state/store';
 import { updateEndpoint } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
 import { log } from '../../../utils/logging';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
 import { SprocketError } from '../../../types/state/state';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { defaultResponse } from './constants';
@@ -24,6 +23,7 @@ import { selectEnvironmentTypography } from '../../../state/active/selectors';
 import { verbColors } from '../../../utils/style';
 import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
+import { tabsActions } from '../../../state/tabs/slice';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
@@ -152,8 +152,8 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 								variant="outlined"
 								color="primary"
 								onClick={() => {
-									dispatch(addTabs({ [request.endpointId]: 'endpoint' }));
-									dispatch(setSelectedTab(request.endpointId));
+									dispatch(tabsActions.addTabs({ [request.endpointId]: 'endpoint' }));
+									dispatch(tabsActions.setSelectedTab(request.endpointId));
 								}}
 							>
 								<EditIcon />

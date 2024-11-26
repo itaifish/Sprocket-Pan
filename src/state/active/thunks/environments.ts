@@ -3,7 +3,7 @@ import { Environment } from '../../../types/application-data/application-data';
 import { RootState } from '../../store';
 import { insertEnvironment, deleteEnvironmentFromState } from '../slice';
 import { createNewEnvironmentObject } from './util';
-import { closeTab } from '../../tabs/slice';
+import { tabsActions } from '../../tabs/slice';
 
 interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, '__id'>>;
@@ -33,7 +33,7 @@ export const addNewEnvironmentById = createAsyncThunk<void, string, { state: Roo
 export const deleteEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
 	'active/deleteEnvironmentById',
 	async (id, thunk) => {
-		thunk.dispatch(closeTab(id));
+		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(deleteEnvironmentFromState(id));
 	},
 );

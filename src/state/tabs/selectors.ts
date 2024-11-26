@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { tabsSlice } from './slice';
-import { selectEndpoints, selectEnvironments, selectRequests, selectServices } from '../active/selectors';
+import { selectEndpoints, selectRequests, selectServices } from '../active/selectors';
 import { getValidIdsFromSearchTerm } from '../../utils/search';
 
 export const selectTabsState = tabsSlice.selectSlice;
@@ -32,9 +32,9 @@ export const selectNextForDiff = createSelector(selectTabsState, ({ diffQueue })
 export const selectSearchText = createSelector(selectTabsState, (state) => state.searchText);
 
 export const selectFilteredIds = createSelector(
-	[selectSearchText, selectEnvironments, selectServices, selectEndpoints, selectRequests],
-	(searchText, environments, services, endpoints, requests) =>
-		searchText === '' ? null : getValidIdsFromSearchTerm(searchText, { environments, services, endpoints, requests }),
+	[selectSearchText, selectServices, selectEndpoints, selectRequests],
+	(searchText, services, endpoints, requests) =>
+		searchText === '' ? null : getValidIdsFromSearchTerm(searchText, { services, endpoints, requests }),
 );
 
 export const selectFilteredNestedIds = createSelector(

@@ -1,4 +1,4 @@
-import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, MenuItem } from '@mui/joy';
+import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useEffect, useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
@@ -6,14 +6,15 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { addToCreateQueue } from '../../../state/tabs/slice';
-import { useOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
+import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
+import { tabsActions } from '../../../state/tabs/slice';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
 	const ref = useRef(null);
-	const emitterForOutsideClicks = useOutsideAlerter(ref as any);
+	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
 	useEffect(() => {
 		emitterForOutsideClicks.addListener('outsideClick', () => {
 			setMenuOpen(false);
@@ -22,17 +23,17 @@ export function NewButton() {
 	const newEntities = [
 		{
 			name: 'Service',
-			createFunc: () => addToCreateQueue('service'),
+			createFunc: () => tabsActions.addToCreateQueue('service'),
 			icon: <CreateNewFolderSharpIcon fontSize="small" />,
 		},
 		{
 			name: 'Environment',
-			createFunc: () => addToCreateQueue('environment'),
+			createFunc: () => tabsActions.addToCreateQueue('environment'),
 			icon: <TableChartIcon fontSize="small" />,
 		},
 		{
 			name: 'Script',
-			createFunc: () => addToCreateQueue('script'),
+			createFunc: () => tabsActions.addToCreateQueue('script'),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];
@@ -50,7 +51,7 @@ export function NewButton() {
 					<Menu ref={ref}>
 						{newEntities.map((entity, index) => (
 							<Box key={index}>
-								<MenuItem
+								<DropdownMenuItem
 									onClick={() => {
 										dispatch(entity.createFunc());
 										setMenuOpen(false);
@@ -62,7 +63,7 @@ export function NewButton() {
 										</IconButton>
 										New {entity.name}
 									</ListItemDecorator>
-								</MenuItem>
+								</DropdownMenuItem>
 							</Box>
 						))}
 					</Menu>

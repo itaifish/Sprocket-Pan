@@ -1,3 +1,4 @@
+import { LIST_STYLING } from '../../styles/list';
 import { RecursiveValueOf } from '../utils/utils';
 
 const levels = ['service', 'endpoint', 'request'] as const;
@@ -23,6 +24,7 @@ export type Settings = {
 	maxHistoryLength: number;
 	displayVariableNames: boolean;
 	autoSaveIntervalMS: number | undefined;
+	listStyle: keyof typeof LIST_STYLING;
 	scriptRunnerStrategy: {
 		pre: ScriptRunnerStrategy;
 		post: ScriptRunnerStrategy;

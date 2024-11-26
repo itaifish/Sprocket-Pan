@@ -4,13 +4,19 @@ import { useEffect } from 'react';
 /**
  * Hook that alerts clicks outside of the passed ref
  */
-export function useOutsideAlerter<T extends { contains: (input: unknown) => boolean }>(ref: React.MutableRefObject<T>) {
+export function useClickOutsideAlerter<T extends { contains: (input: unknown) => boolean }>(
+	ref: React.MutableRefObject<T>,
+) {
 	const emitter = new EventEmitter<'outsideClick'>();
 	useEffect(() => {
 		/**
 		 * Alert if clicked on outside of element
 		 */
 		function handleClickOutside(event: MouseEvent) {
+			// if not a left click
+			if (event.buttons !== 1) {
+				return;
+			}
 			if (ref.current && !ref.current.contains(event.target)) {
 				emitter.emit('outsideClick');
 			}

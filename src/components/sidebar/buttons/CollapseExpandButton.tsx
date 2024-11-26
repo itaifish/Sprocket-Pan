@@ -3,22 +3,19 @@ import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownR
 import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 
-export function CollapseExpandButton({
-	collapsed,
-	setCollapsed,
-	variant,
-}: {
+interface CollapseExpandButtonProps {
 	collapsed: boolean;
 	setCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
 	variant?: 'plain' | 'soft';
-}) {
+}
+
+export function CollapseExpandButton({ collapsed, setCollapsed, variant }: CollapseExpandButtonProps) {
 	return (
 		<SprocketTooltip text={collapsed ? 'Uncollapse' : 'Collapse'}>
 			<IconButton
 				size="sm"
 				variant={variant ?? 'plain'}
 				color="primary"
-				sx={{ '--IconButton-size': '24px', ml: 'auto' }}
 				onClick={() => {
 					setCollapsed((isCollapsed) => !isCollapsed);
 				}}

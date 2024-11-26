@@ -21,13 +21,16 @@ export function SideDrawer({ open, children }: SideDrawerProps) {
 			/>
 			<Sheet
 				sx={{
-					minWidth: 256,
-					width: 'max-content',
+					minWidth: 350,
+					width: 400,
+					maxWidth: 700,
 					height: '100vh',
 					p: 2,
 					boxShadow: 'lg',
-					bgcolor: 'background.surface',
 					overflowY: 'scroll',
+					overflowX: 'hidden',
+					position: 'relative',
+					resize: 'horizontal',
 				}}
 			>
 				{children}

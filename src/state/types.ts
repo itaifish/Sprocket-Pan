@@ -1,4 +1,4 @@
-import { ApplicationData } from '../types/application-data/application-data';
+import { WorkspaceData } from '../types/application-data/application-data';
 import { AppDispatch } from './store';
 
 /**
@@ -8,6 +8,6 @@ import { AppDispatch } from './store';
  * @deprecated
  */
 export interface StateAccess {
-	getState: () => ApplicationData;
+	getState: () => WorkspaceData;
 	dispatch: AppDispatch;
 }

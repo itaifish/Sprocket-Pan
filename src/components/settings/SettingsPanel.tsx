@@ -1,11 +1,10 @@
-import { Box, Button, Sheet, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { Box, Button, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { Settings } from '../../types/settings/settings';
 import { useAppDispatch } from '../../state/store';
-import { setSelectedWorkspace } from '../../state/workspaces/slice';
 import { insertSettings } from '../../state/active/slice';
 import { useSelector } from 'react-redux';
 import { selectSettings } from '../../state/active/selectors';
@@ -13,18 +12,7 @@ import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
 import { DataTab } from './tabs/DataTab';
 import { GeneralTab } from './tabs/GeneralTab';
 import { ActionsTab } from './tabs/ActionsTab';
-
-const style = {
-	position: 'absolute' as const,
-	top: '50%',
-	left: '50%',
-	transform: 'translate(-50%, -50%)',
-	width: '75vw',
-	bgcolor: 'background.grey',
-	border: '2px solid #000',
-	boxShadow: 24,
-	p: 4,
-};
+import { globalActions } from '../../state/global/slice';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -42,7 +30,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	}
 	const dispatch = useAppDispatch();
 	function goToWorkspaceSelection() {
-		dispatch(setSelectedWorkspace(undefined));
+		dispatch(globalActions.setSelectedWorkspace(undefined));
 	}
 	function saveSettings() {
 		dispatch(insertSettings(unsavedSettings));
@@ -50,47 +38,45 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	return (
 		<>
 			<Box>
-				<Sheet sx={style}>
-					<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
-						<TabList>
-							<Tab>General</Tab>
-							<Tab>Actions</Tab>
-							<Tab>Data</Tab>
-						</TabList>
-						<TabPanel value={0}>
-							<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
-						</TabPanel>
-						<TabPanel value={1}>
-							<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
-						</TabPanel>
-						<TabPanel value={2}>
-							<DataTab
-								settings={unsavedSettings}
-								setSettings={setSettings}
-								onQuit={() => setQuitWithoutSavingModalOpen(true)}
-								goToWorkspaceSelection={goToWorkspaceSelection}
-							/>
-						</TabPanel>
-					</Tabs>
-					<Box
-						sx={{
-							display: 'flex',
-							flexDirection: 'row-reverse',
-						}}
+				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
+					<TabList>
+						<Tab>General</Tab>
+						<Tab>Actions</Tab>
+						<Tab>Data</Tab>
+					</TabList>
+					<TabPanel value={0}>
+						<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
+					</TabPanel>
+					<TabPanel value={1}>
+						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
+					</TabPanel>
+					<TabPanel value={2}>
+						<DataTab
+							settings={unsavedSettings}
+							setSettings={setSettings}
+							onQuit={() => setQuitWithoutSavingModalOpen(true)}
+							goToWorkspaceSelection={goToWorkspaceSelection}
+						/>
+					</TabPanel>
+				</Tabs>
+				<Box
+					sx={{
+						display: 'flex',
+						flexDirection: 'row-reverse',
+					}}
+				>
+					<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
+						Apply
+					</Button>
+					<Button
+						color={hasChanged ? 'danger' : 'warning'}
+						startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
+						sx={{ mr: '10px' }}
+						onClick={props.closePanel}
 					>
-						<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
-							Apply
-						</Button>
-						<Button
-							color={hasChanged ? 'danger' : 'warning'}
-							startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
-							sx={{ mr: '10px' }}
-							onClick={props.closePanel}
-						>
-							{hasChanged ? 'Cancel' : 'Quit'}
-						</Button>
-					</Box>
-				</Sheet>
+						{hasChanged ? 'Cancel' : 'Close'}
+					</Button>
+				</Box>
 			</Box>
 			<AreYouSureModal
 				open={quitWithoutSavingModalOpen}

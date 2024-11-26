@@ -2,6 +2,9 @@ import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
 import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
 import { queryParamsToString } from '../../utils/application';
+import { TabType } from '../../types/state/state';
+import { WorkspaceData } from '../../types/application-data/application-data';
+import { selectGlobalState } from '../global/selectors';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -63,6 +66,19 @@ export const selectFullRequestInfoById = createSelector(
 	},
 );
 
+// TODO: remember to actually deep merge these if there's any nested properties that matter in the future
+export const selectUiMetadata = createSelector([selectActiveState, selectGlobalState], (activeState, globalState) => ({
+	...globalState.uiMetadata,
+	...activeState.uiMetadata,
+}));
+
+export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
+
+export const selectUiMetadataById = createSelector(
+	[selectIdSpecificUiMetadata, (_, id: string) => id],
+	(state, id) => state[id],
+);
+
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);
@@ -78,6 +94,24 @@ export const selectScripts = createSelector(selectActiveState, (state) => state.
 export const selectScript = createSelector(
 	[selectScripts, (_, scriptName: string) => scriptName],
 	(scripts, scriptName) => scripts[scriptName],
+);
+
+export const selectPossibleTabInfo = createSelector(
+	[selectEnvironments, selectServices, selectRequests, selectEndpoints, selectScripts],
+	(environments, services, requests, endpoints, scripts) => {
+		return { environments, requests, services, endpoints, scripts };
+	},
+);
+
+function getMapFromTabType<TTabType extends TabType>(data: Pick<WorkspaceData, `${TTabType}s`>, tabType: TTabType) {
+	return data[`${tabType}s`];
+}
+
+export const selectTabInfoById = createSelector(
+	[selectPossibleTabInfo, (_, tab: [string, TabType]) => tab],
+	(data, [tabId, tabType]) => {
+		return getMapFromTabType(data, tabType)[tabId];
+	},
 );
 
 export const selectHasBeenModifiedSinceLastSave = createSelector(

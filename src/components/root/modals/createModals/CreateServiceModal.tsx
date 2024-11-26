@@ -12,11 +12,11 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType, Service } from '../../../types/application-data/application-data';
+import { iconFromTabType, Service } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
-import { useAppDispatch } from '../../../state/store';
-import { cloneService } from '../../../state/active/thunks/services';
-import { addTabs, setSelectedTab } from '../../../state/tabs/slice';
+import { useAppDispatch } from '../../../../state/store';
+import { cloneService } from '../../../../state/active/thunks/services';
+import { tabsActions } from '../../../../state/tabs/slice';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -35,8 +35,8 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 			newService.baseUrl = baseUrl;
 		}
 		const createdServiceId = await dispatch(cloneService({ data: newService })).unwrap();
-		dispatch(addTabs({ [createdServiceId]: 'service' }));
-		dispatch(setSelectedTab(createdServiceId));
+		dispatch(tabsActions.addTabs({ [createdServiceId]: 'service' }));
+		dispatch(tabsActions.setSelectedTab(createdServiceId));
 	};
 
 	return (

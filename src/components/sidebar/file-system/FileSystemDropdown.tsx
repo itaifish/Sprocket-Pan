@@ -1,10 +1,11 @@
-import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton, MenuItem } from '@mui/joy';
-import { MoreVert } from '@mui/icons-material';
+import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton } from '@mui/joy';
+import { Folder, FolderOpen, MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
+import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
 
-interface FileSystemMenuOption {
+export interface FileSystemMenuOption {
 	label: string;
 	onClick: () => void;
 	Icon: any;
@@ -16,11 +17,12 @@ interface FileSystemMenuOptionProps extends FileSystemMenuOption {
 
 export function FileSystemMenuOption({ label, onClick, Icon, closeMenu }: FileSystemMenuOptionProps) {
 	return (
-		<MenuItem
+		<DropdownMenuItem
 			onClick={() => {
 				closeMenu();
 				onClick();
 			}}
+			sx={{ pr: 3 }}
 		>
 			<ListItemDecorator>
 				<IconButton size="sm">
@@ -28,7 +30,7 @@ export function FileSystemMenuOption({ label, onClick, Icon, closeMenu }: FileSy
 				</IconButton>
 				{label}
 			</ListItemDecorator>
-		</MenuItem>
+		</DropdownMenuItem>
 	);
 }
 
@@ -36,6 +38,22 @@ export function menuOptionDuplicate(onClick: () => void) {
 	return {
 		Icon: FolderCopyIcon,
 		label: 'Duplicate',
+		onClick,
+	};
+}
+
+export function menuOptionCollapseAll(onClick: () => void) {
+	return {
+		Icon: Folder,
+		label: 'Collapse Endpoints',
+		onClick,
+	};
+}
+
+export function menuOptionExpandAll(onClick: () => void) {
+	return {
+		Icon: FolderOpen,
+		label: 'Expand Endpoints',
 		onClick,
 	};
 }

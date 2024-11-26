@@ -1,6 +1,6 @@
 import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
-import { EMPTY_ENVIRONMENT, Environment } from '../../../types/application-data/application-data';
+import { Environment, newEnvironment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor, Monaco } from '@monaco-editor/react';
@@ -97,7 +97,7 @@ export function EditableData(props: EditableDataProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment =
-		props.environment ?? (selectedEnvironment ? environments[selectedEnvironment as string] : EMPTY_ENVIRONMENT);
+		props.environment ?? (selectedEnvironment ? environments[selectedEnvironment as string] : newEnvironment());
 	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
 	const [backupEditorText, setBackupEditorText] = useState(editorText);
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
@@ -133,17 +133,19 @@ export function EditableData(props: EditableDataProps) {
 			return 'null';
 		}
 		return tableDataToString(
-			runningTableData.map((tdItem) => ({
-				key: environmentContextResolver
-					.parseStringWithEnvironment(tdItem.key, environment)
-					.map((x) => x.value)
-					.join(''),
-				value: environmentContextResolver
-					.parseStringWithEnvironment(tdItem.value, environment)
-					.map((x) => x.value)
-					.join(''),
-				id: tdItem.id,
-			})),
+			runningTableData
+				.filter((tdItem) => tdItem.key != null && tdItem.value != null)
+				.map((tdItem) => ({
+					key: environmentContextResolver
+						.parseStringWithEnvironment(tdItem.key, environment)
+						.map((x) => x.value)
+						.join(''),
+					value: environmentContextResolver
+						.parseStringWithEnvironment(tdItem.value, environment)
+						.map((x) => x.value)
+						.join(''),
+					id: tdItem.id,
+				})),
 			props.unique,
 		);
 	};
