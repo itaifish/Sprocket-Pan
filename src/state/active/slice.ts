@@ -9,6 +9,7 @@ import {
 	NetworkFetchRequest,
 	Script,
 	Service,
+	ElementSpecificUiMetadata,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { log } from '../../utils/logging';
@@ -131,6 +132,13 @@ export const activeSlice = createSlice({
 				state.uiMetadata.idSpecific[id] = {};
 			}
 			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
+		},
+		setUiMetadataByElement: (state, action: PayloadAction<ElementSpecificUiMetadata & { id: string }>) => {
+			const { id, ...updateFields } = action.payload;
+			if (state.uiMetadata.elementSpecific[id] == null) {
+				state.uiMetadata.elementSpecific[id] = {};
+			}
+			Object.assign(state.uiMetadata.elementSpecific[id], updateFields);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
@@ -258,4 +266,5 @@ export const {
 	deleteScript,
 	updateScript,
 	setUiMetadataById,
+	setUiMetadataByElement,
 } = activeSlice.actions;

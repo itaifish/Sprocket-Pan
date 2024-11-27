@@ -1,15 +1,24 @@
 import { List, ListItem, ListSubheader, Stack } from '@mui/joy';
-import { PropsWithChildren, useState } from 'react';
+import { PropsWithChildren } from 'react';
 import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
+import { useAppDispatch } from '../../../../state/store';
+import { useSelector } from 'react-redux';
+import { setUiMetadataByElement } from '../../../../state/active/slice';
+import { selectUiMetadataByElement } from '../../../../state/active/selectors';
 
 interface FileSystemTrunkProps extends PropsWithChildren {
+	id: string;
 	header: string | React.ReactNode;
 	actions?: React.ReactNode;
 	isCollapsed?: boolean;
 }
 
-export function FileSystemTrunk({ children, header, actions, isCollapsed = false }: FileSystemTrunkProps) {
-	const [collapsed, setCollapsed] = useState(isCollapsed);
+export function FileSystemTrunk({ id, children, header, actions }: FileSystemTrunkProps) {
+	const dispatch = useAppDispatch();
+	const collapsed = useSelector((state) => selectUiMetadataByElement(state, id))?.collapsed ?? false;
+	const setCollapsed = (value: boolean) => {
+		dispatch(setUiMetadataByElement({ id: id, collapsed: value }));
+	};
 	return (
 		<ListItem nested>
 			<ListSubheader>
@@ -17,7 +26,7 @@ export function FileSystemTrunk({ children, header, actions, isCollapsed = false
 					{header}
 					<Stack direction="row" flex={1} justifyContent="end">
 						{actions}
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						<CollapseExpandButton collapsed={collapsed} toggleCollapsed={() => setCollapsed(!collapsed)} />
 					</Stack>
 				</Stack>
 			</ListSubheader>

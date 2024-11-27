@@ -141,8 +141,7 @@ export type Service<TBaseUrl extends string = string> = {
 export type WorkspaceMetadata = {
 	name: string;
 	description: string;
-	// undefined is the default workspace
-	fileName: string | undefined;
+	fileName: string;
 	lastModified: number;
 };
 
@@ -163,8 +162,13 @@ export type IdSpecificUiMetadata = {
 	priority?: number;
 };
 
+export type ElementSpecificUiMetadata = {
+	collapsed?: boolean;
+};
+
 export type UiMetadata = {
 	idSpecific: Record<string, IdSpecificUiMetadata>;
+	elementSpecific: Record<string, ElementSpecificUiMetadata>;
 };
 
 export type GlobalData = {
@@ -181,7 +185,7 @@ export type WorkspaceData = {
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
-	metadata?: WorkspaceMetadata;
+	metadata: WorkspaceMetadata;
 	uiMetadata: UiMetadata;
 	version: number | null;
 };

@@ -73,9 +73,15 @@ export const selectUiMetadata = createSelector([selectActiveState, selectGlobalS
 }));
 
 export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
+export const selectElementSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.elementSpecific);
 
 export const selectUiMetadataById = createSelector(
 	[selectIdSpecificUiMetadata, (_, id: string) => id],
+	(state, id) => state[id],
+);
+
+export const selectUiMetadataByElement = createSelector(
+	[selectElementSpecificUiMetadata, (_, id: string) => id],
 	(state, id) => state[id],
 );
 

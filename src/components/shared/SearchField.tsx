@@ -47,7 +47,7 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 					isTyping && localDataState !== '' ? (
 						<PendingOutlined color="secondary" />
 					) : (
-						<SprocketTooltip text="clear search">
+						<SprocketTooltip text="Clear search">
 							<IconButton onClick={cancel}>
 								<ClearRounded color="primary" />
 							</IconButton>

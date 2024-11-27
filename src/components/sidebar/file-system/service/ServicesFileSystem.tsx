@@ -16,6 +16,7 @@ export function ServicesFileSystem() {
 
 	return (
 		<FileSystemTrunk
+			id="sidebar.section.services"
 			header="Services"
 			actions={<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />}
 		>

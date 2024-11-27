@@ -14,7 +14,11 @@ export function ScriptsFileSystem() {
 	const filteredScriptIds = useMemo(() => searchScripts(scripts, searchText), [scripts, searchText]);
 
 	return (
-		<FileSystemTrunk header="Scripts" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
+		<FileSystemTrunk
+			id="sidebar.section.scripts"
+			header="Scripts"
+			actions={<SearchField onChange={(text) => setSearchText(text)} />}
+		>
 			{filteredScriptIds.map((scriptId, index) => (
 				<Box key={index}>
 					{index !== 0 && <ListDivider />}

@@ -11,15 +11,17 @@ export function EnvironmentsFileSystem() {
 	const environments = useSelector(selectEnvironments);
 	const [searchText, setSearchText] = useState('');
 
-	console.log(searchText);
-
 	const filteredEnvironmentIds = useMemo(
 		() => searchEnvironments(environments, searchText),
 		[environments, searchText],
 	);
 
 	return (
-		<FileSystemTrunk header="Environments" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
+		<FileSystemTrunk
+			id="sidebar.section.environments"
+			header="Environments"
+			actions={<SearchField onChange={(text) => setSearchText(text)} />}
+		>
 			{filteredEnvironmentIds.map((environmentId, index) => (
 				<div key={environmentId}>
 					{index !== 0 && <ListDivider />}
