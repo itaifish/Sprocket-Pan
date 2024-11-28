@@ -1,6 +1,5 @@
 import { v4 } from 'uuid';
 import {
-	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
 	Environment,
@@ -51,7 +50,8 @@ import { log } from '../../../utils/logging';
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';
 import { CONTENT_TYPE } from '../../../constants/request';
-import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
+import { KeyValueValues, OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
+import { cloneEnv } from '../../../utils/application';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -209,10 +209,10 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[], importSource: ImportSource): Environment {
-		const env = createEmptyEnvironment();
+		const env = cloneEnv();
 		variables.forEach((variable) => {
 			const { key, value } = variable;
-			if (key != null) env.values.set(key, value);
+			if (key != null) env.pairs.set(key, value);
 		});
 		env.name = `${importSource} Variables`;
 		return env;
@@ -280,7 +280,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters = new OrderedKeyValuePairs();
+		let parameters = new OrderedKeyValuePairs<KeyValueValues>();
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -305,7 +305,7 @@ class PostmanParseManager {
 			headers: new OrderedKeyValuePairs(),
 			queryParams: new OrderedKeyValuePairs(),
 			history: [],
-			environmentOverride: createEmptyEnvironment(),
+			environmentOverride: cloneEnv(),
 			body,
 			bodyType,
 			rawType,

@@ -7,9 +7,8 @@ import {
 	RawBodyType,
 	RawBodyTypes,
 	rawBodyTypeToMime,
-	SPHeaders,
 } from '../types/application-data/application-data';
-import { queryParamsToString } from '../utils/application';
+import { queryParamsToString, toKeyValuePairs } from '../utils/application';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
@@ -139,10 +138,10 @@ class NetworkRequestManager {
 				requestId: request.id,
 			});
 		}
-		const headers: SPHeaders = new OrderedKeyValuePairs();
+		const headers = new OrderedKeyValuePairs();
 		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
-		endpoint.baseHeaders.toArray().forEach((header) => {
+		endpoint.baseHeaders.forEach((header) => {
 			if (header.value == null) return;
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
 				header.key,
@@ -155,7 +154,7 @@ class NetworkRequestManager {
 				EnvironmentContextResolver.resolveVariablesForString(header.value, data, endpoint.serviceId, request.id),
 			);
 		});
-		request.headers.toArray().forEach((header) => {
+		request.headers.forEach((header) => {
 			if (header.value == null) return;
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
 				header.key,
@@ -170,18 +169,20 @@ class NetworkRequestManager {
 		});
 
 		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
-		let queryParamStr = queryParamsToString(fullQueryParams, (text) =>
+		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), (text) =>
 			EnvironmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
 		);
 		if (queryParamStr) {
 			queryParamStr = `?${queryParamStr}`;
 		}
 
+		const contentTypeValue = headers.get(CONTENT_TYPE);
+
 		const networkRequest = {
 			url: `${url}${queryParamStr}`,
 			method: endpoint.verb,
 			body: this.parseRequestForNetworkCall(request, body) ?? '',
-			headers: headers,
+			headers: headers.toArray(),
 			dateTime: new Date().getTime(),
 			bodyType: request.rawType,
 		} as const satisfies NetworkFetchRequest;
@@ -197,8 +198,8 @@ class NetworkRequestManager {
 		} else if (category !== 'none') {
 			networkBody = Body.text(networkRequest.body);
 			// auto-set content type if not already set
-			if (request.headers.get(CONTENT_TYPE) == undefined) {
-				request.headers.set(CONTENT_TYPE, rawBodyTypeToMime(networkRequest.bodyType));
+			if (contentTypeValue == undefined) {
+				request.headers.push({ key: CONTENT_TYPE, value: rawBodyTypeToMime(networkRequest.bodyType) });
 			}
 		} else {
 			networkBody = undefined;
@@ -220,10 +221,7 @@ class NetworkRequestManager {
 		const responseText = res.data as string;
 		const response = {
 			statusCode: res.status,
-			headers: [...Object.entries(res.headers)].reduce<Record<string, string>>((obj, keyValuePair) => {
-				obj[keyValuePair[0]] = keyValuePair[1];
-				return obj;
-			}, {}),
+			headers: toKeyValuePairs(res.headers),
 			bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 			body: responseText,
 			dateTime: new Date().getTime(),

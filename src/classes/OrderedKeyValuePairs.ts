@@ -1,6 +1,6 @@
 export type KeyValueValues = string | string[] | (string | string[]);
 
-export type KeyValuePair<T extends KeyValueValues> = { key: string; value?: T };
+export type KeyValuePair<T extends KeyValueValues = string> = { key: string; value?: T };
 
 type KeyValueOrOrdered<T extends KeyValueValues> = KeyValuePair<T>[] | OrderedKeyValuePairs<T>;
 
@@ -8,11 +8,12 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	private map: Record<string, T | undefined> = {};
 	private order: string[] = [];
 
-	constructor(...args: KeyValueOrOrdered<T>[]) {
+	constructor(...args: (KeyValueOrOrdered<T> | undefined)[]) {
 		args.forEach(this.apply);
 	}
 
-	public apply(pairs: KeyValueOrOrdered<T>) {
+	public apply(pairs: KeyValueOrOrdered<T> | undefined) {
+		if (pairs == null) return;
 		if (pairs instanceof OrderedKeyValuePairs) {
 			pairs = pairs.toArray();
 		}
@@ -61,6 +62,12 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 
 	public keys() {
 		return this.order.slice();
+	}
+
+	public toObject() {
+		const obj: Record<string, T> = {};
+		this.order.forEach((key) => (obj[key] = this.map[key] as T));
+		return obj;
 	}
 
 	[Symbol.iterator] = () => this.toArray().entries();

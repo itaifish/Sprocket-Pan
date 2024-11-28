@@ -13,17 +13,10 @@ import {
 } from '../../../state/active/selectors';
 import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
-import {
-	EndpointRequest,
-	QueryParams,
-	Environment,
-	createEmptyEnvironment,
-} from '../../../types/application-data/application-data';
+import { EndpointRequest } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
-import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
-import { OrderedKeyValueEditableTable } from '../shared/OrderedKeyValueEditableTable';
+import { EditableData } from '../../shared/input/EditableData';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
@@ -67,19 +60,19 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
-				<OrderedKeyValueEditableTable
+				<EditableData
 					values={request.headers}
 					onChange={(values) => update({ headers: values })}
-					varsEnv={varsEnv}
+					environment={varsEnv}
 				/>
 			</TabPanel>
 			<TabPanel value="queryParams">
-				<QueryParamEditableTable
-					queryParams={request.queryParams}
-					setNewQueryParams={(newQueryParams: QueryParams) => {
+				<EditableData
+					values={request.queryParams}
+					onChange={(newQueryParams) => {
 						update({ queryParams: newQueryParams });
 					}}
-					varsEnv={varsEnv}
+					environment={varsEnv}
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">
@@ -92,10 +85,10 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				</AccordionGroup>
 			</TabPanel>
 			<TabPanel value="environment">
-				<EnvironmentEditableTable
-					environment={request.environmentOverride ?? createEmptyEnvironment()}
-					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
-					varsEnv={varsEnv}
+				<EditableData
+					values={request.environmentOverride.pairs ?? []}
+					onChange={(pairs) => update({ environmentOverride: { ...request.environmentOverride, pairs } })}
+					environment={varsEnv}
 				/>
 			</TabPanel>
 		</Tabs>

@@ -1,6 +1,5 @@
 import { v4 } from 'uuid';
 import {
-	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
 	Environment,
@@ -42,7 +41,7 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import { log } from '../../utils/logging';
 import yaml from 'js-yaml';
 import { CONTENT_TYPE } from '../../constants/request';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { cloneEnv } from '../../utils/application';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -190,10 +189,9 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[]): Environment {
-		const env = createEmptyEnvironment();
-		variables.forEach((variable) => {
-			const { key, value } = variable;
-			if (key != null) env.values.set(key, value);
+		const env = cloneEnv();
+		variables.forEach(({ key, value }) => {
+			env.pairs.push({ key, value });
 		});
 		env.name = 'Postman Variables';
 		return env;
@@ -259,7 +257,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters: QueryParams = new OrderedKeyValuePairs();
+		let parameters: QueryParams = [];
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -272,18 +270,21 @@ class PostmanParseManager {
 		const endpointId = v4();
 		const requestId = v4();
 
+		const contentTypeValue = headers.find((header) => header.key === CONTENT_TYPE)?.value;
+
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
-			camelCaseToTitle(mime.getExtension(headers.get(CONTENT_TYPE) ?? '') ?? '') as RawBodyType,
+			camelCaseToTitle(mime.getExtension(contentTypeValue ?? '') ?? '') as RawBodyType,
 		);
+
 		const newRequest: EndpointRequest = {
 			id: requestId,
 			endpointId,
 			name,
-			headers: new OrderedKeyValuePairs(),
-			queryParams: new OrderedKeyValuePairs(),
+			headers: [],
+			queryParams: [],
 			history: [],
-			environmentOverride: createEmptyEnvironment(),
+			environmentOverride: cloneEnv(),
 			body,
 			bodyType,
 			rawType,
@@ -317,31 +318,23 @@ class PostmanParseManager {
 	}
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {
-		const result: SPHeaders = new OrderedKeyValuePairs();
 		if (typeof headers === 'string' || typeof headers === 'undefined') {
-			return result;
+			return [];
 		}
-		headers.forEach((header) => {
-			result.set(
-				this.convertVariablesToSprocketVariables(header.key),
-				this.convertVariablesToSprocketVariables(header.value),
-			);
-		});
-		return result;
+		return headers.map(({ key, value }) => ({
+			key: this.convertVariablesToSprocketVariables(key),
+			value: this.convertVariablesToSprocketVariables(value),
+		}));
 	};
 
 	private importParameters = (parameters: QueryParam[]): QueryParams => {
-		const result: QueryParams = new OrderedKeyValuePairs();
 		if (!parameters || parameters?.length === 0) {
-			return result;
+			return [];
 		}
-		parameters.forEach(({ key, value }) =>
-			result.set(
-				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
-				this.convertVariablesToSprocketVariables(value ?? ''),
-			),
-		);
-		return result;
+		return parameters.map(({ key, value }) => ({
+			key: this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
+			value: this.convertVariablesToSprocketVariables(value ?? ''),
+		}));
 	};
 
 	private importBody = (

@@ -1,5 +1,4 @@
 import Checkbox from '@mui/joy/Checkbox';
-import { Environment } from '../../../types/application-data/application-data';
 import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
@@ -8,17 +7,13 @@ import { Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
+import { EditableData } from '../../shared/input/EditableData';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment = environments[id];
 	const dispatch = useAppDispatch();
-
-	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, id: id }));
-	}
 
 	if (environment == null) {
 		return <Typography>No Environment Found</Typography>;
@@ -28,7 +23,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 		<>
 			<EditableText
 				text={environment.name}
-				setText={(newText: string) => update({ name: newText })}
+				setText={(newText: string) => dispatch(updateEnvironment({ name: newText, id }))}
 				isValidFunc={(text: string) =>
 					text.length >= 1 &&
 					Object.values(environments)
@@ -43,7 +38,11 @@ export function EnvironmentPanel({ id }: PanelProps) {
 				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
 			/>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
-				<EnvironmentEditableTable environment={environment} setNewEnvironment={update} fullSize={true} />
+				<EditableData
+					values={environment.pairs}
+					onChange={(pairs) => dispatch(updateEnvironment({ pairs, id }))}
+					fullSize={true}
+				/>
 			</Box>
 		</>
 	);

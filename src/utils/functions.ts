@@ -148,12 +148,11 @@ export function noMetadataReplacer(key: string, value: unknown) {
 	return value;
 }
 
-function replaceAllEnvironmentValuesWithEmptyString(environment: Environment) {
-	const copy = structuredClone(environment);
-	for (const key of environment.values.keys()) {
-		environment.values.set(key, '');
-	}
-	return copy;
+function replaceAllEnvironmentValuesWithEmptyString({ pairs, ...env }: Environment): Environment {
+	return {
+		...env,
+		pairs: pairs.map(({ key }) => ({ key, value: '' })),
+	};
 }
 
 export const noEnvironmentsReplacer = (key: string, value: unknown) => {

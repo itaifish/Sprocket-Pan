@@ -36,10 +36,11 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { EditableText } from '../../shared/input/EditableText';
 import { EditableTextArea } from '../../shared/input/EditableTextArea';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { RecentRequestListItem } from './RecentRequestListItem';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
+import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
+import { EditableData } from '../../shared/input/EditableData';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -154,7 +155,7 @@ export function ServicePanel({ id }: PanelProps) {
 													[id]: {
 														id: id,
 														name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
-														values: {},
+														pairs: new OrderedKeyValuePairs(),
 													},
 												},
 											});
@@ -223,17 +224,17 @@ export function ServicePanel({ id }: PanelProps) {
 												</IconButton>
 											</SprocketTooltip>
 
-											<EnvironmentEditableTable
-												environment={env}
-												setNewEnvironment={(newEnv) =>
+											<EditableData
+												values={env.pairs}
+												onChange={(pairs) =>
 													update({
 														localEnvironments: {
 															...structuredClone(serviceData.localEnvironments),
-															[env.id]: { ...newEnv, name: env.name, id: env.id } as Environment,
+															[env.id]: { pairs, name: env.name, id: env.id },
 														},
 													})
 												}
-												varsEnv={EnvironmentContextResolver.buildEnvironmentVariables(
+												environment={EnvironmentContextResolver.buildEnvironmentVariables(
 													{ services, selectedEnvironment, environments, requests, settings },
 													serviceData.id,
 												)}

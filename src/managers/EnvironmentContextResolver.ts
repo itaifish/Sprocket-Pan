@@ -128,18 +128,18 @@ export class EnvironmentContextResolver {
 	): OrderedKeyValuePairs {
 		const values = new OrderedKeyValuePairs();
 		if (data.selectedEnvironment) {
-			values.apply(data.environments[data.selectedEnvironment].values);
+			values.apply(data.environments[data.selectedEnvironment].pairs);
 		}
 		if (serviceId) {
 			const service = data.services[serviceId];
 			if (service?.selectedEnvironment) {
-				values.apply(service.localEnvironments[service.selectedEnvironment].values);
+				values.apply(service.localEnvironments[service.selectedEnvironment].pairs);
 			}
 		}
 		if (requestId) {
 			const request = data.requests[requestId];
 			if (request?.environmentOverride) {
-				values.apply(request.environmentOverride.values);
+				values.apply(request.environmentOverride.pairs);
 			}
 		}
 		return values;

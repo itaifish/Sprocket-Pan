@@ -1,7 +1,6 @@
 import { WorkspaceDataManager } from './../data/WorkspaceDataManager';
 import { log } from '../../utils/logging';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { dateTimeReviver } from '../../utils/json-parse';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { FileSystemWorker } from './FileSystemWorker';
 
@@ -74,7 +73,7 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 					return null;
 				}
 				const metadataStr = await FileSystemWorker.readTextFile(paths.metadata);
-				const metadata = JSON.parse(metadataStr, dateTimeReviver) as WorkspaceMetadata;
+				const metadata = JSON.parse(metadataStr) as WorkspaceMetadata;
 				return { ...metadata, fileName: workspaceFolder };
 			};
 			metadataTasks.push(action());

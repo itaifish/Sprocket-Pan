@@ -8,9 +8,8 @@ import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
-
-type KeyValuePair = { key: string; value: string };
+import { KeyValuePair, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { cloneEnv } from '../../utils/application';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -44,12 +43,10 @@ export function getScriptInjectionCode(
 			update.body = JSON.stringify(modifications.body);
 		}
 		if (modifications.queryParams != undefined) {
-			update.queryParams = QueryParamUtils.fromTableData(
-				modifications.queryParams.map((kvp, index) => ({ ...kvp, id: index })),
-			);
+			update.queryParams?.apply(modifications.queryParams);
 		}
 		if (modifications.headers != undefined) {
-			update.headers = HeaderUtils.fromTableData(modifications.headers.map((kvp, index) => ({ ...kvp, id: index })));
+			update.headers?.apply(modifications.headers);
 		}
 
 		dispatch(updateRequest(update));
@@ -68,43 +65,41 @@ export function getScriptInjectionCode(
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
 		const data = getState();
 		const request = getRequest();
-		if (request == null) {
-			level = 'global';
-		}
-		if (level === 'request') {
-			const newEnv = structuredClone(request!.environmentOverride);
-			EnvironmentUtils.set(newEnv, key, value);
-			dispatch(updateRequest({ id: request!.id, environmentOverride: newEnv }));
-		} else if (level === 'service') {
-			const endpoint = data.endpoints[request!.endpointId];
-			if (!endpoint) {
-				return;
-			}
-			const service = data.services[endpoint.serviceId];
-			if (!service) {
-				return;
-			}
-			const selectedEnvironment = service.selectedEnvironment;
-			if (selectedEnvironment) {
-				const newEnv = structuredClone(service.localEnvironments[selectedEnvironment]);
-				EnvironmentUtils.set(newEnv, key, value);
-				dispatch(
-					updateService({
-						id: endpoint.serviceId,
-						localEnvironments: {
-							...service.localEnvironments,
-							[selectedEnvironment]: newEnv,
-						},
-					}),
-				);
-			}
-		} else if (level === 'global') {
-			const selectedEnvironment = data.selectedEnvironment;
-			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
-			if (newEnv) {
-				newEnv.values.set(key, value);
-				dispatch(updateEnvironment(newEnv));
-			}
+		switch (level) {
+			case 'request':
+				const environmentOverride = cloneEnv(request!.environmentOverride);
+				environmentOverride.pairs.set(key, value);
+				dispatch(updateRequest({ id: request!.id, environmentOverride }));
+				break;
+			case 'service':
+				const endpoint = data.endpoints[request!.endpointId];
+				if (!endpoint) {
+					return;
+				}
+				const service = data.services[endpoint.serviceId];
+				if (!service) {
+					return;
+				}
+				if (service.selectedEnvironment) {
+					const newEnv = cloneEnv(service.localEnvironments[service.selectedEnvironment]);
+					newEnv.pairs.set(key, value);
+					dispatch(
+						updateService({
+							id: endpoint.serviceId,
+							localEnvironments: {
+								...service.localEnvironments,
+								[service.selectedEnvironment]: newEnv,
+							},
+						}),
+					);
+				}
+				break;
+			default:
+				const newEnv = cloneEnv(data.environments[data.selectedEnvironment ?? '']);
+				if (newEnv) {
+					newEnv.pairs.set(key, value);
+					dispatch(updateEnvironment(newEnv));
+				}
 		}
 	};
 
@@ -140,11 +135,11 @@ export function getScriptInjectionCode(
 		const data = getState();
 		const request = getRequest();
 		if (request == null) {
-			return EnvironmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
+			return EnvironmentContextResolver.buildEnvironmentVariables(data).toObject();
 		}
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
-		return EnvironmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
+		return EnvironmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id).toObject();
 	};
 
 	const sendRequest = async (requestId: string) => {

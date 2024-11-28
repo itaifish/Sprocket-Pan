@@ -20,11 +20,11 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { defaultResponse } from './constants';
 import { useSelector } from 'react-redux';
 import { selectEnvironmentSnippets } from '../../../state/active/selectors';
-import { verbColors } from '../../../utils/style';
 import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 import { tabsActions } from '../../../state/tabs/slice';
 import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
+import { verbColors } from '../../../constants/style';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);

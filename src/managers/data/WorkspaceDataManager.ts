@@ -8,13 +8,13 @@ import {
 } from '../../types/application-data/application-data';
 import swaggerParseManager from '../parsers/SwaggerParseManager';
 import { noHistoryReplacer } from '../../utils/functions';
-import { dateTimeReviver } from '../../utils/json-parse';
 import { saveUpdateManager } from '../SaveUpdateManager';
 import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
 import { insomniaParseManager } from '../parsers/InsomniaParseManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -22,7 +22,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 	requests: {},
 	environments: {},
 	scripts: {},
-	secrets: {},
+	secrets: new OrderedKeyValuePairs(),
 	selectedEnvironment: undefined,
 	metadata: defaultWorkspaceMetadata,
 	uiMetadata: {
@@ -126,8 +126,8 @@ export class WorkspaceDataManager {
 			FileSystemWorker.readTextFile(paths.secrets),
 		]);
 
-		const parsedData = JSON.parse(data, dateTimeReviver) as WorkspaceData;
-		const parsedHistory = JSON.parse(history, dateTimeReviver) as {
+		const parsedData = JSON.parse(data) as WorkspaceData;
+		const parsedHistory = JSON.parse(history) as {
 			id: string;
 			history: HistoricalEndpointResponse[];
 		}[];
@@ -136,9 +136,9 @@ export class WorkspaceDataManager {
 		});
 		parsedData.metadata = {
 			fileName: workspace.fileName,
-			...JSON.parse(metadata, dateTimeReviver),
+			...JSON.parse(metadata),
 		} as WorkspaceMetadata;
-		parsedData.uiMetadata = JSON.parse(uiMetadata, dateTimeReviver) as UiMetadata;
+		parsedData.uiMetadata = JSON.parse(uiMetadata) as UiMetadata;
 		parsedData.secrets = JSON.parse(secrets);
 		saveUpdateManager.update(parsedData);
 		return parsedData;

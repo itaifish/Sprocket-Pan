@@ -1,7 +1,6 @@
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
-import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
@@ -23,6 +22,7 @@ import { EndpointEditTabs } from './EndpointEditTabs';
 import { tabsActions } from '../../../state/tabs/slice';
 import { Constants } from '../../../constants/constants';
 import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
+import { verbColors } from '../../../constants/style';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const endpoints = useSelector(selectEndpoints);

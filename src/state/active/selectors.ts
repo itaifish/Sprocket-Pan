@@ -138,7 +138,7 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 	const endpointData = state.endpoints[requestData?.endpointId];
 	const serviceData = state.services[endpointData?.serviceId];
 	const fullQueryParams = new OrderedKeyValuePairs(endpointData.baseQueryParams, requestData.queryParams);
-	let query = queryParamsToString(fullQueryParams);
+	let query = queryParamsToString(fullQueryParams.toArray());
 	if (query) {
 		query = `?${query}`;
 	}

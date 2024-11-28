@@ -12,11 +12,7 @@ interface AddNewEnvironment {
 export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { state: RootState }>(
 	'active/addEnvironment',
 	async ({ data = {} }, thunk) => {
-		const newEnvironment = {
-			...createNewEnvironmentObject(),
-			...data,
-			values: { ...data.values },
-		} as unknown as Environment;
+		const newEnvironment = createNewEnvironmentObject(data);
 		thunk.dispatch(insertEnvironment(newEnvironment));
 		return newEnvironment.id;
 	},

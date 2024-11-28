@@ -18,9 +18,10 @@ import { useState } from 'react';
 import { HistoryControl } from '../../../panels/request/response/HistoryControl';
 import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
-import { formatShortFullDate, statusCodes } from '../../../../utils/string';
+import { formatShortFullDate } from '../../../../utils/string';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
-import { verbColors } from '../../../../utils/style';
+import { statusCodes } from '../../../../constants/statusCodes';
+import { verbColors } from '../../../../constants/style';
 
 function headersToJson(headers: Record<string, string>) {
 	return JSON.stringify(
@@ -33,20 +34,6 @@ function headersToJson(headers: Record<string, string>) {
 				},
 				{} as Record<string, string>,
 			),
-	);
-}
-
-function requestHeadersToJson(headers: Record<string, string>) {
-	return headersToJson(
-		Object.entries(headers).reduce(
-			(acc, curr) => {
-				if (!curr[0].startsWith('__')) {
-					acc[curr[0]] = curr[1];
-				}
-				return acc;
-			},
-			{} as Record<string, string>,
-		),
 	);
 }
 
@@ -258,8 +245,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 										width={'100%'}
 										height={'40vh'}
 										isDiff={true}
-										original={requestHeadersToJson(original.request.headers)}
-										modified={requestHeadersToJson(modified.request.headers)}
+										original={original.request.headers.toJSON()}
+										modified={modified.request.headers.toJSON()}
 										language="json"
 										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
 									/>

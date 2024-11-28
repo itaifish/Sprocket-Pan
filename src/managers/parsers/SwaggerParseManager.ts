@@ -1,5 +1,4 @@
 import {
-	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
 	RESTfulRequestVerb,
@@ -14,6 +13,7 @@ import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
 import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { cloneEnv } from '../../utils/application';
 
 export type ParsedServiceWorkspaceData = {
 	services: Service[];
@@ -130,8 +130,8 @@ class SwaggerParseManager {
 						serviceId: service.id,
 						verb: method,
 						url: `${pathsUri}`,
-						baseHeaders: new OrderedKeyValuePairs(),
-						baseQueryParams: new OrderedKeyValuePairs(),
+						baseHeaders: [],
+						baseQueryParams: [],
 						description: pathData.description ?? 'This is a new endpoint',
 						name: `${method}: ${pathsUri}`,
 						requestIds: [],
@@ -144,13 +144,13 @@ class SwaggerParseManager {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
 						name: defaultEndpointData.name,
-						headers: new OrderedKeyValuePairs(),
-						queryParams: new OrderedKeyValuePairs(),
+						headers: [],
+						queryParams: [],
 						body: undefined,
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: createEmptyEnvironment(),
+						environmentOverride: cloneEnv(),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -280,7 +280,7 @@ class SwaggerParseManager {
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: createEmptyEnvironment(),
+					environmentOverride: cloneEnv(),
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {

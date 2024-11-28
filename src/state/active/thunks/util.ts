@@ -1,26 +1,6 @@
 import { v4 } from 'uuid';
-import {
-	createEmptyEnvironment,
-	Endpoint,
-	EndpointRequest,
-	Environment,
-	Service,
-} from '../../../types/application-data/application-data';
-
-export function createNewRequestObject(endpointId: string): EndpointRequest {
-	return {
-		name: 'New Request',
-		headers: [],
-		queryParams: [],
-		body: undefined,
-		bodyType: 'none',
-		rawType: undefined,
-		environmentOverride: createEmptyEnvironment(),
-		endpointId: endpointId,
-		id: v4(),
-		history: [],
-	} satisfies EndpointRequest;
-}
+import { Endpoint, EndpointRequest, Environment, Service } from '../../../types/application-data/application-data';
+import { cloneEnv } from '../../../utils/application';
 
 export function createNewEndpointObject(serviceId: string): Endpoint {
 	return {
@@ -49,10 +29,21 @@ export function createNewServiceObject(): Service {
 	};
 }
 
-export function createNewEnvironmentObject(): Environment {
+export function createNewEnvironmentObject(data?: Partial<Environment>): Environment {
+	return cloneEnv({ name: 'New Environment', id: v4(), ...data });
+}
+
+export function createNewRequestObject(endpointId: string): EndpointRequest {
 	return {
-		name: 'New Environment',
+		name: 'New Request',
+		headers: [],
+		queryParams: [],
+		body: undefined,
+		bodyType: 'none',
+		rawType: undefined,
+		environmentOverride: createNewEnvironmentObject(),
+		endpointId: endpointId,
 		id: v4(),
-		values: {},
-	};
+		history: [],
+	} satisfies EndpointRequest;
 }

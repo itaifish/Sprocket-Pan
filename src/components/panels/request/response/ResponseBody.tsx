@@ -1,7 +1,8 @@
 import { Typography } from '@mui/joy';
 import { EndpointResponse } from '../../../../types/application-data/application-data';
-import { getStatusCodeColor, statusCodes } from '../../../../utils/string';
+import { getStatusCodeColor } from '../../../../utils/string';
 import { SprocketEditor } from '../../../shared/input/SprocketEditor';
+import { statusCodes } from '../../../../constants/statusCodes';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	let editorType = 'text';

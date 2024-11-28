@@ -8,7 +8,7 @@ import { TabType } from '../state/state';
 import CodeIcon from '@mui/icons-material/Code';
 import mime from 'mime';
 import { Key } from '@mui/icons-material';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -98,19 +98,11 @@ export type Endpoint<TUrlBase extends string = string> = {
 export type Environment = {
 	name: string;
 	id: string;
-	values: OrderedKeyValuePairs;
+	pairs: KeyValuePair[];
 };
 
-export type QueryParams = OrderedKeyValuePairs<string[] | string>;
-export type SPHeaders = OrderedKeyValuePairs;
-
-export function createEmptyEnvironment() {
-	return {
-		values: new OrderedKeyValuePairs(),
-		name: '',
-		id: '',
-	};
-}
+export type QueryParams = KeyValuePair<KeyValueValues>[];
+export type SPHeaders = KeyValuePair[];
 
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
@@ -185,7 +177,7 @@ export type EndpointResponse = {
 	statusCode: number;
 	body: string;
 	bodyType: RawBodyType;
-	headers: Record<string, string>;
+	headers: SPHeaders;
 	dateTime: number;
 };
 

@@ -1,8 +1,8 @@
 import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Table } from '@mui/joy';
-import { SPHeaders } from '../../../../types/application-data/application-data';
+import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
 
 interface HeadersDisplayTableProps {
-	headers: SPHeaders;
+	headers: KeyValuePair[];
 	label: 'request' | 'response';
 }
 
@@ -20,7 +20,7 @@ export function HeadersDisplayTable({ headers, label }: HeadersDisplayTableProps
 							</tr>
 						</thead>
 						<tbody>
-							{headers.toArray().map(({ key, value }, index) => (
+							{headers.map(({ key, value }, index) => (
 								<tr key={index}>
 									<td>{key}</td>
 									<td>{value}</td>
