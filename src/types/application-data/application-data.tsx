@@ -101,17 +101,15 @@ export type Environment = {
 	values: OrderedKeyValuePairs;
 };
 
-export type QueryParams = OrderedKeyValuePairs;
+export type QueryParams = OrderedKeyValuePairs<string[] | string>;
 export type SPHeaders = OrderedKeyValuePairs;
 
-const EMPTY_ENVIRONMENT: Environment = {
-	values: new OrderedKeyValuePairs(),
-	name: '',
-	id: '',
-};
-
 export function createEmptyEnvironment() {
-	return structuredClone(EMPTY_ENVIRONMENT);
+	return {
+		values: new OrderedKeyValuePairs(),
+		name: '',
+		id: '',
+	};
 }
 
 export type Service<TBaseUrl extends string = string> = {
@@ -167,7 +165,7 @@ export type GlobalData = {
 	workspaces: WorkspaceMetadata[];
 };
 
-export type Secrets = Record<string, string>;
+export type Secrets = OrderedKeyValuePairs;
 
 export type WorkspaceData = {
 	services: Record<string, Service>;

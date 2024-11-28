@@ -1,16 +1,16 @@
 import { QueryParams } from '../types/application-data/application-data';
 
-export function queryParamsToString(queryParams: QueryParams): string {
-	const searchParams = new URLSearchParams();
-	queryParams.toArray().forEach(({ key, value }) => searchParams.append(key, value ?? ''));
-	return decodeURIComponent(searchParams.toString());
-}
-
-export function queryParamsToStringReplaceVars(
+export function queryParamsToString(
 	queryParams: QueryParams,
-	replaceFunc: (text: string) => string,
+	replaceFunc: (text: string) => string = (element) => element,
 ): string {
 	const searchParams = new URLSearchParams();
-	queryParams.toArray().forEach(({ key, value }) => searchParams.append(replaceFunc(key), replaceFunc(value ?? '')));
+	queryParams.toArray().forEach(({ key, value }) => {
+		if (Array.isArray(value)) {
+			value.forEach((element) => searchParams.append(replaceFunc(key), replaceFunc(element)));
+		} else {
+			searchParams.append(replaceFunc(key), replaceFunc(value ?? ''));
+		}
+	});
 	return searchParams.toString();
 }

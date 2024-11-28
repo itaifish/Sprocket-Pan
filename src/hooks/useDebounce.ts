@@ -3,14 +3,14 @@ import { EventEmitter } from '@tauri-apps/api/shell';
 import { Constants } from '../constants/constants';
 
 interface UseDebounceProps<T> {
-	state: T | null;
+	state: T;
 	setState: React.Dispatch<React.SetStateAction<T>> | ((newState: T) => void);
 	debounceOverride?: number;
 	writeOnClose?: boolean;
 }
 
 export const useDebounce = <TData>(props: UseDebounceProps<TData>) => {
-	const [localDataState, setLocalDataState] = useState<TData | null>(props.state);
+	const [localDataState, setLocalDataState] = useState<TData>(props.state);
 	const [_typingBufferTimeout, setTypingBufferTimeout] = useState<null | NodeJS.Timeout>(null);
 	const debounceEventEmitter = useMemo(() => new EventEmitter<'sync' | 'desync'>(), []);
 

@@ -6,7 +6,6 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { clamp } from '../../../utils/math';
-import { safeJsonParse } from '../../../utils/functions';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
@@ -16,89 +15,49 @@ import { editor } from 'monaco-editor';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
 import { FormatIcon } from '../buttons/FormatIcon';
+import { KeyValueValues, OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
+import { parseOrderedKeyValuePairs } from '../../../utils/serialization';
 
-export type TableData<TID extends string | number> = {
-	key: string;
-	value: string;
-	id: TID;
-}[];
-
-const tableDataToString = (tableData: TableData<number>, uniqueValues: boolean) => {
-	const tdObject = {} as Record<string, string | string[]>;
-	if (uniqueValues) {
-		tableData.forEach((x) => {
-			tdObject[x.key] = x.value;
-		});
-	} else {
-		tableData.forEach((x) => {
-			if (tdObject[x.key] == undefined) {
-				tdObject[x.key] = [];
-			}
-			(tdObject[x.key] as string[])[x.id] = x.value;
-		});
-
-		Object.entries(tdObject).forEach(([key, value]) => {
-			if (value.length === 1) {
-				tdObject[key] = value[0];
-			}
-		});
-	}
-
-	return JSON.stringify(tdObject, null, 2);
-};
-
-const stringToTableData = (str: string, uniqueValues: boolean): TableData<number> | null => {
-	const res = safeJsonParse<Record<string, string | string[]>>(str)[1];
-	if (res == null) {
-		return null;
-	}
-	if (uniqueValues) {
-		const tableData: TableData<number> = [];
-		for (const [key, value] of Object.entries(res)) {
-			if (typeof value !== 'string') {
-				return null;
-			}
-			tableData.push({ key, value, id: 0 });
-		}
-		return tableData;
-	}
-	const td = Object.entries(res).flatMap(([key, value]) => {
-		if (typeof value === 'string') {
-			return {
-				key,
-				value,
-				id: 0,
-			};
-		} else {
-			return value.map((valueItem, index) => ({
-				key,
-				value: valueItem,
-				id: index,
-			}));
-		}
-	});
-	return td;
-};
-
-interface EditableDataProps {
-	tableData: TableData<number>;
-	setTableData: (newData: TableData<number>) => void;
-	environment?: Environment;
-	unique: boolean;
+export interface EditableDataSettings {
 	fullSize?: boolean;
+	environment?: Environment | Environment['values'];
 }
-export function EditableData(props: EditableDataProps) {
+
+interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
+	values: OrderedKeyValuePairs<T>;
+	onChange: (newData: OrderedKeyValuePairs<T>) => void;
+}
+
+function envParse(value: KeyValueValues | undefined, envValues: OrderedKeyValuePairs<string>) {
+	if (value == null) {
+		return '';
+	}
+	if (Array.isArray(value)) {
+		value = value.join(', ');
+	}
+	return EnvironmentContextResolver.parseStringWithEnvironment(value, envValues)
+		.map((x) => x.value)
+		.join('');
+}
+
+export function EditableData<T extends KeyValueValues>({
+	values,
+	onChange,
+	fullSize,
+	environment,
+}: EditableDataProps<T>) {
 	const colorScheme = useColorScheme();
 	const selectedMode = colorScheme.mode;
 	const systemMode = colorScheme.systemMode;
 	const resolvedMode = selectedMode === 'system' ? systemMode : selectedMode;
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
-	const environment =
-		props.environment ?? (selectedEnvironment == null ? createEmptyEnvironment() : environments[selectedEnvironment]);
-	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
+	environment =
+		environment ?? (selectedEnvironment == null ? createEmptyEnvironment() : environments[selectedEnvironment]);
+	const envValues = 'id' in environment ? environment.values : environment;
+	const [editorText, setEditorText] = useState(values.toJSON());
 	const [backupEditorText, setBackupEditorText] = useState(editorText);
-	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
+	const [runningTableData, setRunningTableData] = useState<OrderedKeyValuePairs<T> | null>(values);
 	const [hasChanged, setChanged] = useState(false);
 	const [mode, setMode] = useState<'view' | 'edit'>('edit');
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -113,15 +72,15 @@ export function EditableData(props: EditableDataProps) {
 	};
 
 	useEffect(() => {
-		setEditorText(tableDataToString(props.tableData, props.unique));
+		setEditorText(values.toJSON());
 		setChanged(false);
-		setRunningTableData(props.tableData);
-	}, [props.tableData]);
+		setRunningTableData(values);
+	}, [values]);
 
 	const save = () => {
-		const tableData = stringToTableData(editorText, props.unique);
+		const tableData = parseOrderedKeyValuePairs<T>(editorText);
 		if (tableData != null) {
-			props.setTableData(tableData);
+			onChange(tableData);
 			setChanged(false);
 		}
 	};
@@ -130,20 +89,12 @@ export function EditableData(props: EditableDataProps) {
 		if (runningTableData == null) {
 			return 'null';
 		}
-		return tableDataToString(
-			runningTableData
-				.filter((tdItem) => tdItem.key != null && tdItem.value != null)
-				.map((tdItem) => ({
-					key: EnvironmentContextResolver.parseStringWithEnvironment(tdItem.key, environment)
-						.map((x) => x.value)
-						.join(''),
-					value: EnvironmentContextResolver.parseStringWithEnvironment(tdItem.value, environment)
-						.map((x) => x.value)
-						.join(''),
-					id: tdItem.id,
-				})),
-			props.unique,
-		);
+		return new OrderedKeyValuePairs(
+			runningTableData.toArray().map(({ key, value }) => ({
+				key: envParse(key, envValues),
+				value: envParse(value, envValues),
+			})),
+		).toJSON();
 	};
 
 	return (
@@ -173,9 +124,9 @@ export function EditableData(props: EditableDataProps) {
 					<IconButton
 						disabled={!hasChanged}
 						onClick={() => {
-							setEditorText(tableDataToString(props.tableData, props.unique));
+							setEditorText(values.toJSON());
 							setChanged(false);
-							setRunningTableData(props.tableData);
+							setRunningTableData(values);
 							format();
 						}}
 					>
@@ -206,13 +157,13 @@ export function EditableData(props: EditableDataProps) {
 				height={'100%'}
 			>
 				<Editor
-					height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
+					height={fullSize ? '100%' : `${clamp((values.count() + 2) * 3, 10, 40)}vh`}
 					value={editorText}
 					onChange={(value) => {
 						if (value != editorText) {
 							setEditorText(value ?? '');
 							setChanged(true);
-							setRunningTableData(value ? stringToTableData(value, props.unique) : null);
+							setRunningTableData(value ? parseOrderedKeyValuePairs<T>(value) : null);
 						}
 					}}
 					language={'json'}

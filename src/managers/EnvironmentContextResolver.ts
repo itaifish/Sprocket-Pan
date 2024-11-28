@@ -80,7 +80,10 @@ export class EnvironmentContextResolver {
 		return oldValue;
 	}
 
-	public static parseStringWithEnvironment(text: string, envValues: OrderedKeyValuePairs): Snippet[] {
+	public static parseStringWithEnvironment(
+		text: string | undefined | null,
+		envValues: OrderedKeyValuePairs,
+	): Snippet[] {
 		if (text == null) {
 			return [];
 		}

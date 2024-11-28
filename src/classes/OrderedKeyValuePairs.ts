@@ -1,16 +1,18 @@
-export type KeyValuePair = { key: string; value?: string };
+export type KeyValueValues = string | string[] | (string | string[]);
 
-type KeyValueOrOrdered = KeyValuePair[] | OrderedKeyValuePairs;
+export type KeyValuePair<T extends KeyValueValues> = { key: string; value?: T };
 
-export class OrderedKeyValuePairs implements Iterable<[number, KeyValuePair]> {
-	private map: Record<string, string | undefined> = {};
+type KeyValueOrOrdered<T extends KeyValueValues> = KeyValuePair<T>[] | OrderedKeyValuePairs<T>;
+
+export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements Iterable<[number, KeyValuePair<T>]> {
+	private map: Record<string, T | undefined> = {};
 	private order: string[] = [];
 
-	constructor(...args: KeyValueOrOrdered[]) {
+	constructor(...args: KeyValueOrOrdered<T>[]) {
 		args.forEach(this.apply);
 	}
 
-	public apply(pairs: KeyValueOrOrdered) {
+	public apply(pairs: KeyValueOrOrdered<T>) {
 		if (pairs instanceof OrderedKeyValuePairs) {
 			pairs = pairs.toArray();
 		}
@@ -21,7 +23,7 @@ export class OrderedKeyValuePairs implements Iterable<[number, KeyValuePair]> {
 		return this.map[key];
 	}
 
-	public set(key: string, value?: string) {
+	public set(key: string, value?: T) {
 		const oldValue = this.map[key];
 		if (oldValue == null) {
 			this.order.push(key);
@@ -41,12 +43,20 @@ export class OrderedKeyValuePairs implements Iterable<[number, KeyValuePair]> {
 		this.deleteByIndex(index);
 	}
 
-	private toKeyValue(key: string): KeyValuePair {
+	private toKeyValuePair(key: string): KeyValuePair<T> {
 		return { key, value: this.map[key] };
 	}
 
+	public count() {
+		return this.order.length;
+	}
+
 	public toArray() {
-		return this.order.map(this.toKeyValue);
+		return this.order.map(this.toKeyValuePair);
+	}
+
+	public toTableData() {
+		return this.order.map((key, index) => ({ ...this.toKeyValuePair(key), id: index }));
 	}
 
 	public keys() {

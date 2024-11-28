@@ -15,8 +15,8 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 	const [isTyping, setTyping] = useState(false);
 	const [active, setActive] = useState(false);
 
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
-		state: null,
+	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce<string>({
+		state: '',
 		setState: onChange,
 		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
 	});
@@ -44,7 +44,7 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 				variant="outlined"
 				placeholder="Search for something"
 				endDecorator={
-					isTyping && localDataState !== '' ? (
+					isTyping ? (
 						<PendingOutlined color="secondary" />
 					) : (
 						<SprocketTooltip text="Clear search">

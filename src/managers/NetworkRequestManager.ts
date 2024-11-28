@@ -9,7 +9,7 @@ import {
 	rawBodyTypeToMime,
 	SPHeaders,
 } from '../types/application-data/application-data';
-import { queryParamsToStringReplaceVars } from '../utils/application';
+import { queryParamsToString } from '../utils/application';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
@@ -170,7 +170,7 @@ class NetworkRequestManager {
 		});
 
 		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
-		let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
+		let queryParamStr = queryParamsToString(fullQueryParams, (text) =>
 			EnvironmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
 		);
 		if (queryParamStr) {

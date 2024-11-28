@@ -5,6 +5,7 @@ import { queryParamsToString } from '../../utils/application';
 import { TabType, TabTypeWithData } from '../../types/state/state';
 import { WorkspaceData } from '../../types/application-data/application-data';
 import { selectGlobalState } from '../global/selectors';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 const selectActiveState = activeSlice.selectSlice;
 
@@ -136,7 +137,7 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 	const requestData = state.requests[id];
 	const endpointData = state.endpoints[requestData?.endpointId];
 	const serviceData = state.services[endpointData?.serviceId];
-	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
+	const fullQueryParams = new OrderedKeyValuePairs(endpointData.baseQueryParams, requestData.queryParams);
 	let query = queryParamsToString(fullQueryParams);
 	if (query) {
 		query = `?${query}`;

@@ -13,6 +13,7 @@ import {
 import { AuditLog } from '../../managers/AuditLogManager';
 import { log } from '../../utils/logging';
 import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
@@ -152,7 +153,7 @@ export const activeSlice = createSlice({
 			log.debug(`deleteEnvironmentFromState called on env ${action.payload}`);
 			delete state.environments[action.payload];
 		},
-		updateSecrets: (state, action: PayloadAction<Record<string, string>>) => {
+		updateSecrets: (state, action: PayloadAction<OrderedKeyValuePairs>) => {
 			state.secrets = action.payload;
 		},
 		// more specific logic
