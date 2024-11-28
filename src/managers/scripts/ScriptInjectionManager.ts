@@ -3,12 +3,12 @@ import { Update, updateEnvironment, updateRequest, updateService } from '../../s
 import { makeRequest } from '../../state/active/thunks/requests';
 import { StateAccess } from '../../state/types';
 import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
 import { AuditLog, auditLogManager } from '../AuditLogManager';
 import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 type KeyValuePair = { key: string; value: string };
 
@@ -102,7 +102,7 @@ export function getScriptInjectionCode(
 			const selectedEnvironment = data.selectedEnvironment;
 			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
 			if (newEnv) {
-				EnvironmentUtils.set(newEnv, key, value);
+				newEnv.values.set(key, value);
 				dispatch(updateEnvironment(newEnv));
 			}
 		}
@@ -113,18 +113,8 @@ export function getScriptInjectionCode(
 		if (request == null) {
 			return;
 		}
-		const newQueryParams = structuredClone(request.queryParams);
-		QueryParamUtils.add(newQueryParams, key, value);
-		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
-	};
-
-	const setQueryParams = (key: string, values: string[]) => {
-		const request = getRequest();
-		if (request == null) {
-			return;
-		}
-		const newQueryParams = structuredClone(request.queryParams);
-		QueryParamUtils.set(newQueryParams, key, values);
+		const newQueryParams = new OrderedKeyValuePairs(request.queryParams);
+		newQueryParams.set(key, value);
 		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
 	};
 
@@ -133,8 +123,8 @@ export function getScriptInjectionCode(
 		if (request == null) {
 			return;
 		}
-		const newHeaders = structuredClone(request.headers);
-		HeaderUtils.set(newHeaders, key, value);
+		const newHeaders = new OrderedKeyValuePairs(request.headers);
+		newHeaders.set(key, value);
 		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
 	};
 	const deleteHeader = (key: string) => {
@@ -142,8 +132,8 @@ export function getScriptInjectionCode(
 		if (request == null) {
 			return;
 		}
-		const newHeaders = structuredClone(request.headers);
-		HeaderUtils.delete(newHeaders, key);
+		const newHeaders = new OrderedKeyValuePairs(request.headers);
+		newHeaders.delete(key);
 		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
 	};
 	const getEnvironment = () => {
@@ -189,7 +179,6 @@ export function getScriptInjectionCode(
 		...getRunnableScripts(),
 		setEnvironmentVariable,
 		setQueryParam,
-		setQueryParams,
 		setHeader,
 		deleteHeader,
 		getEnvironment,

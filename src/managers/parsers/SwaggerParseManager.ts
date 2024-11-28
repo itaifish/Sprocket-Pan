@@ -13,7 +13,7 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { UniqueKeyValuePairUtils } from '../../utils/data-utils';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 export type ParsedServiceWorkspaceData = {
 	services: Service[];
@@ -130,8 +130,8 @@ class SwaggerParseManager {
 						serviceId: service.id,
 						verb: method,
 						url: `${pathsUri}`,
-						baseHeaders: [],
-						baseQueryParams: [],
+						baseHeaders: new OrderedKeyValuePairs(),
+						baseQueryParams: new OrderedKeyValuePairs(),
 						description: pathData.description ?? 'This is a new endpoint',
 						name: `${method}: ${pathsUri}`,
 						requestIds: [],
@@ -144,8 +144,8 @@ class SwaggerParseManager {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
 						name: defaultEndpointData.name,
-						headers: [],
-						queryParams: [],
+						headers: new OrderedKeyValuePairs(),
+						queryParams: new OrderedKeyValuePairs(),
 						body: undefined,
 						bodyType: 'none',
 						rawType: undefined,
@@ -161,14 +161,14 @@ class SwaggerParseManager {
 						switch (paramIn) {
 							case 'header':
 								if (typedParam.name) {
-									UniqueKeyValuePairUtils.set(defaultEndpointData.baseHeaders, typedParam.name, type);
+									defaultEndpointData.baseHeaders.set(typedParam.name, type);
 								}
 								break;
 							case 'query':
 								if (typedParam.name) {
-									UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, type);
+									defaultEndpointData.baseQueryParams.set(typedParam.name, type);
 									if (schema?.type === 'array') {
-										UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, `${type}2`);
+										defaultEndpointData.baseQueryParams.set(typedParam.name, `${type}2`);
 									}
 								}
 								break;
@@ -251,8 +251,8 @@ class SwaggerParseManager {
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: [],
-					baseQueryParams: [],
+					baseHeaders: new OrderedKeyValuePairs(),
+					baseQueryParams: new OrderedKeyValuePairs(),
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
 					requestIds: [],
@@ -274,8 +274,8 @@ class SwaggerParseManager {
 					id: v4(),
 					endpointId: defaultEndpointData.id,
 					name: defaultEndpointData.name,
-					headers: [],
-					queryParams: [],
+					headers: new OrderedKeyValuePairs(),
+					queryParams: new OrderedKeyValuePairs(),
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
@@ -296,11 +296,7 @@ class SwaggerParseManager {
 							break;
 						case 'header':
 							if (typedParam.name) {
-								UniqueKeyValuePairUtils.set(
-									defaultEndpointData.baseHeaders,
-									typedParam.name,
-									typedParam.type ?? 'string',
-								);
+								defaultEndpointData.baseHeaders.set(typedParam.name, typedParam.type ?? 'string');
 							}
 							break;
 						case 'formData':
@@ -315,9 +311,9 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, 'string');
+								defaultEndpointData.baseQueryParams.set(typedParam.name, 'string');
 								if (typedParam.type === 'array') {
-									UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, 'string2');
+									defaultEndpointData.baseQueryParams.set(typedParam.name, 'string2');
 								}
 							}
 							break;
