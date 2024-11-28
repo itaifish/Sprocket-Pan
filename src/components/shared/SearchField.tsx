@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { IconButton, Input } from '@mui/joy';
 import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
 import { useDebounce } from '../../hooks/useDebounce';
-import { Constants } from '../../utils/constants';
 import { SprocketTooltip } from './SprocketTooltip';
+import { Constants } from '../../constants/constants';
 
 export interface SearchFieldProps {
 	onChange: (text: string) => void;

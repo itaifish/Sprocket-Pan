@@ -6,6 +6,7 @@ import { selectEnvironments } from '../../../../state/active/selectors';
 import { SearchField } from '../../../shared/SearchField';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { searchEnvironments } from '../../../../utils/search';
+import { ELEMENT_ID } from '../../../../constants/uiElementIds';
 
 export function EnvironmentsFileSystem() {
 	const environments = useSelector(selectEnvironments);
@@ -18,7 +19,7 @@ export function EnvironmentsFileSystem() {
 
 	return (
 		<FileSystemTrunk
-			id="sidebar.section.environments"
+			id={ELEMENT_ID.sidebar.environments}
 			header="Environments"
 			actions={<SearchField onChange={(text) => setSearchText(text)} />}
 		>

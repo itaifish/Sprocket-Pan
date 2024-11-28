@@ -1,5 +1,6 @@
 import { v4 } from 'uuid';
 import {
+	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
 	Environment,
@@ -12,7 +13,6 @@ import {
 	Service,
 	SPHeaders,
 } from '../../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../../utils/data-utils';
 import type {
 	Auth as V200Auth,
 	EventList as V200EventList,
@@ -50,6 +50,8 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import { log } from '../../../utils/logging';
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';
+import { CONTENT_TYPE } from '../../../constants/request';
+import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -207,14 +209,12 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[], importSource: ImportSource): Environment {
-		const env = EnvironmentUtils.new();
+		const env = createEmptyEnvironment();
 		variables.forEach((variable) => {
 			const { key, value } = variable;
-			if (key) {
-				EnvironmentUtils.set(env, key, value);
-			}
+			if (key != null) env.values.set(key, value);
 		});
-		env.__name = `${importSource} Variables`;
+		env.name = `${importSource} Variables`;
 		return env;
 	}
 
@@ -280,7 +280,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters = QueryParamUtils.new();
+		let parameters = new OrderedKeyValuePairs();
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -295,17 +295,17 @@ class PostmanParseManager {
 
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
-			(camelCaseToTitle(mime.getExtension(headers['Content-Type']) ?? '') as RawBodyType) || undefined,
+			camelCaseToTitle(mime.getExtension(headers.get(CONTENT_TYPE) ?? '') ?? '') as RawBodyType,
 		);
 
 		const newRequest: EndpointRequest = {
 			id: requestId,
 			endpointId,
 			name,
-			headers: HeaderUtils.new(),
-			queryParams: QueryParamUtils.new(),
+			headers: new OrderedKeyValuePairs(),
+			queryParams: new OrderedKeyValuePairs(),
 			history: [],
-			environmentOverride: EnvironmentUtils.new(),
+			environmentOverride: createEmptyEnvironment(),
 			body,
 			bodyType,
 			rawType,
@@ -339,13 +339,12 @@ class PostmanParseManager {
 	}
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {
-		const result = HeaderUtils.new();
+		const result = new OrderedKeyValuePairs();
 		if (typeof headers === 'string' || typeof headers === 'undefined') {
 			return result;
 		}
 		headers.forEach((header) => {
-			HeaderUtils.set(
-				result,
+			result.set(
 				this.convertVariablesToSprocketVariables(header.key),
 				this.convertVariablesToSprocketVariables(header.value),
 			);
@@ -354,13 +353,12 @@ class PostmanParseManager {
 	};
 
 	private importParameters = (parameters: QueryParam[]): QueryParams => {
-		const result = QueryParamUtils.new();
+		const result = new OrderedKeyValuePairs();
 		if (!parameters || parameters?.length === 0) {
 			return result;
 		}
 		parameters.forEach(({ key, value }) =>
-			QueryParamUtils.add(
-				result,
+			result.set(
 				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
 				this.convertVariablesToSprocketVariables(value ?? ''),
 			),

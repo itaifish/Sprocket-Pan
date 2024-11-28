@@ -22,14 +22,6 @@ import { WorkspaceData } from '../types/application-data/application-data';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
 /**
- * add s'more user interface data
- */
-function toEight(data: WorkspaceData | any) {
-	data.uiMetadata = { ...data.uiMetadata, elementSpecific: {} };
-	data.globalUiMetadata = { ...data.uiMetadata, elementSpecific: {} };
-}
-
-/**
  * add user interface data
  */
 function toSeven(data: WorkspaceData | any) {
@@ -92,7 +84,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven] as const;
 
 class SaveUpdateManager {
 	public static readonly INSTANCE = new SaveUpdateManager();

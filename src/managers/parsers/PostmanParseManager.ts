@@ -1,5 +1,6 @@
 import { v4 } from 'uuid';
 import {
+	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
 	Environment,
@@ -12,31 +13,22 @@ import {
 	Service,
 	SPHeaders,
 } from '../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
 import type {
-	Auth as V200Auth,
 	EventList as V200EventList,
-	Folder as V200Folder,
-	FormParameter as V200FormParameter,
 	Header as V200Header,
 	HttpsSchemaGetpostmanComJsonCollectionV200 as V200Schema,
 	Item as V200Item,
 	Url,
 	Request1 as V200Request1,
-	UrlEncodedParameter as V200UrlEncodedParameter,
 	Description as V200Description,
 } from './parseTypes/postman2.0Types';
 import type {
-	Auth as V210Auth,
 	EventList as V210EventList,
-	Folder as V210Folder,
-	FormParameter as V210FormParameter,
 	Header as V210Header,
 	HttpsSchemaGetpostmanComJsonCollectionV210 as V210Schema,
 	Item as V210Item,
 	Request1 as V210Request1,
 	QueryParam,
-	UrlEncodedParameter as V210UrlEncodedParameter,
 	Description as V210Description,
 } from './parseTypes/postman2.1Types';
 import mime from 'mime';
@@ -49,22 +41,16 @@ import {
 import { readTextFile } from '@tauri-apps/api/fs';
 import { log } from '../../utils/logging';
 import yaml from 'js-yaml';
+import { CONTENT_TYPE } from '../../constants/request';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 type PostmanCollection = V200Schema | V210Schema;
 
 type EventList = V200EventList | V210EventList;
 
-type Authetication = V200Auth | V210Auth;
-
 type Body = V200Request1['body'] | V210Request1['body'];
 
-type UrlEncodedParameter = V200UrlEncodedParameter | V210UrlEncodedParameter;
-
-type FormParameter = V200FormParameter | V210FormParameter;
-
 type Item = V200Item | V210Item;
-
-type Folder = V200Folder | V210Folder;
 
 type Header = V200Header | V210Header;
 
@@ -204,14 +190,12 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[]): Environment {
-		const env = EnvironmentUtils.new();
+		const env = createEmptyEnvironment();
 		variables.forEach((variable) => {
 			const { key, value } = variable;
-			if (key) {
-				EnvironmentUtils.set(env, key, value);
-			}
+			if (key != null) env.values.set(key, value);
 		});
-		env.__name = 'Postman Variables';
+		env.name = 'Postman Variables';
 		return env;
 	}
 
@@ -275,7 +259,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters = QueryParamUtils.new();
+		let parameters: QueryParams = new OrderedKeyValuePairs();
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -290,17 +274,16 @@ class PostmanParseManager {
 
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
-			(camelCaseToTitle(mime.getExtension(headers['Content-Type']) ?? '') as RawBodyType) || undefined,
+			camelCaseToTitle(mime.getExtension(headers.get(CONTENT_TYPE) ?? '') ?? '') as RawBodyType,
 		);
-
 		const newRequest: EndpointRequest = {
 			id: requestId,
 			endpointId,
 			name,
-			headers: HeaderUtils.new(),
-			queryParams: QueryParamUtils.new(),
+			headers: new OrderedKeyValuePairs(),
+			queryParams: new OrderedKeyValuePairs(),
 			history: [],
-			environmentOverride: EnvironmentUtils.new(),
+			environmentOverride: createEmptyEnvironment(),
 			body,
 			bodyType,
 			rawType,
@@ -334,13 +317,12 @@ class PostmanParseManager {
 	}
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {
-		const result = HeaderUtils.new();
+		const result: SPHeaders = new OrderedKeyValuePairs();
 		if (typeof headers === 'string' || typeof headers === 'undefined') {
 			return result;
 		}
 		headers.forEach((header) => {
-			HeaderUtils.set(
-				result,
+			result.set(
 				this.convertVariablesToSprocketVariables(header.key),
 				this.convertVariablesToSprocketVariables(header.value),
 			);
@@ -349,13 +331,12 @@ class PostmanParseManager {
 	};
 
 	private importParameters = (parameters: QueryParam[]): QueryParams => {
-		const result = QueryParamUtils.new();
+		const result: QueryParams = new OrderedKeyValuePairs();
 		if (!parameters || parameters?.length === 0) {
 			return result;
 		}
 		parameters.forEach(({ key, value }) =>
-			QueryParamUtils.add(
-				result,
+			result.set(
 				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
 				this.convertVariablesToSprocketVariables(value ?? ''),
 			),

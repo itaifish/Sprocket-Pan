@@ -8,7 +8,7 @@ export interface GlobalState extends GlobalData {
 
 const initialState: GlobalState = {
 	workspaces: [],
-	uiMetadata: { idSpecific: {}, elementSpecific: {} },
+	uiMetadata: { idSpecific: {} },
 	settings: {} as Settings,
 };
 

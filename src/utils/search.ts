@@ -13,7 +13,7 @@ function cleanText(text: string) {
 }
 
 function envMatches(env: Environment, text: string) {
-	return cleanText(env.__name).includes(text);
+	return cleanText(env.name).includes(text);
 }
 
 function scriptMatches(script: Script, text: string) {

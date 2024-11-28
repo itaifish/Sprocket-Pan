@@ -21,7 +21,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../utils/constants';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
@@ -40,6 +39,7 @@ import { EditableText } from '../../shared/input/EditableText';
 import { sleep } from '../../../utils/misc';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { Constants } from '../../../constants/constants';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,

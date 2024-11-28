@@ -7,6 +7,8 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { TabType } from '../state/state';
 import CodeIcon from '@mui/icons-material/Code';
 import mime from 'mime';
+import { Key } from '@mui/icons-material';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -15,7 +17,7 @@ export type RESTfulRequestVerb = (typeof RESTfulRequestVerbs)[number];
 export const RequestBodyTypes = ['none', 'form-data', 'x-www-form-urlencoded', 'raw'] as const;
 export type RequestBodyType = (typeof RequestBodyTypes)[number];
 export function getRequestBodyCategory(requestBodyType: RequestBodyType) {
-	let _exaustive: never;
+	let _exhaustive: never;
 	switch (requestBodyType) {
 		case 'none':
 			return 'none';
@@ -25,7 +27,7 @@ export function getRequestBodyCategory(requestBodyType: RequestBodyType) {
 		case 'x-www-form-urlencoded':
 			return 'table';
 		default:
-			_exaustive = requestBodyType;
+			_exhaustive = requestBodyType;
 			return 'none';
 	}
 }
@@ -93,35 +95,24 @@ export type Endpoint<TUrlBase extends string = string> = {
 	defaultRequest: string | null;
 };
 
-export type OrderedKeyValuePair<
-	TKey extends string | number = string,
-	TVal = string,
-	IsUnique extends boolean = true,
-> = {
-	__data: { key: TKey; value: TVal }[];
-} & Record<TKey, IsUnique extends true ? TVal : TVal[]>;
 export type Environment = {
-	__name: string;
-	__id: string;
-} & OrderedKeyValuePair;
-export type QueryParams = OrderedKeyValuePair<string, string, false>;
-export type SPHeaders = OrderedKeyValuePair;
+	name: string;
+	id: string;
+	values: OrderedKeyValuePairs;
+};
 
-export const EMPTY_QUERY_PARAMS: QueryParams = {
-	__data: [],
-} as unknown as QueryParams;
+export type QueryParams = OrderedKeyValuePairs;
+export type SPHeaders = OrderedKeyValuePairs;
 
 const EMPTY_ENVIRONMENT: Environment = {
-	__data: [],
-} as unknown as Environment;
+	values: new OrderedKeyValuePairs(),
+	name: '',
+	id: '',
+};
 
-export function newEnvironment() {
+export function createEmptyEnvironment() {
 	return structuredClone(EMPTY_ENVIRONMENT);
 }
-
-export const EMPTY_HEADERS: SPHeaders = {
-	__data: [],
-} as unknown as SPHeaders;
 
 export type Service<TBaseUrl extends string = string> = {
 	id: string;
@@ -168,7 +159,6 @@ export type ElementSpecificUiMetadata = {
 
 export type UiMetadata = {
 	idSpecific: Record<string, IdSpecificUiMetadata>;
-	elementSpecific: Record<string, ElementSpecificUiMetadata>;
 };
 
 export type GlobalData = {
@@ -177,11 +167,14 @@ export type GlobalData = {
 	workspaces: WorkspaceMetadata[];
 };
 
+export type Secrets = Record<string, string>;
+
 export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
+	secrets: Secrets;
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;
@@ -204,4 +197,5 @@ export const iconFromTabType: Record<TabType, JSX.Element> = {
 	request: <TextSnippetIcon />,
 	service: <FolderOpenSharpIcon />,
 	script: <CodeIcon />,
+	secrets: <Key />,
 };

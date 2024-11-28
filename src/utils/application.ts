@@ -2,14 +2,7 @@ import { QueryParams } from '../types/application-data/application-data';
 
 export function queryParamsToString(queryParams: QueryParams): string {
 	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				searchParams.append(queryParamKey, queryParamVal);
-			});
-		}
-	});
-
+	queryParams.toArray().forEach(({ key, value }) => searchParams.append(key, value ?? ''));
 	return decodeURIComponent(searchParams.toString());
 }
 
@@ -18,14 +11,6 @@ export function queryParamsToStringReplaceVars(
 	replaceFunc: (text: string) => string,
 ): string {
 	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				const newKey = replaceFunc(queryParamKey);
-				const newVal = replaceFunc(queryParamVal);
-				searchParams.append(newKey, newVal);
-			});
-		}
-	});
+	queryParams.toArray().forEach(({ key, value }) => searchParams.append(replaceFunc(key), replaceFunc(value ?? '')));
 	return searchParams.toString();
 }

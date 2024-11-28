@@ -5,7 +5,7 @@ import { StateAccess } from '../../state/types';
 import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
 import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
 import { AuditLog, auditLogManager } from '../AuditLogManager';
-import { environmentContextResolver } from '../EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
@@ -150,11 +150,11 @@ export function getScriptInjectionCode(
 		const data = getState();
 		const request = getRequest();
 		if (request == null) {
-			return environmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
+			return EnvironmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
 		}
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
-		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
+		return EnvironmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
 	};
 
 	const sendRequest = async (requestId: string) => {

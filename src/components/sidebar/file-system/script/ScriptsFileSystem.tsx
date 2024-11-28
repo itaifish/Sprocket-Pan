@@ -6,6 +6,7 @@ import { selectScripts } from '../../../../state/active/selectors';
 import { SearchField } from '../../../shared/SearchField';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { searchScripts } from '../../../../utils/search';
+import { ELEMENT_ID } from '../../../../constants/uiElementIds';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);
@@ -15,7 +16,7 @@ export function ScriptsFileSystem() {
 
 	return (
 		<FileSystemTrunk
-			id="sidebar.section.scripts"
+			id={ELEMENT_ID.sidebar.scripts}
 			header="Scripts"
 			actions={<SearchField onChange={(text) => setSearchText(text)} />}
 		>

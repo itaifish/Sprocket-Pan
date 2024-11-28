@@ -1,5 +1,5 @@
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
@@ -17,11 +17,12 @@ import { useSelector } from 'react-redux';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../utils/constants';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
 import { tabsActions } from '../../../state/tabs/slice';
+import { Constants } from '../../../constants/constants';
+import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const endpoints = useSelector(selectEndpoints);
@@ -78,13 +79,16 @@ export function EndpointPanel({ id }: PanelProps) {
 				</Grid>
 				<Grid xs={8}>
 					<Input
-						startDecorator={environmentContextResolver.stringWithVarsToTypography(
-							serviceData.baseUrl || 'unknown',
-							{ environments, selectedEnvironment, services, settings, requests },
-							serviceData.id,
-							undefined,
-							{ variant: 'outlined', color: 'primary' },
-						)}
+						startDecorator={
+							<EnvironmentTypography
+								typographyProps={{ variant: 'outlined', color: 'primary' }}
+								snippets={EnvironmentContextResolver.stringWithVarsToSnippet(
+									serviceData.baseUrl || 'unknown',
+									{ environments, selectedEnvironment, services, settings, requests },
+									serviceData.id,
+								)}
+							/>
+						}
 						value={localDataState}
 						onChange={(e) => {
 							setLocalDataState(e.target.value);

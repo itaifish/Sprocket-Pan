@@ -26,12 +26,12 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const allEnvironments = useSelector(selectEnvironments);
 	const dispatch = useAppDispatch();
 	const createEnvironmentFunction = async () => {
-		let newEnvironment: Partial<Environment> = { __name: envName };
+		let newEnvironment: Partial<Environment> = { name: envName };
 		if (cloneFrom != null) {
 			const environmentToCloneFrom = allEnvironments[cloneFrom];
 			if (environmentToCloneFrom != undefined) {
 				newEnvironment = { ...structuredClone(environmentToCloneFrom), ...newEnvironment };
-				delete newEnvironment['__id'];
+				delete newEnvironment.id;
 			}
 		}
 		const createdEnvironmentId = await dispatch(addNewEnvironment({ data: newEnvironment })).unwrap();
@@ -62,15 +62,15 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 						<FormLabel>Clone from existing environment?</FormLabel>
 						<Autocomplete
 							value={{
-								label: allEnvironments[cloneFrom as string]?.__name ?? "Don't clone",
-								value: allEnvironments[cloneFrom as string]?.__id,
+								label: allEnvironments[cloneFrom as string]?.name ?? "Don't clone",
+								value: allEnvironments[cloneFrom as string]?.id,
 							}}
 							onChange={(_e, value) => setCloneFrom(value?.value ?? null)}
 							options={[
 								{ label: "Don't clone", value: null },
 								...Object.values(allEnvironments).map((env) => ({
-									label: env.__name,
-									value: env.__id,
+									label: env.name,
+									value: env.id,
 								})),
 							]}
 						></Autocomplete>

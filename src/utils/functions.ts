@@ -3,7 +3,6 @@ import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
 import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 import { parseScript } from 'esprima';
 import { log } from './logging';
-import { EnvironmentUtils } from './data-utils';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -149,20 +148,20 @@ export function noMetadataReplacer(key: string, value: unknown) {
 	return value;
 }
 
-const replaceAllEnvironmentValuesWithEmptyString = (environment: Environment) => {
+function replaceAllEnvironmentValuesWithEmptyString(environment: Environment) {
 	const copy = structuredClone(environment);
-	for (const item of environment.__data) {
-		EnvironmentUtils.set(copy, item.key, '');
+	for (const key of environment.values.keys()) {
+		environment.values.set(key, '');
 	}
 	return copy;
-};
+}
 
 export const noEnvironmentsReplacer = (key: string, value: unknown) => {
 	if (key === 'environments' || key === 'localEnvironments') {
 		const record = value as Record<string, Environment>;
 		return Object.values(record).reduce(
 			(acc, curr) => {
-				Object.assign(acc, { [curr.__id]: replaceAllEnvironmentValuesWithEmptyString(curr) });
+				Object.assign(acc, { [curr.id]: replaceAllEnvironmentValuesWithEmptyString(curr) });
 				return acc;
 			},
 			{} as Record<string, Environment>,
@@ -172,12 +171,6 @@ export const noEnvironmentsReplacer = (key: string, value: unknown) => {
 		return replaceAllEnvironmentValuesWithEmptyString(value as Environment);
 	}
 	return value;
-};
-
-export const getDataArrayFromEnvKeys = (env: Environment) => {
-	return Object.keys(env)
-		.filter((envKey) => !envKey.startsWith('__'))
-		.map((envKey) => ({ key: envKey, value: env[envKey] }));
 };
 
 export function safeJsonParse<T>(str: string) {

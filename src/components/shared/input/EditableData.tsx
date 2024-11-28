@@ -1,6 +1,6 @@
 import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
 import { useState, useRef, useEffect } from 'react';
-import { Environment, newEnvironment } from '../../../types/application-data/application-data';
+import { createEmptyEnvironment, Environment } from '../../../types/application-data/application-data';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor, Monaco } from '@monaco-editor/react';
@@ -9,7 +9,7 @@ import { clamp } from '../../../utils/math';
 import { safeJsonParse } from '../../../utils/functions';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { useSelector } from 'react-redux';
 import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { editor } from 'monaco-editor';
@@ -82,8 +82,6 @@ const stringToTableData = (str: string, uniqueValues: boolean): TableData<number
 
 interface EditableDataProps {
 	tableData: TableData<number>;
-	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
-	addNewData: (key: string, value: string) => void;
 	setTableData: (newData: TableData<number>) => void;
 	environment?: Environment;
 	unique: boolean;
@@ -97,7 +95,7 @@ export function EditableData(props: EditableDataProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment =
-		props.environment ?? (selectedEnvironment ? environments[selectedEnvironment as string] : newEnvironment());
+		props.environment ?? (selectedEnvironment == null ? createEmptyEnvironment() : environments[selectedEnvironment]);
 	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
 	const [backupEditorText, setBackupEditorText] = useState(editorText);
 	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
@@ -136,12 +134,10 @@ export function EditableData(props: EditableDataProps) {
 			runningTableData
 				.filter((tdItem) => tdItem.key != null && tdItem.value != null)
 				.map((tdItem) => ({
-					key: environmentContextResolver
-						.parseStringWithEnvironment(tdItem.key, environment)
+					key: EnvironmentContextResolver.parseStringWithEnvironment(tdItem.key, environment)
 						.map((x) => x.value)
 						.join(''),
-					value: environmentContextResolver
-						.parseStringWithEnvironment(tdItem.value, environment)
+					value: EnvironmentContextResolver.parseStringWithEnvironment(tdItem.value, environment)
 						.map((x) => x.value)
 						.join(''),
 					id: tdItem.id,

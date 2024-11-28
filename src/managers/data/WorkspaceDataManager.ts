@@ -22,11 +22,11 @@ export const defaultWorkspaceData: WorkspaceData = {
 	requests: {},
 	environments: {},
 	scripts: {},
+	secrets: {},
 	selectedEnvironment: undefined,
 	metadata: defaultWorkspaceMetadata,
 	uiMetadata: {
 		idSpecific: {},
-		elementSpecific: {},
 	},
 	settings: {
 		debugLogs: true,
@@ -63,12 +63,13 @@ export class WorkspaceDataManager {
 		const {
 			metadata: { fileName, ...metadata },
 			uiMetadata,
-			...noMetadataData
+			secrets,
+			...strippedData
 		} = data;
 
 		const paths = this.getWorkspacePath(fileName);
 
-		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(noMetadataData, noHistoryReplacer));
+		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(strippedData, noHistoryReplacer));
 		const saveHistory = FileSystemWorker.tryUpdateFile(
 			paths.history,
 			JSON.stringify(
@@ -83,7 +84,10 @@ export class WorkspaceDataManager {
 		);
 		const saveUiMetadata = FileSystemWorker.tryUpdateFile(paths.uiMetadata, JSON.stringify(uiMetadata));
 
-		const results = await Promise.all([saveData, saveHistory, saveMetadata, saveUiMetadata]);
+		const saveSecrets = FileSystemWorker.tryUpdateFile(paths.secrets, JSON.stringify(secrets));
+
+		const results = await Promise.all([saveData, saveHistory, saveMetadata, saveUiMetadata, saveSecrets]);
+
 		if (results.includes(false)) {
 			throw new Error('could not save one or more categories of data, file(s) did not exist');
 		}
@@ -101,6 +105,7 @@ export class WorkspaceDataManager {
 			history: `${base}_history.json`,
 			metadata: `${base}_metadata.json`,
 			uiMetadata: `${base}_ui_metadata`,
+			secrets: `${base}_secrets.json`,
 		};
 	}
 
@@ -113,11 +118,12 @@ export class WorkspaceDataManager {
 	private static async loadDataFromFile(workspace: WorkspaceMetadata) {
 		const paths = this.getWorkspacePath(workspace.fileName);
 
-		const [data, metadata, history, uiMetadata] = await Promise.all([
+		const [data, metadata, history, uiMetadata, secrets] = await Promise.all([
 			FileSystemWorker.readTextFile(paths.data),
 			FileSystemWorker.readTextFile(paths.metadata),
 			FileSystemWorker.readTextFile(paths.history),
 			FileSystemWorker.readTextFile(paths.uiMetadata),
+			FileSystemWorker.readTextFile(paths.secrets),
 		]);
 
 		const parsedData = JSON.parse(data, dateTimeReviver) as WorkspaceData;
@@ -133,6 +139,7 @@ export class WorkspaceDataManager {
 			...JSON.parse(metadata, dateTimeReviver),
 		} as WorkspaceMetadata;
 		parsedData.uiMetadata = JSON.parse(uiMetadata, dateTimeReviver) as UiMetadata;
+		parsedData.secrets = JSON.parse(secrets);
 		saveUpdateManager.update(parsedData);
 		return parsedData;
 	}
@@ -151,6 +158,7 @@ export class WorkspaceDataManager {
 			fileSystemManager.createFileIfNotExists(paths.history, []),
 			fileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
 			fileSystemManager.createFileIfNotExists(paths.metadata, workspace),
+			fileSystemManager.createFileIfNotExists(paths.secrets, {}),
 		];
 		const results = await Promise.all(promises);
 		return results.includes(true);

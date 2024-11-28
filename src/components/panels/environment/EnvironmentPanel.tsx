@@ -17,7 +17,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
 
 	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, __id: id } as unknown as Environment));
+		dispatch(updateEnvironment({ ...values, id: id }));
 	}
 
 	if (environment == null) {
@@ -27,13 +27,13 @@ export function EnvironmentPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
-				text={environment.__name}
-				setText={(newText: string) => update({ __name: newText })}
+				text={environment.name}
+				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) =>
 					text.length >= 1 &&
 					Object.values(environments)
-						.filter((env) => env.__id != id)
-						.filter((env) => env.__name === text).length === 0
+						.filter((env) => env.id != id)
+						.filter((env) => env.name === text).length === 0
 				}
 				isTitle
 			/>

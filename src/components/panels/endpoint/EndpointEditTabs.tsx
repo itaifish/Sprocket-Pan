@@ -1,7 +1,7 @@
 import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
 	selectEnvironments,
 	selectServices,
@@ -27,7 +27,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const settings = useSelector(selectSettings);
 	const requests = useSelector(selectRequests);
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
+	const varsEnv = EnvironmentContextResolver.buildEnvironmentVariables(
 		{ services, selectedEnvironment, requests, environments, settings },
 		endpoint.serviceId,
 	);

@@ -139,9 +139,9 @@ export function getMonacoInjectedTypeCode(scripts: Script[]) {
 			defaultRequest: string | null;
 		};
 		type Environment = {
-			__name: string;
-			__id: string;
-			[key: string]: string;
+			name: string;
+			id: string;
+			values: { [key: string]: string; };
 		};
 		type Service<TBaseUrl extends string = string> = {
 			id: string;

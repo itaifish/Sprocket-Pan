@@ -1,9 +1,7 @@
-import { Typography } from '@mui/joy';
-import { WorkspaceData, Environment } from '../types/application-data/application-data';
-import { getDataArrayFromEnvKeys } from '../utils/functions';
-import { asEnv } from '../utils/types';
+import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
+import { WorkspaceData } from '../types/application-data/application-data';
 
-type Snippet = {
+export type Snippet = {
 	value: string;
 	variableName?: string;
 };
@@ -13,67 +11,27 @@ type PickedWorkspaceData = Pick<
 	'selectedEnvironment' | 'services' | 'environments' | 'requests' | 'settings'
 >;
 
-class EnvironmentContextResolver {
-	public static readonly INSTANCE = new EnvironmentContextResolver();
-	private constructor() {}
-
-	public stringWithVarsToTypography(
+export class EnvironmentContextResolver {
+	public static stringWithVarsToSnippet(
 		text: string,
 		data: PickedWorkspaceData,
 		serviceId?: string,
 		requestId?: string,
-		typographyProps?: React.ComponentProps<typeof Typography>,
 	) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
-		return this.snippetsToTypography(snippets, data.settings.displayVariableNames, typographyProps);
+		return this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 	}
 
-	public stringWithEnvironmentToTypography(
+	public static resolveVariablesForString(
 		text: string,
-		env: Environment,
-		displayVariableNames: boolean,
-		typographyProps?: React.ComponentProps<typeof Typography>,
+		data: PickedWorkspaceData,
+		serviceId?: string,
+		requestId?: string,
 	) {
-		const snippets = this.parseStringWithEnvironment(text, env);
-		return this.snippetsToTypography(snippets, displayVariableNames, typographyProps);
-	}
-
-	private snippetsToTypography(
-		snippets: Snippet[],
-		displayVariableNames: boolean,
-		typographyProps?: React.ComponentProps<typeof Typography>,
-	) {
-		return (
-			<Typography {...typographyProps}>
-				{snippets.map((snippet, index) => {
-					if (snippet.variableName) {
-						const valueText = snippet.value ?? 'unknown';
-						const shouldDisplayVariable = displayVariableNames || snippet.value == null;
-						const displayText = shouldDisplayVariable ? `${snippet.variableName}: ${valueText}` : valueText;
-						return (
-							<Typography
-								variant="outlined"
-								color={snippet.value ? 'success' : 'danger'}
-								key={index}
-								sx={{ overflowWrap: 'break-word' }}
-							>
-								{displayText}
-							</Typography>
-						);
-					} else {
-						return snippet.value;
-					}
-				})}
-			</Typography>
-		);
-	}
-
-	public resolveVariablesForString(text: string, data: PickedWorkspaceData, serviceId?: string, requestId?: string) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
-	public resolveVariablesForMappedObject<T extends Record<string, unknown>>(
+	public static resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
 		context: {
 			data: PickedWorkspaceData;
@@ -94,7 +52,7 @@ class EnvironmentContextResolver {
 		}
 	}
 
-	private resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(
+	private static resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(
 		object: T,
 		key: TKey,
 		context: {
@@ -122,7 +80,7 @@ class EnvironmentContextResolver {
 		return oldValue;
 	}
 
-	public parseStringWithEnvironment(text: string, env: Environment): Snippet[] {
+	public static parseStringWithEnvironment(text: string, envValues: OrderedKeyValuePairs): Snippet[] {
 		if (text == null) {
 			return [];
 		}
@@ -139,7 +97,7 @@ class EnvironmentContextResolver {
 			if (text.charAt(i) === '}' && state === 'variable') {
 				state = 'text';
 				const variableName = text.slice(startVariablePos, i);
-				resultText.push({ variableName, value: env[variableName] });
+				resultText.push({ variableName, value: envValues.get(variableName) ?? '' });
 				startVariablePos = i + 1;
 			}
 		}
@@ -150,7 +108,7 @@ class EnvironmentContextResolver {
 		return resultText;
 	}
 
-	public parseStringWithEnvironmentOverrides(
+	private static parseStringWithEnvironmentOverrides(
 		text: string,
 		data: PickedWorkspaceData,
 		serviceId?: string,
@@ -160,27 +118,27 @@ class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	public buildEnvironmentVariables(data: PickedWorkspaceData, serviceId?: string, requestId?: string) {
-		let env: Environment = asEnv({ __name: '', __id: '', __data: [] });
+	public static buildEnvironmentVariables(
+		data: PickedWorkspaceData,
+		serviceId?: string,
+		requestId?: string,
+	): OrderedKeyValuePairs {
+		const values = new OrderedKeyValuePairs();
 		if (data.selectedEnvironment) {
-			env = { ...data.environments[data.selectedEnvironment] };
+			values.apply(data.environments[data.selectedEnvironment].values);
 		}
 		if (serviceId) {
 			const service = data.services[serviceId];
 			if (service?.selectedEnvironment) {
-				env = { ...env, ...service.localEnvironments[service.selectedEnvironment] };
+				values.apply(service.localEnvironments[service.selectedEnvironment].values);
 			}
 		}
 		if (requestId) {
 			const request = data.requests[requestId];
 			if (request?.environmentOverride) {
-				env = { ...env, ...request.environmentOverride };
+				values.apply(request.environmentOverride.values);
 			}
 		}
-		env.__data = getDataArrayFromEnvKeys(env);
-
-		return env;
+		return values;
 	}
 }
-
-export const environmentContextResolver = EnvironmentContextResolver.INSTANCE;

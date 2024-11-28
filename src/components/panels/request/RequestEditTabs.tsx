@@ -2,7 +2,7 @@ import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
 import { RequestBody } from './RequestBody';
 import { useSelector } from 'react-redux';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
 	selectEnvironments,
 	selectServices,
@@ -17,12 +17,13 @@ import {
 	EndpointRequest,
 	QueryParams,
 	Environment,
-	newEnvironment,
+	createEmptyEnvironment,
 } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
 import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
+import { OrderedKeyValueEditableTable } from '../shared/OrderedKeyValueEditableTable';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
@@ -36,7 +37,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	const requests = useSelector(selectRequests);
 	const endpoints = useSelector(selectEndpoints);
 	const endpoint = endpoints[request.endpointId];
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
+	const varsEnv = EnvironmentContextResolver.buildEnvironmentVariables(
 		{ environments, selectedEnvironment, services, settings, requests },
 		endpoint?.serviceId,
 		request.id,
@@ -66,9 +67,9 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
-				<EnvironmentEditableTable
-					environment={request.headers as Environment}
-					setNewEnvironment={(newEnvironment: Environment) => update({ headers: newEnvironment })}
+				<OrderedKeyValueEditableTable
+					values={request.headers}
+					onChange={(values) => update({ headers: values })}
 					varsEnv={varsEnv}
 				/>
 			</TabPanel>
@@ -92,7 +93,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			</TabPanel>
 			<TabPanel value="environment">
 				<EnvironmentEditableTable
-					environment={(request.environmentOverride ?? newEnvironment()) as Environment}
+					environment={request.environmentOverride ?? createEmptyEnvironment()}
 					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
 					varsEnv={varsEnv}
 				/>

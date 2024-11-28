@@ -7,6 +7,7 @@ import { useAppDispatch } from '../../../../state/store';
 import { SearchField } from '../../../shared/SearchField';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { tabsActions } from '../../../../state/tabs/slice';
+import { ELEMENT_ID } from '../../../../constants/uiElementIds';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -16,7 +17,7 @@ export function ServicesFileSystem() {
 
 	return (
 		<FileSystemTrunk
-			id="sidebar.section.services"
+			id={ELEMENT_ID.sidebar.services}
 			header="Services"
 			actions={<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />}
 		>

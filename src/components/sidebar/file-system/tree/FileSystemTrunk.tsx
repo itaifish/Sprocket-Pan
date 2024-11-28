@@ -3,8 +3,8 @@ import { PropsWithChildren } from 'react';
 import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
 import { useAppDispatch } from '../../../../state/store';
 import { useSelector } from 'react-redux';
-import { setUiMetadataByElement } from '../../../../state/active/slice';
-import { selectUiMetadataByElement } from '../../../../state/active/selectors';
+import { selectUiMetadataById } from '../../../../state/active/selectors';
+import { setUiMetadataById } from '../../../../state/active/slice';
 
 interface FileSystemTrunkProps extends PropsWithChildren {
 	id: string;
@@ -15,12 +15,12 @@ interface FileSystemTrunkProps extends PropsWithChildren {
 
 export function FileSystemTrunk({ id, children, header, actions }: FileSystemTrunkProps) {
 	const dispatch = useAppDispatch();
-	const collapsed = useSelector((state) => selectUiMetadataByElement(state, id))?.collapsed ?? false;
+	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const setCollapsed = (value: boolean) => {
-		dispatch(setUiMetadataByElement({ id: id, collapsed: value }));
+		dispatch(setUiMetadataById({ id: id, collapsed: value }));
 	};
 	return (
-		<ListItem nested>
+		<ListItem id={id} nested>
 			<ListSubheader>
 				<Stack direction="row" alignItems="center" justifyContent="space-between" width="100%" gap={3}>
 					{header}

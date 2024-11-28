@@ -1,9 +1,7 @@
 import {
-	EMPTY_HEADERS,
-	EMPTY_QUERY_PARAMS,
+	createEmptyEnvironment,
 	Endpoint,
 	EndpointRequest,
-	newEnvironment,
 	RESTfulRequestVerb,
 	RESTfulRequestVerbs,
 	Service,
@@ -15,7 +13,7 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { QueryParamUtils } from '../../utils/data-utils';
+import { UniqueKeyValuePairUtils } from '../../utils/data-utils';
 
 export type ParsedServiceWorkspaceData = {
 	services: Service[];
@@ -132,8 +130,8 @@ class SwaggerParseManager {
 						serviceId: service.id,
 						verb: method,
 						url: `${pathsUri}`,
-						baseHeaders: structuredClone(EMPTY_HEADERS),
-						baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
+						baseHeaders: [],
+						baseQueryParams: [],
 						description: pathData.description ?? 'This is a new endpoint',
 						name: `${method}: ${pathsUri}`,
 						requestIds: [],
@@ -146,13 +144,13 @@ class SwaggerParseManager {
 						id: v4(),
 						endpointId: defaultEndpointData.id,
 						name: defaultEndpointData.name,
-						headers: structuredClone(EMPTY_HEADERS),
-						queryParams: structuredClone(EMPTY_QUERY_PARAMS),
+						headers: [],
+						queryParams: [],
 						body: undefined,
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: newEnvironment(),
+						environmentOverride: createEmptyEnvironment(),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -163,14 +161,14 @@ class SwaggerParseManager {
 						switch (paramIn) {
 							case 'header':
 								if (typedParam.name) {
-									defaultEndpointData.baseHeaders[typedParam.name] = type;
+									UniqueKeyValuePairUtils.set(defaultEndpointData.baseHeaders, typedParam.name, type);
 								}
 								break;
 							case 'query':
 								if (typedParam.name) {
-									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, type);
+									UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, type);
 									if (schema?.type === 'array') {
-										QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, `${type}2`);
+										UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, `${type}2`);
 									}
 								}
 								break;
@@ -253,8 +251,8 @@ class SwaggerParseManager {
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: structuredClone(EMPTY_HEADERS),
-					baseQueryParams: structuredClone(EMPTY_QUERY_PARAMS),
+					baseHeaders: [],
+					baseQueryParams: [],
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
 					requestIds: [],
@@ -276,13 +274,13 @@ class SwaggerParseManager {
 					id: v4(),
 					endpointId: defaultEndpointData.id,
 					name: defaultEndpointData.name,
-					headers: structuredClone(EMPTY_HEADERS),
-					queryParams: structuredClone(EMPTY_QUERY_PARAMS),
+					headers: [],
+					queryParams: [],
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: newEnvironment(),
+					environmentOverride: createEmptyEnvironment(),
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {
@@ -298,7 +296,11 @@ class SwaggerParseManager {
 							break;
 						case 'header':
 							if (typedParam.name) {
-								defaultEndpointData.baseHeaders[typedParam.name] = typedParam.type ?? 'string';
+								UniqueKeyValuePairUtils.set(
+									defaultEndpointData.baseHeaders,
+									typedParam.name,
+									typedParam.type ?? 'string',
+								);
 							}
 							break;
 						case 'formData':
@@ -313,9 +315,9 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string');
+								UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, 'string');
 								if (typedParam.type === 'array') {
-									QueryParamUtils.add(defaultEndpointData.baseQueryParams, typedParam.name, 'string2');
+									UniqueKeyValuePairUtils.set(defaultEndpointData.baseQueryParams, typedParam.name, 'string2');
 								}
 							}
 							break;

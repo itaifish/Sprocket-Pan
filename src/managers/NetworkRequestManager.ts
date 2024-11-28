@@ -1,6 +1,5 @@
 import {
 	WorkspaceData,
-	EMPTY_HEADERS,
 	EndpointRequest,
 	EndpointResponse,
 	getRequestBodyCategory,
@@ -11,10 +10,9 @@ import {
 	SPHeaders,
 } from '../types/application-data/application-data';
 import { queryParamsToStringReplaceVars } from '../utils/application';
-import { environmentContextResolver } from './EnvironmentContextResolver';
+import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
-import { HeaderUtils } from '../utils/data-utils';
 import { capitalizeWord } from '../utils/string';
 import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
 import { StateAccess } from '../state/types';
@@ -23,8 +21,9 @@ import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
 import { log } from '../utils/logging';
+import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
+import { CONTENT_TYPE } from '../constants/request';
 
-const contentType = 'Content-Type';
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -131,62 +130,48 @@ class NetworkRequestManager {
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
-		const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
+		const url = EnvironmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
 		let body: Record<string, unknown> | unknown[] | undefined = await this.parseRequestForEnvironmentOverrides(request);
 		if (body != undefined && typeof body != 'string') {
-			body = environmentContextResolver.resolveVariablesForMappedObject(body, {
+			body = EnvironmentContextResolver.resolveVariablesForMappedObject(body, {
 				data,
 				serviceId: endpoint.serviceId,
 				requestId: request.id,
 			});
 		}
-		const headers: SPHeaders = structuredClone(EMPTY_HEADERS);
-		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders.__data)}`);
+		const headers: SPHeaders = new OrderedKeyValuePairs();
+		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
-		endpoint.baseHeaders.__data
-			.filter((header) => header?.key != null && header?.value != null)
-			.forEach((header) => {
-				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					header.key,
-					data,
-					endpoint.serviceId,
-					request.id,
-				);
-				HeaderUtils.set(
-					headers,
-					parsedKey,
-					environmentContextResolver.resolveVariablesForString(
-						endpoint.baseHeaders[header.key],
-						data,
-						endpoint.serviceId,
-						request.id,
-					),
-				);
-			});
-		request.headers.__data
-			.filter((header) => header?.key != null && header?.value != null)
-			.forEach((header) => {
-				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					header.key,
-					data,
-					endpoint.serviceId,
-					request.id,
-				);
-				HeaderUtils.set(
-					headers,
-					parsedKey,
-					environmentContextResolver.resolveVariablesForString(
-						request.headers[header.key],
-						data,
-						endpoint.serviceId,
-						request.id,
-					),
-				);
-			});
+		endpoint.baseHeaders.toArray().forEach((header) => {
+			if (header.value == null) return;
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
+				header.key,
+				data,
+				endpoint.serviceId,
+				request.id,
+			);
+			headers.set(
+				parsedKey,
+				EnvironmentContextResolver.resolveVariablesForString(header.value, data, endpoint.serviceId, request.id),
+			);
+		});
+		request.headers.toArray().forEach((header) => {
+			if (header.value == null) return;
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
+				header.key,
+				data,
+				endpoint.serviceId,
+				request.id,
+			);
+			headers.set(
+				parsedKey,
+				EnvironmentContextResolver.resolveVariablesForString(header.value, data, endpoint.serviceId, request.id),
+			);
+		});
 
-		const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
+		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
 		let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
-			environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
+			EnvironmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
 		);
 		if (queryParamStr) {
 			queryParamStr = `?${queryParamStr}`;
@@ -212,20 +197,19 @@ class NetworkRequestManager {
 		} else if (category !== 'none') {
 			networkBody = Body.text(networkRequest.body);
 			// auto-set content type if not already set
-			if (request.headers[contentType] == undefined) {
-				HeaderUtils.set(headers, contentType, rawBodyTypeToMime(networkRequest.bodyType));
+			if (request.headers.get(CONTENT_TYPE) == undefined) {
+				request.headers.set(CONTENT_TYPE, rawBodyTypeToMime(networkRequest.bodyType));
 			}
 		} else {
 			networkBody = undefined;
 		}
 
-		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
 
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
 			body: networkBody,
-			headers: headersToSend,
+			headers,
 			responseType: ResponseType.Text,
 		});
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(

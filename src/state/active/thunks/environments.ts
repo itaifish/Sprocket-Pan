@@ -6,7 +6,7 @@ import { createNewEnvironmentObject } from './util';
 import { tabsActions } from '../../tabs/slice';
 
 interface AddNewEnvironment {
-	data?: Partial<Omit<Environment, '__id'>>;
+	data?: Partial<Omit<Environment, 'id'>>;
 }
 
 export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { state: RootState }>(
@@ -15,17 +15,17 @@ export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { s
 		const newEnvironment = {
 			...createNewEnvironmentObject(),
 			...data,
-			__data: structuredClone(data.__data ?? []),
+			values: { ...data.values },
 		} as unknown as Environment;
 		thunk.dispatch(insertEnvironment(newEnvironment));
-		return newEnvironment.__id;
+		return newEnvironment.id;
 	},
 );
 
 export const addNewEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
 	'active/addEnvironmentById',
 	async (oldId, thunk) => {
-		const { __id, ...environment } = thunk.getState().active.environments[oldId];
+		const { id, ...environment } = thunk.getState().active.environments[oldId];
 		thunk.dispatch(addNewEnvironment({ data: environment }));
 	},
 );

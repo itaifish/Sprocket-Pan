@@ -19,7 +19,7 @@ import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 
 import { useSelector } from 'react-redux';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
 	selectEnvironments,
 	selectServices,
@@ -32,7 +32,6 @@ import { updateService } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { Service, EndpointRequest, Environment } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
-import { asEnv } from '../../../utils/types';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { EditableText } from '../../shared/input/EditableText';
 import { EditableTextArea } from '../../shared/input/EditableTextArea';
@@ -148,13 +147,16 @@ export function ServicePanel({ id }: PanelProps) {
 								<SprocketTooltip text="Add New Service Environment">
 									<IconButton
 										onClick={() => {
-											const newEnv = asEnv({
-												__id: v4(),
-												__name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
-												__data: [],
-											});
+											const id = v4();
 											update({
-												localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+												localEnvironments: {
+													...serviceData.localEnvironments,
+													[id]: {
+														id: id,
+														name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
+														values: {},
+													},
+												},
 											});
 										}}
 									>
@@ -163,14 +165,14 @@ export function ServicePanel({ id }: PanelProps) {
 								</SprocketTooltip>
 								<Stack spacing={4}>
 									{Object.values(serviceData.localEnvironments).map((env) => (
-										<Box key={env.__id}>
+										<Box key={env.id}>
 											<EditableText
-												text={env.__name}
+												text={env.name}
 												setText={(text) =>
 													update({
 														localEnvironments: {
 															...serviceData.localEnvironments,
-															[env.__id]: { ...env, __name: text } as Environment,
+															[env.id]: { ...env, name: text } as Environment,
 														},
 													})
 												}
@@ -178,17 +180,17 @@ export function ServicePanel({ id }: PanelProps) {
 													return text != '';
 												}}
 												isTitle
-												color={serviceData.selectedEnvironment === env.__id ? 'primary' : 'neutral'}
+												color={serviceData.selectedEnvironment === env.id ? 'primary' : 'neutral'}
 											></EditableText>
-											<SprocketTooltip text={serviceData.selectedEnvironment === env.__id ? 'Unselect' : 'Select'}>
+											<SprocketTooltip text={serviceData.selectedEnvironment === env.id ? 'Unselect' : 'Select'}>
 												<IconButton
 													onClick={() => {
 														update({
-															selectedEnvironment: serviceData.selectedEnvironment === env.__id ? undefined : env.__id,
+															selectedEnvironment: serviceData.selectedEnvironment === env.id ? undefined : env.id,
 														});
 													}}
 												>
-													{serviceData.selectedEnvironment === env.__id ? (
+													{serviceData.selectedEnvironment === env.id ? (
 														<RadioButtonCheckedIcon />
 													) : (
 														<RadioButtonUncheckedIcon />
@@ -199,10 +201,10 @@ export function ServicePanel({ id }: PanelProps) {
 												text="Duplicate"
 												onClick={() => {
 													const newEnv = structuredClone(env);
-													newEnv.__id = v4();
-													newEnv.__name += ' (Copy)';
+													newEnv.id = v4();
+													newEnv.name += ' (Copy)';
 													update({
-														localEnvironments: { ...serviceData.localEnvironments, [newEnv.__id]: newEnv },
+														localEnvironments: { ...serviceData.localEnvironments, [newEnv.id]: newEnv },
 													});
 												}}
 											>
@@ -213,7 +215,7 @@ export function ServicePanel({ id }: PanelProps) {
 											<SprocketTooltip
 												text="Delete"
 												onClick={() => {
-													setEnvToDelete(env.__id);
+													setEnvToDelete(env.id);
 												}}
 											>
 												<IconButton>
@@ -227,11 +229,11 @@ export function ServicePanel({ id }: PanelProps) {
 													update({
 														localEnvironments: {
 															...structuredClone(serviceData.localEnvironments),
-															[env.__id]: { ...newEnv, __name: env.__name, __id: env.__id } as Environment,
+															[env.id]: { ...newEnv, name: env.name, id: env.id } as Environment,
 														},
 													})
 												}
-												varsEnv={environmentContextResolver.buildEnvironmentVariables(
+												varsEnv={EnvironmentContextResolver.buildEnvironmentVariables(
 													{ services, selectedEnvironment, environments, requests, settings },
 													serviceData.id,
 												)}
@@ -264,7 +266,7 @@ export function ServicePanel({ id }: PanelProps) {
 			<AreYouSureModal
 				open={!!envToDelete}
 				closeFunc={() => setEnvToDelete(null)}
-				action={`delete ${serviceData.localEnvironments[envToDelete ?? '']?.__name ?? envToDelete}`}
+				action={`delete ${serviceData.localEnvironments[envToDelete ?? '']?.name ?? envToDelete}`}
 				actionFunc={() => {
 					if (envToDelete) {
 						const newData = structuredClone(serviceData.localEnvironments);

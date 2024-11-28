@@ -1,6 +1,6 @@
-import { Constants } from '../../../utils/constants';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { Constants } from '../../../constants/constants';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;
@@ -18,7 +18,7 @@ export function RequestScript(props: RequestScriptProps) {
 	return (
 		<SprocketEditor
 			height={'55vh'}
-			value={localDataState}
+			value={localDataState ?? undefined}
 			onChange={(value) => {
 				if (value != null) {
 					setLocalDataState(value);
