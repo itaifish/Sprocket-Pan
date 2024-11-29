@@ -1,4 +1,3 @@
-import { PayloadAction } from '@reduxjs/toolkit';
 import { Update, updateEnvironment, updateRequest, updateService } from '../../state/active/slice';
 import { makeRequest } from '../../state/active/thunks/requests';
 import { StateAccess } from '../../state/types';
@@ -9,7 +8,6 @@ import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
 import { KeyValuePair, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
-import { cloneEnv } from '../../utils/application';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -35,7 +33,7 @@ export function getScriptInjectionCode(
 			return;
 		}
 
-		const update: PayloadAction<Update<EndpointRequest>>['payload'] = { id: requestId };
+		const update: Update<EndpointRequest> = { id: requestId };
 
 		if (modifications.body != undefined) {
 			update.bodyType = 'raw';
@@ -43,10 +41,10 @@ export function getScriptInjectionCode(
 			update.body = JSON.stringify(modifications.body);
 		}
 		if (modifications.queryParams != undefined) {
-			update.queryParams?.apply(modifications.queryParams);
+			update.queryParams = new OrderedKeyValuePairs(update.queryParams, modifications.queryParams).toArray();
 		}
 		if (modifications.headers != undefined) {
-			update.headers?.apply(modifications.headers);
+			update.headers = new OrderedKeyValuePairs(update.headers, modifications.headers).toArray();
 		}
 
 		dispatch(updateRequest(update));
@@ -65,11 +63,17 @@ export function getScriptInjectionCode(
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
 		const data = getState();
 		const request = getRequest();
+		const newPairs = new OrderedKeyValuePairs();
 		switch (level) {
 			case 'request':
-				const environmentOverride = cloneEnv(request!.environmentOverride);
-				environmentOverride.pairs.set(key, value);
-				dispatch(updateRequest({ id: request!.id, environmentOverride }));
+				newPairs.apply(request?.environmentOverride?.pairs);
+				newPairs.set(key, value);
+				dispatch(
+					updateRequest({
+						id: request!.id,
+						environmentOverride: { ...request!.environmentOverride, pairs: newPairs.toArray() },
+					}),
+				);
 				break;
 			case 'service':
 				const endpoint = data.endpoints[request!.endpointId];
@@ -81,24 +85,26 @@ export function getScriptInjectionCode(
 					return;
 				}
 				if (service.selectedEnvironment) {
-					const newEnv = cloneEnv(service.localEnvironments[service.selectedEnvironment]);
-					newEnv.pairs.set(key, value);
+					const env = service.localEnvironments[service.selectedEnvironment];
+					newPairs.apply(env.pairs);
+					newPairs.set(key, value);
 					dispatch(
 						updateService({
 							id: endpoint.serviceId,
 							localEnvironments: {
 								...service.localEnvironments,
-								[service.selectedEnvironment]: newEnv,
+								[service.selectedEnvironment]: { ...env, pairs: newPairs.toArray() },
 							},
 						}),
 					);
 				}
 				break;
 			default:
-				const newEnv = cloneEnv(data.environments[data.selectedEnvironment ?? '']);
-				if (newEnv) {
-					newEnv.pairs.set(key, value);
-					dispatch(updateEnvironment(newEnv));
+				const env = data.environments[data.selectedEnvironment ?? ''];
+				if (env != null) {
+					newPairs.apply(env.pairs);
+					newPairs.set(key, value);
+					dispatch(updateEnvironment({ ...env, pairs: newPairs.toArray() }));
 				}
 		}
 	};
@@ -110,7 +116,7 @@ export function getScriptInjectionCode(
 		}
 		const newQueryParams = new OrderedKeyValuePairs(request.queryParams);
 		newQueryParams.set(key, value);
-		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
+		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams.toArray() }));
 	};
 
 	const setHeader = (key: string, value: string) => {
@@ -120,7 +126,7 @@ export function getScriptInjectionCode(
 		}
 		const newHeaders = new OrderedKeyValuePairs(request.headers);
 		newHeaders.set(key, value);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
+		dispatch(updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const deleteHeader = (key: string) => {
 		const request = getRequest();
@@ -129,7 +135,7 @@ export function getScriptInjectionCode(
 		}
 		const newHeaders = new OrderedKeyValuePairs(request.headers);
 		newHeaders.delete(key);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
+		dispatch(updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const getEnvironment = () => {
 		const data = getState();

@@ -12,7 +12,6 @@ import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 import { cloneEnv } from '../../utils/application';
 
 export type ParsedServiceWorkspaceData = {
@@ -161,15 +160,15 @@ class SwaggerParseManager {
 						switch (paramIn) {
 							case 'header':
 								if (typedParam.name) {
-									defaultEndpointData.baseHeaders.set(typedParam.name, type);
+									defaultEndpointData.baseHeaders.push({ key: typedParam.name, value: type });
 								}
 								break;
 							case 'query':
 								if (typedParam.name) {
-									defaultEndpointData.baseQueryParams.set(typedParam.name, type);
-									if (schema?.type === 'array') {
-										defaultEndpointData.baseQueryParams.set(typedParam.name, `${type}2`);
-									}
+									defaultEndpointData.baseQueryParams.push({
+										key: typedParam.name,
+										value: schema?.type === 'array' ? `${type}2` : type,
+									});
 								}
 								break;
 							case 'path':
@@ -251,8 +250,8 @@ class SwaggerParseManager {
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: new OrderedKeyValuePairs(),
-					baseQueryParams: new OrderedKeyValuePairs(),
+					baseHeaders: [],
+					baseQueryParams: [],
 					description: 'This is a new endpoint',
 					name: `${method}: ${pathsUri}`,
 					requestIds: [],
@@ -274,8 +273,8 @@ class SwaggerParseManager {
 					id: v4(),
 					endpointId: defaultEndpointData.id,
 					name: defaultEndpointData.name,
-					headers: new OrderedKeyValuePairs(),
-					queryParams: new OrderedKeyValuePairs(),
+					headers: [],
+					queryParams: [],
 					body: undefined,
 					bodyType: 'none',
 					rawType: undefined,
@@ -296,7 +295,7 @@ class SwaggerParseManager {
 							break;
 						case 'header':
 							if (typedParam.name) {
-								defaultEndpointData.baseHeaders.set(typedParam.name, typedParam.type ?? 'string');
+								defaultEndpointData.baseHeaders.push({ key: typedParam.name, value: typedParam.type ?? 'string' });
 							}
 							break;
 						case 'formData':
@@ -311,10 +310,10 @@ class SwaggerParseManager {
 							break;
 						case 'query':
 							if (typedParam.name) {
-								defaultEndpointData.baseQueryParams.set(typedParam.name, 'string');
-								if (typedParam.type === 'array') {
-									defaultEndpointData.baseQueryParams.set(typedParam.name, 'string2');
-								}
+								defaultEndpointData.baseQueryParams.push({
+									key: typedParam.name,
+									value: typedParam.type === 'array' ? 'string2' : 'string',
+								});
 							}
 							break;
 						case 'path':

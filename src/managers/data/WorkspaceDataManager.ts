@@ -14,7 +14,6 @@ import { insomniaParseManager } from '../parsers/InsomniaParseManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -22,7 +21,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 	requests: {},
 	environments: {},
 	scripts: {},
-	secrets: new OrderedKeyValuePairs(),
+	secrets: [],
 	selectedEnvironment: undefined,
 	metadata: defaultWorkspaceMetadata,
 	uiMetadata: {

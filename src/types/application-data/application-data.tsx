@@ -8,7 +8,7 @@ import { TabType } from '../state/state';
 import CodeIcon from '@mui/icons-material/Code';
 import mime from 'mime';
 import { Key } from '@mui/icons-material';
-import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { KeyValuePair, KeyValueValues } from '../../classes/OrderedKeyValuePairs';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -157,14 +157,12 @@ export type GlobalData = {
 	workspaces: WorkspaceMetadata[];
 };
 
-export type Secrets = OrderedKeyValuePairs;
-
 export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, Environment>;
-	secrets: Secrets;
+	secrets: KeyValuePair[];
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
 	settings: Settings;

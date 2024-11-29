@@ -39,7 +39,6 @@ import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { RecentRequestListItem } from './RecentRequestListItem';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
-import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
 import { EditableData } from '../../shared/input/EditableData';
 
 export function ServicePanel({ id }: PanelProps) {
@@ -155,7 +154,7 @@ export function ServicePanel({ id }: PanelProps) {
 													[id]: {
 														id: id,
 														name: `${serviceData.name}.env.${Object.keys(serviceData.localEnvironments).length}`,
-														pairs: new OrderedKeyValuePairs(),
+														pairs: [],
 													},
 												},
 											});

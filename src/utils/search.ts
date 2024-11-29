@@ -9,7 +9,7 @@ import {
 import { log } from './logging';
 
 function cleanText(text: string) {
-	return text.toLocaleLowerCase();
+	return text?.toLocaleLowerCase() ?? '';
 }
 
 function envMatches(env: Environment, text: string) {
