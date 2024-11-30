@@ -38,7 +38,6 @@ export function EnvironmentPanel({ id }: PanelProps) {
 				checked={selectedEnvironment === id}
 				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
 			/>
-			<Typography>{environment.linked?.toString()}</Typography>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
 				<EditableData
 					values={environment.pairs}
