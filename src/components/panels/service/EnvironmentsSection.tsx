@@ -36,6 +36,7 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 		const newEnv = cloneEnv(env, nameMod);
 		onChange({
 			localEnvironments: {
+				...localEnvs,
 				[newEnv.id]: newEnv,
 			},
 		});
