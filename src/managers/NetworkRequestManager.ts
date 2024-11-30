@@ -150,7 +150,7 @@ class NetworkRequestManager {
 		});
 
 		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
-		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), (text) =>
+		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), true, (text) =>
 			EnvironmentContextResolver.resolveVariablesForString(text, envValues),
 		);
 		if (queryParamStr) {
@@ -182,7 +182,7 @@ class NetworkRequestManager {
 			url: `${url}${queryParamStr}`,
 			method: endpoint.verb,
 			body: networkRequestBodyText,
-			headers: headers.toArray(),
+			headers: headers.toObject(),
 			dateTime: new Date().getTime(),
 			bodyType: request.rawType,
 		};

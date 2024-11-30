@@ -68,7 +68,7 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 export type NetworkFetchRequest = {
 	method: RESTfulRequestVerb;
 	url: string;
-	headers: SPHeaders;
+	headers: Record<string, string>;
 	body: string;
 	bodyType?: RawBodyType;
 	dateTime: number;

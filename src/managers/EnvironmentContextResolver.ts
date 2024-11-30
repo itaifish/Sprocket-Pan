@@ -1,4 +1,4 @@
-import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
+import { KeyValuePair, OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
 import { Environment, WorkspaceData } from '../types/application-data/application-data';
 import { replaceValuesByKey } from '../utils/variables';
 
@@ -96,14 +96,31 @@ export class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
+	private static applyLayerOntoEnv(
+		layer: KeyValuePair[],
+		variables: OrderedKeyValuePairs,
+		replacer: OrderedKeyValuePairs,
+	) {
+		const orderedLayer = new OrderedKeyValuePairs(layer);
+		const replacerPairs = replacer.toArray();
+		orderedLayer.transformValues((val) => (val == null ? val : replaceValuesByKey(val, replacerPairs)));
+		variables.apply(orderedLayer);
+		replacer.apply(orderedLayer);
+	}
+
 	public static buildEnvironmentVariables({
+		secrets,
 		rootEnv,
 		servEnv,
 		reqEnv,
-		secrets,
 	}: BuildEnvironmentVariablesArgs): OrderedKeyValuePairs {
-		const values = new OrderedKeyValuePairs(rootEnv?.pairs, servEnv?.pairs, reqEnv?.pairs);
-		values.transformValues((val) => (val == null ? val : replaceValuesByKey(val, secrets)));
-		return values;
+		const replacer = new OrderedKeyValuePairs(secrets);
+		const variables = new OrderedKeyValuePairs();
+		[rootEnv, servEnv, reqEnv].forEach((env) => {
+			if (env?.pairs?.length) {
+				this.applyLayerOntoEnv(env.pairs, variables, replacer);
+			}
+		});
+		return variables;
 	}
 }
