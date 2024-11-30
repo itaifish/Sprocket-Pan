@@ -1,6 +1,5 @@
 import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
-import { useState, useRef, useEffect } from 'react';
-import { Environment } from '../../../types/application-data/application-data';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor, Monaco } from '@monaco-editor/react';
@@ -13,18 +12,19 @@ import { selectEnvironments, selectSelectedEnvironment } from '../../../state/ac
 import { editor } from 'monaco-editor';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
-import { FormatIcon } from '../buttons/FormatIcon';
-import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
-import { cloneEnv, envParse } from '../../../utils/application';
-import { getMode } from '../../../utils/style';
+import { KeyValuePair, KeyValueValues } from '../../../classes/OrderedKeyValuePairs';
+import { getEditorTheme } from '../../../utils/style';
+import { replaceValuesByKey } from '../../../utils/variables';
+import { FormatButton } from '../buttons/FormatButton';
 
-interface KeyValueObject<T extends KeyValueValues> {
-	[key: string]: T | undefined;
+function parseEditorJSON<T>(text: string): Record<string, T> {
+	if (text === '') return {};
+	return JSON.parse(text) as Record<string, T>;
 }
 
 export interface EditableDataSettings {
 	fullSize?: boolean;
-	environment?: Environment | Environment['pairs'] | OrderedKeyValuePairs;
+	envPairs?: KeyValuePair[];
 }
 
 interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
@@ -32,94 +32,82 @@ interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettin
 	onChange: (newData: KeyValuePair<T>[]) => void;
 }
 
-export function EditableData<T extends KeyValueValues>({
-	values,
-	onChange,
-	fullSize,
-	environment,
-}: EditableDataProps<T>) {
-	const resolvedMode = getMode(useColorScheme());
+export function EditableData<T extends KeyValueValues>({ values, onChange, fullSize, envPairs }: EditableDataProps<T>) {
+	const theme = getEditorTheme(useColorScheme());
 
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
-	environment = environment ?? (selectedEnvironment == null ? cloneEnv() : environments[selectedEnvironment]);
-	const envValues =
-		'set' in environment
-			? environment
-			: new OrderedKeyValuePairs('pairs' in environment ? environment.pairs : environment);
-
-	const valuesAsObject = Object.fromEntries(values.map(({ key, value }) => [key, value]));
+	const envValues = envPairs ?? (selectedEnvironment == null ? [] : environments[selectedEnvironment].pairs);
+	const valuesAsObject = useMemo(() => Object.fromEntries(values.map(({ key, value }) => [key, value])), [values]);
 
 	const [editorText, setEditorText] = useState(JSON.stringify(valuesAsObject));
-	const [backupEditorText, setBackupEditorText] = useState(editorText);
-	const [runningTableData, setRunningTableData] = useState<KeyValueObject<T>>(valuesAsObject);
 	const [hasChanged, setChanged] = useState(false);
-	const [mode, setMode] = useState<'view' | 'edit'>('edit');
+	const [isFormatting, setIsFormatting] = useState(false);
+	const [isReadOnly, setIsReadOnly] = useState(false);
 
+	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-	const format = () => editorRef.current?.getAction('editor.action.formatDocument')?.run();
+	const format = () => {
+		editorRef.current?.getAction('editor.action.formatDocument')?.run();
+		setIsFormatting(true);
+	};
 
 	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		editorRef.current = editor;
 		format();
 	};
 
-	useEffect(() => {
-		setEditorText(JSON.stringify(valuesAsObject));
-		setChanged(false);
-		setRunningTableData(valuesAsObject);
-		format();
-	}, [valuesAsObject]);
-
 	const reset = () => {
 		setEditorText(JSON.stringify(valuesAsObject));
 		setChanged(false);
-		setRunningTableData(valuesAsObject);
 		format();
 	};
 
 	const save = () => {
-		const tableData = JSON.parse(editorText);
+		const tableData = parseEditorJSON<T>(editorText);
 		if (tableData != null) {
-			onChange(tableData);
+			onChange(Object.entries(tableData).map(([key, value]) => ({ key, value })));
 			setChanged(false);
+			format();
 		}
 	};
 
-	const getEnvParsedRunningTableData = () => {
-		if (runningTableData == null) {
-			return 'null';
+	const switchMode = () => {
+		if (isReadOnly) {
+			// if current mode isReadOnly, switching to false (edit) mode
+			editorRef.current?.updateOptions({ readOnly: false });
+			editorRef.current?.setValue(editorText);
+			ignoreEditorUpdates.current = false;
+			setIsReadOnly(false);
+		} else {
+			// else switching to true (view) mode
+			setIsReadOnly(true);
+			ignoreEditorUpdates.current = true;
+			editorRef.current?.setValue(replaceValuesByKey(editorText, envValues));
+			editorRef.current?.updateOptions({ readOnly: true });
 		}
-		const parsedData: KeyValueObject<string> = {};
-		Object.entries(runningTableData).forEach(([key, value]) => {
-			parsedData[envParse(key, envValues)] = envParse(value, envValues);
-		});
-		return JSON.stringify(parsedData);
+	};
+
+	useEffect(() => {
+		ignoreEditorUpdates.current = isReadOnly;
+	}, [isReadOnly]);
+
+	const onEditorChange = (value: string | undefined) => {
+		if (ignoreEditorUpdates.current) return;
+		setEditorText(value ?? '');
+		if (isFormatting) {
+			setIsFormatting(false);
+		} else {
+			setChanged(true);
+		}
 	};
 
 	return (
 		<>
 			<Stack direction="row" justifyContent="end" alignItems="end">
-				<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
-					<IconButton
-						disabled={runningTableData == null}
-						onClick={() => {
-							if (mode === 'edit') {
-								setMode('view');
-								setBackupEditorText(editorText);
-								setEditorText(getEnvParsedRunningTableData());
-								editorRef.current?.updateOptions({ readOnly: true });
-							} else {
-								setMode('edit');
-								setEditorText(backupEditorText);
-								editorRef.current?.updateOptions({ readOnly: false });
-								editorRef.current?.setValue(backupEditorText);
-							}
-						}}
-					>
-						{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
-					</IconButton>
+				<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
+					<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
 				</SprocketTooltip>
 				<SprocketTooltip text="Clear Changes">
 					<IconButton disabled={!hasChanged} onClick={reset}>
@@ -127,19 +115,14 @@ export function EditableData<T extends KeyValueValues>({
 					</IconButton>
 				</SprocketTooltip>
 				<SprocketTooltip text="Save Changes">
-					<IconButton
-						disabled={!hasChanged || runningTableData == null}
-						onClick={() => {
-							save();
-						}}
-					>
-						<Badge invisible={!hasChanged || runningTableData == null} color="primary">
+					<IconButton disabled={!hasChanged} onClick={save}>
+						<Badge invisible={!hasChanged} color="primary">
 							<SaveIcon></SaveIcon>
 						</Badge>
 					</IconButton>
 				</SprocketTooltip>
 				<CopyToClipboardButton copyText={editorText} />
-				<FormatIcon actionFunction={() => format()} />
+				<FormatButton disabled={isReadOnly} onChange={format} />
 			</Stack>
 			<Box
 				onKeyDown={(e) => {
@@ -152,15 +135,9 @@ export function EditableData<T extends KeyValueValues>({
 				<Editor
 					height={fullSize ? '100%' : `${clamp((values.length + 2) * 3, 10, 40)}vh`}
 					value={editorText}
-					onChange={(value) => {
-						if (value != editorText) {
-							setEditorText(value ?? '');
-							setChanged(true);
-							setRunningTableData(value == null ? null : JSON.parse(value));
-						}
-					}}
+					onChange={onEditorChange}
 					language={'json'}
-					theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+					theme={theme}
 					options={defaultEditorOptions}
 					onMount={handleEditorDidMount}
 				/>

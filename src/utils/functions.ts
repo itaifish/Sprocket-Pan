@@ -1,4 +1,4 @@
-import { Environment, Script } from '../types/application-data/application-data';
+import { Script } from '../types/application-data/application-data';
 import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
 import { getMonacoInjectedTypeCode } from '../managers/MonacoInitManager';
 import { parseScript } from 'esprima';
@@ -127,50 +127,14 @@ export function combineReplacers(replacers: Replacer[]): Replacer {
 	};
 }
 
-export const noSettingsReplacer: Replacer = (key, value) => {
-	if (key === 'settings') {
-		return undefined;
-	}
-	return value;
-};
-
-export const noHistoryReplacer = (key: string, value: unknown) => {
-	if (key === 'history') {
-		return [];
-	}
-	return value;
-};
-
-export function noMetadataReplacer(key: string, value: unknown) {
-	if (key === 'metadata') {
-		return undefined;
-	}
-	return value;
-}
-
-function replaceAllEnvironmentValuesWithEmptyString({ pairs, ...env }: Environment): Environment {
-	return {
-		...env,
-		pairs: pairs.map(({ key }) => ({ key, value: '' })),
+export function nullifyProperties<T extends Record<string, any>>(...keys: (keyof T)[]): Replacer {
+	return (key, value) => {
+		if (keys.includes(key)) {
+			return undefined;
+		}
+		return value;
 	};
 }
-
-export const noEnvironmentsReplacer = (key: string, value: unknown) => {
-	if (key === 'environments' || key === 'localEnvironments') {
-		const record = value as Record<string, Environment>;
-		return Object.values(record).reduce(
-			(acc, curr) => {
-				Object.assign(acc, { [curr.id]: replaceAllEnvironmentValuesWithEmptyString(curr) });
-				return acc;
-			},
-			{} as Record<string, Environment>,
-		);
-	}
-	if (key === 'environmentOverride') {
-		return replaceAllEnvironmentValuesWithEmptyString(value as Environment);
-	}
-	return value;
-};
 
 export function safeJsonParse<T>(str: string) {
 	try {

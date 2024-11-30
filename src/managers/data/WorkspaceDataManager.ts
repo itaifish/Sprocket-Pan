@@ -5,15 +5,18 @@ import {
 	HistoricalEndpointResponse,
 	WorkspaceMetadata,
 	UiMetadata,
+	EndpointRequest,
 } from '../../types/application-data/application-data';
 import swaggerParseManager from '../parsers/SwaggerParseManager';
-import { noHistoryReplacer } from '../../utils/functions';
-import { saveUpdateManager } from '../SaveUpdateManager';
+import { nullifyProperties } from '../../utils/functions';
+import { SaveUpdateManager } from '../SaveUpdateManager';
 import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
 import { insomniaParseManager } from '../parsers/InsomniaParseManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
+import { save } from '@tauri-apps/api/dialog';
+import { writeTextFile } from '@tauri-apps/api/fs';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -42,10 +45,12 @@ export const defaultWorkspaceData: WorkspaceData = {
 		},
 		listStyle: 'default',
 	},
-	version: saveUpdateManager.getCurrentVersion(),
+	version: SaveUpdateManager.getCurrentVersion(),
 };
 
 export class WorkspaceDataManager {
+	private static noHistoryReplacer = nullifyProperties('history');
+
 	public static loadSwaggerFile(url: string) {
 		return swaggerParseManager.parseSwaggerFile('filePath', url);
 	}
@@ -58,6 +63,30 @@ export class WorkspaceDataManager {
 		return insomniaParseManager.parseInsomniaFile('filePath', url);
 	}
 
+	public static async exportData(data?: WorkspaceData) {
+		if (data == null) {
+			throw new Error('export data called with no data');
+		}
+		const filePath = await save({
+			title: `Save ${data.metadata?.name} Workspace`,
+			filters: [
+				{ name: 'Sprocketpan Workspace', extensions: ['json'] },
+				{ name: 'All Files', extensions: ['*'] },
+			],
+		});
+
+		if (!filePath) {
+			return;
+		}
+
+		const dataToWrite = JSON.stringify(
+			data,
+			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'secrets', 'uiMetadata'),
+		);
+
+		await writeTextFile(filePath, dataToWrite);
+	}
+
 	public static async saveData(data: WorkspaceData) {
 		const {
 			metadata: { fileName, ...metadata },
@@ -68,7 +97,7 @@ export class WorkspaceDataManager {
 
 		const paths = this.getWorkspacePath(fileName);
 
-		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(strippedData, noHistoryReplacer));
+		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(strippedData, this.noHistoryReplacer));
 		const saveHistory = FileSystemWorker.tryUpdateFile(
 			paths.history,
 			JSON.stringify(
@@ -109,9 +138,14 @@ export class WorkspaceDataManager {
 	}
 
 	public static async initializeWorkspace(workspace: WorkspaceMetadata) {
-		await fileSystemManager.createDataFolderIfNotExists();
-		await this.createDataFilesIfNotExist(workspace);
-		return await this.loadDataFromFile(workspace);
+		try {
+			await fileSystemManager.createDataFolderIfNotExists();
+			await this.createDataFilesIfNotExist(workspace);
+			return await this.loadDataFromFile(workspace);
+		} catch (err) {
+			console.error(err);
+			return null;
+		}
 	}
 
 	private static async loadDataFromFile(workspace: WorkspaceMetadata) {
@@ -139,7 +173,7 @@ export class WorkspaceDataManager {
 		} as WorkspaceMetadata;
 		parsedData.uiMetadata = JSON.parse(uiMetadata) as UiMetadata;
 		parsedData.secrets = JSON.parse(secrets);
-		saveUpdateManager.update(parsedData);
+		SaveUpdateManager.update(parsedData);
 		return parsedData;
 	}
 

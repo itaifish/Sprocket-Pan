@@ -8,7 +8,7 @@ import {
 	RawBodyTypes,
 	rawBodyTypeToMime,
 } from '../types/application-data/application-data';
-import { queryParamsToString, toKeyValuePairs } from '../utils/application';
+import { getEnvValuesFromData, queryParamsToString, toKeyValuePairs } from '../utils/application';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
@@ -125,52 +125,33 @@ class NetworkRequestManager {
 	}
 
 	public async sendRequest(requestId: string, data: WorkspaceData, auditLog: AuditLog = []) {
+		const envValues = getEnvValuesFromData(data, requestId);
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
-		const url = EnvironmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
+		const url = EnvironmentContextResolver.resolveVariablesForString(unparsedUrl, envValues);
 		let body: Record<string, unknown> | unknown[] | undefined = await this.parseRequestForEnvironmentOverrides(request);
 		if (body != undefined && typeof body != 'string') {
-			body = EnvironmentContextResolver.resolveVariablesForMappedObject(body, {
-				data,
-				serviceId: endpoint.serviceId,
-				requestId: request.id,
-			});
+			body = EnvironmentContextResolver.resolveVariablesForMappedObject(body, envValues);
 		}
 		const headers = new OrderedKeyValuePairs();
 		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
 		endpoint.baseHeaders.forEach((header) => {
 			if (header.value == null) return;
-			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
-				header.key,
-				data,
-				endpoint.serviceId,
-				request.id,
-			);
-			headers.set(
-				parsedKey,
-				EnvironmentContextResolver.resolveVariablesForString(header.value, data, endpoint.serviceId, request.id),
-			);
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
+			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});
 		request.headers.forEach((header) => {
 			if (header.value == null) return;
-			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(
-				header.key,
-				data,
-				endpoint.serviceId,
-				request.id,
-			);
-			headers.set(
-				parsedKey,
-				EnvironmentContextResolver.resolveVariablesForString(header.value, data, endpoint.serviceId, request.id),
-			);
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
+			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});
 
 		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
 		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), (text) =>
-			EnvironmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
+			EnvironmentContextResolver.resolveVariablesForString(text, envValues),
 		);
 		if (queryParamStr) {
 			queryParamStr = `?${queryParamStr}`;

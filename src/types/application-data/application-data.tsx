@@ -101,6 +101,10 @@ export type Environment = {
 	pairs: KeyValuePair[];
 };
 
+type LinkedEnv = { serviceId: string; envId: string };
+
+export type RootEnvironment = Environment & { linked?: LinkedEnv[] };
+
 export type QueryParams = KeyValuePair<KeyValueValues>[];
 export type SPHeaders = KeyValuePair[];
 
@@ -161,7 +165,7 @@ export type WorkspaceData = {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
-	environments: Record<string, Environment>;
+	environments: Record<string, RootEnvironment>;
 	secrets: KeyValuePair[];
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;

@@ -8,6 +8,7 @@ import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
 import { KeyValuePair, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { getEnvValuesFromData } from '../../utils/application';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -141,11 +142,11 @@ export function getScriptInjectionCode(
 		const data = getState();
 		const request = getRequest();
 		if (request == null) {
-			return EnvironmentContextResolver.buildEnvironmentVariables(data).toObject();
+			return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data)).toObject();
 		}
 		const endpoint = data.endpoints[request.endpointId];
 		const serviceId = endpoint?.serviceId;
-		return EnvironmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id).toObject();
+		return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data, request.id)).toObject();
 	};
 
 	const sendRequest = async (requestId: string) => {

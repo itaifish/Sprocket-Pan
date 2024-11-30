@@ -7,7 +7,7 @@ import { WorkspaceData } from '../../types/application-data/application-data';
 import { selectGlobalState } from '../global/selectors';
 import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
-const selectActiveState = activeSlice.selectSlice;
+export const selectActiveState = activeSlice.selectSlice;
 
 export const selectAllItems = createSelector(selectActiveState, (state) => ({
 	environments: state.environments,
@@ -18,6 +18,10 @@ export const selectAllItems = createSelector(selectActiveState, (state) => ({
 }));
 
 export const selectSelectedEnvironment = createSelector(selectActiveState, (state) => state.selectedEnvironment);
+
+export const selectSelectedEnvironmentValue = createSelector(selectActiveState, (state) =>
+	state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+);
 
 // we're handling state secrets lol
 export const selectSecrets = createSelector(selectActiveState, (state) => state.secrets);
@@ -34,6 +38,14 @@ export const selectServices = createSelector(selectActiveState, (state) => state
 export const selectServicesById = createSelector(
 	[selectServices, (_, id: string) => id],
 	(services, id) => services[id],
+);
+
+export const selectServiceSelectedEnvironmentValue = createSelector(
+	[selectServices, (_, id: string) => id],
+	(services, id) => {
+		const envId = services[id].selectedEnvironment;
+		return envId == null ? null : services[id].localEnvironments[envId];
+	},
 );
 
 export const selectEnvironments = createSelector(selectActiveState, (state) => {
@@ -142,10 +154,11 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 	if (query) {
 		query = `?${query}`;
 	}
-	return EnvironmentContextResolver.stringWithVarsToSnippet(
-		`${serviceData.baseUrl}${endpointData.url}${query}`,
-		state,
-		serviceData.id,
-		requestData.id,
-	);
+	return EnvironmentContextResolver.stringWithVarsToSnippet(`${serviceData.baseUrl}${endpointData.url}${query}`, {
+		secrets: state.secrets,
+		servEnv:
+			serviceData.selectedEnvironment == null ? null : serviceData.localEnvironments[serviceData.selectedEnvironment],
+		reqEnv: requestData.environmentOverride,
+		rootEnv: state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+	});
 });

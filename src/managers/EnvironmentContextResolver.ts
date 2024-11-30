@@ -1,81 +1,62 @@
 import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
-import { WorkspaceData } from '../types/application-data/application-data';
+import { Environment, WorkspaceData } from '../types/application-data/application-data';
+import { replaceValuesByKey } from '../utils/variables';
 
 export type Snippet = {
 	value: string;
 	variableName?: string;
 };
 
-type PickedWorkspaceData = Pick<
-	WorkspaceData,
-	'selectedEnvironment' | 'services' | 'environments' | 'requests' | 'settings'
->;
+export type BuildEnvironmentVariablesArgs = Pick<WorkspaceData, 'secrets'> & {
+	rootEnv?: Environment | null;
+	reqEnv?: Environment | null;
+	servEnv?: Environment | null;
+	// ensures you don't accidentally pass in WorkspaceData, which technically satisfies the above properties
+	environments?: never;
+};
 
 export class EnvironmentContextResolver {
-	public static stringWithVarsToSnippet(
-		text: string,
-		data: PickedWorkspaceData,
-		serviceId?: string,
-		requestId?: string,
-	) {
-		return this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
+	public static stringWithVarsToSnippet(text: string, data: BuildEnvironmentVariablesArgs) {
+		return this.parseStringWithEnvironmentOverrides(text, data);
 	}
 
-	public static resolveVariablesForString(
-		text: string,
-		data: PickedWorkspaceData,
-		serviceId?: string,
-		requestId?: string,
-	) {
-		const snippets = this.parseStringWithEnvironmentOverrides(text, data, serviceId, requestId);
+	public static resolveVariablesForString(text: string, data: BuildEnvironmentVariablesArgs) {
+		const snippets = this.parseStringWithEnvironmentOverrides(text, data);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
 	public static resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
-		context: {
-			data: PickedWorkspaceData;
-			serviceId?: string;
-			requestId?: string;
-		},
+		data: BuildEnvironmentVariablesArgs,
 	) {
-		const { data, serviceId, requestId } = context;
 		if (!Array.isArray(object)) {
 			const newObj: Record<string, unknown> = {};
 			Object.keys(object).forEach((key) => {
-				const newKey = this.resolveVariablesForString(key, data, serviceId, requestId);
-				newObj[newKey] = this.resolveVariableForObjectKey(object, key, context);
+				const newKey = this.resolveVariablesForString(key, data);
+				newObj[newKey] = this.resolveVariableForObjectKey(object, key, data);
 			});
 			return newObj;
 		} else {
-			return object.map((_item, index) => this.resolveVariableForObjectKey(object, index, context));
+			return object.map((_item, index) => this.resolveVariableForObjectKey(object, index, data));
 		}
 	}
 
 	private static resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(
 		object: T,
 		key: TKey,
-		context: {
-			data: PickedWorkspaceData;
-			serviceId?: string;
-			requestId?: string;
-		},
+		data: BuildEnvironmentVariablesArgs,
 	): T[TKey] {
-		const { data, serviceId, requestId } = context;
 		const oldValue = object[key];
 		if (oldValue === null) {
 			return null as T[TKey];
 		} else if (typeof oldValue === 'object') {
 			if (Array.isArray(oldValue)) {
-				return oldValue.map((_val, index) => this.resolveVariableForObjectKey(oldValue, index, context)) as T[TKey];
+				return oldValue.map((_val, index) => this.resolveVariableForObjectKey(oldValue, index, data)) as T[TKey];
 			} else {
-				return this.resolveVariablesForMappedObject(
-					oldValue as T[keyof T] & Record<string, unknown>,
-					context,
-				) as T[TKey];
+				return this.resolveVariablesForMappedObject(oldValue as T[keyof T] & Record<string, unknown>, data) as T[TKey];
 			}
 		} else if (typeof oldValue === 'string') {
-			return this.resolveVariablesForString(oldValue, data, serviceId, requestId) as T[TKey];
+			return this.resolveVariablesForString(oldValue, data) as T[TKey];
 		}
 		return oldValue;
 	}
@@ -87,7 +68,6 @@ export class EnvironmentContextResolver {
 		if (text == null) {
 			return [];
 		}
-		text = text.toString();
 		let state: 'variable' | 'text' = 'text';
 		let startVariablePos = 0;
 		const resultText = [];
@@ -111,37 +91,19 @@ export class EnvironmentContextResolver {
 		return resultText;
 	}
 
-	private static parseStringWithEnvironmentOverrides(
-		text: string,
-		data: PickedWorkspaceData,
-		serviceId?: string,
-		requestId?: string,
-	) {
-		const env = this.buildEnvironmentVariables(data, serviceId, requestId);
+	private static parseStringWithEnvironmentOverrides(text: string, data: BuildEnvironmentVariablesArgs) {
+		const env = this.buildEnvironmentVariables(data);
 		return this.parseStringWithEnvironment(text, env);
 	}
 
-	public static buildEnvironmentVariables(
-		data: PickedWorkspaceData,
-		serviceId?: string,
-		requestId?: string,
-	): OrderedKeyValuePairs {
-		const values = new OrderedKeyValuePairs();
-		if (data.selectedEnvironment) {
-			values.apply(data.environments[data.selectedEnvironment].pairs);
-		}
-		if (serviceId) {
-			const service = data.services[serviceId];
-			if (service?.selectedEnvironment) {
-				values.apply(service.localEnvironments[service.selectedEnvironment].pairs);
-			}
-		}
-		if (requestId) {
-			const request = data.requests[requestId];
-			if (request?.environmentOverride) {
-				values.apply(request.environmentOverride.pairs);
-			}
-		}
+	public static buildEnvironmentVariables({
+		rootEnv,
+		servEnv,
+		reqEnv,
+		secrets,
+	}: BuildEnvironmentVariablesArgs): OrderedKeyValuePairs {
+		const values = new OrderedKeyValuePairs(rootEnv?.pairs, servEnv?.pairs, reqEnv?.pairs);
+		values.transformValues((val) => (val == null ? val : replaceValuesByKey(val, secrets)));
 		return values;
 	}
 }

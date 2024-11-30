@@ -9,17 +9,14 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	private order: string[] = [];
 
 	constructor(...args: (KeyValueOrOrdered<T> | undefined)[]) {
-		console.log({ args });
-		args.forEach(this.apply);
+		args.forEach(this.apply.bind(this));
 	}
 
 	public apply(pairs: KeyValueOrOrdered<T> | undefined) {
 		if (pairs == null) return;
 		if ('toArray' in pairs) {
-			console.log('this is not a an ordered key value pair');
 			pairs = pairs.toArray();
 		}
-		console.log('got to the forEach of apply w/ pairs', pairs);
 		pairs.forEach(({ key, value }) => this.set(key, value));
 	}
 
@@ -32,13 +29,11 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	}
 
 	public set(key: string, value?: T) {
-		console.log(`tryna set w/ ${key}, ${value}`);
 		const oldValue = this.map[key];
 		if (oldValue == null) {
 			this.order.push(key);
 		}
 		this.map[key] = value;
-		console.log(`finished setting w/ ${key}, ${value}`);
 	}
 
 	public deleteByIndex(index: number) {
@@ -54,7 +49,6 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	}
 
 	private toKeyValuePair(key: string): KeyValuePair<T> {
-		console.log('entered toKeyValuePair for key ' + key + ' and map', this.map);
 		return { key, value: this.map[key] };
 	}
 
@@ -63,8 +57,7 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	}
 
 	public toArray() {
-		console.log('entered toArray for OrderedKeyValuePair', this.order);
-		return this.order.map(this.toKeyValuePair);
+		return this.order.map(this.toKeyValuePair.bind(this));
 	}
 
 	public toTableData() {
@@ -73,6 +66,12 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 
 	public keys() {
 		return this.order.slice();
+	}
+
+	public transformValues(transform: (value: T | undefined) => T | undefined) {
+		this.order.forEach((key) => {
+			this.map[key] = transform(this.map[key]);
+		});
 	}
 
 	public toObject() {

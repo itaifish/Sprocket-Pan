@@ -34,12 +34,12 @@ import { runScript } from '../../../state/active/thunks/requests';
 import { editor } from 'monaco-editor';
 import { PanelProps } from '../panels.interface';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
-import { FormatIcon } from '../../shared/buttons/FormatIcon';
 import { EditableText } from '../../shared/input/EditableText';
 import { sleep } from '../../../utils/misc';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { Constants } from '../../../constants/constants';
+import { FormatButton } from '../../shared/buttons/FormatButton';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -263,7 +263,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				</FormControl>
 			</Stack>
 			<Stack direction={'row'} spacing={2}>
-				<FormatIcon actionFunction={() => format()} />
+				<FormatButton onChange={format} />
 				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
 			<Editor

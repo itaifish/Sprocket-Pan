@@ -3,11 +3,9 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
-	selectEnvironments,
-	selectServices,
-	selectSelectedEnvironment,
-	selectSettings,
-	selectRequests,
+	selectSecrets,
+	selectSelectedEnvironmentValue,
+	selectServiceSelectedEnvironmentValue,
 } from '../../../state/active/selectors';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
@@ -21,15 +19,10 @@ type EndpointPanelType = (typeof endpointTabs)[number];
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const [tab, setTab] = useState<EndpointPanelType>('headers');
-	const environments = useSelector(selectEnvironments);
-	const services = useSelector(selectServices);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const settings = useSelector(selectSettings);
-	const requests = useSelector(selectRequests);
-	const varsEnv = EnvironmentContextResolver.buildEnvironmentVariables(
-		{ services, selectedEnvironment, requests, environments, settings },
-		endpoint.serviceId,
-	);
+	const secrets = useSelector(selectSecrets);
+	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
+	const rootEnv = useSelector(selectSelectedEnvironmentValue);
+	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({ secrets, servEnv, rootEnv }).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
 		dispatch(updateEndpoint({ ...values, id: endpoint.id }));
@@ -56,14 +49,14 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 				<EditableData
 					values={endpoint.baseHeaders}
 					onChange={(baseHeaders) => update({ baseHeaders })}
-					environment={varsEnv}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 			<TabPanel value="queryParams">
 				<EditableData
 					values={endpoint.baseQueryParams}
 					onChange={(baseQueryParams) => update({ baseQueryParams })}
-					environment={varsEnv}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">

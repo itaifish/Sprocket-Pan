@@ -27,23 +27,17 @@ import { defaultWorkspaceData } from './data/WorkspaceDataManager';
  */
 
 function toEight(data: WorkspaceData | any) {
-	console.log('started toEight');
 	function consolidateValues(obj: any) {
-		console.log('new consolidateValues with object', obj);
 		const pairs = new OrderedKeyValuePairs(obj.__data);
-		console.log(`exited the consolidate values new OrderedKeyValuePairs block`);
 		Object.entries(obj).forEach(([key, value]) => {
-			console.log('consolidateValues forEach loop with', { key, value });
 			if (!key.startsWith('__')) {
-				console.log('moving forward with setting the above');
 				pairs.set(key, value as any);
 			}
 		});
-		console.log('got past all the setting of values, about to return the array');
 		return pairs.toArray();
 	}
 	function convertEnv(env: any): Environment {
-		return { id: env.id, name: env.__name, pairs: consolidateValues(env) };
+		return { id: env.__id, name: env.__name, pairs: consolidateValues(env) };
 	}
 	function convertHistory({ request, response, auditLog }: HistoricalEndpointResponse): HistoricalEndpointResponse {
 		request.headers = consolidateValues(request.headers);
@@ -51,28 +45,23 @@ function toEight(data: WorkspaceData | any) {
 		return { request, response, auditLog };
 	}
 	for (const envId in data.environments) {
-		console.log({ envId });
 		data.environments[envId] = convertEnv(data.environments[envId]);
 	}
-	console.log('toEight environments done');
 	for (const servId in data.services) {
 		for (const envId in data.services[servId].localEnvironments) {
 			data.services[servId].localEnvironments[envId] = convertEnv(data.services[servId].localEnvironments[envId]);
 		}
 	}
-	console.log('toEight services done');
 	for (const endId in data.endpoints) {
 		data.endpoints[endId].baseHeaders = consolidateValues(data.endpoints[endId].baseHeaders);
 		data.endpoints[endId].baseQueryParams = consolidateValues(data.endpoints[endId].baseQueryParams);
 	}
-	console.log('toEight endpoints done');
 	for (const reqId in data.requests) {
 		data.requests[reqId].headers = consolidateValues(data.requests[reqId].headers);
 		data.requests[reqId].queryParams = consolidateValues(data.requests[reqId].queryParams);
 		data.requests[reqId].environmentOverride = convertEnv(data.requests[reqId].environmentOverride);
 		data.requests[reqId].history = data.requests[reqId].history.map((history: any) => convertHistory(history));
 	}
-	console.log('finished eight');
 }
 
 /**
@@ -138,35 +127,15 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight] as const;
 
-class SaveUpdateManager {
-	public static readonly INSTANCE = new SaveUpdateManager();
-
-	private constructor() {}
-
-	public getCurrentVersion(): number {
+export class SaveUpdateManager {
+	public static getCurrentVersion(): number {
 		return transformers.length;
 	}
 
-	public update(data: WorkspaceData | any) {
-		console.log('started all updating with data input: ', data);
+	public static update(data: WorkspaceData | any) {
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
-		console.log('finished all updating with data output:', data);
-		const eightTest: any = {
-			environments: {
-				w: {
-					__data: [{ key: 'your_mom', value: 'ugly' }],
-					your_mom: 'ugly',
-					__name: ':(',
-					__id: 'w',
-				},
-			},
-		};
-		console.log('starting toEight run with custom input: ', eightTest);
-		toEight(eightTest);
 	}
 }
-
-export const saveUpdateManager = SaveUpdateManager.INSTANCE;

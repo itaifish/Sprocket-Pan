@@ -44,7 +44,7 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 				thunk.dispatch(setFullState(data)),
 			]);
 		} else {
-			log.warn('Workspace failed to load');
+			log.warn('Workspace failed to load!');
 		}
 	},
 );

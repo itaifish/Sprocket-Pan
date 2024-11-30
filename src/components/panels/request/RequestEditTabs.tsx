@@ -4,12 +4,10 @@ import { RequestBody } from './RequestBody';
 import { useSelector } from 'react-redux';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
-	selectEnvironments,
-	selectServices,
-	selectSelectedEnvironment,
-	selectSettings,
-	selectRequests,
-	selectEndpoints,
+	selectSecrets,
+	selectSelectedEnvironmentValue,
+	selectServiceSelectedEnvironmentValue,
+	selectEndpointById,
 } from '../../../state/active/selectors';
 import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
@@ -23,18 +21,17 @@ type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	const [tab, setTab] = useState<RequestTabType>('body');
-	const environments = useSelector(selectEnvironments);
-	const services = useSelector(selectServices);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const settings = useSelector(selectSettings);
-	const requests = useSelector(selectRequests);
-	const endpoints = useSelector(selectEndpoints);
-	const endpoint = endpoints[request.endpointId];
-	const varsEnv = EnvironmentContextResolver.buildEnvironmentVariables(
-		{ environments, selectedEnvironment, services, settings, requests },
-		endpoint?.serviceId,
-		request.id,
-	);
+	const secrets = useSelector(selectSecrets);
+	const reqEnv = request.environmentOverride;
+	const rootEnv = useSelector(selectSelectedEnvironmentValue);
+	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
+	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({
+		reqEnv,
+		secrets,
+		rootEnv,
+		servEnv,
+	}).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(updateRequest({ ...values, id: request.id }));
@@ -60,19 +57,13 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
-				<EditableData
-					values={request.headers}
-					onChange={(values) => update({ headers: values })}
-					environment={varsEnv}
-				/>
+				<EditableData values={request.headers} onChange={(values) => update({ headers: values })} envPairs={envPairs} />
 			</TabPanel>
 			<TabPanel value="queryParams">
 				<EditableData
 					values={request.queryParams}
-					onChange={(newQueryParams) => {
-						update({ queryParams: newQueryParams });
-					}}
-					environment={varsEnv}
+					onChange={(queryParams) => update({ queryParams })}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">
@@ -88,7 +79,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<EditableData
 					values={request.environmentOverride.pairs ?? []}
 					onChange={(pairs) => update({ environmentOverride: { ...request.environmentOverride, pairs } })}
-					environment={varsEnv}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 		</Tabs>

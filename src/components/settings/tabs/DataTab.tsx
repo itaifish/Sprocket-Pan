@@ -22,22 +22,13 @@ import { useAppDispatch } from '../../../state/store';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { log } from '../../../utils/logging';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { save as saveFile } from '@tauri-apps/api/dialog';
 import { useSelector } from 'react-redux';
 import { saveActiveData } from '../../../state/active/thunks/applicationData';
-import { selectAllItems } from '../../../state/active/selectors';
-import { writeTextFile } from '@tauri-apps/api/fs';
-import {
-	noMetadataReplacer,
-	noHistoryReplacer,
-	noEnvironmentsReplacer,
-	combineReplacers,
-	noSettingsReplacer,
-} from '../../../utils/functions';
+import { selectActiveState } from '../../../state/active/selectors';
 import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';
 import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
-import { selectActiveWorkspace } from '../../../state/global/selectors';
+import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 
 interface DataTabProps {
 	onQuit: () => void;
@@ -49,8 +40,7 @@ interface DataTabProps {
 export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings }: DataTabProps) {
 	const dispatch = useAppDispatch();
 	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
-	const activeWorkspace = useSelector(selectActiveWorkspace);
-	const state = useSelector(selectAllItems);
+	const state = useSelector(selectActiveState);
 	function save() {
 		dispatch(saveActiveData());
 	}
@@ -58,27 +48,7 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 	function deleteHistory() {
 		dispatch(deleteAllHistory());
 	}
-	const exportData = async (exportEnvironments: boolean) => {
-		const filePath = await saveFile({
-			title: `Save ${activeWorkspace?.name} Workspace`,
-			filters: [
-				{ name: 'Sprocketpan Workspace', extensions: ['json'] },
-				{ name: 'All Files', extensions: ['*'] },
-			],
-		});
-
-		if (!filePath) {
-			return;
-		}
-		const dataToWrite = JSON.stringify(
-			state,
-			exportEnvironments
-				? combineReplacers([noHistoryReplacer, noSettingsReplacer, noMetadataReplacer])
-				: combineReplacers([noEnvironmentsReplacer, noHistoryReplacer, noMetadataReplacer, noSettingsReplacer]),
-		);
-
-		await writeTextFile(filePath, dataToWrite);
-	};
+	const exportData = async () => WorkspaceDataManager.exportData(state);
 
 	return (
 		<Box sx={{ maxWidth: '700px' }}>
@@ -219,35 +189,15 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 					</Grid>
 				</Box>
 				<Box>
-					<Typography>Export</Typography>
-					<Grid container justifyContent={'left'} spacing={4}>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<FileUploadIcon />}
-								color="primary"
-								variant="outlined"
-								onClick={async () => {
-									exportData(true);
-								}}
-							>
-								Export With Environment Variables
-							</Button>
-						</Grid>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<FileUploadIcon />}
-								color="primary"
-								variant="outlined"
-								onClick={async () => {
-									exportData(false);
-								}}
-							>
-								Export Without Environment Variables
-							</Button>
-						</Grid>
-					</Grid>
+					<Button
+						sx={{ width: '300px' }}
+						startDecorator={<FileUploadIcon />}
+						color="primary"
+						variant="outlined"
+						onClick={exportData}
+					>
+						Export Workspace
+					</Button>
 				</Box>
 			</Stack>
 			<AreYouSureModal
