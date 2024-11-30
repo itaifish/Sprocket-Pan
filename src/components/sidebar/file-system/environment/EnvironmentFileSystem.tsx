@@ -27,19 +27,19 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 			color={envSelected ? 'success' : 'neutral'}
 			menuOptions={[
 				{
-					onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.__id)),
+					onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.id)),
 					Icon: CheckCircleOutlinedIcon,
 					label: envSelected ? 'Deselect' : 'Select',
 				},
-				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.__id))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.__id))),
+				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.id))),
+				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.id))),
 			]}
 		>
 			<ListItemDecorator>
 				<TableChartIcon fontSize="small" />
 			</ListItemDecorator>
 			<ListSubheader sx={{ width: '100%' }}>
-				<EllipsisSpan>{environment.__name}</EllipsisSpan>
+				<EllipsisSpan>{environment.name}</EllipsisSpan>
 			</ListSubheader>
 		</FileSystemLeaf>
 	);

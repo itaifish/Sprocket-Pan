@@ -1,205 +1,128 @@
 import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
-import { useState, useRef, useEffect } from 'react';
-import { Environment, newEnvironment } from '../../../types/application-data/application-data';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { clamp } from '../../../utils/math';
-import { safeJsonParse } from '../../../utils/functions';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { useSelector } from 'react-redux';
 import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { editor } from 'monaco-editor';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
-import { FormatIcon } from '../buttons/FormatIcon';
+import { KeyValuePair, KeyValueValues } from '../../../classes/OrderedKeyValuePairs';
+import { getEditorTheme } from '../../../utils/style';
+import { replaceValuesByKey } from '../../../utils/variables';
+import { FormatButton } from '../buttons/FormatButton';
 
-export type TableData<TID extends string | number> = {
-	key: string;
-	value: string;
-	id: TID;
-}[];
-
-const tableDataToString = (tableData: TableData<number>, uniqueValues: boolean) => {
-	const tdObject = {} as Record<string, string | string[]>;
-	if (uniqueValues) {
-		tableData.forEach((x) => {
-			tdObject[x.key] = x.value;
-		});
-	} else {
-		tableData.forEach((x) => {
-			if (tdObject[x.key] == undefined) {
-				tdObject[x.key] = [];
-			}
-			(tdObject[x.key] as string[])[x.id] = x.value;
-		});
-
-		Object.entries(tdObject).forEach(([key, value]) => {
-			if (value.length === 1) {
-				tdObject[key] = value[0];
-			}
-		});
-	}
-
-	return JSON.stringify(tdObject, null, 2);
-};
-
-const stringToTableData = (str: string, uniqueValues: boolean): TableData<number> | null => {
-	const res = safeJsonParse<Record<string, string | string[]>>(str)[1];
-	if (res == null) {
-		return null;
-	}
-	if (uniqueValues) {
-		const tableData: TableData<number> = [];
-		for (const [key, value] of Object.entries(res)) {
-			if (typeof value !== 'string') {
-				return null;
-			}
-			tableData.push({ key, value, id: 0 });
-		}
-		return tableData;
-	}
-	const td = Object.entries(res).flatMap(([key, value]) => {
-		if (typeof value === 'string') {
-			return {
-				key,
-				value,
-				id: 0,
-			};
-		} else {
-			return value.map((valueItem, index) => ({
-				key,
-				value: valueItem,
-				id: index,
-			}));
-		}
-	});
-	return td;
-};
-
-interface EditableDataProps {
-	tableData: TableData<number>;
-	changeTableData: (id: number, newKey?: string, newValue?: string) => void;
-	addNewData: (key: string, value: string) => void;
-	setTableData: (newData: TableData<number>) => void;
-	environment?: Environment;
-	unique: boolean;
-	fullSize?: boolean;
+function parseEditorJSON<T>(text: string): Record<string, T> {
+	if (text === '') return {};
+	return JSON.parse(text) as Record<string, T>;
 }
-export function EditableData(props: EditableDataProps) {
-	const colorScheme = useColorScheme();
-	const selectedMode = colorScheme.mode;
-	const systemMode = colorScheme.systemMode;
-	const resolvedMode = selectedMode === 'system' ? systemMode : selectedMode;
+
+export interface EditableDataSettings {
+	fullSize?: boolean;
+	envPairs?: KeyValuePair[];
+}
+
+interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
+	values: KeyValuePair<T>[];
+	onChange: (newData: KeyValuePair<T>[]) => void;
+}
+
+export function EditableData<T extends KeyValueValues>({ values, onChange, fullSize, envPairs }: EditableDataProps<T>) {
+	const theme = getEditorTheme(useColorScheme());
+
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
-	const environment =
-		props.environment ?? (selectedEnvironment ? environments[selectedEnvironment as string] : newEnvironment());
-	const [editorText, setEditorText] = useState(tableDataToString(props.tableData, props.unique));
-	const [backupEditorText, setBackupEditorText] = useState(editorText);
-	const [runningTableData, setRunningTableData] = useState<TableData<number> | null>(props.tableData);
+	const envValues = envPairs ?? (selectedEnvironment == null ? [] : environments[selectedEnvironment].pairs);
+	const valuesAsObject = useMemo(() => Object.fromEntries(values.map(({ key, value }) => [key, value])), [values]);
+
+	const [editorText, setEditorText] = useState(JSON.stringify(valuesAsObject));
 	const [hasChanged, setChanged] = useState(false);
-	const [mode, setMode] = useState<'view' | 'edit'>('edit');
+	const [isFormatting, setIsFormatting] = useState(false);
+	const [isReadOnly, setIsReadOnly] = useState(false);
+
+	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+
 	const format = () => {
-		if (editorRef.current != null) {
-			editorRef.current.getAction('editor.action.formatDocument')?.run();
-		}
+		editorRef.current?.getAction('editor.action.formatDocument')?.run();
+		setIsFormatting(true);
 	};
+
 	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		editorRef.current = editor;
 		format();
 	};
 
-	useEffect(() => {
-		setEditorText(tableDataToString(props.tableData, props.unique));
+	const reset = () => {
+		setEditorText(JSON.stringify(valuesAsObject));
 		setChanged(false);
-		setRunningTableData(props.tableData);
-	}, [props.tableData]);
+		format();
+	};
 
 	const save = () => {
-		const tableData = stringToTableData(editorText, props.unique);
+		const tableData = parseEditorJSON<T>(editorText);
 		if (tableData != null) {
-			props.setTableData(tableData);
+			onChange(Object.entries(tableData).map(([key, value]) => ({ key, value })));
 			setChanged(false);
+			format();
 		}
 	};
 
-	const getEnvParsedRunningTableData = () => {
-		if (runningTableData == null) {
-			return 'null';
+	const switchMode = () => {
+		if (isReadOnly) {
+			// if current mode isReadOnly, switching to false (edit) mode
+			editorRef.current?.updateOptions({ readOnly: false });
+			editorRef.current?.setValue(editorText);
+			ignoreEditorUpdates.current = false;
+			setIsReadOnly(false);
+		} else {
+			// else switching to true (view) mode
+			setIsReadOnly(true);
+			ignoreEditorUpdates.current = true;
+			editorRef.current?.setValue(replaceValuesByKey(editorText, envValues));
+			editorRef.current?.updateOptions({ readOnly: true });
 		}
-		return tableDataToString(
-			runningTableData
-				.filter((tdItem) => tdItem.key != null && tdItem.value != null)
-				.map((tdItem) => ({
-					key: environmentContextResolver
-						.parseStringWithEnvironment(tdItem.key, environment)
-						.map((x) => x.value)
-						.join(''),
-					value: environmentContextResolver
-						.parseStringWithEnvironment(tdItem.value, environment)
-						.map((x) => x.value)
-						.join(''),
-					id: tdItem.id,
-				})),
-			props.unique,
-		);
+	};
+
+	useEffect(() => {
+		ignoreEditorUpdates.current = isReadOnly;
+	}, [isReadOnly]);
+
+	const onEditorChange = (value: string | undefined) => {
+		if (ignoreEditorUpdates.current) return;
+		setEditorText(value ?? '');
+		if (isFormatting) {
+			setIsFormatting(false);
+		} else {
+			setChanged(true);
+		}
 	};
 
 	return (
 		<>
 			<Stack direction="row" justifyContent="end" alignItems="end">
-				<SprocketTooltip text={`Switch to ${mode === 'edit' ? 'View' : 'Edit'} Mode`}>
-					<IconButton
-						disabled={runningTableData == null}
-						onClick={() => {
-							if (mode === 'edit') {
-								setMode('view');
-								setBackupEditorText(editorText);
-								setEditorText(getEnvParsedRunningTableData());
-								editorRef.current?.updateOptions({ readOnly: true });
-							} else {
-								setMode('edit');
-								setEditorText(backupEditorText);
-								editorRef.current?.updateOptions({ readOnly: false });
-								editorRef.current?.setValue(backupEditorText);
-							}
-						}}
-					>
-						{mode === 'edit' ? <VisibilityIcon /> : <EditIcon />}
-					</IconButton>
+				<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
+					<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
 				</SprocketTooltip>
 				<SprocketTooltip text="Clear Changes">
-					<IconButton
-						disabled={!hasChanged}
-						onClick={() => {
-							setEditorText(tableDataToString(props.tableData, props.unique));
-							setChanged(false);
-							setRunningTableData(props.tableData);
-							format();
-						}}
-					>
+					<IconButton disabled={!hasChanged} onClick={reset}>
 						<CancelIcon />
 					</IconButton>
 				</SprocketTooltip>
 				<SprocketTooltip text="Save Changes">
-					<IconButton
-						disabled={!hasChanged || runningTableData == null}
-						onClick={() => {
-							save();
-						}}
-					>
-						<Badge invisible={!hasChanged || runningTableData == null} color="primary">
+					<IconButton disabled={!hasChanged} onClick={save}>
+						<Badge invisible={!hasChanged} color="primary">
 							<SaveIcon></SaveIcon>
 						</Badge>
 					</IconButton>
 				</SprocketTooltip>
 				<CopyToClipboardButton copyText={editorText} />
-				<FormatIcon actionFunction={() => format()} />
+				<FormatButton disabled={isReadOnly} onChange={format} />
 			</Stack>
 			<Box
 				onKeyDown={(e) => {
@@ -210,17 +133,11 @@ export function EditableData(props: EditableDataProps) {
 				height={'100%'}
 			>
 				<Editor
-					height={props.fullSize ? '100%' : `${clamp((props.tableData.length + 2) * 3, 10, 40)}vh`}
+					height={fullSize ? '100%' : `${clamp((values.length + 2) * 3, 10, 40)}vh`}
 					value={editorText}
-					onChange={(value) => {
-						if (value != editorText) {
-							setEditorText(value ?? '');
-							setChanged(true);
-							setRunningTableData(value ? stringToTableData(value, props.unique) : null);
-						}
-					}}
+					onChange={onEditorChange}
 					language={'json'}
-					theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+					theme={theme}
 					options={defaultEditorOptions}
 					onMount={handleEditorDidMount}
 				/>

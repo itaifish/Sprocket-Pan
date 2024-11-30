@@ -1,12 +1,13 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
-import { environmentContextResolver } from '../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../managers/EnvironmentContextResolver';
 import { queryParamsToString } from '../../utils/application';
-import { TabType } from '../../types/state/state';
+import { TabType, TabTypeWithData } from '../../types/state/state';
 import { WorkspaceData } from '../../types/application-data/application-data';
 import { selectGlobalState } from '../global/selectors';
+import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 
-const selectActiveState = activeSlice.selectSlice;
+export const selectActiveState = activeSlice.selectSlice;
 
 export const selectAllItems = createSelector(selectActiveState, (state) => ({
 	environments: state.environments,
@@ -17,6 +18,13 @@ export const selectAllItems = createSelector(selectActiveState, (state) => ({
 }));
 
 export const selectSelectedEnvironment = createSelector(selectActiveState, (state) => state.selectedEnvironment);
+
+export const selectSelectedEnvironmentValue = createSelector(selectActiveState, (state) =>
+	state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+);
+
+// we're handling state secrets lol
+export const selectSecrets = createSelector(selectActiveState, (state) => state.secrets);
 
 export const selectEndpoints = createSelector(selectActiveState, (state) => state.endpoints);
 
@@ -32,12 +40,20 @@ export const selectServicesById = createSelector(
 	(services, id) => services[id],
 );
 
+export const selectServiceSelectedEnvironmentValue = createSelector(
+	[selectServices, (_, id: string) => id],
+	(services, id) => {
+		const envId = services[id].selectedEnvironment;
+		return envId == null ? null : services[id].localEnvironments[envId];
+	},
+);
+
 export const selectEnvironments = createSelector(selectActiveState, (state) => {
 	return state.environments;
 });
 
 export const selectEnvironmentIds = createSelector(selectEnvironments, (environments) => {
-	return Object.values(environments).map((env) => env.__id);
+	return Object.values(environments).map((env) => env.id);
 });
 
 export const selectEnvironmentsById = createSelector(
@@ -103,14 +119,24 @@ export const selectPossibleTabInfo = createSelector(
 	},
 );
 
-function getMapFromTabType<TTabType extends TabType>(data: Pick<WorkspaceData, `${TTabType}s`>, tabType: TTabType) {
+function getMapFromTabType<TTabType extends TabTypeWithData>(
+	data: Pick<WorkspaceData, `${TTabType}s`>,
+	tabType: TTabType,
+) {
 	return data[`${tabType}s`];
+}
+
+function getStaticTabTypeInfo(tabType: TabType) {
+	switch (tabType) {
+		case 'secrets':
+			return { name: 'User Secrets' };
+	}
 }
 
 export const selectTabInfoById = createSelector(
 	[selectPossibleTabInfo, (_, tab: [string, TabType]) => tab],
 	(data, [tabId, tabType]) => {
-		return getMapFromTabType(data, tabType)[tabId];
+		return getStaticTabTypeInfo(tabType) ?? getMapFromTabType(data, tabType as TabTypeWithData)[tabId];
 	},
 );
 
@@ -119,19 +145,20 @@ export const selectHasBeenModifiedSinceLastSave = createSelector(
 	(time) => time.modified > time.saved,
 );
 
-export const selectEnvironmentTypography = createSelector([selectActiveState, (_, id: string) => id], (state, id) => {
+export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, id: string) => id], (state, id) => {
 	const requestData = state.requests[id];
 	const endpointData = state.endpoints[requestData?.endpointId];
 	const serviceData = state.services[endpointData?.serviceId];
-	const fullQueryParams = { ...endpointData.baseQueryParams, ...requestData.queryParams };
-	let query = queryParamsToString(fullQueryParams);
+	const fullQueryParams = new OrderedKeyValuePairs(endpointData.baseQueryParams, requestData.queryParams);
+	let query = queryParamsToString(fullQueryParams.toArray());
 	if (query) {
 		query = `?${query}`;
 	}
-	return environmentContextResolver.stringWithVarsToTypography(
-		`${serviceData.baseUrl}${endpointData.url}${query}`,
-		state,
-		serviceData.id,
-		requestData.id,
-	);
+	return EnvironmentContextResolver.stringWithVarsToSnippet(`${serviceData.baseUrl}${endpointData.url}${query}`, {
+		secrets: state.secrets,
+		servEnv:
+			serviceData.selectedEnvironment == null ? null : serviceData.localEnvironments[serviceData.selectedEnvironment],
+		reqEnv: requestData.environmentOverride,
+		rootEnv: state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+	});
 });

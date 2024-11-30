@@ -15,7 +15,8 @@ import { HeadersDisplayTable } from './HeadersDisplayTable';
 import { VisualEventLog } from './VisualEventLog';
 import { HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
 import { ValuesOf } from '../../../../types/utils/utils';
-import { formatFullDate, camelCaseToTitle, statusCodes } from '../../../../utils/string';
+import { formatFullDate, camelCaseToTitle } from '../../../../utils/string';
+import { statusCodes } from '../../../../constants/statusCodes';
 
 const responseTabs = ['body', 'details', 'request', 'eventLog'] as const;
 type ResponseTabType = ValuesOf<typeof responseTabs>;

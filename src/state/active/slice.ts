@@ -13,6 +13,7 @@ import {
 import { AuditLog } from '../../managers/AuditLogManager';
 import { log } from '../../utils/logging';
 import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
+import { KeyValuePair } from '../../classes/OrderedKeyValuePairs';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
@@ -111,15 +112,15 @@ export const activeSlice = createSlice({
 		insertEnvironment: (state, action: PayloadAction<Environment>) => {
 			const environment = action.payload;
 			log.debug(`insertEnvironment called with environment ${JSON.stringify(environment)}`);
-			Object.assign(state.environments, { [environment.__id]: environment });
+			Object.assign(state.environments, { [environment.id]: environment });
 		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
-			const { __id, ...updateFields } = action.payload;
-			if (__id == null) {
-				throw new Error('attempted to update environment with null __id');
+		updateEnvironment: (state, action: PayloadAction<Update<Environment, 'id'>>) => {
+			const { id, ...updateFields } = action.payload;
+			if (id == null) {
+				throw new Error('attempted to update environment with null id');
 			}
-			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${__id}`);
-			Object.assign(state.environments[__id], updateFields);
+			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${id}`);
+			Object.assign(state.environments[id], updateFields);
 		},
 		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
 			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
@@ -151,6 +152,9 @@ export const activeSlice = createSlice({
 		deleteEnvironmentFromState: (state, action: PayloadAction<string>) => {
 			log.debug(`deleteEnvironmentFromState called on env ${action.payload}`);
 			delete state.environments[action.payload];
+		},
+		updateSecrets: (state, action: PayloadAction<KeyValuePair[]>) => {
+			state.secrets = action.payload;
 		},
 		// more specific logic
 		addRequestToEndpoint: (state, action: PayloadAction<AddRequestToEndpoint>) => {
@@ -258,4 +262,5 @@ export const {
 	deleteScript,
 	updateScript,
 	setUiMetadataById,
+	updateSecrets,
 } = activeSlice.actions;

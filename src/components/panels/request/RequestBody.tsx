@@ -10,9 +10,9 @@ import {
 	RawBodyTypes,
 	getRequestBodyCategory,
 } from '../../../types/application-data/application-data';
-import { Constants } from '../../../utils/constants';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 import { EditableFormTable } from '../../shared/input/EditableFormTable';
+import { Constants } from '../../../constants/constants';
 
 interface RequestBodyProps {
 	request: EndpointRequest;

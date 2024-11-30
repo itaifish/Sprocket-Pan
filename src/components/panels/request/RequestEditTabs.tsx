@@ -2,45 +2,36 @@ import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
 import { RequestBody } from './RequestBody';
 import { useSelector } from 'react-redux';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
-	selectEnvironments,
-	selectServices,
-	selectSelectedEnvironment,
-	selectSettings,
-	selectRequests,
-	selectEndpoints,
+	selectSecrets,
+	selectSelectedEnvironmentValue,
+	selectServiceSelectedEnvironmentValue,
+	selectEndpointById,
 } from '../../../state/active/selectors';
 import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
-import {
-	EndpointRequest,
-	QueryParams,
-	Environment,
-	newEnvironment,
-} from '../../../types/application-data/application-data';
+import { EndpointRequest } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
-import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
+import { EditableData } from '../../shared/input/EditableData';
 
 const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
 type RequestTabType = (typeof requestTabs)[number];
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	const [tab, setTab] = useState<RequestTabType>('body');
-	const environments = useSelector(selectEnvironments);
-	const services = useSelector(selectServices);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const settings = useSelector(selectSettings);
-	const requests = useSelector(selectRequests);
-	const endpoints = useSelector(selectEndpoints);
-	const endpoint = endpoints[request.endpointId];
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
-		{ environments, selectedEnvironment, services, settings, requests },
-		endpoint?.serviceId,
-		request.id,
-	);
+	const secrets = useSelector(selectSecrets);
+	const reqEnv = request.environmentOverride;
+	const rootEnv = useSelector(selectSelectedEnvironmentValue);
+	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
+	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({
+		reqEnv,
+		secrets,
+		rootEnv,
+		servEnv,
+	}).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(updateRequest({ ...values, id: request.id }));
@@ -66,19 +57,13 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				<RequestBody request={request}></RequestBody>
 			</TabPanel>
 			<TabPanel value="headers">
-				<EnvironmentEditableTable
-					environment={request.headers as Environment}
-					setNewEnvironment={(newEnvironment: Environment) => update({ headers: newEnvironment })}
-					varsEnv={varsEnv}
-				/>
+				<EditableData values={request.headers} onChange={(values) => update({ headers: values })} envPairs={envPairs} />
 			</TabPanel>
 			<TabPanel value="queryParams">
-				<QueryParamEditableTable
-					queryParams={request.queryParams}
-					setNewQueryParams={(newQueryParams: QueryParams) => {
-						update({ queryParams: newQueryParams });
-					}}
-					varsEnv={varsEnv}
+				<EditableData
+					values={request.queryParams}
+					onChange={(queryParams) => update({ queryParams })}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 			<TabPanel value="scripts">
@@ -91,10 +76,10 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 				</AccordionGroup>
 			</TabPanel>
 			<TabPanel value="environment">
-				<EnvironmentEditableTable
-					environment={(request.environmentOverride ?? newEnvironment()) as Environment}
-					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
-					varsEnv={varsEnv}
+				<EditableData
+					values={request.environmentOverride?.pairs ?? []}
+					onChange={(pairs) => update({ environmentOverride: { ...request.environmentOverride, pairs } })}
+					envPairs={envPairs}
 				/>
 			</TabPanel>
 		</Tabs>

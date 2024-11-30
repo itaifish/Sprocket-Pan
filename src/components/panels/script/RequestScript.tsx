@@ -1,6 +1,6 @@
-import { Constants } from '../../../utils/constants';
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 import { useDebounce } from '../../../hooks/useDebounce';
+import { Constants } from '../../../constants/constants';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;

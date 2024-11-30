@@ -1,7 +1,6 @@
 import { WorkspaceDataManager } from './../data/WorkspaceDataManager';
 import { log } from '../../utils/logging';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { dateTimeReviver } from '../../utils/json-parse';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { FileSystemWorker } from './FileSystemWorker';
 
@@ -17,19 +16,36 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 
 	/**
 	 * This function creates a data folder if it does not already exist.
-	 * @returns 'created' if a new folder is created, 'alreadyExists' if not
+	 * @returns true if it created a folder, false if not
 	 */
 	async createDataFolderIfNotExists() {
 		log.trace(`createDataFolderIfNotExists called`);
 		const dataFolderLocalPath = FileSystemWorker.DATA_FOLDER_NAME;
 		const doesExist = await FileSystemWorker.exists(dataFolderLocalPath);
-		if (!doesExist) {
+		if (doesExist) {
+			log.trace(`Folder already exists, no need to create`);
+			return false;
+		} else {
 			log.debug(`Folder does not exist, creating...`);
 			await FileSystemWorker.createDir(dataFolderLocalPath);
-			return 'created' as const;
+			return true;
+		}
+	}
+
+	/**
+	 * This function creates a data file if it does not already exist.
+	 * @returns true if it created a file, false if not
+	 */
+	async createFileIfNotExists(path: string, content: unknown) {
+		log.trace('createFileIfNotExists called');
+		const doesExist = await FileSystemWorker.exists(path);
+		if (doesExist) {
+			log.trace(`File already exists, no need to create`);
+			return false;
 		} else {
-			log.trace(`Folder already exists, no need to create`);
-			return 'alreadyExists' as const;
+			log.debug(`File does not exist, creating...`);
+			await FileSystemWorker.writeFile(path, JSON.stringify(content));
+			return true;
 		}
 	}
 
@@ -47,19 +63,18 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 	}
 
 	async getWorkspaces() {
-		// undefined represents the default workspace
-		const workspaceFolders = [undefined, ...(await this.getDirectories())];
+		const workspaceFolders = await this.getDirectories();
 		const metadataTasks: Promise<null | WorkspaceMetadata>[] = [];
-		for (const workspaceName of workspaceFolders) {
+		for (const workspaceFolder of workspaceFolders) {
 			const action = async () => {
-				const paths = WorkspaceDataManager.getWorkspacePath(workspaceName);
+				const paths = WorkspaceDataManager.getWorkspacePath(workspaceFolder);
 				const doesExist = await FileSystemWorker.exists(paths.metadata);
 				if (!doesExist) {
 					return null;
 				}
 				const metadataStr = await FileSystemWorker.readTextFile(paths.metadata);
-				const metadata = JSON.parse(metadataStr, dateTimeReviver) as WorkspaceMetadata;
-				return { ...metadata, fileName: workspaceName };
+				const metadata = JSON.parse(metadataStr) as WorkspaceMetadata;
+				return { ...metadata, fileName: workspaceFolder };
 			};
 			metadataTasks.push(action());
 		}

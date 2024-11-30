@@ -1,7 +1,6 @@
 import { ListSubheader, Chip, ListItemContent } from '@mui/joy';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { verbColors } from '../../../utils/style';
 import { useAppDispatch } from '../../../state/store';
 import { addNewEndpointById } from '../../../state/active/thunks/endpoints';
 import { addNewRequest } from '../../../state/active/thunks/requests';
@@ -12,6 +11,7 @@ import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
 import { EllipsisTypography } from '../../shared/EllipsisTypography';
 import { FileSystemBranch } from './tree/FileSystemBranch';
 import { tabsActions } from '../../../state/tabs/slice';
+import { verbColors } from '../../../constants/style';
 
 interface EndpointFileSystemProps {
 	endpointId: string;

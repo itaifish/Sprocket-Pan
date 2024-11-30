@@ -6,6 +6,7 @@ import { selectScripts } from '../../../../state/active/selectors';
 import { SearchField } from '../../../shared/SearchField';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { searchScripts } from '../../../../utils/search';
+import { ELEMENT_ID } from '../../../../constants/uiElementIds';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);
@@ -14,7 +15,11 @@ export function ScriptsFileSystem() {
 	const filteredScriptIds = useMemo(() => searchScripts(scripts, searchText), [scripts, searchText]);
 
 	return (
-		<FileSystemTrunk header="Scripts" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
+		<FileSystemTrunk
+			id={ELEMENT_ID.sidebar.scripts}
+			header="Scripts"
+			actions={<SearchField onChange={setSearchText} />}
+		>
 			{filteredScriptIds.map((scriptId, index) => (
 				<Box key={index}>
 					{index !== 0 && <ListDivider />}

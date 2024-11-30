@@ -1,5 +1,4 @@
 import { ListItemDecorator, IconButton, Tab as MuiTab, Stack } from '@mui/joy';
-import { Environment } from 'monaco-editor';
 import { useSelector } from 'react-redux';
 import { selectTabInfoById } from '../../state/active/selectors';
 import { iconFromTabType } from '../../types/application-data/application-data';
@@ -17,7 +16,7 @@ export function Tab({ tab }: TabProps) {
 	const [tabId, tabType] = tab;
 	const dispatch = useAppDispatch();
 	const tabData = useSelector((state) => selectTabInfoById(state, tab));
-	const name = tabData?.name ?? (tabData as Environment)?.__name ?? '';
+	const name = tabData?.name;
 	return (
 		<MuiTab
 			indicatorPlacement="top"
