@@ -144,8 +144,6 @@ export function getScriptInjectionCode(
 		if (request == null) {
 			return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data)).toObject();
 		}
-		const endpoint = data.endpoints[request.endpointId];
-		const serviceId = endpoint?.serviceId;
 		return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data, request.id)).toObject();
 	};
 
