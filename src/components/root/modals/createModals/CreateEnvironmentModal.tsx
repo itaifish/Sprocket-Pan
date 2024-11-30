@@ -20,8 +20,6 @@ import { useAppDispatch } from '../../../../state/store';
 import { addNewEnvironment } from '../../../../state/active/thunks/environments';
 import { tabsActions } from '../../../../state/tabs/slice';
 
-const emptyAutoOption = { label: "Don't clone", value: null };
-
 export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const [envName, setEnvName] = useState('');
 	const [cloneFrom, setCloneFrom] = useState<string | null>(null);
@@ -35,6 +33,13 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	};
 	const envNameValid = envName.length > 0;
 	const allFieldsValid = envNameValid;
+	const autoOptions = [
+		{ label: "Don't clone", value: null },
+		...Object.values(allEnvironments).map((env) => ({
+			label: env.name,
+			value: env.id,
+		})),
+	];
 	return (
 		<Modal open={open} onClose={closeFunc}>
 			<ModalDialog variant="outlined" role="alertdialog">
@@ -51,15 +56,9 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 					<FormControl>
 						<FormLabel>Clone from existing environment?</FormLabel>
 						<Autocomplete
-							value={cloneEnv == null ? emptyAutoOption : { label: cloneEnv.name, value: cloneEnv.id }}
+							value={cloneEnv == null ? autoOptions[0] : { label: cloneEnv.name, value: cloneEnv.id }}
 							onChange={(_e, value) => setCloneFrom(value?.value ?? null)}
-							options={[
-								emptyAutoOption,
-								...Object.values(allEnvironments).map((env) => ({
-									label: env.name,
-									value: env.id,
-								})),
-							]}
+							options={autoOptions}
 						></Autocomplete>
 					</FormControl>
 				</DialogContent>
