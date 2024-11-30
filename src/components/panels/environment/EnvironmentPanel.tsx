@@ -1,6 +1,5 @@
 import Checkbox from '@mui/joy/Checkbox';
-import { Environment } from '../../../types/application-data/application-data';
-import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
+import { selectEnvironments, selectSecrets, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
@@ -8,17 +7,14 @@ import { Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
+import { EditableData } from '../../shared/input/EditableData';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment = environments[id];
+	const secrets = useSelector(selectSecrets);
 	const dispatch = useAppDispatch();
-
-	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, __id: id } as unknown as Environment));
-	}
 
 	if (environment == null) {
 		return <Typography>No Environment Found</Typography>;
@@ -27,13 +23,13 @@ export function EnvironmentPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
-				text={environment.__name}
-				setText={(newText: string) => update({ __name: newText })}
+				text={environment.name}
+				setText={(newText: string) => dispatch(updateEnvironment({ name: newText, id }))}
 				isValidFunc={(text: string) =>
 					text.length >= 1 &&
 					Object.values(environments)
-						.filter((env) => env.__id != id)
-						.filter((env) => env.__name === text).length === 0
+						.filter((env) => env.id != id)
+						.filter((env) => env.name === text).length === 0
 				}
 				isTitle
 			/>
@@ -43,7 +39,12 @@ export function EnvironmentPanel({ id }: PanelProps) {
 				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
 			/>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
-				<EnvironmentEditableTable environment={environment} setNewEnvironment={update} fullSize={true} />
+				<EditableData
+					values={environment.pairs}
+					onChange={(pairs) => dispatch(updateEnvironment({ pairs, id }))}
+					fullSize
+					envPairs={secrets}
+				/>
 			</Box>
 		</>
 	);

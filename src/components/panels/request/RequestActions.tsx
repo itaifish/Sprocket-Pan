@@ -19,11 +19,12 @@ import { SprocketError } from '../../../types/state/state';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { defaultResponse } from './constants';
 import { useSelector } from 'react-redux';
-import { selectEnvironmentTypography } from '../../../state/active/selectors';
-import { verbColors } from '../../../utils/style';
+import { selectEnvironmentSnippets } from '../../../state/active/selectors';
 import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
 import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 import { tabsActions } from '../../../state/tabs/slice';
+import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
+import { verbColors } from '../../../constants/style';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
@@ -45,7 +46,7 @@ interface RequestActionsProps {
 export function RequestActions({ endpoint, request, onError, onResponse }: RequestActionsProps) {
 	const [hidden, setHidden] = useState(false);
 	const [isAnimating, setIsAnimating] = useState(false);
-	const environmentTypography = useSelector((state) => selectEnvironmentTypography(state, request.id));
+	const envSnippets = useSelector((state) => selectEnvironmentSnippets(state, request.id));
 	const dispatch = useAppDispatch();
 	const particleColor = useParticleThemeColor();
 	const [isLoading, setLoading] = useState(false);
@@ -111,7 +112,7 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 						overflowWrap: 'break-word',
 					}}
 				>
-					{environmentTypography}
+					<EnvironmentTypography snippets={envSnippets} />
 				</Card>
 			</Grid>
 			<Grid xs={5} xl={3}>

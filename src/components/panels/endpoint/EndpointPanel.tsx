@@ -1,57 +1,60 @@
 import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
+import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
-import { verbColors } from '../../../utils/style';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 import {
-	selectEndpoints,
-	selectEnvironments,
-	selectRequests,
-	selectSelectedEnvironment,
-	selectServices,
-	selectSettings,
+	selectEndpointById,
+	selectSecrets,
+	selectSelectedEnvironmentValue,
+	selectServicesById,
+	selectServiceSelectedEnvironmentValue,
 } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../utils/constants';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
 import { tabsActions } from '../../../state/tabs/slice';
+import { Constants } from '../../../constants/constants';
+import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
+import { verbColors } from '../../../constants/style';
 
 export function EndpointPanel({ id }: PanelProps) {
-	const endpoints = useSelector(selectEndpoints);
-	const services = useSelector(selectServices);
-	const settings = useSelector(selectSettings);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const environments = useSelector(selectEnvironments);
-	const requests = useSelector(selectRequests);
-	const endpointData = endpoints[id];
-	const serviceData = services[endpointData.serviceId];
 	const dispatch = useAppDispatch();
+	const endpoint = useSelector((state) => selectEndpointById(state, id));
+	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
+	const secrets = useSelector(selectSecrets);
+	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
+	const rootEnv = useSelector(selectSelectedEnvironmentValue);
+
+	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', {
+		secrets,
+		servEnv,
+		rootEnv,
+	});
 
 	const update = (values: Partial<Endpoint>) => {
 		dispatch(updateEndpoint({ ...values, id }));
 	};
 
 	const { localDataState, setLocalDataState } = useDebounce({
-		state: endpointData.url,
+		state: endpoint.url,
 		setState: (newUrl: string) => update({ url: newUrl }),
 		debounceOverride: Constants.debounceTimeMS,
 	});
 
-	if (endpointData == null || serviceData == null) {
+	if (endpoint == null || service == null) {
 		return <>Endpoint data not found</>;
 	}
 
 	return (
 		<>
 			<EditableText
-				text={endpointData.name}
+				text={endpoint.name}
 				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
 				isTitle
@@ -59,9 +62,9 @@ export function EndpointPanel({ id }: PanelProps) {
 			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
 				<Grid xs={2}>
 					<Select
-						value={endpointData.verb}
+						value={endpoint.verb}
 						startDecorator={<LabelIcon />}
-						color={verbColors[endpointData.verb]}
+						color={verbColors[endpoint.verb]}
 						variant="soft"
 						onChange={(_e, newVerb) => {
 							if (newVerb) {
@@ -78,13 +81,12 @@ export function EndpointPanel({ id }: PanelProps) {
 				</Grid>
 				<Grid xs={8}>
 					<Input
-						startDecorator={environmentContextResolver.stringWithVarsToTypography(
-							serviceData.baseUrl || 'unknown',
-							{ environments, selectedEnvironment, services, settings, requests },
-							serviceData.id,
-							undefined,
-							{ variant: 'outlined', color: 'primary' },
-						)}
+						startDecorator={
+							<EnvironmentTypography
+								typographyProps={{ variant: 'outlined', color: 'primary' }}
+								snippets={envSnippets}
+							/>
+						}
 						value={localDataState}
 						onChange={(e) => {
 							setLocalDataState(e.target.value);
@@ -97,11 +99,11 @@ export function EndpointPanel({ id }: PanelProps) {
 						<Button
 							color="primary"
 							startDecorator={<ExitToAppIcon />}
-							disabled={!endpointData.defaultRequest}
+							disabled={!endpoint.defaultRequest}
 							onClick={() => {
-								if (endpointData.defaultRequest) {
-									dispatch(tabsActions.addTabs({ [endpointData.defaultRequest]: 'request' }));
-									dispatch(tabsActions.setSelectedTab(endpointData.defaultRequest));
+								if (endpoint.defaultRequest) {
+									dispatch(tabsActions.addTabs({ [endpoint.defaultRequest]: 'request' }));
+									dispatch(tabsActions.setSelectedTab(endpoint.defaultRequest));
 								}
 							}}
 						>
@@ -110,7 +112,7 @@ export function EndpointPanel({ id }: PanelProps) {
 					</Stack>
 				</Grid>
 			</Grid>
-			<EndpointEditTabs endpoint={endpointData} />
+			<EndpointEditTabs endpoint={endpoint} />
 		</>
 	);
 }

@@ -69,11 +69,9 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 				</Typography>
 			</CardContent>
 			<CardContent orientation="horizontal" sx={{ gap: 1 }}>
-				{workspace.fileName != undefined && (
-					<Button variant="outlined" color="danger" startDecorator={<DeleteIcon />} onClick={deleteWorkspace}>
-						Delete
-					</Button>
-				)}
+				<Button variant="outlined" color="danger" startDecorator={<DeleteIcon />} onClick={deleteWorkspace}>
+					Delete
+				</Button>
 				<Button variant="outlined" startDecorator={<OpenInNewIcon />} onClick={openWorkspace}>
 					Open
 				</Button>

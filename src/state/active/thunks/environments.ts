@@ -2,31 +2,27 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Environment } from '../../../types/application-data/application-data';
 import { RootState } from '../../store';
 import { insertEnvironment, deleteEnvironmentFromState } from '../slice';
-import { createNewEnvironmentObject } from './util';
 import { tabsActions } from '../../tabs/slice';
+import { cloneEnv } from '../../../utils/application';
 
 interface AddNewEnvironment {
-	data?: Partial<Omit<Environment, '__id'>>;
+	data?: Partial<Omit<Environment, 'id'>> | null;
 }
 
-export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment, { state: RootState }>(
+export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment | undefined, { state: RootState }>(
 	'active/addEnvironment',
-	async ({ data = {} }, thunk) => {
-		const newEnvironment = {
-			...createNewEnvironmentObject(),
-			...data,
-			__data: structuredClone(data.__data ?? []),
-		} as unknown as Environment;
+	async ({ data } = {}, thunk) => {
+		const newEnvironment = cloneEnv({ name: 'New Environment', ...data });
 		thunk.dispatch(insertEnvironment(newEnvironment));
-		return newEnvironment.__id;
+		return newEnvironment.id;
 	},
 );
 
-export const addNewEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
+export const addNewEnvironmentById = createAsyncThunk<string, string, { state: RootState }>(
 	'active/addEnvironmentById',
 	async (oldId, thunk) => {
-		const { __id, ...environment } = thunk.getState().active.environments[oldId];
-		thunk.dispatch(addNewEnvironment({ data: environment }));
+		const { id, ...environment } = thunk.getState().active.environments[oldId];
+		return await thunk.dispatch(addNewEnvironment({ data: environment })).unwrap();
 	},
 );
 

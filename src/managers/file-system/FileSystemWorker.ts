@@ -14,13 +14,17 @@ export class FileSystemWorker {
 		return writeFile({ contents, path }, { dir: FileSystemWorker.DEFAULT_DIRECTORY });
 	}
 
+	/**
+	 * @returns true if the file was updated and written to, false if not
+	 */
 	public static async tryUpdateFile(path: string, contents: string) {
 		if (await this.exists(path)) {
 			log.trace('File already exists, updating...');
 			await this.writeFile(path, contents);
+			return true;
 		} else {
-			log.warn('File does not exist, exiting...');
-			return 'doesNotExist' as const;
+			log.warn('File does not exist, creating new...');
+			return false;
 		}
 	}
 

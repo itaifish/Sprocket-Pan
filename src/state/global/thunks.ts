@@ -19,8 +19,8 @@ export const deleteWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state
 			throw new Error('cannot delete a workspace without a path');
 		}
 		await GlobalDataManager.deleteWorkspace(path);
-		if (path === state.selected?.fileName) {
-			state.selected = undefined;
+		if (path === state.activeWorkspace?.fileName) {
+			state.activeWorkspace = undefined;
 		}
 	},
 );
@@ -44,7 +44,7 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 				thunk.dispatch(setFullState(data)),
 			]);
 		} else {
-			log.warn('Workspace failed to load');
+			log.warn('Workspace failed to load!');
 		}
 	},
 );

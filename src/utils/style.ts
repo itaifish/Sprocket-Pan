@@ -1,16 +1,12 @@
-import { ColorPaletteProp, OptionPropsColorOverrides } from '@mui/joy';
-import { RESTfulRequestVerb } from '../types/application-data/application-data';
-import { OverridableStringUnion } from '@mui/types';
+import { useColorScheme } from '@mui/joy';
 
-export const verbColors: Record<
-	RESTfulRequestVerb,
-	OverridableStringUnion<ColorPaletteProp, OptionPropsColorOverrides>
-> = {
-	GET: 'primary',
-	POST: 'success',
-	DELETE: 'danger',
-	PUT: 'warning',
-	PATCH: 'warning',
-	OPTIONS: 'neutral',
-	HEAD: 'neutral',
-};
+export function getMode(colorScheme: ReturnType<typeof useColorScheme>) {
+	const selectedMode = colorScheme.mode;
+	const systemMode = colorScheme.systemMode;
+	return selectedMode === 'system' ? systemMode : selectedMode;
+}
+
+export function getEditorTheme(colorScheme: ReturnType<typeof useColorScheme>) {
+	const resolvedMode = getMode(colorScheme);
+	return resolvedMode === 'dark' ? 'vs-dark' : resolvedMode;
+}

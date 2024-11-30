@@ -6,12 +6,12 @@ import { emit } from '@tauri-apps/api/event';
 import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
 import { sleep } from '../../../utils/misc';
-import { Constants } from '../../../utils/constants';
 import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
 import { SprocketSelect } from '../../shared/SprocketSelect';
+import { Constants } from '../../../constants/constants';
 
 export interface SettingsTabProps {
 	settings: Settings;

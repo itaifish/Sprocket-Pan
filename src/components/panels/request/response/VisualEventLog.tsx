@@ -113,7 +113,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 						requests[requestEvent.associatedId].name}{' '}
 					{camelCaseToTitle(requestEvent.eventType)}
 					{transformedLog.innerEvents.length > 0 && (
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						<CollapseExpandButton collapsed={collapsed} toggleCollapsed={() => setCollapsed(!collapsed)} />
 					)}
 				</ListItemDecorator>
 				<ListItemButton>
