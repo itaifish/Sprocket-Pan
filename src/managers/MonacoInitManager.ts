@@ -33,8 +33,7 @@ function getSprocketPanType(scripts: Script[]) {
 	)}
 	type SprocketPan = {
 		setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
-		setQueryParam: (key: string, value: string) => void;
-		setQueryParams: (key: string, values: string[]) => void;
+		setQueryParam: (key: string, value?: string | string[]) => void;
 		setHeader: (key: string, value: string) => void;
 		deleteHeader: (key: string) => void;
 		getEnvironment: () => Record<string, string>;
@@ -141,7 +140,7 @@ export function getMonacoInjectedTypeCode(scripts: Script[]) {
 		type Environment = {
 			name: string;
 			id: string;
-			values: { [key: string]: string; };
+			pairs: [{key: string, value: string}]
 		};
 		type Service<TBaseUrl extends string = string> = {
 			id: string;

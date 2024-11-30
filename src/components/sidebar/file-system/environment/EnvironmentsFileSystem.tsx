@@ -21,7 +21,7 @@ export function EnvironmentsFileSystem() {
 		<FileSystemTrunk
 			id={ELEMENT_ID.sidebar.environments}
 			header="Environments"
-			actions={<SearchField onChange={(text) => setSearchText(text)} />}
+			actions={<SearchField onChange={setSearchText} />}
 		>
 			{filteredEnvironmentIds.map((environmentId, index) => (
 				<div key={environmentId}>

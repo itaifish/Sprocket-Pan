@@ -2,11 +2,14 @@ import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Table } 
 import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
 
 interface HeadersDisplayTableProps {
-	headers: KeyValuePair[];
+	headers?: KeyValuePair[] | null;
 	label: 'request' | 'response';
 }
 
 export function HeadersDisplayTable({ headers, label }: HeadersDisplayTableProps) {
+	if (headers == null || headers.length === 0) {
+		return <></>;
+	}
 	return (
 		<AccordionGroup>
 			<Accordion defaultExpanded>

@@ -77,7 +77,7 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 			</TabPanel>
 			<TabPanel value="environment">
 				<EditableData
-					values={request.environmentOverride.pairs ?? []}
+					values={request.environmentOverride?.pairs ?? []}
 					onChange={(pairs) => update({ environmentOverride: { ...request.environmentOverride, pairs } })}
 					envPairs={envPairs}
 				/>

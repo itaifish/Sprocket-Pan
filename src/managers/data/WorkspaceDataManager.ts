@@ -143,7 +143,7 @@ export class WorkspaceDataManager {
 			await this.createDataFilesIfNotExist(workspace);
 			return await this.loadDataFromFile(workspace);
 		} catch (err) {
-			console.error(err);
+			log.error(err);
 			return null;
 		}
 	}

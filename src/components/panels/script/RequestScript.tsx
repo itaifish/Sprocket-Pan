@@ -18,7 +18,7 @@ export function RequestScript(props: RequestScriptProps) {
 	return (
 		<SprocketEditor
 			height={'55vh'}
-			value={localDataState ?? undefined}
+			value={localDataState}
 			onChange={(value) => {
 				if (value != null) {
 					setLocalDataState(value);

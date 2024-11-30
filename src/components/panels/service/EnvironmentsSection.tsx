@@ -50,7 +50,7 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 			});
 		}
 	}
-	console.log({ localEnvs });
+
 	return (
 		<Box>
 			<SprocketTooltip text="Add New Service Environment">

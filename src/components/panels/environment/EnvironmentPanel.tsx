@@ -43,7 +43,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 				<EditableData
 					values={environment.pairs}
 					onChange={(pairs) => dispatch(updateEnvironment({ pairs, id }))}
-					fullSize={true}
+					fullSize
 					envPairs={secrets}
 				/>
 			</Box>

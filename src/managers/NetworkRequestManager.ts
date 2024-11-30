@@ -191,7 +191,7 @@ class NetworkRequestManager {
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
 			body: networkBody,
-			headers,
+			headers: networkRequest.headers,
 			responseType: ResponseType.Text,
 		});
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(

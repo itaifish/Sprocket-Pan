@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import { Endpoint, EndpointRequest, Environment, Service } from '../../../types/application-data/application-data';
+import { Endpoint, EndpointRequest, Service } from '../../../types/application-data/application-data';
 import { cloneEnv } from '../../../utils/application';
 
 export function createNewEndpointObject(serviceId: string): Endpoint {
@@ -29,10 +29,6 @@ export function createNewServiceObject(): Service {
 	};
 }
 
-export function createNewEnvironmentObject(data?: Partial<Environment>): Environment {
-	return cloneEnv({ name: 'New Environment', id: v4(), ...data });
-}
-
 export function createNewRequestObject(endpointId: string): EndpointRequest {
 	return {
 		name: 'New Request',
@@ -41,7 +37,7 @@ export function createNewRequestObject(endpointId: string): EndpointRequest {
 		body: undefined,
 		bodyType: 'none',
 		rawType: undefined,
-		environmentOverride: createNewEnvironmentObject(),
+		environmentOverride: cloneEnv(),
 		endpointId: endpointId,
 		id: v4(),
 		history: [],

@@ -50,7 +50,7 @@ import { log } from '../../../utils/logging';
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';
 import { CONTENT_TYPE } from '../../../constants/request';
-import { KeyValueValues, OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
+import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
 import { cloneEnv } from '../../../utils/application';
 
 type PostmanCollection = V200Schema | V210Schema;
@@ -209,13 +209,7 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[], importSource: ImportSource): Environment {
-		const env = cloneEnv();
-		variables.forEach((variable) => {
-			const { key, value } = variable;
-			if (key != null) env.pairs.set(key, value);
-		});
-		env.name = `${importSource} Variables`;
-		return env;
+		return cloneEnv({ name: `${importSource} Variables`, pairs: variables.map(({ key, value }) => ({ key, value })) });
 	}
 
 	private importItems = (
@@ -280,7 +274,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters = new OrderedKeyValuePairs<KeyValueValues>();
+		let parameters: QueryParams = [];
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -295,15 +289,17 @@ class PostmanParseManager {
 
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
-			camelCaseToTitle(mime.getExtension(headers.get(CONTENT_TYPE) ?? '') ?? '') as RawBodyType,
+			camelCaseToTitle(
+				mime.getExtension(headers.find((header) => header.key === CONTENT_TYPE)?.value ?? '') ?? '',
+			) as RawBodyType,
 		);
 
 		const newRequest: EndpointRequest = {
 			id: requestId,
 			endpointId,
 			name,
-			headers: new OrderedKeyValuePairs(),
-			queryParams: new OrderedKeyValuePairs(),
+			headers: [],
+			queryParams: [],
 			history: [],
 			environmentOverride: cloneEnv(),
 			body,
@@ -340,30 +336,23 @@ class PostmanParseManager {
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {
 		const result = new OrderedKeyValuePairs();
-		if (typeof headers === 'string' || typeof headers === 'undefined') {
-			return result;
+		if (Array.isArray(headers)) {
+			headers.forEach(({ key, value }) => {
+				result.set(this.convertVariablesToSprocketVariables(key), this.convertVariablesToSprocketVariables(value));
+			});
 		}
-		headers.forEach((header) => {
-			result.set(
-				this.convertVariablesToSprocketVariables(header.key),
-				this.convertVariablesToSprocketVariables(header.value),
-			);
-		});
-		return result;
+		return result.toArray();
 	};
 
-	private importParameters = (parameters: QueryParam[]): QueryParams => {
+	private importParameters = (parameters?: QueryParam[]): QueryParams => {
 		const result = new OrderedKeyValuePairs();
-		if (!parameters || parameters?.length === 0) {
-			return result;
-		}
-		parameters.forEach(({ key, value }) =>
+		parameters?.forEach(({ key, value }) =>
 			result.set(
 				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
 				this.convertVariablesToSprocketVariables(value ?? ''),
 			),
 		);
-		return result;
+		return result.toArray();
 	};
 
 	private importBody = (

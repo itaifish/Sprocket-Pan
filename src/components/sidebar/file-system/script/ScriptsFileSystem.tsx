@@ -18,7 +18,7 @@ export function ScriptsFileSystem() {
 		<FileSystemTrunk
 			id={ELEMENT_ID.sidebar.scripts}
 			header="Scripts"
-			actions={<SearchField onChange={(text) => setSearchText(text)} />}
+			actions={<SearchField onChange={setSearchText} />}
 		>
 			{filteredScriptIds.map((scriptId, index) => (
 				<Box key={index}>

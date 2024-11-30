@@ -7,7 +7,7 @@ import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
-import { KeyValuePair, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
+import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
 import { getEnvValuesFromData } from '../../utils/application';
 
 type HttpOptions = {
@@ -110,7 +110,7 @@ export function getScriptInjectionCode(
 		}
 	};
 
-	const setQueryParam = (key: string, value: string) => {
+	const setQueryParam = (key: string, value: KeyValueValues) => {
 		const request = getRequest();
 		if (request == null) {
 			return;

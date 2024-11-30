@@ -15,9 +15,9 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 	const [isTyping, setTyping] = useState(false);
 	const [active, setActive] = useState(false);
 
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce<string>({
-		state: '',
-		setState: onChange,
+	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce<string | null>({
+		state: null,
+		setState: (text: string | null) => onChange(text ?? ''),
 		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
 	});
 
