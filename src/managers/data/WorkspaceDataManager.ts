@@ -132,7 +132,7 @@ export class WorkspaceDataManager {
 			data: `${base}.json`,
 			history: `${base}_history.json`,
 			metadata: `${base}_metadata.json`,
-			uiMetadata: `${base}_ui_metadata`,
+			uiMetadata: `${base}_ui_metadata.json`,
 			secrets: `${base}_secrets.json`,
 		};
 	}
@@ -191,7 +191,7 @@ export class WorkspaceDataManager {
 			fileSystemManager.createFileIfNotExists(paths.history, []),
 			fileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
 			fileSystemManager.createFileIfNotExists(paths.metadata, workspace),
-			fileSystemManager.createFileIfNotExists(paths.secrets, {}),
+			fileSystemManager.createFileIfNotExists(paths.secrets, []),
 		];
 		const results = await Promise.all(promises);
 		return results.includes(true);
