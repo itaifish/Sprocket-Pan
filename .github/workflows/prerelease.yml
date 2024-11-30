@@ -33,7 +33,6 @@ jobs:
               repo: context.repo.repo,
               tag: newTag,
             });
-            console.log(existingRelease);
             if (existingRelease?.data?.id != null) {
               await github.rest.repos.deleteRelease({
                 owner: context.repo.owner,
