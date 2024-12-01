@@ -1,13 +1,3 @@
-export function keepStringLengthReasonable(string: string, reasonableLength = 30) {
-	if (string == null) {
-		return '';
-	}
-	if (string.length <= reasonableLength) {
-		return string;
-	}
-	return `${string.slice(0, reasonableLength - 3)}...`;
-}
-
 function getLongestCommonSubstringStartingAtBeginningIndex(string1: string, string2: string): number {
 	let i;
 	for (i = 0; i < string1.length && i < string2.length; i++) {
