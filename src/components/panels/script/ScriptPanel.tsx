@@ -14,7 +14,6 @@ import {
 	Select,
 	Stack,
 	Typography,
-	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
@@ -40,6 +39,7 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { Constants } from '../../../constants/constants';
 import { FormatButton } from '../../shared/buttons/FormatButton';
+import { useEditorTheme } from '../../../hooks/useEditorTheme';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -48,11 +48,10 @@ const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 };
 
 export function ScriptPanel({ id }: PanelProps) {
+	const theme = useEditorTheme();
 	const script = useSelector((state) => selectScript(state, id));
 	const scripts = useSelector(selectScripts);
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
-	const { mode, systemMode } = useColorScheme();
-	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [isRunning, setRunning] = useState(false);
 	const [isDebouncing, setDebouncing] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -275,7 +274,7 @@ export function ScriptPanel({ id }: PanelProps) {
 					}
 				}}
 				language={'typescript'}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={defaultEditorOptions}
 				onMount={handleMainEditorDidMount}
 			/>
@@ -286,7 +285,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				height={'15vh'}
 				value={scriptOutput}
 				language={scriptOutputLang}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 				onMount={handleReturnEditorDidMount}
 			/>

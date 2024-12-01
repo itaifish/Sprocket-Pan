@@ -1,4 +1,4 @@
-import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
+import { Badge, Box, IconButton, Stack } from '@mui/joy';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -13,9 +13,9 @@ import { editor } from 'monaco-editor';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
 import { KeyValuePair, KeyValueValues } from '../../../classes/OrderedKeyValuePairs';
-import { getEditorTheme } from '../../../utils/style';
 import { replaceValuesByKey } from '../../../utils/variables';
 import { FormatButton } from '../buttons/FormatButton';
+import { useEditorTheme } from '../../../hooks/useEditorTheme';
 
 function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};
@@ -33,7 +33,7 @@ interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettin
 }
 
 export function EditableData<T extends KeyValueValues>({ values, onChange, fullSize, envPairs }: EditableDataProps<T>) {
-	const theme = getEditorTheme(useColorScheme());
+	const theme = useEditorTheme();
 
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);

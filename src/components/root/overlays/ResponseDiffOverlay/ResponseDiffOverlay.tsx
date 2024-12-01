@@ -16,20 +16,23 @@ import {
 } from '@mui/joy';
 import { useState } from 'react';
 import { HistoryControl } from '../../../panels/request/response/HistoryControl';
-import { SprocketEditor } from '../../../shared/input/SprocketEditor';
 import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
 import { formatShortFullDate } from '../../../../utils/string';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
 import { statusCodes } from '../../../../constants/statusCodes';
 import { verbColors } from '../../../../constants/style';
+import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
+import { toKeyValuePairs } from '../../../../utils/application';
+import { DiffText } from '../../../shared/input/DiffText';
 
-function headersToJson(headers: Record<string, string>) {
+function headersToJson(headers: Record<string, string> | KeyValuePair[]) {
+	const convertedHeaders = Array.isArray(headers) ? headers.slice() : toKeyValuePairs(headers);
 	return JSON.stringify(
-		Object.entries(headers)
-			.sort((e1, e2) => e1[0].localeCompare(e2[0]))
+		convertedHeaders
+			.sort((e1, e2) => e1.key.localeCompare(e2.key))
 			.reduce(
 				(acc, curr) => {
-					acc[curr[0]] = curr[1];
+					acc[curr.key] = curr.value ?? '';
 					return acc;
 				},
 				{} as Record<string, string>,
@@ -200,15 +203,11 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Response Body
 									</Typography>
-									<SprocketEditor
-										width={'100%'}
-										height={'40vh'}
-										isDiff={true}
+									<DiffText
 										original={original.response.body}
 										modified={modified.response.body}
 										originalLanguage={original.response.bodyType?.toLocaleLowerCase()}
 										modifiedLanguage={modified.response.bodyType?.toLocaleLowerCase()}
-										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
 									/>
 								</>
 							</TabPanel>
@@ -225,14 +224,9 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											{modified.response.statusCode}: {statusCodes[modified.response.statusCode]}
 										</Typography>
 									</Stack>
-									<SprocketEditor
-										width={'100%'}
-										height={'40vh'}
-										isDiff={true}
+									<DiffText
 										original={headersToJson(original.response.headers)}
 										modified={headersToJson(modified.response.headers)}
-										language="json"
-										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
 									/>
 								</>
 							</TabPanel>
@@ -241,14 +235,9 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Request Headers
 									</Typography>
-									<SprocketEditor
-										width={'100%'}
-										height={'40vh'}
-										isDiff={true}
-										original={original.request.headers.toJSON()}
-										modified={modified.request.headers.toJSON()}
-										language="json"
-										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
+									<DiffText
+										original={headersToJson(original.request.headers)}
+										modified={headersToJson(modified.request.headers)}
 									/>
 								</>
 							</TabPanel>
@@ -271,15 +260,11 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											</Stack>
 										</Box>
 									</Stack>
-									<SprocketEditor
-										width={'100%'}
-										height={'40vh'}
-										isDiff={true}
+									<DiffText
 										original={original.request.body}
 										modified={modified.request.body}
 										originalLanguage={original.request.bodyType?.toLocaleLowerCase()}
 										modifiedLanguage={modified.request.bodyType?.toLocaleLowerCase()}
-										options={{ readOnly: true, domReadOnly: true, originalEditable: false }}
 									/>
 								</>
 							</TabPanel>
