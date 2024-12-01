@@ -3,7 +3,7 @@ import { PropsWithChildren } from 'react';
 export function UriTypography({ children }: PropsWithChildren) {
 	return (
 		<u>
-			<span style={{ overflowWrap: 'break-word' }}>{children}</span>
+			<span style={{ overflowWrap: 'anywhere', wordBreak: 'break-all' }}>{children}</span>
 		</u>
 	);
 }

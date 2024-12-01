@@ -3,7 +3,7 @@ import { selectEnvironments, selectSecrets, selectSelectedEnvironment } from '..
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
-import { Typography } from '@mui/joy';
+import { Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { EditableText } from '../../shared/input/EditableText';
 import { PanelProps } from '../panels.interface';
@@ -21,8 +21,9 @@ export function EnvironmentPanel({ id }: PanelProps) {
 	}
 
 	return (
-		<>
+		<Stack gap={2}>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={environment.name}
 				setText={(newText: string) => dispatch(updateEnvironment({ name: newText, id }))}
 				isValidFunc={(text: string) =>
@@ -31,21 +32,26 @@ export function EnvironmentPanel({ id }: PanelProps) {
 						.filter((env) => env.id != id)
 						.filter((env) => env.name === text).length === 0
 				}
-				isTitle
-			/>
-			<Checkbox
-				label="Selected"
-				checked={selectedEnvironment === id}
-				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
+				level="h2"
 			/>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
 				<EditableData
+					actions={{
+						start: (
+							<Checkbox
+								sx={{ my: 1 }}
+								label="Selected"
+								checked={selectedEnvironment === id}
+								onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
+							/>
+						),
+					}}
 					values={environment.pairs}
 					onChange={(pairs) => dispatch(updateEnvironment({ pairs, id }))}
 					fullSize
 					envPairs={secrets}
 				/>
 			</Box>
-		</>
+		</Stack>
 	);
 }

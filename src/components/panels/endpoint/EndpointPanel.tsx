@@ -52,14 +52,15 @@ export function EndpointPanel({ id }: PanelProps) {
 	}
 
 	return (
-		<>
+		<Stack gap={2}>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={endpoint.name}
 				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
-				isTitle
+				level="h2"
 			/>
-			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
+			<Grid container spacing={2} alignItems="center" justifyContent={'center'}>
 				<Grid xs={2}>
 					<Select
 						value={endpoint.verb}
@@ -95,7 +96,7 @@ export function EndpointPanel({ id }: PanelProps) {
 					></Input>
 				</Grid>
 				<Grid xs={2}>
-					<Stack direction={'row'} spacing={2}>
+					<Stack direction="row" spacing={2}>
 						<Button
 							color="primary"
 							startDecorator={<ExitToAppIcon />}
@@ -113,6 +114,6 @@ export function EndpointPanel({ id }: PanelProps) {
 				</Grid>
 			</Grid>
 			<EndpointEditTabs endpoint={endpoint} />
-		</>
+		</Stack>
 	);
 }

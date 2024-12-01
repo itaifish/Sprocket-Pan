@@ -137,12 +137,13 @@ export function ScriptPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={script.name}
 				setText={(newText: string) => update({ name: newText, id, scriptCallableName: toValidFunctionName(newText) })}
 				isValidFunc={(text: string) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
-				isTitle
+				level="h2"
 			/>
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction="row" spacing={2}>
 				<FormControl>
 					<FormLabel>Script-Callable Name</FormLabel>
 					<Input
@@ -261,7 +262,7 @@ export function ScriptPanel({ id }: PanelProps) {
 					)}
 				</FormControl>
 			</Stack>
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction="row" spacing={2}>
 				<FormatButton onChange={format} />
 				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>

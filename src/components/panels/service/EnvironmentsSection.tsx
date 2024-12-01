@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, IconButton, Stack } from '@mui/joy';
+import { Box, IconButton, Select, Stack, Option } from '@mui/joy';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
 import DeleteIcon from '@mui/icons-material/Delete';
 import FileCopyIcon from '@mui/icons-material/FileCopy';
@@ -16,11 +16,13 @@ import { EditableData } from '../../shared/input/EditableData';
 import { SectionProps } from './sectionProps';
 import { Environment } from '../../../types/application-data/application-data';
 import { cloneEnv } from '../../../utils/application';
+import { Link } from '@mui/icons-material';
 
 export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const secrets = useSelector(selectSecrets);
 	const rootEnv = useSelector(selectSelectedEnvironmentValue);
 	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
+	const [visibleEnvId, setVisibleEnvId] = useState<string | null>(data.selectedEnvironment ?? null);
 	const localEnvs = data.localEnvironments;
 
 	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({ rootEnv, secrets }).toArray();
@@ -40,6 +42,7 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 				[newEnv.id]: newEnv,
 			},
 		});
+		setVisibleEnvId(newEnv.id);
 	}
 
 	function deleteEnv() {
@@ -52,56 +55,78 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 		}
 	}
 
+	const envList = Object.values(data.localEnvironments);
+	const visibleEnv = visibleEnvId == null ? null : data.localEnvironments[visibleEnvId];
+
 	return (
 		<Box>
-			<SprocketTooltip text="Add New Service Environment">
-				<IconButton onClick={() => addEnv()}>
-					<PlaylistAddIcon />
-				</IconButton>
-			</SprocketTooltip>
-			<Stack spacing={4}>
-				{Object.values(data.localEnvironments).map((env) => (
-					<Box key={env.id}>
-						<EditableText
-							text={env.name}
-							setText={(name) => modifyEnv(env.id, { name })}
-							isValidFunc={function (text: string): boolean {
-								return text != '';
-							}}
-							isTitle
-							color={data.selectedEnvironment === env.id ? 'primary' : 'neutral'}
-						></EditableText>
-						<SprocketTooltip text={data.selectedEnvironment === env.id ? 'Unselect' : 'Select'}>
-							<IconButton
-								onClick={() => {
-									onChange({
-										selectedEnvironment: data.selectedEnvironment === env.id ? undefined : env.id,
-									});
-								}}
-							>
-								{data.selectedEnvironment === env.id ? <RadioButtonCheckedIcon /> : <RadioButtonUncheckedIcon />}
-							</IconButton>
-						</SprocketTooltip>
-						<SprocketTooltip text="Duplicate" onClick={() => addEnv(env, ' (Copy)')}>
-							<IconButton>
-								<FileCopyIcon />
-							</IconButton>
-						</SprocketTooltip>
-						<SprocketTooltip
-							text="Delete"
-							onClick={() => {
-								setEnvToDelete(env.id);
-							}}
-						>
-							<IconButton>
-								<DeleteIcon />
-							</IconButton>
-						</SprocketTooltip>
-
-						<EditableData values={env.pairs} onChange={(pairs) => modifyEnv(env.id, { pairs })} envPairs={envPairs} />
-					</Box>
-				))}
+			<Stack direction="row" gap={1}>
+				<Select placeholder="Choose Environment" value={visibleEnvId} onChange={(_, value) => setVisibleEnvId(value)}>
+					{envList.map((env) => (
+						<Option value={env.id} key={env.id}>
+							{env.name}
+						</Option>
+					))}
+				</Select>
+				<SprocketTooltip text="Add New Service-Scoped Environment">
+					<IconButton onClick={() => addEnv()}>
+						<PlaylistAddIcon />
+					</IconButton>
+				</SprocketTooltip>
 			</Stack>
+			{visibleEnv != null && (
+				<EditableData
+					actions={{
+						middle: (
+							<EditableText
+								text={visibleEnv.name}
+								setText={(name) => modifyEnv(visibleEnv.id, { name })}
+								isValidFunc={function (text: string): boolean {
+									return text != '';
+								}}
+								color={data.selectedEnvironment === visibleEnv.id ? 'primary' : 'neutral'}
+							/>
+						),
+						start: (
+							<>
+								<SprocketTooltip text={data.selectedEnvironment === visibleEnv.id ? 'Unselect' : 'Select'}>
+									<IconButton
+										onClick={() => {
+											onChange({
+												selectedEnvironment: data.selectedEnvironment === visibleEnv.id ? undefined : visibleEnv.id,
+											});
+										}}
+									>
+										{data.selectedEnvironment === visibleEnv.id ? (
+											<RadioButtonCheckedIcon />
+										) : (
+											<RadioButtonUncheckedIcon />
+										)}
+									</IconButton>
+								</SprocketTooltip>
+								<SprocketTooltip text="Duplicate">
+									<IconButton onClick={() => addEnv(visibleEnv, ' (Copy)')}>
+										<FileCopyIcon />
+									</IconButton>
+								</SprocketTooltip>
+								<SprocketTooltip text="Delete">
+									<IconButton onClick={() => setEnvToDelete(visibleEnv.id)}>
+										<DeleteIcon />
+									</IconButton>
+								</SprocketTooltip>
+								<SprocketTooltip text="Link with Global Environment">
+									<IconButton>
+										<Link />
+									</IconButton>
+								</SprocketTooltip>
+							</>
+						),
+					}}
+					values={visibleEnv.pairs}
+					onChange={(pairs) => modifyEnv(visibleEnv.id, { pairs })}
+					envPairs={envPairs}
+				/>
+			)}
 			<AreYouSureModal
 				open={!!envToDelete}
 				closeFunc={() => setEnvToDelete(null)}

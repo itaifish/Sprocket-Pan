@@ -103,7 +103,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 			</Typography>
 			<Divider />
 			<Stack>
-				<Stack direction={'row'} spacing={2} sx={{ mt: '20px' }} justifyContent={'space-between'}>
+				<Stack direction="row" spacing={2} sx={{ mt: '20px' }} justifyContent={'space-between'}>
 					{(['left', 'right'] as const).map((direction) => (
 						<Box key={direction}>
 							<Stack direction={'column'}>
@@ -164,7 +164,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 
 								<FormControl>
 									<FormLabel>History Item</FormLabel>
-									<Stack direction={'row'} alignItems={'center'}>
+									<Stack direction="row" alignItems={'center'}>
 										<HistoryControl
 											value={selectedHistoryIndex[direction] ?? 0}
 											historyLength={selectedRequest[direction]?.history.length ?? 0}
@@ -216,7 +216,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Response Headers
 									</Typography>
-									<Stack direction={'row'} justifyContent={'space-between'}>
+									<Stack direction="row" justifyContent={'space-between'}>
 										<Typography>
 											{original.response.statusCode}: {statusCodes[original.response.statusCode]}
 										</Typography>
@@ -246,15 +246,15 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 										Request Body
 									</Typography>
-									<Stack direction={'row'} justifyContent={'space-between'} textAlign={'center'}>
+									<Stack direction="row" justifyContent={'space-between'} textAlign={'center'}>
 										<Box>
-											<Stack direction={'row'} spacing={0}>
+											<Stack direction="row" spacing={0}>
 												<Chip color={verbColors[original.request.method]}>{original.request.method}</Chip>
 												<Typography level="body-md">{original.request.url}</Typography>
 											</Stack>
 										</Box>
 										<Box>
-											<Stack direction={'row'} spacing={0}>
+											<Stack direction="row" spacing={0}>
 												<Chip color={verbColors[modified.request.method]}>{modified.request.method}</Chip>
 												<Typography level="body-md">{modified.request.url}</Typography>
 											</Stack>
@@ -272,7 +272,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								<Typography sx={{ textAlign: 'center', mt: '20px' }} level="h4">
 									Event Log
 								</Typography>
-								<Stack direction={'row'} justifyContent={'space-between'}>
+								<Stack direction="row" justifyContent={'space-between'}>
 									<VisualEventLog auditLog={original.auditLog ?? []} requestId={selectedRequest.left.id} />
 									<VisualEventLog auditLog={modified.auditLog ?? []} requestId={selectedRequest.right.id} />
 								</Stack>

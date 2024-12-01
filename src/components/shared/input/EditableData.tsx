@@ -1,8 +1,8 @@
-import { Badge, Box, IconButton, Stack } from '@mui/joy';
+import { Badge, Box, IconButton } from '@mui/joy';
 import { useState, useRef, useMemo, useEffect } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
-import { Editor, Monaco } from '@monaco-editor/react';
+import { Editor } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { clamp } from '../../../utils/math';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -16,6 +16,7 @@ import { KeyValuePair, KeyValueValues } from '../../../classes/OrderedKeyValuePa
 import { replaceValuesByKey } from '../../../utils/variables';
 import { FormatButton } from '../buttons/FormatButton';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
+import { ActionBar, ActionBarPassthroughProps } from './ActionBar';
 
 function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};
@@ -30,9 +31,16 @@ export interface EditableDataSettings {
 interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
 	values: KeyValuePair<T>[];
 	onChange: (newData: KeyValuePair<T>[]) => void;
+	actions?: ActionBarPassthroughProps;
 }
 
-export function EditableData<T extends KeyValueValues>({ values, onChange, fullSize, envPairs }: EditableDataProps<T>) {
+export function EditableData<T extends KeyValueValues>({
+	values,
+	onChange,
+	fullSize,
+	envPairs,
+	actions = {},
+}: EditableDataProps<T>) {
 	const theme = useEditorTheme();
 
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -51,11 +59,6 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 	const format = () => {
 		editorRef.current?.getAction('editor.action.formatDocument')?.run();
 		setIsFormatting(true);
-	};
-
-	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
-		editorRef.current = editor;
-		format();
 	};
 
 	const reset = () => {
@@ -93,6 +96,10 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 		ignoreEditorUpdates.current = isReadOnly;
 	}, [isReadOnly]);
 
+	useEffect(() => {
+		format();
+	}, [values]);
+
 	const onEditorChange = (value: string | undefined) => {
 		if (ignoreEditorUpdates.current) return;
 		setEditorText(value ?? '');
@@ -105,25 +112,33 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 
 	return (
 		<>
-			<Stack direction="row" justifyContent="end" alignItems="end">
-				<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
-					<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
-				</SprocketTooltip>
-				<SprocketTooltip text="Clear Changes">
-					<IconButton disabled={!hasChanged} onClick={reset}>
-						<CancelIcon />
-					</IconButton>
-				</SprocketTooltip>
-				<SprocketTooltip text="Save Changes">
-					<IconButton disabled={!hasChanged} onClick={save}>
-						<Badge invisible={!hasChanged} color="primary">
-							<SaveIcon></SaveIcon>
-						</Badge>
-					</IconButton>
-				</SprocketTooltip>
-				<CopyToClipboardButton copyText={editorText} />
-				<FormatButton disabled={isReadOnly} onChange={format} />
-			</Stack>
+			<ActionBar
+				start={actions.start}
+				end={
+					<>
+						{actions.end}
+						<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
+							<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
+						</SprocketTooltip>
+						<SprocketTooltip text="Clear Changes">
+							<IconButton disabled={!hasChanged} onClick={reset}>
+								<CancelIcon />
+							</IconButton>
+						</SprocketTooltip>
+						<SprocketTooltip text="Save Changes">
+							<IconButton disabled={!hasChanged} onClick={save}>
+								<Badge invisible={!hasChanged} color="primary">
+									<SaveIcon></SaveIcon>
+								</Badge>
+							</IconButton>
+						</SprocketTooltip>
+						<CopyToClipboardButton copyText={editorText} />
+						<FormatButton disabled={isReadOnly} onChange={format} />
+					</>
+				}
+			>
+				{actions.middle}
+			</ActionBar>
 			<Box
 				onKeyDown={(e) => {
 					if (e.key === 's' && e.ctrlKey) {
@@ -139,7 +154,10 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 					language={'json'}
 					theme={theme}
 					options={defaultEditorOptions}
-					onMount={handleEditorDidMount}
+					onMount={(editor) => {
+						editorRef.current = editor;
+						format();
+					}}
 				/>
 			</Box>
 		</>

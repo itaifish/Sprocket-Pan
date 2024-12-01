@@ -31,13 +31,14 @@ export function RequestPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={request.name}
 				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
-				isTitle
+				level="h2"
 			/>
 			<RequestActions endpoint={endpoint} request={request} onError={setLastError} onResponse={setResponseState} />
-			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
+			<Grid container direction="row" spacing={1} sx={{ height: '100%' }}>
 				<Grid xs={6}>
 					<Card sx={{ height: '100%', width: '100%' }}>
 						<Typography level="h3" sx={{ textAlign: 'center' }}>
