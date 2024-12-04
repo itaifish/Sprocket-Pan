@@ -101,9 +101,7 @@ export type Environment = {
 	pairs: KeyValuePair[];
 };
 
-type LinkedEnv = { serviceId: string; envId: string };
-
-export type RootEnvironment = Environment & { linked?: LinkedEnv[] };
+export type RootEnvironment = Environment & { linked?: Record<string, string | null>; parents?: string[] };
 
 export type QueryParams = KeyValuePair<KeyValueValues>[];
 export type SPHeaders = KeyValuePair[];
@@ -121,6 +119,7 @@ export type Service<TBaseUrl extends string = string> = {
 	endpointIds: string[];
 	preRequestScript?: string;
 	postRequestScript?: string;
+	linkedEnvMode?: boolean;
 };
 
 export type WorkspaceMetadata = {

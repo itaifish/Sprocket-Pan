@@ -51,6 +51,7 @@ export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): B
 	const values: BuildEnvironmentVariablesArgs = {
 		secrets: data.secrets,
 		rootEnv: data.selectedEnvironment == null ? null : data.environments[data.selectedEnvironment],
+		rootAncestors: Object.values(data.environments),
 	};
 	if (requestId != null) {
 		const request = data.requests[requestId];

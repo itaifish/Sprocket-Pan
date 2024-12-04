@@ -16,10 +16,8 @@ interface EditableTextProps extends Partial<TypographyProps> {
 export function EditableText({ text, setText, isValidFunc, sx, narrow = false, ...props }: EditableTextProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [typingText, setTypingText] = useState(text);
-	const [isValid, setIsValid] = useState(true);
-	useEffect(() => {
-		setIsValid(isValidFunc(typingText));
-	}, [typingText, isValidFunc]);
+
+	const isValid = isValidFunc(text);
 
 	const commitInput = () => {
 		if (isValid) {
@@ -36,6 +34,11 @@ export function EditableText({ text, setText, isValidFunc, sx, narrow = false, .
 			setIsEditing(true);
 		}
 	};
+
+	useEffect(() => {
+		setTypingText(text);
+		setIsEditing(false);
+	}, [text]);
 
 	return (
 		<Stack

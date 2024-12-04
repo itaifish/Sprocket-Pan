@@ -1,13 +1,4 @@
-import {
-	Box,
-	IconButton,
-	ListDivider,
-	ListItem,
-	ListItemContent,
-	ListItemDecorator,
-	Stack,
-	Typography,
-} from '@mui/joy';
+import { Box, IconButton, ListItem, ListItemContent, ListItemDecorator, Stack, Typography } from '@mui/joy';
 import EventIcon from '@mui/icons-material/Event';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../state/store';
@@ -52,7 +43,6 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 					</Stack>
 				</ListItemContent>
 			</ListItem>
-			<ListDivider inset="gutter" />
 		</>
 	);
 }

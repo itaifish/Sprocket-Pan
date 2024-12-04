@@ -80,8 +80,8 @@ export class WorkspaceDataManager {
 		}
 
 		const dataToWrite = JSON.stringify(
-			data,
-			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'secrets', 'uiMetadata'),
+			{ ...data, secrets: data.secrets.map(({ key }) => ({ key, value: '' })) },
+			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'uiMetadata'),
 		);
 
 		await writeTextFile(filePath, dataToWrite);

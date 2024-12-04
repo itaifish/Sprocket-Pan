@@ -1,5 +1,5 @@
 import { Badge, Box, IconButton } from '@mui/joy';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor } from '@monaco-editor/react';
@@ -18,9 +18,13 @@ import { FormatButton } from '../buttons/FormatButton';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
 import { ActionBar, ActionBarPassthroughProps } from './ActionBar';
 
-function parseEditorJSON<T>(text: string): Record<string, T> {
+export function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};
 	return JSON.parse(text) as Record<string, T>;
+}
+
+export function toEditorJSON<T extends KeyValueValues>(values: KeyValuePair<T>[]): string {
+	return JSON.stringify(Object.fromEntries(values.map(({ key, value }) => [key, value])));
 }
 
 export interface EditableDataSettings {
@@ -29,26 +33,32 @@ export interface EditableDataSettings {
 }
 
 interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
-	values: KeyValuePair<T>[];
+	initialValues: KeyValuePair<T>[];
 	onChange: (newData: KeyValuePair<T>[]) => void;
 	actions?: ActionBarPassthroughProps;
+	viewParser?: (text: string) => string;
 }
 
+/**
+ * @todo this won't format data if the values are updated. it'll run everything except the onChange from the editor
+ * which prevents us from getting the updated text.
+ * in order to reset initialValues, you'll need to teardown and re-render this entire component
+ */
 export function EditableData<T extends KeyValueValues>({
-	values,
+	initialValues,
 	onChange,
 	fullSize,
 	envPairs,
 	actions = {},
+	viewParser,
 }: EditableDataProps<T>) {
 	const theme = useEditorTheme();
 
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const envValues = envPairs ?? (selectedEnvironment == null ? [] : environments[selectedEnvironment].pairs);
-	const valuesAsObject = useMemo(() => Object.fromEntries(values.map(({ key, value }) => [key, value])), [values]);
 
-	const [editorText, setEditorText] = useState(JSON.stringify(valuesAsObject));
+	const [editorText, setEditorText] = useState(toEditorJSON(initialValues));
 	const [hasChanged, setChanged] = useState(false);
 	const [isFormatting, setIsFormatting] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState(false);
@@ -62,7 +72,7 @@ export function EditableData<T extends KeyValueValues>({
 	};
 
 	const reset = () => {
-		setEditorText(JSON.stringify(valuesAsObject));
+		setEditorText(toEditorJSON(initialValues));
 		setChanged(false);
 		format();
 	};
@@ -87,7 +97,10 @@ export function EditableData<T extends KeyValueValues>({
 			// else switching to true (view) mode
 			setIsReadOnly(true);
 			ignoreEditorUpdates.current = true;
-			editorRef.current?.setValue(replaceValuesByKey(editorText, envValues));
+			editorRef.current?.setValue(
+				viewParser == null ? replaceValuesByKey(editorText, envValues) : viewParser(editorText),
+			);
+			editorRef.current?.getAction('editor.action.formatDocument')?.run();
 			editorRef.current?.updateOptions({ readOnly: true });
 		}
 	};
@@ -95,10 +108,6 @@ export function EditableData<T extends KeyValueValues>({
 	useEffect(() => {
 		ignoreEditorUpdates.current = isReadOnly;
 	}, [isReadOnly]);
-
-	useEffect(() => {
-		format();
-	}, [values]);
 
 	const onEditorChange = (value: string | undefined) => {
 		if (ignoreEditorUpdates.current) return;
@@ -133,7 +142,7 @@ export function EditableData<T extends KeyValueValues>({
 							</IconButton>
 						</SprocketTooltip>
 						<CopyToClipboardButton copyText={editorText} />
-						<FormatButton disabled={isReadOnly} onChange={format} />
+						<FormatButton disabled={isReadOnly} onClick={format} />
 					</>
 				}
 			>
@@ -148,7 +157,7 @@ export function EditableData<T extends KeyValueValues>({
 				height={'100%'}
 			>
 				<Editor
-					height={fullSize ? '100%' : `${clamp((values.length + 2) * 3, 10, 40)}vh`}
+					height={fullSize ? '100%' : `${clamp((initialValues.length + 2) * 3, 10, 40)}vh`}
 					value={editorText}
 					onChange={onEditorChange}
 					language={'json'}

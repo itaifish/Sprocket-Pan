@@ -1,7 +1,13 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Environment } from '../../../types/application-data/application-data';
 import { RootState } from '../../store';
-import { insertEnvironment, deleteEnvironmentFromState } from '../slice';
+import {
+	insertEnvironment,
+	deleteEnvironmentFromState,
+	removeLinkedEnv,
+	addLinkedEnv,
+	UpdateLinkedEnv,
+} from '../slice';
 import { tabsActions } from '../../tabs/slice';
 import { cloneEnv } from '../../../utils/application';
 
@@ -31,5 +37,18 @@ export const deleteEnvironmentById = createAsyncThunk<void, string, { state: Roo
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(deleteEnvironmentFromState(id));
+	},
+);
+
+interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
+	remove: string[];
+	add: string[];
+}
+
+export const relinkEnvironments = createAsyncThunk<void, RelinkEnvironmentsArgs, { state: RootState }>(
+	'active/deleteEnvironmentById',
+	async ({ remove, add, serviceEnvId, serviceId }, thunk) => {
+		remove.forEach((envId) => thunk.dispatch(removeLinkedEnv({ envId, serviceEnvId, serviceId })));
+		add.forEach((envId) => thunk.dispatch(addLinkedEnv({ envId, serviceEnvId, serviceId })));
 	},
 );

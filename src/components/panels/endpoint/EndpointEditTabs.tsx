@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import {
+	selectEnvironments,
 	selectSecrets,
 	selectSelectedEnvironmentValue,
 	selectServiceSelectedEnvironmentValue,
@@ -22,7 +23,13 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const secrets = useSelector(selectSecrets);
 	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
 	const rootEnv = useSelector(selectSelectedEnvironmentValue);
-	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({ secrets, servEnv, rootEnv }).toArray();
+	const environments = useSelector(selectEnvironments);
+	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({
+		secrets,
+		servEnv,
+		rootEnv,
+		rootAncestors: Object.values(environments),
+	}).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
 		dispatch(updateEndpoint({ ...values, id: endpoint.id }));
@@ -47,14 +54,14 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 
 			<TabPanel value="headers">
 				<EditableData
-					values={endpoint.baseHeaders}
+					initialValues={endpoint.baseHeaders}
 					onChange={(baseHeaders) => update({ baseHeaders })}
 					envPairs={envPairs}
 				/>
 			</TabPanel>
 			<TabPanel value="queryParams">
 				<EditableData
-					values={endpoint.baseQueryParams}
+					initialValues={endpoint.baseQueryParams}
 					onChange={(baseQueryParams) => update({ baseQueryParams })}
 					envPairs={envPairs}
 				/>

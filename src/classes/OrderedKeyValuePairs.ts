@@ -20,12 +20,27 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 		pairs.forEach(({ key, value }) => this.set(key, value));
 	}
 
+	public expand(pairs: KeyValueOrOrdered<T> | undefined) {
+		if (pairs == null) return;
+		if ('toArray' in pairs) {
+			pairs = pairs.toArray();
+		}
+		pairs.forEach(({ key, value }) => this.insertOnly(key, value));
+	}
+
 	public get(key: string) {
 		return this.map[key];
 	}
 
 	public findIndexOf(key: string) {
 		return this.order.findIndex((k) => k === key);
+	}
+
+	public insertOnly(key: string, value?: T) {
+		if (this.map[key] == null) {
+			this.order.push(key);
+			this.map[key] = value;
+		}
 	}
 
 	public set(key: string, value?: T) {

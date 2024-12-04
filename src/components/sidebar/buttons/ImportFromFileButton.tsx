@@ -56,6 +56,7 @@ export function ImportFromFileButton() {
 										requests: Object.values(asData.requests ?? {}),
 										environments: Object.values(asData.environments ?? {}),
 										scripts: Object.values(asData.scripts ?? {}),
+										secrets: Object.values(asData.secrets ?? []),
 									};
 									dispatch(InjectLoadedData(toInject));
 								}

@@ -11,13 +11,13 @@ export type ActionBarPassthroughProps = Omit<ActionBarProps, 'children'> & { mid
 export function ActionBar({ start, children, end }: ActionBarProps) {
 	return (
 		<Stack direction="row" justifyContent="stretch" alignItems="end" flexWrap="nowrap" gap={2}>
-			<Stack direction="row" justifyContent="start" alignItems="end" width="25%">
+			<Stack direction="row" justifyContent="start" alignItems="end" width="50%">
 				{start}
 			</Stack>
 			<Stack direction="row" justifyContent="center" alignItems="end" minWidth="fit-content" width="100%">
 				{children}
 			</Stack>
-			<Stack direction="row" justifyContent="end" alignItems="end" width="25%">
+			<Stack direction="row" justifyContent="end" alignItems="end" width="50%">
 				{end}
 			</Stack>
 		</Stack>
