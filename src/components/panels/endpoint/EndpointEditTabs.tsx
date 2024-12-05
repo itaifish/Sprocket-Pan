@@ -1,35 +1,19 @@
 import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import {
-	selectEnvironments,
-	selectSecrets,
-	selectSelectedEnvironmentValue,
-	selectServiceSelectedEnvironmentValue,
-} from '../../../state/active/selectors';
 import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { Endpoint } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { EditableData } from '../../shared/input/EditableData';
+import { useComputedServiceEnvironment } from '../../../hooks/useComputedEnvironment';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
 type EndpointPanelType = (typeof endpointTabs)[number];
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const [tab, setTab] = useState<EndpointPanelType>('headers');
-	const secrets = useSelector(selectSecrets);
-	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
-	const rootEnv = useSelector(selectSelectedEnvironmentValue);
-	const environments = useSelector(selectEnvironments);
-	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({
-		secrets,
-		servEnv,
-		rootEnv,
-		rootAncestors: Object.values(environments),
-	}).toArray();
+	const envPairs = useComputedServiceEnvironment(endpoint.serviceId);
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
 		dispatch(updateEndpoint({ ...values, id: endpoint.id }));

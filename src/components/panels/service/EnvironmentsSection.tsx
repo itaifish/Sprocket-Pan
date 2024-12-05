@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { IconButton, Select, Stack, Option, Box, Divider } from '@mui/joy';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import { useSelector } from 'react-redux';
-import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { selectEnvironments, selectSecrets, selectSelectedEnvironmentValue } from '../../../state/active/selectors';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { SectionProps } from './sectionProps';
 import { Environment } from '../../../types/application-data/application-data';
@@ -11,22 +8,16 @@ import { cloneEnv } from '../../../utils/application';
 import { EnvironmentEditor } from './EnvironmentEditor';
 import { Link, LinkOff, ModeEdit } from '@mui/icons-material';
 import { LinkedEnvironmentEditor } from './LinkedEnvironmentEditor';
+import { useComputedRootEnvironment } from '../../../hooks/useComputedEnvironment';
 
 export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const [visibleEnvId, setVisibleEnvId] = useState<string | null>(data.selectedEnvironment ?? null);
-	const secrets = useSelector(selectSecrets);
-	const rootEnv = useSelector(selectSelectedEnvironmentValue);
 	const localEnvs = data.localEnvironments;
 	const envList = Object.values(localEnvs);
 	const visibleEnv = visibleEnvId == null ? null : data.localEnvironments[visibleEnvId];
 	const isVisibleSelected = data.selectedEnvironment === visibleEnvId;
-	const environments = useSelector(selectEnvironments);
 
-	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({
-		rootEnv,
-		secrets,
-		rootAncestors: Object.values(environments),
-	}).toArray();
+	const envPairs = useComputedRootEnvironment();
 
 	function addEnv(
 		env: Partial<Environment> = { name: `${data.name}.env.${Object.keys(data.localEnvironments).length}` },

@@ -1,5 +1,5 @@
 import { Badge, Box, IconButton } from '@mui/joy';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor } from '@monaco-editor/react';
@@ -60,15 +60,19 @@ export function EditableData<T extends KeyValueValues>({
 
 	const [editorText, setEditorText] = useState(toEditorJSON(initialValues));
 	const [hasChanged, setChanged] = useState(false);
-	const [isFormatting, setIsFormatting] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState(false);
 
 	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-	const format = () => {
-		editorRef.current?.getAction('editor.action.formatDocument')?.run();
-		setIsFormatting(true);
+	const format = async () => {
+		const prevIgnore = ignoreEditorUpdates.current;
+		const prevReadOnly = editorRef.current?.getRawOptions().readOnly;
+		ignoreEditorUpdates.current = true;
+		editorRef.current?.updateOptions({ readOnly: false });
+		await editorRef.current?.getAction('editor.action.formatDocument')?.run();
+		editorRef.current?.updateOptions({ readOnly: prevReadOnly });
+		ignoreEditorUpdates.current = prevIgnore;
 	};
 
 	const reset = () => {
@@ -87,36 +91,23 @@ export function EditableData<T extends KeyValueValues>({
 	};
 
 	const switchMode = () => {
+		ignoreEditorUpdates.current = !isReadOnly;
 		if (isReadOnly) {
-			// if current mode isReadOnly, switching to false (edit) mode
 			editorRef.current?.updateOptions({ readOnly: false });
 			editorRef.current?.setValue(editorText);
-			ignoreEditorUpdates.current = false;
-			setIsReadOnly(false);
 		} else {
-			// else switching to true (view) mode
-			setIsReadOnly(true);
-			ignoreEditorUpdates.current = true;
 			editorRef.current?.setValue(
 				viewParser == null ? replaceValuesByKey(editorText, envValues) : viewParser(editorText),
 			);
-			editorRef.current?.getAction('editor.action.formatDocument')?.run();
-			editorRef.current?.updateOptions({ readOnly: true });
 		}
+		setIsReadOnly(!isReadOnly);
+		format();
 	};
-
-	useEffect(() => {
-		ignoreEditorUpdates.current = isReadOnly;
-	}, [isReadOnly]);
 
 	const onEditorChange = (value: string | undefined) => {
 		if (ignoreEditorUpdates.current) return;
 		setEditorText(value ?? '');
-		if (isFormatting) {
-			setIsFormatting(false);
-		} else {
-			setChanged(true);
-		}
+		setChanged(true);
 	};
 
 	return (
