@@ -41,7 +41,7 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 						<Typography level="title-md" textAlign={'center'}>
 							{formatFullDate(new Date(responseStateData?.response.dateTime))}
 						</Typography>
-						<Stack direction={'row'} spacing={0}>
+						<Stack direction="row" spacing={0}>
 							<OpenDiffToolButton
 								historyIndex={
 									typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)

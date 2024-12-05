@@ -1,33 +1,23 @@
 import { useState } from 'react';
-import { Box, IconButton, Stack } from '@mui/joy';
+import { IconButton, Select, Stack, Option, Box, Divider } from '@mui/joy';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import DeleteIcon from '@mui/icons-material/Delete';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
-
-import { useSelector } from 'react-redux';
-import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { selectSecrets, selectSelectedEnvironmentValue } from '../../../state/active/selectors';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { EditableText } from '../../shared/input/EditableText';
-import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
-import { EditableData } from '../../shared/input/EditableData';
 import { SectionProps } from './sectionProps';
 import { Environment } from '../../../types/application-data/application-data';
 import { cloneEnv } from '../../../utils/application';
+import { EnvironmentEditor } from './EnvironmentEditor';
+import { Link, LinkOff, ModeEdit } from '@mui/icons-material';
+import { LinkedEnvironmentEditor } from './LinkedEnvironmentEditor';
+import { useComputedRootEnvironment } from '../../../hooks/useComputedEnvironment';
 
 export function EnvironmentsSection({ data, onChange }: SectionProps) {
-	const secrets = useSelector(selectSecrets);
-	const rootEnv = useSelector(selectSelectedEnvironmentValue);
-	const [envToDelete, setEnvToDelete] = useState<string | null>(null);
+	const [visibleEnvId, setVisibleEnvId] = useState<string | null>(data.selectedEnvironment ?? null);
 	const localEnvs = data.localEnvironments;
+	const envList = Object.values(localEnvs);
+	const visibleEnv = visibleEnvId == null ? null : data.localEnvironments[visibleEnvId];
+	const isVisibleSelected = data.selectedEnvironment === visibleEnvId;
 
-	const envPairs = EnvironmentContextResolver.buildEnvironmentVariables({ rootEnv, secrets }).toArray();
-
-	function modifyEnv(id: string, content: Partial<Environment>) {
-		onChange({ localEnvironments: { ...localEnvs, [id]: { ...localEnvs[id], ...content } } });
-	}
+	const envPairs = useComputedRootEnvironment();
 
 	function addEnv(
 		env: Partial<Environment> = { name: `${data.name}.env.${Object.keys(data.localEnvironments).length}` },
@@ -36,77 +26,76 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 		const newEnv = cloneEnv(env, nameMod);
 		onChange({
 			localEnvironments: {
+				...localEnvs,
 				[newEnv.id]: newEnv,
 			},
 		});
+		setVisibleEnvId(newEnv.id);
 	}
 
-	function deleteEnv() {
-		if (envToDelete) {
-			const newData = structuredClone(localEnvs);
-			delete newData[envToDelete];
-			onChange({
-				localEnvironments: newData,
-			});
-		}
+	function deleteEnv(id: string) {
+		const newData = structuredClone(localEnvs);
+		delete newData[id];
+		onChange({
+			localEnvironments: newData,
+		});
 	}
 
 	return (
-		<Box>
-			<SprocketTooltip text="Add New Service Environment">
-				<IconButton onClick={() => addEnv()}>
-					<PlaylistAddIcon />
-				</IconButton>
-			</SprocketTooltip>
-			<Stack spacing={4}>
-				{Object.values(data.localEnvironments).map((env) => (
-					<Box key={env.id}>
-						<EditableText
-							text={env.name}
-							setText={(name) => modifyEnv(env.id, { name })}
-							isValidFunc={function (text: string): boolean {
-								return text != '';
-							}}
-							isTitle
-							color={data.selectedEnvironment === env.id ? 'primary' : 'neutral'}
-						></EditableText>
-						<SprocketTooltip text={data.selectedEnvironment === env.id ? 'Unselect' : 'Select'}>
-							<IconButton
-								onClick={() => {
-									onChange({
-										selectedEnvironment: data.selectedEnvironment === env.id ? undefined : env.id,
-									});
-								}}
-							>
-								{data.selectedEnvironment === env.id ? <RadioButtonCheckedIcon /> : <RadioButtonUncheckedIcon />}
-							</IconButton>
-						</SprocketTooltip>
-						<SprocketTooltip text="Duplicate" onClick={() => addEnv(env, ' (Copy)')}>
-							<IconButton>
-								<FileCopyIcon />
-							</IconButton>
-						</SprocketTooltip>
-						<SprocketTooltip
-							text="Delete"
-							onClick={() => {
-								setEnvToDelete(env.id);
-							}}
-						>
-							<IconButton>
-								<DeleteIcon />
-							</IconButton>
-						</SprocketTooltip>
-
-						<EditableData values={env.pairs} onChange={(pairs) => modifyEnv(env.id, { pairs })} envPairs={envPairs} />
-					</Box>
-				))}
+		<Stack>
+			<Box alignSelf="end" height={0}>
+				<SprocketTooltip text={`${data.linkedEnvMode ? 'Disable' : 'Enable'} Environment Linking`}>
+					<IconButton onClick={() => onChange({ linkedEnvMode: !data.linkedEnvMode })}>
+						{data.linkedEnvMode ? <LinkOff /> : <Link />}
+					</IconButton>
+				</SprocketTooltip>
+			</Box>
+			<Box height={data.linkedEnvMode ? 'fit-content' : 0} sx={{ transition: 'all 1s linear', overflow: 'hidden' }}>
+				<Box height="20px" />
+				<LinkedEnvironmentEditor service={data} />
+				<Divider sx={{ margin: '30px' }} />
+			</Box>
+			<Stack direction="row" gap={1} alignItems="center">
+				<Select
+					startDecorator={<ModeEdit />}
+					placeholder="Choose Environment"
+					value={visibleEnvId}
+					onChange={(_, value) => setVisibleEnvId(value)}
+				>
+					{envList.map((env) => (
+						<Option value={env.id} key={env.id}>
+							{env.name}
+						</Option>
+					))}
+				</Select>
+				<SprocketTooltip text="Add New Service-Scoped Environment">
+					<IconButton onClick={() => addEnv()}>
+						<PlaylistAddIcon />
+					</IconButton>
+				</SprocketTooltip>
 			</Stack>
-			<AreYouSureModal
-				open={!!envToDelete}
-				closeFunc={() => setEnvToDelete(null)}
-				action={`delete ${data.localEnvironments[envToDelete ?? '']?.name ?? envToDelete}`}
-				actionFunc={deleteEnv}
-			></AreYouSureModal>
-		</Box>
+			<Stack width="100%" minWidth="500px" flex={1}>
+				{visibleEnv != null && (
+					<EnvironmentEditor
+						serviceId={data.id}
+						env={visibleEnv}
+						envPairs={envPairs}
+						onChange={(values) =>
+							onChange({
+								localEnvironments: { ...localEnvs, [visibleEnv.id]: { ...localEnvs[visibleEnv.id], ...values } },
+							})
+						}
+						onDelete={() => deleteEnv(visibleEnv.id)}
+						onClone={(env) => addEnv(env, ' (Copy)')}
+						selected={isVisibleSelected}
+						toggleSelected={
+							data.linkedEnvMode
+								? null
+								: () => onChange({ selectedEnvironment: isVisibleSelected ? undefined : visibleEnv.id })
+						}
+					/>
+				)}
+			</Stack>
+		</Stack>
 	);
 }

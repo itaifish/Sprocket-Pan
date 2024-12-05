@@ -27,7 +27,6 @@ export function TabRow({ list }: TabRowProps) {
 						color: `secondary.500`,
 						bgcolor: 'background.surface',
 						borderColor: 'divider',
-						outline: 'none',
 						'&::before': {
 							content: '""',
 							display: 'block',

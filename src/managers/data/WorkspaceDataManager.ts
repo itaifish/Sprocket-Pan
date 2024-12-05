@@ -80,8 +80,8 @@ export class WorkspaceDataManager {
 		}
 
 		const dataToWrite = JSON.stringify(
-			data,
-			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'secrets', 'uiMetadata'),
+			{ ...data, secrets: data.secrets.map(({ key }) => ({ key, value: '' })) },
+			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'uiMetadata'),
 		);
 
 		await writeTextFile(filePath, dataToWrite);
@@ -132,7 +132,7 @@ export class WorkspaceDataManager {
 			data: `${base}.json`,
 			history: `${base}_history.json`,
 			metadata: `${base}_metadata.json`,
-			uiMetadata: `${base}_ui_metadata`,
+			uiMetadata: `${base}_ui_metadata.json`,
 			secrets: `${base}_secrets.json`,
 		};
 	}
@@ -191,7 +191,7 @@ export class WorkspaceDataManager {
 			fileSystemManager.createFileIfNotExists(paths.history, []),
 			fileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
 			fileSystemManager.createFileIfNotExists(paths.metadata, workspace),
-			fileSystemManager.createFileIfNotExists(paths.secrets, {}),
+			fileSystemManager.createFileIfNotExists(paths.secrets, []),
 		];
 		const results = await Promise.all(promises);
 		return results.includes(true);

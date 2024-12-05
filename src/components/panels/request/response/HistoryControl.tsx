@@ -19,7 +19,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 	// and 'latest' is identical to historyLength - 1
 	const numValue = value === 'latest' ? historyLength - 1 : value === 'error' ? historyLength : value;
 	return (
-		<Stack direction={'row'}>
+		<Stack direction="row">
 			<SprocketTooltip text={'Previous Response'}>
 				<IconButton
 					aria-label="Previous Response"
@@ -35,7 +35,6 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 				) : (
 					<>
 						<EditableText
-							sx={{ display: 'flex', alignItems: 'center' }}
 							text={`${numValue + 1}`}
 							setText={(text: string) => {
 								const num = Number.parseInt(text);
@@ -45,6 +44,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 								const num = Number.parseInt(text);
 								return !isNaN(num) && num >= 1 && num <= historyLength;
 							}}
+							narrow
 						/>
 						/{historyLength}
 					</>

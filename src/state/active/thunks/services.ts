@@ -26,6 +26,17 @@ export const cloneService = createAsyncThunk<string, CloneServiceInput, { state:
 	},
 );
 
+type NewServiceArgs = Pick<Service, 'baseUrl' | 'description' | 'name'>;
+
+export const addNewService = createAsyncThunk<string, NewServiceArgs, { state: RootState }>(
+	'active/addNewService',
+	async (serviceData, thunk) => {
+		const newService = { ...createNewServiceObject(), ...serviceData };
+		thunk.dispatch(insertService(newService));
+		return newService.id;
+	},
+);
+
 export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootState }>(
 	'active/cloneServiceFromId',
 	async (oldId, thunk) => {

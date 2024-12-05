@@ -150,24 +150,14 @@ class NetworkRequestManager {
 		});
 
 		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
-		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), (text) =>
+		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), true, (text) =>
 			EnvironmentContextResolver.resolveVariablesForString(text, envValues),
 		);
 		if (queryParamStr) {
 			queryParamStr = `?${queryParamStr}`;
 		}
 
-		const contentTypeValue = headers.get(CONTENT_TYPE);
-
-		const networkRequest = {
-			url: `${url}${queryParamStr}`,
-			method: endpoint.verb,
-			body: this.parseRequestForNetworkCall(request, body) ?? '',
-			headers: headers.toArray(),
-			dateTime: new Date().getTime(),
-			bodyType: request.rawType,
-		} as const satisfies NetworkFetchRequest;
-
+		const networkRequestBodyText = this.parseRequestForNetworkCall(request, body) ?? '';
 		let networkBody: Body | undefined;
 		const category = getRequestBodyCategory(request.bodyType);
 		if (category === 'table') {
@@ -177,10 +167,10 @@ class NetworkRequestManager {
 				networkBody = Body.json(body as Record<string, string>);
 			}
 		} else if (category !== 'none') {
-			networkBody = Body.text(networkRequest.body);
+			networkBody = Body.text(networkRequestBodyText);
 			// auto-set content type if not already set
-			if (contentTypeValue == undefined) {
-				request.headers.push({ key: CONTENT_TYPE, value: rawBodyTypeToMime(networkRequest.bodyType) });
+			if (headers.get(CONTENT_TYPE) == undefined) {
+				headers.set(CONTENT_TYPE, rawBodyTypeToMime(request.rawType));
 			}
 		} else {
 			networkBody = undefined;
@@ -188,12 +178,22 @@ class NetworkRequestManager {
 
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
 
+		const networkRequest: NetworkFetchRequest = {
+			url: `${url}${queryParamStr}`,
+			method: endpoint.verb,
+			body: networkRequestBodyText,
+			headers: headers.toObject(),
+			dateTime: new Date().getTime(),
+			bodyType: request.rawType,
+		};
+
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
 			body: networkBody,
 			headers: networkRequest.headers,
 			responseType: ResponseType.Text,
 		});
+
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
 			networkCall,
 			data.settings.timeoutDurationMS,

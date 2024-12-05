@@ -1,8 +1,8 @@
-import { Badge, Box, IconButton, Stack, useColorScheme } from '@mui/joy';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { Badge, Box, IconButton } from '@mui/joy';
+import { useState, useRef } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
-import { Editor, Monaco } from '@monaco-editor/react';
+import { Editor } from '@monaco-editor/react';
 import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
 import { clamp } from '../../../utils/math';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -13,13 +13,18 @@ import { editor } from 'monaco-editor';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
 import { KeyValuePair, KeyValueValues } from '../../../classes/OrderedKeyValuePairs';
-import { getEditorTheme } from '../../../utils/style';
 import { replaceValuesByKey } from '../../../utils/variables';
 import { FormatButton } from '../buttons/FormatButton';
+import { useEditorTheme } from '../../../hooks/useEditorTheme';
+import { ActionBar, ActionBarPassthroughProps } from './ActionBar';
 
-function parseEditorJSON<T>(text: string): Record<string, T> {
+export function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};
 	return JSON.parse(text) as Record<string, T>;
+}
+
+export function toEditorJSON<T extends KeyValueValues>(values: KeyValuePair<T>[]): string {
+	return JSON.stringify(Object.fromEntries(values.map(({ key, value }) => [key, value])));
 }
 
 export interface EditableDataSettings {
@@ -28,38 +33,50 @@ export interface EditableDataSettings {
 }
 
 interface EditableDataProps<T extends KeyValueValues> extends EditableDataSettings {
-	values: KeyValuePair<T>[];
+	initialValues: KeyValuePair<T>[];
 	onChange: (newData: KeyValuePair<T>[]) => void;
+	actions?: ActionBarPassthroughProps;
+	viewParser?: (text: string) => string;
 }
 
-export function EditableData<T extends KeyValueValues>({ values, onChange, fullSize, envPairs }: EditableDataProps<T>) {
-	const theme = getEditorTheme(useColorScheme());
+/**
+ * @todo this won't format data if the values are updated. it'll run everything except the onChange from the editor
+ * which prevents us from getting the updated text.
+ * in order to reset initialValues, you'll need to teardown and re-render this entire component
+ */
+export function EditableData<T extends KeyValueValues>({
+	initialValues,
+	onChange,
+	fullSize,
+	envPairs,
+	actions = {},
+	viewParser,
+}: EditableDataProps<T>) {
+	const theme = useEditorTheme();
 
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const envValues = envPairs ?? (selectedEnvironment == null ? [] : environments[selectedEnvironment].pairs);
-	const valuesAsObject = useMemo(() => Object.fromEntries(values.map(({ key, value }) => [key, value])), [values]);
 
-	const [editorText, setEditorText] = useState(JSON.stringify(valuesAsObject));
+	const [editorText, setEditorText] = useState(toEditorJSON(initialValues));
 	const [hasChanged, setChanged] = useState(false);
-	const [isFormatting, setIsFormatting] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState(false);
 
 	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
-	const format = () => {
-		editorRef.current?.getAction('editor.action.formatDocument')?.run();
-		setIsFormatting(true);
-	};
-
-	const handleEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
-		editorRef.current = editor;
-		format();
+	const format = async () => {
+		const prevIgnore = ignoreEditorUpdates.current;
+		const prevReadOnly = editorRef.current?.getRawOptions().readOnly;
+		ignoreEditorUpdates.current = true;
+		editorRef.current?.updateOptions({ readOnly: false });
+		await editorRef.current?.getAction('editor.action.formatDocument')?.run();
+		editorRef.current?.updateOptions({ readOnly: prevReadOnly });
+		ignoreEditorUpdates.current = prevIgnore;
 	};
 
 	const reset = () => {
-		setEditorText(JSON.stringify(valuesAsObject));
+		setEditorText(toEditorJSON(initialValues));
 		setChanged(false);
 		format();
 	};
@@ -74,56 +91,54 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 	};
 
 	const switchMode = () => {
+		ignoreEditorUpdates.current = !isReadOnly;
 		if (isReadOnly) {
-			// if current mode isReadOnly, switching to false (edit) mode
 			editorRef.current?.updateOptions({ readOnly: false });
 			editorRef.current?.setValue(editorText);
-			ignoreEditorUpdates.current = false;
-			setIsReadOnly(false);
 		} else {
-			// else switching to true (view) mode
-			setIsReadOnly(true);
-			ignoreEditorUpdates.current = true;
-			editorRef.current?.setValue(replaceValuesByKey(editorText, envValues));
-			editorRef.current?.updateOptions({ readOnly: true });
+			editorRef.current?.setValue(
+				viewParser == null ? replaceValuesByKey(editorText, envValues) : viewParser(editorText),
+			);
 		}
+		setIsReadOnly(!isReadOnly);
+		format();
 	};
-
-	useEffect(() => {
-		ignoreEditorUpdates.current = isReadOnly;
-	}, [isReadOnly]);
 
 	const onEditorChange = (value: string | undefined) => {
 		if (ignoreEditorUpdates.current) return;
 		setEditorText(value ?? '');
-		if (isFormatting) {
-			setIsFormatting(false);
-		} else {
-			setChanged(true);
-		}
+		setChanged(true);
 	};
 
 	return (
 		<>
-			<Stack direction="row" justifyContent="end" alignItems="end">
-				<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
-					<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
-				</SprocketTooltip>
-				<SprocketTooltip text="Clear Changes">
-					<IconButton disabled={!hasChanged} onClick={reset}>
-						<CancelIcon />
-					</IconButton>
-				</SprocketTooltip>
-				<SprocketTooltip text="Save Changes">
-					<IconButton disabled={!hasChanged} onClick={save}>
-						<Badge invisible={!hasChanged} color="primary">
-							<SaveIcon></SaveIcon>
-						</Badge>
-					</IconButton>
-				</SprocketTooltip>
-				<CopyToClipboardButton copyText={editorText} />
-				<FormatButton disabled={isReadOnly} onChange={format} />
-			</Stack>
+			<ActionBar
+				start={actions.start}
+				end={
+					<>
+						{actions.end}
+						<SprocketTooltip text={`Switch to ${isReadOnly ? 'Edit' : 'View'} Mode`}>
+							<IconButton onClick={switchMode}>{isReadOnly ? <EditIcon /> : <VisibilityIcon />}</IconButton>
+						</SprocketTooltip>
+						<SprocketTooltip text="Clear Changes">
+							<IconButton disabled={!hasChanged} onClick={reset}>
+								<CancelIcon />
+							</IconButton>
+						</SprocketTooltip>
+						<SprocketTooltip text="Save Changes">
+							<IconButton disabled={!hasChanged} onClick={save}>
+								<Badge invisible={!hasChanged} color="primary">
+									<SaveIcon></SaveIcon>
+								</Badge>
+							</IconButton>
+						</SprocketTooltip>
+						<CopyToClipboardButton copyText={editorText} />
+						<FormatButton disabled={isReadOnly} onClick={format} />
+					</>
+				}
+			>
+				{actions.middle}
+			</ActionBar>
 			<Box
 				onKeyDown={(e) => {
 					if (e.key === 's' && e.ctrlKey) {
@@ -133,13 +148,16 @@ export function EditableData<T extends KeyValueValues>({ values, onChange, fullS
 				height={'100%'}
 			>
 				<Editor
-					height={fullSize ? '100%' : `${clamp((values.length + 2) * 3, 10, 40)}vh`}
+					height={fullSize ? '100%' : `${clamp((initialValues.length + 2) * 3, 10, 40)}vh`}
 					value={editorText}
 					onChange={onEditorChange}
 					language={'json'}
 					theme={theme}
 					options={defaultEditorOptions}
-					onMount={handleEditorDidMount}
+					onMount={(editor) => {
+						editorRef.current = editor;
+						format();
+					}}
 				/>
 			</Box>
 		</>

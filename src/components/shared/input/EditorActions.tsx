@@ -9,7 +9,7 @@ interface EditorActionsProps {
 
 export function EditorActions({ copyText, format }: EditorActionsProps) {
 	return (
-		<Stack direction={'row'}>
+		<Stack direction="row">
 			{copyText != null && <CopyToClipboardButton copyText={copyText} />}
 			{format != null && <FormatButton onChange={format} />}
 		</Stack>

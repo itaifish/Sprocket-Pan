@@ -14,7 +14,6 @@ import {
 	Select,
 	Stack,
 	Typography,
-	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
@@ -40,6 +39,7 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { Constants } from '../../../constants/constants';
 import { FormatButton } from '../../shared/buttons/FormatButton';
+import { useEditorTheme } from '../../../hooks/useEditorTheme';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -48,11 +48,10 @@ const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 };
 
 export function ScriptPanel({ id }: PanelProps) {
+	const theme = useEditorTheme();
 	const script = useSelector((state) => selectScript(state, id));
 	const scripts = useSelector(selectScripts);
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
-	const { mode, systemMode } = useColorScheme();
-	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [isRunning, setRunning] = useState(false);
 	const [isDebouncing, setDebouncing] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -138,12 +137,13 @@ export function ScriptPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={script.name}
 				setText={(newText: string) => update({ name: newText, id, scriptCallableName: toValidFunctionName(newText) })}
 				isValidFunc={(text: string) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
-				isTitle
+				level="h2"
 			/>
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction="row" spacing={2}>
 				<FormControl>
 					<FormLabel>Script-Callable Name</FormLabel>
 					<Input
@@ -262,7 +262,7 @@ export function ScriptPanel({ id }: PanelProps) {
 					)}
 				</FormControl>
 			</Stack>
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction="row" spacing={2}>
 				<FormatButton onChange={format} />
 				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
@@ -275,7 +275,7 @@ export function ScriptPanel({ id }: PanelProps) {
 					}
 				}}
 				language={'typescript'}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={defaultEditorOptions}
 				onMount={handleMainEditorDidMount}
 			/>
@@ -286,7 +286,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				height={'15vh'}
 				value={scriptOutput}
 				language={scriptOutputLang}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 				onMount={handleReturnEditorDidMount}
 			/>

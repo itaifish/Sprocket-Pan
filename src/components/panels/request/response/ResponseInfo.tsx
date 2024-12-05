@@ -17,6 +17,8 @@ import { HistoricalEndpointResponse } from '../../../../types/application-data/a
 import { ValuesOf } from '../../../../types/utils/utils';
 import { formatFullDate, camelCaseToTitle } from '../../../../utils/string';
 import { statusCodes } from '../../../../constants/statusCodes';
+import { UriTypography } from '../../../shared/UriTypography';
+import { toKeyValuePairs } from '../../../../utils/application';
 
 const responseTabs = ['body', 'details', 'request', 'eventLog'] as const;
 type ResponseTabType = ValuesOf<typeof responseTabs>;
@@ -63,7 +65,7 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 			<TabPanel value="request">
 				<Typography left="p" sx={{ mb: 2 }}>
 					At <u>{formatFullDate(new Date(response.request.dateTime))}</u>, a <u>{response.request.method}</u> request
-					was sent to <u>{response.request.url}</u>.
+					was sent to <UriTypography>{response.request.url}</UriTypography>.
 				</Typography>
 				<HeadersDisplayTable headers={response.request.headers} label="request" />
 				{Object.keys(response.request.body).length > 0 && (
@@ -75,6 +77,7 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 									<ResponseBody
 										response={{
 											...response.request,
+											headers: toKeyValuePairs(response.request.headers),
 											bodyType: response.request.bodyType ?? 'JSON',
 											statusCode: 0,
 											body: response.request.body,

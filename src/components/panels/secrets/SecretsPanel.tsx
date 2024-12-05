@@ -11,7 +11,7 @@ export function SecretsPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
 	return (
 		<Box sx={{ height: '70vh', pb: '5vh' }}>
-			<EditableData values={secrets} onChange={(values) => dispatch(updateSecrets(values))} fullSize />
+			<EditableData initialValues={secrets} onChange={(values) => dispatch(updateSecrets(values))} fullSize />
 		</Box>
 	);
 }

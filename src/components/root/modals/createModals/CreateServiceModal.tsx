@@ -12,10 +12,10 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType, Service } from '../../../../types/application-data/application-data';
+import { iconFromTabType } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
 import { useAppDispatch } from '../../../../state/store';
-import { cloneService } from '../../../../state/active/thunks/services';
+import { addNewService } from '../../../../state/active/thunks/services';
 import { tabsActions } from '../../../../state/tabs/slice';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
@@ -27,14 +27,9 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const allFieldsValid = serviceNameValid;
 
 	const createServiceFunction = async () => {
-		const newService: Partial<Service> = { name: serviceName };
-		if (serviceDescription) {
-			newService.description = serviceDescription;
-		}
-		if (baseUrl) {
-			newService.baseUrl = baseUrl;
-		}
-		const createdServiceId = await dispatch(cloneService({ data: newService })).unwrap();
+		const createdServiceId = await dispatch(
+			addNewService({ name: serviceName, description: serviceDescription, baseUrl }),
+		).unwrap();
 		dispatch(tabsActions.addTabs({ [createdServiceId]: 'service' }));
 		dispatch(tabsActions.setSelectedTab(createdServiceId));
 	};

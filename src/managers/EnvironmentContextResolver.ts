@@ -1,5 +1,5 @@
-import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
-import { Environment, WorkspaceData } from '../types/application-data/application-data';
+import { KeyValuePair, OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
+import { Environment, RootEnvironment, WorkspaceData } from '../types/application-data/application-data';
 import { replaceValuesByKey } from '../utils/variables';
 
 export type Snippet = {
@@ -8,9 +8,10 @@ export type Snippet = {
 };
 
 export type BuildEnvironmentVariablesArgs = Pick<WorkspaceData, 'secrets'> & {
-	rootEnv?: Environment | null;
+	rootEnv?: RootEnvironment | null;
 	reqEnv?: Environment | null;
 	servEnv?: Environment | null;
+	rootAncestors?: RootEnvironment[] | null;
 	// ensures you don't accidentally pass in WorkspaceData, which technically satisfies the above properties
 	environments?: never;
 };
@@ -96,14 +97,53 @@ export class EnvironmentContextResolver {
 		return this.parseStringWithEnvironment(text, env);
 	}
 
+	private static applyLayerOntoEnv(
+		layer: KeyValuePair[],
+		variables: OrderedKeyValuePairs,
+		replacer: OrderedKeyValuePairs,
+	) {
+		const orderedLayer = new OrderedKeyValuePairs(layer);
+		const replacerPairs = replacer.toArray();
+		orderedLayer.transformValues((val) => (val == null ? val : replaceValuesByKey(val, replacerPairs)));
+		variables.apply(orderedLayer);
+		replacer.apply(orderedLayer);
+	}
+
 	public static buildEnvironmentVariables({
+		secrets,
 		rootEnv,
+		rootAncestors,
 		servEnv,
 		reqEnv,
-		secrets,
 	}: BuildEnvironmentVariablesArgs): OrderedKeyValuePairs {
-		const values = new OrderedKeyValuePairs(rootEnv?.pairs, servEnv?.pairs, reqEnv?.pairs);
-		values.transformValues((val) => (val == null ? val : replaceValuesByKey(val, secrets)));
-		return values;
+		const replacer = new OrderedKeyValuePairs(secrets);
+		const variables = new OrderedKeyValuePairs();
+		[this.buildFullEnvironment(rootEnv, rootAncestors), servEnv?.pairs, reqEnv?.pairs].forEach((pairs) => {
+			if (pairs?.length) {
+				this.applyLayerOntoEnv(pairs, variables, replacer);
+			}
+		});
+		return variables;
+	}
+
+	public static buildFullEnvironment(
+		environment?: RootEnvironment | null,
+		validAncestors?: RootEnvironment[] | null,
+	): KeyValuePair[] {
+		console.log({ environment, validAncestors });
+		if (environment == null) return [];
+		if (validAncestors == null || environment.parents == null) return environment.pairs;
+
+		const merged = new OrderedKeyValuePairs(environment.pairs);
+		environment.parents.forEach((parentId) => {
+			merged.expand(
+				this.buildFullEnvironment(
+					validAncestors.find((ancestor) => ancestor.id === parentId),
+					validAncestors.filter((ancestor) => ancestor.id === parentId),
+				),
+			);
+		});
+
+		return merged.toArray();
 	}
 }

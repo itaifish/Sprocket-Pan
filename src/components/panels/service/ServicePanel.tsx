@@ -1,17 +1,15 @@
-import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Stack } from '@mui/joy';
-
 import { useSelector } from 'react-redux';
 import { selectServices } from '../../../state/active/selectors';
 import { updateService } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { Service } from '../../../types/application-data/application-data';
 import { EditableText } from '../../shared/input/EditableText';
-import { EditableTextArea } from '../../shared/input/EditableTextArea';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
-import { InformationSection } from './InformationSection';
 import { EnvironmentsSection } from './EnvironmentsSection';
-import { RecentRequestsSection } from './RecentRequestsSection';
+import { SprocketTabs } from '../../shared/SprocketTabs';
+import { AccordionGroup } from '@mui/joy';
+import { GeneralSection } from './GeneralSection';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -23,53 +21,38 @@ export function ServicePanel({ id }: PanelProps) {
 	}
 
 	return (
-		<div>
-			<Stack direction={'column'}>
-				<EditableText
-					text={serviceData.name}
-					setText={(newText: string) => update({ name: newText })}
-					isValidFunc={(text: string) => text.length >= 1}
-					isTitle
-				/>
-				<AccordionGroup transition="0.2s ease">
-					<Accordion defaultExpanded={true}>
-						<AccordionSummary>Description</AccordionSummary>
-						<AccordionDetails>
-							<EditableTextArea
-								label="Description"
-								text={serviceData.description}
-								setText={(newText: string) => update({ description: newText })}
-								isValidFunc={(text: string) => text.length >= 1}
-								renderAsMarkdown={true}
-							/>
-						</AccordionDetails>
-					</Accordion>
-
-					<Accordion defaultExpanded={true}>
-						<AccordionSummary>Information</AccordionSummary>
-						<AccordionDetails>
-							<InformationSection data={serviceData} onChange={update} />
-						</AccordionDetails>
-					</Accordion>
-					<Accordion defaultExpanded={true}>
-						<AccordionSummary>Environments</AccordionSummary>
-						<AccordionDetails>
-							<EnvironmentsSection data={serviceData} onChange={update} />
-						</AccordionDetails>
-					</Accordion>
-					<PrePostScriptDisplay
-						onChange={update}
-						preRequestScript={serviceData.preRequestScript}
-						postRequestScript={serviceData.postRequestScript}
-					/>
-					<Accordion defaultExpanded>
-						<AccordionSummary>Recent Requests</AccordionSummary>
-						<AccordionDetails>
-							<RecentRequestsSection data={serviceData} />
-						</AccordionDetails>
-					</Accordion>
-				</AccordionGroup>
-			</Stack>
-		</div>
+		<>
+			<EditableText
+				sx={{ margin: 'auto' }}
+				text={serviceData.name}
+				setText={(newText: string) => update({ name: newText })}
+				isValidFunc={(text: string) => text.length >= 1}
+				level="h2"
+			/>
+			<SprocketTabs
+				tabs={[
+					{
+						title: 'General',
+						content: <GeneralSection data={serviceData} onChange={update} />,
+					},
+					{
+						title: 'Environments',
+						content: <EnvironmentsSection data={serviceData} onChange={update} />,
+					},
+					{
+						title: 'Scripts',
+						content: (
+							<AccordionGroup transition="0.2s ease">
+								<PrePostScriptDisplay
+									onChange={update}
+									preRequestScript={serviceData.preRequestScript}
+									postRequestScript={serviceData.postRequestScript}
+								/>
+							</AccordionGroup>
+						),
+					},
+				]}
+			/>
+		</>
 	);
 }

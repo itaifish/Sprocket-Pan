@@ -4,11 +4,11 @@ import {
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
-	Environment,
 	IdSpecificUiMetadata,
 	NetworkFetchRequest,
 	Script,
 	Service,
+	RootEnvironment,
 } from '../../types/application-data/application-data';
 import { AuditLog } from '../../managers/AuditLogManager';
 import { log } from '../../utils/logging';
@@ -52,6 +52,12 @@ interface AddEndpointToService {
 
 interface DeleteScript {
 	scriptId: string;
+}
+
+export interface UpdateLinkedEnv {
+	envId: string;
+	serviceEnvId: string | null;
+	serviceId: string;
 }
 
 export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
@@ -109,12 +115,12 @@ export const activeSlice = createSlice({
 			log.debug(`updateRequest called for fields ${JSON.stringify(updateFields)} on request ${id}`);
 			Object.assign(state.requests[id], updateFields);
 		},
-		insertEnvironment: (state, action: PayloadAction<Environment>) => {
+		insertEnvironment: (state, action: PayloadAction<RootEnvironment>) => {
 			const environment = action.payload;
 			log.debug(`insertEnvironment called with environment ${JSON.stringify(environment)}`);
 			Object.assign(state.environments, { [environment.id]: environment });
 		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment, 'id'>>) => {
+		updateEnvironment: (state, action: PayloadAction<Update<RootEnvironment, 'id'>>) => {
 			const { id, ...updateFields } = action.payload;
 			if (id == null) {
 				throw new Error('attempted to update environment with null id');
@@ -135,7 +141,18 @@ export const activeSlice = createSlice({
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
+			if (state.selectedEnvironment != null) {
+				for (const key in state.environments[state.selectedEnvironment].linked) {
+					state.services[key].selectedEnvironment = undefined;
+				}
+			}
 			state.selectedEnvironment = action.payload;
+			if (state.selectedEnvironment != null) {
+				const linkedValues = Object.entries(state.environments[state.selectedEnvironment].linked ?? {});
+				for (const [key, value] of linkedValues) {
+					state.services[key].selectedEnvironment = value ?? undefined;
+				}
+			}
 		},
 		deleteServiceFromState: (state, action: PayloadAction<string>) => {
 			log.debug(`deleteServiceFromState called on service ${action.payload}`);
@@ -229,6 +246,19 @@ export const activeSlice = createSlice({
 			log.debug(`deleteScript called on script ${action.payload.scriptId}`);
 			delete state.scripts[action.payload.scriptId];
 		},
+		addLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
+			const { serviceEnvId, serviceId, envId } = action.payload;
+			state.environments[envId].linked = {
+				...state.environments[envId].linked,
+				[serviceId]: serviceEnvId,
+			};
+		},
+		removeLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
+			const { serviceId, envId } = action.payload;
+			if (state.environments[envId].linked != null) {
+				delete state.environments[envId].linked[serviceId];
+			}
+		},
 	},
 });
 
@@ -263,4 +293,6 @@ export const {
 	updateScript,
 	setUiMetadataById,
 	updateSecrets,
+	removeLinkedEnv,
+	addLinkedEnv,
 } = activeSlice.actions;

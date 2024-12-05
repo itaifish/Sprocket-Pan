@@ -116,7 +116,7 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 				</Card>
 			</Grid>
 			<Grid xs={5} xl={3}>
-				<Stack direction={'row'} spacing={2}>
+				<Stack direction="row" spacing={2}>
 					<Button
 						color={isLoading ? 'warning' : 'primary'}
 						startDecorator={isLoading ? <CircularProgress /> : <SendIcon />}

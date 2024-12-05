@@ -45,7 +45,7 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 						</Chip>
 					</ListSubheader>
 					<ListItemContent>
-						<EllipsisTypography>{endpoint.name}</EllipsisTypography>
+						<EllipsisTypography fontSize="sm">{endpoint.name}</EllipsisTypography>
 					</ListItemContent>
 				</>
 			}

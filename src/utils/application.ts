@@ -5,6 +5,7 @@ import { Environment, QueryParams, WorkspaceData } from '../types/application-da
 
 export function queryParamsToString(
 	queryParams: QueryParams,
+	encoded = false,
 	replaceFunc: (text: string) => string = (element) => element,
 ): string {
 	const searchParams = new URLSearchParams();
@@ -15,7 +16,7 @@ export function queryParamsToString(
 			searchParams.append(replaceFunc(key), replaceFunc(value ?? ''));
 		}
 	});
-	return searchParams.toString();
+	return encoded ? searchParams.toString() : decodeURIComponent(searchParams.toString());
 }
 
 export function cloneEnv(env?: Partial<Environment>, nameMod?: string): Environment {
@@ -50,6 +51,7 @@ export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): B
 	const values: BuildEnvironmentVariablesArgs = {
 		secrets: data.secrets,
 		rootEnv: data.selectedEnvironment == null ? null : data.environments[data.selectedEnvironment],
+		rootAncestors: Object.values(data.environments),
 	};
 	if (requestId != null) {
 		const request = data.requests[requestId];

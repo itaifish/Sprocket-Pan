@@ -1,15 +1,16 @@
 import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Table } from '@mui/joy';
 import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
+import { toKeyValuePairs } from '../../../../utils/application';
 
 interface HeadersDisplayTableProps {
-	headers?: KeyValuePair[] | null;
+	headers?: KeyValuePair[] | null | Record<string, string>;
 	label: 'request' | 'response';
 }
 
 export function HeadersDisplayTable({ headers, label }: HeadersDisplayTableProps) {
-	if (headers == null || headers.length === 0) {
-		return <></>;
-	}
+	if (headers == null) return <></>;
+	headers = Array.isArray(headers) ? headers : toKeyValuePairs(headers);
+	if (headers.length === 0) return <></>;
 	return (
 		<AccordionGroup>
 			<Accordion defaultExpanded>
