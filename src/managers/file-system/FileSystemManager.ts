@@ -73,7 +73,7 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 	async createWorkspace(paths: WorkspacePaths, content: string) {
 		try {
 			const doesExist = await FileSystemWorker.exists(paths.metadata);
-			if (!doesExist) {
+			if (doesExist) {
 				return;
 			}
 			await FileSystemWorker.createDir(paths.root);
