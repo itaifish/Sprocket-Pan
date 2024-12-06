@@ -17,7 +17,6 @@ import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
 import { invoke } from '@tauri-apps/api';
-import { deleteAllHistory } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { log } from '../../../utils/logging';
@@ -29,6 +28,7 @@ import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';
 import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
 import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
+import { activeActions } from '../../../state/active/slice';
 
 interface DataTabProps {
 	onQuit: () => void;
@@ -46,7 +46,7 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 	}
 
 	function deleteHistory() {
-		dispatch(deleteAllHistory());
+		dispatch(activeActions.deleteAllHistory());
 	}
 	const exportData = async () => WorkspaceDataManager.exportData(state);
 

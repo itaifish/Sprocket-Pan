@@ -1,12 +1,12 @@
 import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useState } from 'react';
-import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { Endpoint } from '../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../utils/string';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { EditableData } from '../../shared/input/EditableData';
 import { useComputedServiceEnvironment } from '../../../hooks/useComputedEnvironment';
+import { activeActions } from '../../../state/active/slice';
 
 const endpointTabs = ['headers', 'queryParams', 'scripts'] as const;
 type EndpointPanelType = (typeof endpointTabs)[number];
@@ -16,7 +16,7 @@ export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
 	const envPairs = useComputedServiceEnvironment(endpoint.serviceId);
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
-		dispatch(updateEndpoint({ ...values, id: endpoint.id }));
+		dispatch(activeActions.updateEndpoint({ ...values, id: endpoint.id }));
 	}
 	return (
 		<Tabs

@@ -3,9 +3,9 @@ import { selectEnvironments } from '../../../state/active/selectors';
 import { useMemo } from 'react';
 import { Service } from '../../../types/application-data/application-data';
 import { Select, Stack, Option } from '@mui/joy';
-import { addLinkedEnv } from '../../../state/active/slice';
 import { Link } from '@mui/icons-material';
 import { EllipsisTypography } from '../../shared/EllipsisTypography';
+import { activeActions } from '../../../state/active/slice';
 
 interface LinkedEnvironmentEditorProps {
 	service: Service;
@@ -29,7 +29,7 @@ export function LinkedEnvironmentEditor({ service }: LinkedEnvironmentEditorProp
 						placeholder="None"
 						value={env.linkedEnv}
 						onChange={(_, value) =>
-							dispatch(addLinkedEnv({ serviceEnvId: value, serviceId: service.id, envId: env.id }))
+							dispatch(activeActions.addLinkedEnv({ serviceEnvId: value, serviceId: service.id, envId: env.id }))
 						}
 					>
 						{Object.values(service.localEnvironments).map((localEnv) => (

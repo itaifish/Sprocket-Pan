@@ -1,18 +1,18 @@
 import { AccordionGroup } from '@mui/joy';
 import { RequestBody } from './RequestBody';
-import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { EndpointRequest } from '../../../types/application-data/application-data';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { EditableData } from '../../shared/input/EditableData';
 import { SprocketTabs } from '../../shared/SprocketTabs';
 import { useComputedRequestEnvironment } from '../../../hooks/useComputedEnvironment';
+import { activeActions } from '../../../state/active/slice';
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	const envPairs = useComputedRequestEnvironment(request.id);
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 
 	return (

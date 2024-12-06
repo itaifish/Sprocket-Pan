@@ -1,15 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { Environment } from '../../../types/application-data/application-data';
 import { RootState } from '../../store';
-import {
-	insertEnvironment,
-	deleteEnvironmentFromState,
-	removeLinkedEnv,
-	addLinkedEnv,
-	UpdateLinkedEnv,
-} from '../slice';
 import { tabsActions } from '../../tabs/slice';
 import { cloneEnv } from '../../../utils/application';
+import { activeActions, UpdateLinkedEnv } from '../slice';
 
 interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>> | null;
@@ -19,7 +13,7 @@ export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment | un
 	'active/addEnvironment',
 	async ({ data } = {}, thunk) => {
 		const newEnvironment = cloneEnv({ name: 'New Environment', ...data });
-		thunk.dispatch(insertEnvironment(newEnvironment));
+		thunk.dispatch(activeActions.insertEnvironment(newEnvironment));
 		return newEnvironment.id;
 	},
 );
@@ -36,7 +30,7 @@ export const deleteEnvironmentById = createAsyncThunk<void, string, { state: Roo
 	'active/deleteEnvironmentById',
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
-		thunk.dispatch(deleteEnvironmentFromState(id));
+		thunk.dispatch(activeActions.deleteEnvironmentFromState(id));
 	},
 );
 
@@ -48,7 +42,7 @@ interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
 export const relinkEnvironments = createAsyncThunk<void, RelinkEnvironmentsArgs, { state: RootState }>(
 	'active/deleteEnvironmentById',
 	async ({ remove, add, serviceEnvId, serviceId }, thunk) => {
-		remove.forEach((envId) => thunk.dispatch(removeLinkedEnv({ envId, serviceEnvId, serviceId })));
-		add.forEach((envId) => thunk.dispatch(addLinkedEnv({ envId, serviceEnvId, serviceId })));
+		remove.forEach((envId) => thunk.dispatch(activeActions.removeLinkedEnv({ envId, serviceEnvId, serviceId })));
+		add.forEach((envId) => thunk.dispatch(activeActions.addLinkedEnv({ envId, serviceEnvId, serviceId })));
 	},
 );

@@ -1,6 +1,6 @@
 import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { setModifiedNow } from './slice';
+import { activeActions } from './slice';
 import { updateAutosaveInterval } from './thunks/metadata';
 import { log } from '../../utils/logging';
 
@@ -37,7 +37,7 @@ isModifiedListener.startListening({
 		}
 		// uncomment to see action
 		// log.info(action.type);
-		dispatch(setModifiedNow());
+		dispatch(activeActions.setModifiedNow());
 	},
 });
 

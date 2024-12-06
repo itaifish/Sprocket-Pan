@@ -1,13 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AuditLog, RequestEvent } from '../../../managers/AuditLogManager';
 import { RootState } from '../../store';
-import {
-	addRequestToEndpoint,
-	addResponseToHistory,
-	deleteRequestFromState,
-	insertRequest,
-	removeRequestFromEndpoint,
-} from '../slice';
 import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
 import { createNewRequestObject } from './util';
 import { log } from '../../../utils/logging';
@@ -15,6 +8,7 @@ import { SprocketError } from '../../../types/state/state';
 import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { tabsActions } from '../../tabs/slice';
+import { activeActions } from '../slice';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -76,7 +70,9 @@ export const makeRequest = createAsyncThunk<
 		return error;
 	}
 	auditLog.push(...localAuditLog);
-	thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest, auditLog: localAuditLog }));
+	thunk.dispatch(
+		activeActions.addResponseToHistory({ requestId: requestId, response, networkRequest, auditLog: localAuditLog }),
+	);
 });
 
 interface AddNewRequest {
@@ -88,8 +84,8 @@ export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: Root
 	'active/addRequest',
 	async ({ endpointId, data = {} }, thunk) => {
 		const newRequest: EndpointRequest = { ...createNewRequestObject(endpointId), ...data, history: [], endpointId };
-		thunk.dispatch(insertRequest(newRequest));
-		thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
+		thunk.dispatch(activeActions.insertRequest(newRequest));
+		thunk.dispatch(activeActions.addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
 	},
 );
 
@@ -108,7 +104,7 @@ export const deleteRequest = createAsyncThunk<void, string, { state: RootState }
 	'active/deleteRequest',
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
-		thunk.dispatch(removeRequestFromEndpoint(id));
-		thunk.dispatch(deleteRequestFromState(id));
+		thunk.dispatch(activeActions.removeRequestFromEndpoint(id));
+		thunk.dispatch(activeActions.deleteRequestFromState(id));
 	},
 );

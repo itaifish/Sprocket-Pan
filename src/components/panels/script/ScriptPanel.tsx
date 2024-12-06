@@ -1,7 +1,6 @@
 import { useSelector } from 'react-redux';
 import { selectScript, selectScripts, selectSettings } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { updateScript } from '../../../state/active/slice';
 import {
 	Button,
 	Chip,
@@ -40,6 +39,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { Constants } from '../../../constants/constants';
 import { FormatButton } from '../../shared/buttons/FormatButton';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
+import { activeActions } from '../../../state/active/slice';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -90,7 +90,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	};
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Script>) {
-		dispatch(updateScript({ ...values, id: script.id }));
+		dispatch(activeActions.updateScript({ ...values, id: script.id }));
 	}
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
 		state: script.content,

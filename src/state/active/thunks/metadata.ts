@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { setAutosaveInterval } from '../slice';
 import { saveActiveData } from './applicationData';
+import { activeActions } from '../slice';
 
 export const updateAutosaveInterval = createAsyncThunk<void, number | undefined, { state: RootState }>(
 	'active/updateAutosaveInterval',
@@ -13,6 +13,6 @@ export const updateAutosaveInterval = createAsyncThunk<void, number | undefined,
 				thunk.dispatch(saveActiveData());
 			}, newInterval);
 		}
-		thunk.dispatch(setAutosaveInterval(newIntervalProcess));
+		thunk.dispatch(activeActions.setAutosaveInterval(newIntervalProcess));
 	},
 );
