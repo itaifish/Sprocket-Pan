@@ -25,7 +25,6 @@ isModifiedListener.startListening({
 		if (isIgnoredSliceAction(action) || !action.type.startsWith(activeSlice.name)) {
 			return;
 		}
-		console.log(`isModifiedListener triggered with ${action.type}`);
 		dispatch(activeActions.setModifiedNow());
 	},
 });

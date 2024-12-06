@@ -34,9 +34,7 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	`${activeThunkName}/saveData`,
 	(_, thunk) => {
 		const { lastModified, lastSaved, ...data } = thunk.getState().active;
-		console.log('attempting save w/', { lastModified, lastSaved });
 		if (lastModified > lastSaved) {
-			console.log('moving forward with it');
 			thunk.dispatch(activeActions.setSavedNow());
 			return WorkspaceDataManager.saveData(data);
 		}
