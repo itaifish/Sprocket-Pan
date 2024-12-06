@@ -22,7 +22,7 @@ import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { log } from '../../../utils/logging';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { useSelector } from 'react-redux';
-import { saveActiveData } from '../../../state/active/thunks/applicationData';
+import { saveActiveData } from '../../../state/active/thunks/data';
 import { selectActiveState } from '../../../state/active/selectors';
 import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';

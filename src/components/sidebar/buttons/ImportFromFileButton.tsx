@@ -2,7 +2,7 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
 import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { injectLoadedData } from '../../../state/active/thunks/applicationData';
+import { injectLoadedData } from '../../../state/active/thunks/data';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { useEffect, useRef, useState } from 'react';
