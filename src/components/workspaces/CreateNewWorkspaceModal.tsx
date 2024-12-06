@@ -13,7 +13,7 @@ import {
 	ModalDialog,
 	Textarea,
 } from '@mui/joy';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppDispatch } from '../../state/store';
 import { toValidFolderName } from '../../utils/string';
@@ -27,23 +27,14 @@ interface CreateNewWorkspaceModalProps {
 export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	const { open, closeFunc } = props;
 	const [workspaceName, setWorkspaceName] = useState('');
-	const [workspaceFileName, setWorkspaceFileName] = useState('');
 	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
 	const [loading, setLoading] = useState(false);
-	const [isError, setError] = useState(true);
 	const dispatch = useAppDispatch();
-
-	useEffect(() => {
-		setWorkspaceFileName(toValidFolderName(workspaceName));
-	}, [workspaceName]);
-	useEffect(() => {
-		setError(workspaceFileName.length > 25 || workspaceFileName.length == 0);
-	}, [workspaceFileName]);
+	const workspaceFileName = toValidFolderName(workspaceName);
+	const isError = workspaceFileName.length > 25 || workspaceFileName.length == 0;
 
 	const reset = () => {
 		setWorkspaceDescription('A SprocketPan Workspace');
-		setWorkspaceName('');
-		setWorkspaceFileName('');
 		setLoading(false);
 	};
 
@@ -66,18 +57,13 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 	}
 
 	return (
-		<Modal
-			open={open}
-			onClose={() => {
-				onClose();
-			}}
-		>
+		<Modal open={open} onClose={onClose}>
 			<ModalDialog variant="outlined" role="alertdialog">
-				<DialogTitle>Create a new workspace</DialogTitle>
+				<DialogTitle>Create a New Workspace</DialogTitle>
 				<Divider />
-				<DialogContent>
+				<DialogContent sx={{ minWidth: '500px' }}>
 					<FormControl>
-						<FormLabel>Workspace Name</FormLabel>
+						<FormLabel>Name</FormLabel>
 						<Input
 							placeholder="New Workspace Name"
 							value={workspaceName}
@@ -89,7 +75,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 						)}
 					</FormControl>
 					<FormControl>
-						<FormLabel>Workspace Description</FormLabel>
+						<FormLabel>Description</FormLabel>
 						<Textarea
 							placeholder="New Workspace Description"
 							value={workspaceDescription}
@@ -98,7 +84,7 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 					</FormControl>
 				</DialogContent>
 				<DialogActions>
-					<Button variant="plain" color="danger" onClick={() => onClose()} disabled={loading}>
+					<Button variant="plain" color="danger" onClick={onClose} disabled={loading}>
 						Cancel
 					</Button>
 					<Button
