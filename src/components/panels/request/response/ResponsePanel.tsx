@@ -1,13 +1,12 @@
 import { Typography, Card, Divider, Stack } from '@mui/joy';
-
 import { EndpointRequest, HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
 import { useAppDispatch } from '../../../../state/store';
 import { HistoryControl } from './HistoryControl';
-import { deleteResponseFromHistory } from '../../../../state/active/slice';
 import { ResponseInfo } from './ResponseInfo';
 import { ResponseState } from '../RequestActions';
 import { formatFullDate } from '../../../../utils/string';
 import { OpenDiffToolButton } from './OpenDiffToolButton';
+import { activeActions } from '../../../../state/active/slice';
 
 function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
 	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;
@@ -53,7 +52,7 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 								onChange={setResponseState}
 								historyLength={request.history.length}
 								onDelete={(index) =>
-									dispatch(deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
+									dispatch(activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
 								}
 							/>
 						</Stack>

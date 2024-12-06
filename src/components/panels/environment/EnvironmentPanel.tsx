@@ -2,7 +2,6 @@ import Checkbox from '@mui/joy/Checkbox';
 import { selectEnvironments, selectSecrets, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
-import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
 import { Option, Select, Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { EditableText } from '../../shared/input/EditableText';
@@ -12,6 +11,7 @@ import { useMemo } from 'react';
 import { AccountTree } from '@mui/icons-material';
 import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
 import { toKeyValuePairs } from '../../../utils/application';
+import { activeActions } from '../../../state/active/slice';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -44,7 +44,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 			<EditableText
 				sx={{ margin: 'auto' }}
 				text={environment.name}
-				setText={(newText: string) => dispatch(updateEnvironment({ name: newText, id }))}
+				setText={(newText: string) => dispatch(activeActions.updateEnvironment({ name: newText, id }))}
 				isValidFunc={(text: string) => text.length >= 1}
 				level="h2"
 			/>
@@ -57,7 +57,9 @@ export function EnvironmentPanel({ id }: PanelProps) {
 									sx={{ m: 1 }}
 									label="Selected"
 									checked={selectedEnvironment === id}
-									onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
+									onChange={() =>
+										dispatch(activeActions.selectEnvironment(selectedEnvironment === id ? undefined : id))
+									}
 								/>
 								<Select
 									startDecorator={<AccountTree />}
@@ -65,7 +67,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 									placeholder="None"
 									multiple
 									value={environment.parents ?? []}
-									onChange={(_, parents) => dispatch(updateEnvironment({ parents, id }))}
+									onChange={(_, parents) => dispatch(activeActions.updateEnvironment({ parents, id }))}
 								>
 									{envList.map((env) => (
 										<Option key={env.id} value={env.id}>
@@ -77,7 +79,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 						),
 					}}
 					initialValues={environment.pairs}
-					onChange={(pairs) => dispatch(updateEnvironment({ pairs, id }))}
+					onChange={(pairs) => dispatch(activeActions.updateEnvironment({ pairs, id }))}
 					fullSize
 					envPairs={secrets}
 					viewParser={parseEditorText}

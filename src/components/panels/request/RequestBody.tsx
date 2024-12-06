@@ -2,7 +2,6 @@ import { Select, Option, FormControl, FormLabel, Stack } from '@mui/joy';
 import ListIcon from '@mui/icons-material/List';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { useEffect, useRef, useState } from 'react';
-import { updateRequest } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import {
 	EndpointRequest,
@@ -13,6 +12,7 @@ import {
 import { SprocketEditor } from '../../shared/input/SprocketEditor';
 import { EditableFormTable } from '../../shared/input/EditableFormTable';
 import { Constants } from '../../../constants/constants';
+import { activeActions } from '../../../state/active/slice';
 
 interface RequestBodyProps {
 	request: EndpointRequest;
@@ -26,7 +26,7 @@ export function RequestBody({ request }: RequestBodyProps) {
 	const isTable = requestBodyCategory === 'table';
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 	// We update the text only after the user stops typing
 	useEffect(() => {

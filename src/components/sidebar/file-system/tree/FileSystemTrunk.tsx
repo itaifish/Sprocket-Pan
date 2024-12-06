@@ -4,7 +4,7 @@ import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
 import { useAppDispatch } from '../../../../state/store';
 import { useSelector } from 'react-redux';
 import { selectUiMetadataById } from '../../../../state/active/selectors';
-import { setUiMetadataById } from '../../../../state/active/slice';
+import { activeActions } from '../../../../state/active/slice';
 
 interface FileSystemTrunkProps extends PropsWithChildren {
 	id: string;
@@ -17,7 +17,7 @@ export function FileSystemTrunk({ id, children, header, actions }: FileSystemTru
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const setCollapsed = (value: boolean) => {
-		dispatch(setUiMetadataById({ id: id, collapsed: value }));
+		dispatch(activeActions.setUiMetadataById({ id: id, collapsed: value }));
 	};
 	return (
 		<ListItem id={id} nested>

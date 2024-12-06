@@ -12,7 +12,6 @@ import ParticleEffectButton from 'react-particle-effect-button';
 import SendIcon from '@mui/icons-material/Send';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import { useAppDispatch } from '../../../state/store';
-import { updateEndpoint } from '../../../state/active/slice';
 import { makeRequest } from '../../../state/active/thunks/requests';
 import { log } from '../../../utils/logging';
 import { SprocketError } from '../../../types/state/state';
@@ -25,6 +24,7 @@ import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButto
 import { tabsActions } from '../../../state/tabs/slice';
 import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
 import { verbColors } from '../../../constants/style';
+import { activeActions } from '../../../state/active/slice';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);
@@ -52,7 +52,7 @@ export function RequestActions({ endpoint, request, onError, onResponse }: Reque
 	const [isLoading, setLoading] = useState(false);
 	const isDefault = endpoint.defaultRequest === request.id;
 	function updateAssociatedEndpoint(values: Partial<Endpoint>) {
-		dispatch(updateEndpoint({ ...values, id: request.endpointId }));
+		dispatch(activeActions.updateEndpoint({ ...values, id: request.endpointId }));
 	}
 
 	async function sendRequest() {

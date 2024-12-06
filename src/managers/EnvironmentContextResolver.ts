@@ -130,7 +130,6 @@ export class EnvironmentContextResolver {
 		environment?: RootEnvironment | null,
 		validAncestors?: RootEnvironment[] | null,
 	): KeyValuePair[] {
-		console.log({ environment, validAncestors });
 		if (environment == null) return [];
 		if (validAncestors == null || environment.parents == null) return environment.pairs;
 

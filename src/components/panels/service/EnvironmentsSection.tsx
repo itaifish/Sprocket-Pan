@@ -9,6 +9,10 @@ import { EnvironmentEditor } from './EnvironmentEditor';
 import { Link, LinkOff, ModeEdit } from '@mui/icons-material';
 import { LinkedEnvironmentEditor } from './LinkedEnvironmentEditor';
 import { useComputedRootEnvironment } from '../../../hooks/useComputedEnvironment';
+import { activeActions } from '../../../state/active/slice';
+import { useAppDispatch } from '../../../state/store';
+import { selectSelectedEnvironment } from '../../../state/active/selectors';
+import { useSelector } from 'react-redux';
 
 export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const [visibleEnvId, setVisibleEnvId] = useState<string | null>(data.selectedEnvironment ?? null);
@@ -16,6 +20,8 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const envList = Object.values(localEnvs);
 	const visibleEnv = visibleEnvId == null ? null : data.localEnvironments[visibleEnvId];
 	const isVisibleSelected = data.selectedEnvironment === visibleEnvId;
+	const dispatch = useAppDispatch();
+	const selectedEnv = useSelector(selectSelectedEnvironment);
 
 	const envPairs = useComputedRootEnvironment();
 
@@ -41,13 +47,16 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 		});
 	}
 
+	function toggleLinkedEnvMode() {
+		onChange({ linkedEnvMode: !data.linkedEnvMode });
+		dispatch(activeActions.selectEnvironment(selectedEnv));
+	}
+
 	return (
 		<Stack>
 			<Box alignSelf="end" height={0}>
 				<SprocketTooltip text={`${data.linkedEnvMode ? 'Disable' : 'Enable'} Environment Linking`}>
-					<IconButton onClick={() => onChange({ linkedEnvMode: !data.linkedEnvMode })}>
-						{data.linkedEnvMode ? <LinkOff /> : <Link />}
-					</IconButton>
+					<IconButton onClick={toggleLinkedEnvMode}>{data.linkedEnvMode ? <LinkOff /> : <Link />}</IconButton>
 				</SprocketTooltip>
 			</Box>
 			<Box height={data.linkedEnvMode ? 'fit-content' : 0} sx={{ transition: 'all 1s linear', overflow: 'hidden' }}>

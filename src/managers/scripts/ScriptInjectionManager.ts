@@ -1,4 +1,4 @@
-import { Update, updateEnvironment, updateRequest, updateService } from '../../state/active/slice';
+import { activeActions, Update } from '../../state/active/slice';
 import { makeRequest } from '../../state/active/thunks/requests';
 import { StateAccess } from '../../state/types';
 import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
@@ -48,7 +48,7 @@ export function getScriptInjectionCode(
 			update.headers = new OrderedKeyValuePairs(update.headers, modifications.headers).toArray();
 		}
 
-		dispatch(updateRequest(update));
+		dispatch(activeActions.updateRequest(update));
 	};
 
 	const fetch = <T = unknown>(url: string, request: HttpOptions) => {
@@ -70,7 +70,7 @@ export function getScriptInjectionCode(
 				newPairs.apply(request?.environmentOverride?.pairs);
 				newPairs.set(key, value);
 				dispatch(
-					updateRequest({
+					activeActions.updateRequest({
 						id: request!.id,
 						environmentOverride: { ...request!.environmentOverride, pairs: newPairs.toArray() },
 					}),
@@ -90,7 +90,7 @@ export function getScriptInjectionCode(
 					newPairs.apply(env.pairs);
 					newPairs.set(key, value);
 					dispatch(
-						updateService({
+						activeActions.updateService({
 							id: endpoint.serviceId,
 							localEnvironments: {
 								...service.localEnvironments,
@@ -105,7 +105,7 @@ export function getScriptInjectionCode(
 				if (env != null) {
 					newPairs.apply(env.pairs);
 					newPairs.set(key, value);
-					dispatch(updateEnvironment({ ...env, pairs: newPairs.toArray() }));
+					dispatch(activeActions.updateEnvironment({ ...env, pairs: newPairs.toArray() }));
 				}
 		}
 	};
@@ -117,7 +117,7 @@ export function getScriptInjectionCode(
 		}
 		const newQueryParams = new OrderedKeyValuePairs(request.queryParams);
 		newQueryParams.set(key, value);
-		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams.toArray() }));
+		dispatch(activeActions.updateRequest({ id: request.id, queryParams: newQueryParams.toArray() }));
 	};
 
 	const setHeader = (key: string, value: string) => {
@@ -127,7 +127,7 @@ export function getScriptInjectionCode(
 		}
 		const newHeaders = new OrderedKeyValuePairs(request.headers);
 		newHeaders.set(key, value);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders.toArray() }));
+		dispatch(activeActions.updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const deleteHeader = (key: string) => {
 		const request = getRequest();
@@ -136,7 +136,7 @@ export function getScriptInjectionCode(
 		}
 		const newHeaders = new OrderedKeyValuePairs(request.headers);
 		newHeaders.delete(key);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders.toArray() }));
+		dispatch(activeActions.updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const getEnvironment = () => {
 		const data = getState();

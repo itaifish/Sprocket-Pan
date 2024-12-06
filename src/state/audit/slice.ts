@@ -33,4 +33,4 @@ export const auditLogSlice = createSlice({
 	},
 });
 
-export const { addToAuditLog, clearAuditLogEntry } = auditLogSlice.actions;
+export const auditActions = auditLogSlice.actions;

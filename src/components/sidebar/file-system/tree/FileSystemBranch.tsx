@@ -7,7 +7,7 @@ import { LIST_STYLING } from '../../../../styles/list';
 import { useAppDispatch } from '../../../../state/store';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { Folder, FolderOpen } from '@mui/icons-material';
-import { setUiMetadataById } from '../../../../state/active/slice';
+import { activeActions } from '../../../../state/active/slice';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
@@ -26,7 +26,7 @@ export function FileSystemBranch({
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const setCollapsed = (value: boolean) => {
-		dispatch(setUiMetadataById({ id: id, collapsed: value }));
+		dispatch(activeActions.setUiMetadataById({ id: id, collapsed: value }));
 	};
 	return (
 		<>

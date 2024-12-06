@@ -56,7 +56,7 @@ interface DeleteScript {
 
 export interface UpdateLinkedEnv {
 	envId: string;
-	serviceEnvId: string | null;
+	serviceEnvId: string;
 	serviceId: string;
 }
 
@@ -77,12 +77,6 @@ export const activeSlice = createSlice({
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
 			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
-		},
-		setAutosaveInterval: (state, action: PayloadAction<NodeJS.Timeout | undefined>) => {
-			if (state.autosaveInterval != undefined) {
-				clearInterval(state.autosaveInterval);
-			}
-			state.autosaveInterval = action.payload;
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
@@ -141,8 +135,8 @@ export const activeSlice = createSlice({
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
-			if (state.selectedEnvironment != null) {
-				for (const key in state.environments[state.selectedEnvironment].linked) {
+			for (const key in state.services) {
+				if (state.services[key].linkedEnvMode) {
 					state.services[key].selectedEnvironment = undefined;
 				}
 			}
@@ -150,7 +144,9 @@ export const activeSlice = createSlice({
 			if (state.selectedEnvironment != null) {
 				const linkedValues = Object.entries(state.environments[state.selectedEnvironment].linked ?? {});
 				for (const [key, value] of linkedValues) {
-					state.services[key].selectedEnvironment = value ?? undefined;
+					if (state.services[key].linkedEnvMode) {
+						state.services[key].selectedEnvironment = value ?? undefined;
+					}
 				}
 			}
 		},
@@ -252,47 +248,22 @@ export const activeSlice = createSlice({
 				...state.environments[envId].linked,
 				[serviceId]: serviceEnvId,
 			};
+			if (state.selectedEnvironment === envId) {
+				state.services[serviceId].selectedEnvironment = serviceEnvId;
+			}
 		},
 		removeLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
 			const { serviceId, envId } = action.payload;
 			if (state.environments[envId].linked != null) {
 				delete state.environments[envId].linked[serviceId];
 			}
+			if (state.selectedEnvironment === envId) {
+				state.services[serviceId].selectedEnvironment = undefined;
+			}
 		},
 	},
 });
 
-export const {
-	setFullState,
-	setSavedNow,
-	setModifiedNow,
-	setAutosaveInterval,
-	insertService,
-	updateService,
-	insertEndpoint,
-	updateEndpoint,
-	insertRequest,
-	updateRequest,
-	insertEnvironment,
-	updateEnvironment,
-	insertSettings,
-	selectEnvironment,
-	deleteEndpointFromState,
-	deleteEnvironmentFromState,
-	deleteRequestFromState,
-	deleteServiceFromState,
-	addRequestToEndpoint,
-	removeRequestFromEndpoint,
-	addEndpointToService,
-	removeEndpointFromService,
-	deleteAllHistory,
-	addResponseToHistory,
-	deleteResponseFromHistory,
-	insertScript,
-	deleteScript,
-	updateScript,
-	setUiMetadataById,
-	updateSecrets,
-	removeLinkedEnv,
-	addLinkedEnv,
-} = activeSlice.actions;
+export const activeActions = activeSlice.actions;
+
+export const activeThunkName = `t/${activeSlice.name}`;

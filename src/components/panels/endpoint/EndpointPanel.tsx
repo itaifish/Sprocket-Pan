@@ -12,7 +12,6 @@ import {
 	selectServiceSelectedEnvironmentValue,
 } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { updateEndpoint } from '../../../state/active/slice';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { EditableText } from '../../shared/input/EditableText';
@@ -22,6 +21,7 @@ import { tabsActions } from '../../../state/tabs/slice';
 import { Constants } from '../../../constants/constants';
 import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
 import { verbColors } from '../../../constants/style';
+import { activeActions } from '../../../state/active/slice';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -38,7 +38,7 @@ export function EndpointPanel({ id }: PanelProps) {
 	});
 
 	const update = (values: Partial<Endpoint>) => {
-		dispatch(updateEndpoint({ ...values, id }));
+		dispatch(activeActions.updateEndpoint({ ...values, id }));
 	};
 
 	const { localDataState, setLocalDataState } = useDebounce({

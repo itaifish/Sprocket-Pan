@@ -4,21 +4,14 @@ import { TabHeader } from '../header/TabHeader';
 import { SideDrawer } from '../sidebar/SideDrawer';
 import { SideDrawerActions } from '../sidebar/SideDrawerActions';
 import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
-import { selectSettings } from '../../state/active/selectors';
-import { useEffect } from 'react';
-import { useAppDispatch } from '../../state/store';
-import { updateAutosaveInterval } from '../../state/active/thunks/metadata';
 import { selectActiveWorkspace } from '../../state/global/selectors';
+import { useAutosave } from './hooks/useAutosave';
 
 export function Workspace() {
-	const activeWorkspace = useSelector(selectActiveWorkspace);
-	const settings = useSelector(selectSettings);
-	const dispatch = useAppDispatch();
-	const theme = useTheme();
+	useAutosave();
 
-	useEffect(() => {
-		dispatch(updateAutosaveInterval(settings.autoSaveIntervalMS));
-	}, []);
+	const activeWorkspace = useSelector(selectActiveWorkspace);
+	const theme = useTheme();
 
 	return (
 		<Box
