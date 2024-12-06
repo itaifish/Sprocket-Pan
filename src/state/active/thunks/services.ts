@@ -4,14 +4,14 @@ import { RootState } from '../../store';
 import { createNewServiceObject } from './util';
 import { addNewEndpoint } from './endpoints';
 import { tabsActions } from '../../tabs/slice';
-import { activeActions } from '../slice';
+import { activeActions, activeThunkName } from '../slice';
 
 interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
 }
 
 export const cloneService = createAsyncThunk<string, CloneServiceInput, { state: RootState }>(
-	'active/cloneService',
+	`${activeThunkName}/cloneService`,
 	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
 		const newService = { ...createNewServiceObject(), ...structuredClone(data), name: `${data.name} (Copy)` };
 		thunk.dispatch(activeActions.insertService(newService));
@@ -29,7 +29,7 @@ export const cloneService = createAsyncThunk<string, CloneServiceInput, { state:
 type NewServiceArgs = Pick<Service, 'baseUrl' | 'description' | 'name'>;
 
 export const addNewService = createAsyncThunk<string, NewServiceArgs, { state: RootState }>(
-	'active/addNewService',
+	`${activeThunkName}/addNewService`,
 	async (serviceData, thunk) => {
 		const newService = { ...createNewServiceObject(), ...serviceData };
 		thunk.dispatch(activeActions.insertService(newService));
@@ -38,7 +38,7 @@ export const addNewService = createAsyncThunk<string, NewServiceArgs, { state: R
 );
 
 export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootState }>(
-	'active/cloneServiceFromId',
+	`${activeThunkName}/cloneServiceFromId`,
 	async (oldId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...service } = thunk.getState().active.services[oldId];
@@ -49,7 +49,7 @@ export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootSt
 );
 
 export const deleteService = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteService',
+	`${activeThunkName}/deleteService`,
 	async (id, thunk) => {
 		const service = thunk.getState().active.services[id];
 		if (service == null) {

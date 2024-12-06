@@ -8,7 +8,7 @@ import { SprocketError } from '../../../types/state/state';
 import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
 import { networkRequestManager } from '../../../managers/NetworkRequestManager';
 import { tabsActions } from '../../tabs/slice';
-import { activeActions } from '../slice';
+import { activeActions, activeThunkName } from '../slice';
 
 /**
  * Only exists until managers can be entirely migrated.
@@ -34,7 +34,7 @@ export const runScript = createAsyncThunk<
 		};
 	},
 	{ state: RootState }
->('active/runScipt', async (options, thunk) => {
+>(`${activeThunkName}/runScript`, async (options, thunk) => {
 	const stateAccess = extractStateAccess(thunk);
 
 	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
@@ -51,7 +51,7 @@ export const makeRequest = createAsyncThunk<
 	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },
 	{ state: RootState }
->('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {
+>(`${activeThunkName}/makeRequest`, async ({ requestId, auditLog = [] }, thunk) => {
 	const stateAccess = extractStateAccess(thunk);
 	const localAuditLog: AuditLog = [];
 	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, localAuditLog);
@@ -81,7 +81,7 @@ interface AddNewRequest {
 }
 
 export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: RootState }>(
-	'active/addRequest',
+	`${activeThunkName}/addRequest`,
 	async ({ endpointId, data = {} }, thunk) => {
 		const newRequest: EndpointRequest = { ...createNewRequestObject(endpointId), ...data, history: [], endpointId };
 		thunk.dispatch(activeActions.insertRequest(newRequest));
@@ -90,7 +90,7 @@ export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: Root
 );
 
 export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootState }>(
-	'active/addRequestFromId',
+	`${activeThunkName}/addNewRequestFromId`,
 	async (requestId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...request } = thunk.getState().active.requests[requestId];
@@ -101,7 +101,7 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 );
 
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteRequest',
+	`${activeThunkName}/deleteRequest`,
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(activeActions.removeRequestFromEndpoint(id));

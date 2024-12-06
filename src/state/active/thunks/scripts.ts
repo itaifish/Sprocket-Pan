@@ -4,10 +4,10 @@ import { Script } from '../../../types/application-data/application-data';
 import { v4 } from 'uuid';
 import { toValidFunctionName } from '../../../utils/string';
 import { tabsActions } from '../../tabs/slice';
-import { activeActions } from '../slice';
+import { activeActions, activeThunkName } from '../slice';
 
 export const deleteScriptById = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteScriptById',
+	`${activeThunkName}/deleteScriptById`,
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(activeActions.deleteScript({ scriptId: id }));
@@ -15,7 +15,7 @@ export const deleteScriptById = createAsyncThunk<void, string, { state: RootStat
 );
 
 export const createScript = createAsyncThunk<string, Partial<Omit<Script, 'id'>>, { state: RootState }>(
-	'active/addScript',
+	`${activeThunkName}/createScript`,
 	async (newScriptData, thunk) => {
 		const newId = v4();
 		const newScript = {

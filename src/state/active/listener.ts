@@ -1,24 +1,14 @@
-import { Action, ThunkDispatch, createListenerMiddleware } from '@reduxjs/toolkit';
+import { Action, ThunkDispatch, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
 import { RootState } from '../store';
-import { activeActions } from './slice';
-import { updateAutosaveInterval } from './thunks/metadata';
-import { log } from '../../utils/logging';
+import { activeActions, activeSlice } from './slice';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
-// TODO: we can actually do this with action matching
-const ignoreKeys = new Set([
-	'global/select/fulfilled',
-	'global/setWorkspaces',
-	'global/setSelectedWorkspace',
-	'active/saveData/fulfilled',
-	'active/saveData/pending',
-	'active/setModifiedNow',
-	'active/runScipt/fulfilled',
-	'active/runScipt/pending',
-]);
-
-const ignoreNames = ['tabs'];
+const isIgnoredSliceAction = isAnyOf(
+	activeActions.setModifiedNow,
+	activeActions.setFullState,
+	activeActions.setSavedNow,
+);
 
 isModifiedListener.startListening({
 	predicate: (_, currentState, previousState) => {
@@ -32,28 +22,14 @@ isModifiedListener.startListening({
 		);
 	},
 	effect: (action, { dispatch }) => {
-		if (ignoreKeys.has(action.type) || ignoreNames.some((x) => action.type.startsWith(x))) {
+		if (isIgnoredSliceAction(action) || !action.type.startsWith(activeSlice.name)) {
 			return;
 		}
-		// uncomment to see action
-		// log.info(action.type);
+		console.log(`isModifiedListener triggered with ${action.type}`);
 		dispatch(activeActions.setModifiedNow());
-	},
-});
-
-const settingsChangedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
-
-settingsChangedListener.startListening({
-	predicate: (_, currentState, previousState) => {
-		return currentState.active.settings.autoSaveIntervalMS != previousState.active.settings.autoSaveIntervalMS;
-	},
-	effect: (action, { dispatch, getState }) => {
-		const newInterval = getState().active.settings.autoSaveIntervalMS;
-		log.info(`Autosave interval updated to ${newInterval}`);
-		dispatch(updateAutosaveInterval(newInterval));
 	},
 });
 
 // TODO: add listener to save and then construct redo/undo functionality?
 
-export { isModifiedListener, settingsChangedListener };
+export { isModifiedListener };

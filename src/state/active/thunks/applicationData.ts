@@ -4,12 +4,12 @@ import { ParsedServiceWorkspaceData } from '../../../managers/parsers/SwaggerPar
 import { log } from '../../../utils/logging';
 import { Environment, Script } from '../../../types/application-data/application-data';
 import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { activeActions } from '../slice';
+import { activeActions, activeThunkName } from '../slice';
 
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 
-export const InjectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { state: RootState }>(
-	'active/injectLoadedData',
+export const injectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { state: RootState }>(
+	`${activeThunkName}/saveData`,
 	(loadedData, thunk) => {
 		for (const service of loadedData.services) {
 			thunk.dispatch(activeActions.insertService(service));
@@ -30,9 +30,15 @@ export const InjectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { st
 	},
 );
 
-export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>('active/saveData', (_, thunk) => {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const { lastModified, lastSaved, ...data } = thunk.getState().active;
-	thunk.dispatch(activeActions.setSavedNow());
-	return WorkspaceDataManager.saveData(data);
-});
+export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
+	`${activeThunkName}/saveData`,
+	(_, thunk) => {
+		const { lastModified, lastSaved, ...data } = thunk.getState().active;
+		console.log('attempting save w/', { lastModified, lastSaved });
+		if (lastModified > lastSaved) {
+			console.log('moving forward with it');
+			thunk.dispatch(activeActions.setSavedNow());
+			return WorkspaceDataManager.saveData(data);
+		}
+	},
+);

@@ -3,14 +3,14 @@ import { Environment } from '../../../types/application-data/application-data';
 import { RootState } from '../../store';
 import { tabsActions } from '../../tabs/slice';
 import { cloneEnv } from '../../../utils/application';
-import { activeActions, UpdateLinkedEnv } from '../slice';
+import { activeActions, activeThunkName, UpdateLinkedEnv } from '../slice';
 
 interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>> | null;
 }
 
 export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment | undefined, { state: RootState }>(
-	'active/addEnvironment',
+	`${activeThunkName}/addNewEnvironment`,
 	async ({ data } = {}, thunk) => {
 		const newEnvironment = cloneEnv({ name: 'New Environment', ...data });
 		thunk.dispatch(activeActions.insertEnvironment(newEnvironment));
@@ -19,7 +19,7 @@ export const addNewEnvironment = createAsyncThunk<string, AddNewEnvironment | un
 );
 
 export const addNewEnvironmentById = createAsyncThunk<string, string, { state: RootState }>(
-	'active/addEnvironmentById',
+	`${activeThunkName}/addNewEnvironmentById`,
 	async (oldId, thunk) => {
 		const { id, ...environment } = thunk.getState().active.environments[oldId];
 		return await thunk.dispatch(addNewEnvironment({ data: environment })).unwrap();
@@ -27,7 +27,7 @@ export const addNewEnvironmentById = createAsyncThunk<string, string, { state: R
 );
 
 export const deleteEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteEnvironmentById',
+	`${activeThunkName}/deleteEnvironmentById`,
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
 		thunk.dispatch(activeActions.deleteEnvironmentFromState(id));
@@ -40,7 +40,7 @@ interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
 }
 
 export const relinkEnvironments = createAsyncThunk<void, RelinkEnvironmentsArgs, { state: RootState }>(
-	'active/deleteEnvironmentById',
+	`${activeThunkName}/relinkEnvironments`,
 	async ({ remove, add, serviceEnvId, serviceId }, thunk) => {
 		remove.forEach((envId) => thunk.dispatch(activeActions.removeLinkedEnv({ envId, serviceEnvId, serviceId })));
 		add.forEach((envId) => thunk.dispatch(activeActions.addLinkedEnv({ envId, serviceEnvId, serviceId })));

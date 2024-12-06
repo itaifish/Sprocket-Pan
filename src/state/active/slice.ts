@@ -78,12 +78,6 @@ export const activeSlice = createSlice({
 			state.lastModified = new Date().getTime();
 			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
 		},
-		setAutosaveInterval: (state, action: PayloadAction<NodeJS.Timeout | undefined>) => {
-			if (state.autosaveInterval != undefined) {
-				clearInterval(state.autosaveInterval);
-			}
-			state.autosaveInterval = action.payload;
-		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
 			const service = action.payload;
@@ -263,3 +257,5 @@ export const activeSlice = createSlice({
 });
 
 export const activeActions = activeSlice.actions;
+
+export const activeThunkName = `t/${activeSlice.name}`;

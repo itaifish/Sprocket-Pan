@@ -2,7 +2,7 @@ import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
 import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
+import { injectLoadedData } from '../../../state/active/thunks/applicationData';
 import { useAppDispatch } from '../../../state/store';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { useEffect, useRef, useState } from 'react';
@@ -58,7 +58,7 @@ export function ImportFromFileButton() {
 										scripts: Object.values(asData.scripts ?? {}),
 										secrets: Object.values(asData.secrets ?? []),
 									};
-									dispatch(InjectLoadedData(toInject));
+									dispatch(injectLoadedData(toInject));
 								}
 							}}
 						>
@@ -83,7 +83,7 @@ export function ImportFromFileButton() {
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
 									const loadedData = await WorkspaceDataManager.loadSwaggerFile(selectedUrl);
-									dispatch(InjectLoadedData(loadedData));
+									dispatch(injectLoadedData(loadedData));
 								}
 							}}
 						>
@@ -104,7 +104,7 @@ export function ImportFromFileButton() {
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
 									const loadedData = await WorkspaceDataManager.loadPostmanFile(selectedUrl);
-									dispatch(InjectLoadedData(loadedData));
+									dispatch(injectLoadedData(loadedData));
 								}
 							}}
 						>
@@ -126,7 +126,7 @@ export function ImportFromFileButton() {
 								if (selectedUrl && typeof selectedUrl === 'string') {
 									const loadedData = await WorkspaceDataManager.loadInsomniaFile(selectedUrl);
 									if (loadedData) {
-										dispatch(InjectLoadedData(loadedData));
+										dispatch(injectLoadedData(loadedData));
 									}
 								}
 							}}
