@@ -15,11 +15,11 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.timeoutDurationMS / 1000}
+					value={settings.request.timeoutMS / 1000}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ timeoutDurationMS: value * 1000 });
+							setSettings({ request: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -40,11 +40,11 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.maxHistoryLength}
+					value={settings.history.maxLength}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ maxHistoryLength: value });
+							setSettings({ history: { maxLength: value } });
 						}
 					}}
 					slotProps={{
@@ -68,11 +68,11 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.scriptTimeoutDurationMS / 1000}
+					value={settings.script.timeoutMS / 1000}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ scriptTimeoutDurationMS: value * 1000 });
+							setSettings({ script: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -90,11 +90,17 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			<Box>
 				<Typography>Script Strategy Order</Typography>
 				<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
-					<ScriptChips preOrPost="pre" setSettings={setSettings} settings={settings} />
+					<ScriptChips
+						setStrategy={(pre) => setSettings({ script: { strategy: { pre } } })}
+						strategy={settings.script.strategy.pre}
+					/>
 					<Chip sx={{ verticalAlign: 'middle' }} color="primary" startDecorator={iconFromTabType['request']}>
 						Request
 					</Chip>
-					<ScriptChips preOrPost="post" setSettings={setSettings} settings={settings} />
+					<ScriptChips
+						setStrategy={(post) => setSettings({ script: { strategy: { post } } })}
+						strategy={settings.script.strategy.post}
+					/>
 				</Sheet>
 			</Box>
 		</Stack>

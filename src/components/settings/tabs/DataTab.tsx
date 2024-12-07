@@ -18,12 +18,13 @@ import TimerIcon from '@mui/icons-material/Timer';
 import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
 import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 import { MS_IN_MINUTE } from '../../../constants/constants';
+import { RecursivePartial } from '../../../types/utils/utils';
 
 interface DataTabProps {
 	onQuit: () => void;
 	goToWorkspaceSelection: () => void;
 	settings: Settings;
-	setSettings: (settings: Partial<Settings>) => void;
+	setSettings: (settings: RecursivePartial<Settings>) => void;
 }
 
 export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings }: DataTabProps) {
@@ -39,7 +40,7 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 	}
 	const exportData = () => WorkspaceDataManager.exportData(state);
 
-	const autoSaveOn = settings.autoSaveIntervalMS != null;
+	const autosave = settings.data.autosave;
 
 	return (
 		<>
@@ -50,13 +51,11 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 						<FormLabel>Autosave</FormLabel>
 						<Box>
 							<Switch
-								checked={autoSaveOn}
-								onChange={(event) =>
-									setSettings({ autoSaveIntervalMS: event.target.checked ? MS_IN_MINUTE * 5 : undefined })
-								}
-								color={autoSaveOn ? 'success' : 'neutral'}
-								variant={autoSaveOn ? 'solid' : 'outlined'}
-								endDecorator={autoSaveOn ? 'Enabled' : 'Disabled'}
+								checked={autosave.enabled}
+								onChange={(event) => setSettings({ data: { autosave: { enabled: event.target.checked } } })}
+								color={autosave.enabled ? 'success' : 'neutral'}
+								variant={autosave.enabled ? 'solid' : 'outlined'}
+								endDecorator={autosave.enabled ? 'Enabled' : 'Disabled'}
 							/>
 						</Box>
 					</FormControl>
@@ -66,13 +65,13 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 							Interval
 						</FormLabel>
 						<Input
-							disabled={!autoSaveOn}
+							disabled={!autosave.enabled}
 							sx={{ width: 250 }}
-							value={(settings.autoSaveIntervalMS ?? 0) / MS_IN_MINUTE}
+							value={autosave.intervalMS / MS_IN_MINUTE}
 							onChange={(e) => {
 								const value = +e.target.value;
 								if (!isNaN(value) && value > 0) {
-									setSettings({ autoSaveIntervalMS: value * MS_IN_MINUTE });
+									setSettings({ data: { autosave: { intervalMS: value * MS_IN_MINUTE } } });
 								}
 							}}
 							slotProps={{

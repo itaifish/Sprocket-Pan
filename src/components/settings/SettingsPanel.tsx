@@ -13,6 +13,8 @@ import { DataTab } from './tabs/DataTab';
 import { GeneralTab } from './tabs/GeneralTab';
 import { ActionsTab } from './tabs/ActionsTab';
 import { globalActions } from '../../state/global/slice';
+import { RecursivePartial } from '../../types/utils/utils';
+import { mergeDeep } from '../../utils/variables';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -25,8 +27,8 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(previousSettings) !== JSON.stringify(unsavedSettings);
 	}, [previousSettings, unsavedSettings]);
-	function setSettings(settings: Partial<Settings>) {
-		setUnsavedSettings({ ...unsavedSettings, ...settings });
+	function setSettings(settings: RecursivePartial<Settings>) {
+		setUnsavedSettings(mergeDeep(unsavedSettings, settings));
 	}
 	const dispatch = useAppDispatch();
 	function goToWorkspaceSelection() {

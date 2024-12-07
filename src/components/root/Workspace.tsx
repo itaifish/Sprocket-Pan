@@ -17,7 +17,7 @@ export function Workspace() {
 	const theme = useTheme();
 
 	useEffect(() => {
-		dispatch(updateAutosaveInterval(settings.autoSaveIntervalMS));
+		dispatch(updateAutosaveInterval(settings.data.autosave.intervalMS));
 	}, []);
 
 	return (

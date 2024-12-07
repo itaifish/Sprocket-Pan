@@ -1,7 +1,7 @@
 import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { InputSlider } from '../../shared/input/InputSlider';
-import { Settings } from '../../../types/settings/settings';
+import { BASE_THEME, LIST_STYLING, Settings, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
@@ -12,10 +12,11 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
 import { SprocketSelect } from '../../shared/SprocketSelect';
 import { Constants } from '../../../constants/constants';
+import { RecursivePartial } from '../../../types/utils/utils';
 
 export interface SettingsTabProps {
 	settings: Settings;
-	setSettings: (settings: Partial<Settings>) => void;
+	setSettings: (settings: RecursivePartial<Settings>) => void;
 }
 
 export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
@@ -32,9 +33,9 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
 			<InputSlider
-				value={settings.zoomLevel}
+				value={settings.theme.zoom}
 				label="Zoom"
-				setValue={(val) => setSettings({ zoomLevel: val })}
+				setValue={(val) => setSettings({ theme: { zoom: val } })}
 				endDecorator="%"
 				icon={<ZoomInIcon />}
 				range={{ min: 20, max: 300 }}
@@ -42,39 +43,33 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 			<SprocketSelect
 				sx={{ width: 240 }}
 				label="Theme"
-				value={settings.defaultTheme}
-				onChange={(value) => {
-					setSettings({ defaultTheme: value as Settings['defaultTheme'] });
-				}}
+				value={settings.theme.base}
+				onChange={(val) => setSettings({ theme: { base: val } })}
 				options={[
-					{ value: 'light', label: 'Light Mode' },
-					{ value: 'dark', label: 'Dark Mode' },
-					{ value: 'system-default', label: 'System Default' },
+					{ value: BASE_THEME.light, label: 'Light Mode' },
+					{ value: BASE_THEME.dark, label: 'Dark Mode' },
+					{ value: BASE_THEME.default, label: 'System Default' },
 				]}
 			/>
 			<SprocketSelect
 				sx={{ width: 240 }}
 				label="Display Variable Names"
-				value={settings.displayVariableNames}
-				onChange={(value) => {
-					setSettings({ displayVariableNames: value });
-				}}
+				value={settings.interface.variableNameDisplay}
+				onChange={(val) => setSettings({ interface: { variableNameDisplay: val } })}
 				options={[
-					{ value: true, label: 'Key and Value' },
-					{ value: false, label: 'Value Only' },
+					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
+					{ value: VARIABLE_NAME_DISPLAY.none, label: 'Value Only' },
 				]}
 			/>
 			<SprocketSelect
 				sx={{ width: 240 }}
 				label="List Style"
-				value={settings.listStyle}
-				onChange={(value) => {
-					setSettings({ listStyle: value as Settings['listStyle'] });
-				}}
+				value={settings.theme.list}
+				onChange={(val) => setSettings({ theme: { list: val } })}
 				options={[
-					{ value: 'compact', label: 'Compact' },
-					{ value: 'default', label: 'Default' },
-					{ value: 'cozy', label: 'Cozy' },
+					{ value: LIST_STYLING.compact, label: 'Compact' },
+					{ value: LIST_STYLING.default, label: 'Default' },
+					{ value: LIST_STYLING.cozy, label: 'Cozy' },
 				]}
 			/>
 			<Divider />

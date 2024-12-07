@@ -1,10 +1,9 @@
-import { LIST_STYLING } from '../../styles/list';
 import { RecursiveValueOf } from '../utils/utils';
 
 const levels = ['service', 'endpoint', 'request'] as const;
 type level = (typeof levels)[number];
 
-type ScriptRunnerStrategy = RecursiveValueOf<
+export type ScriptRunnerStrategy = RecursiveValueOf<
 	{
 		[levelType1 in level]: {
 			[levelType2 in Exclude<level, levelType1>]: {
@@ -15,18 +14,59 @@ type ScriptRunnerStrategy = RecursiveValueOf<
 	readonly string[]
 >;
 
-export type Settings = {
-	debugLogs: boolean;
-	zoomLevel: number;
-	timeoutDurationMS: number;
-	scriptTimeoutDurationMS: number;
-	defaultTheme: 'light' | 'dark' | 'system-default';
-	maxHistoryLength: number;
-	displayVariableNames: boolean;
-	autoSaveIntervalMS: number | undefined;
-	listStyle: keyof typeof LIST_STYLING;
-	scriptRunnerStrategy: {
-		pre: ScriptRunnerStrategy;
-		post: ScriptRunnerStrategy;
+export enum VARIABLE_NAME_DISPLAY {
+	before = 'before',
+	hover = 'hover',
+	none = 'none',
+}
+
+export enum BASE_THEME {
+	light = 'light',
+	dark = 'dark',
+	default = 'system_default',
+}
+
+export enum LOG_LEVELS {
+	debug = 'debug',
+	info = 'info',
+	warn = 'warn',
+}
+
+export enum LIST_STYLING {
+	compact = 'compact',
+	default = 'default',
+	cozy = 'cozy',
+}
+
+export interface Settings {
+	theme: {
+		base: BASE_THEME;
+		list: LIST_STYLING;
+		zoom: number;
 	};
-};
+	history: {
+		maxLength: number;
+	};
+	data: {
+		autosave: {
+			enabled: boolean;
+			intervalMS: number;
+		};
+	};
+	script: {
+		strategy: {
+			pre: ScriptRunnerStrategy;
+			post: ScriptRunnerStrategy;
+		};
+		timeoutMS: number;
+	};
+	request: {
+		timeoutMS: number;
+	};
+	interface: {
+		variableNameDisplay: VARIABLE_NAME_DISPLAY;
+	};
+	log: {
+		level: LOG_LEVELS;
+	};
+}
