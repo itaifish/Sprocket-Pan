@@ -1,4 +1,4 @@
-import { Box, Button, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { Box, Button, Stack, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -37,8 +37,8 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	}
 	return (
 		<>
-			<Box>
-				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
+			<Box height="75vh">
+				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ height: 'calc(100% - 30px)' }}>
 					<TabList>
 						<Tab>General</Tab>
 						<Tab>Actions</Tab>
@@ -47,7 +47,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					<TabPanel value={0}>
 						<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
-					<TabPanel value={1}>
+					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={1}>
 						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
 					<TabPanel value={2}>
@@ -59,24 +59,18 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						/>
 					</TabPanel>
 				</Tabs>
-				<Box
-					sx={{
-						display: 'flex',
-						flexDirection: 'row-reverse',
-					}}
-				>
-					<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
-						Apply
-					</Button>
+				<Stack gap={1} direction="row" justifyContent="end" mt={1}>
 					<Button
 						color={hasChanged ? 'danger' : 'warning'}
 						startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
-						sx={{ mr: '10px' }}
 						onClick={props.closePanel}
 					>
 						{hasChanged ? 'Cancel' : 'Close'}
 					</Button>
-				</Box>
+					<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
+						Apply
+					</Button>
+				</Stack>
 			</Box>
 			<AreYouSureModal
 				open={quitWithoutSavingModalOpen}

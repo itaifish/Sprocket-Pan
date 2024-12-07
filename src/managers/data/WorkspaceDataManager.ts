@@ -17,6 +17,7 @@ import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
+import { MS_IN_MINUTE } from '../../constants/constants';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -35,7 +36,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 		zoomLevel: 100,
 		timeoutDurationMS: 1_000 * 30,
 		scriptTimeoutDurationMS: 1_000 * 10,
-		autoSaveIntervalMS: 60_000 * 5,
+		autoSaveIntervalMS: MS_IN_MINUTE * 5,
 		defaultTheme: 'system-default',
 		maxHistoryLength: -1,
 		displayVariableNames: true,

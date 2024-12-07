@@ -19,6 +19,7 @@ much more difficult to get them out of order and much easier to fix if they do.
 */
 
 import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
+import { MS_IN_MINUTE } from '../constants/constants';
 import { Environment, HistoricalEndpointResponse, WorkspaceData } from '../types/application-data/application-data';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
@@ -91,7 +92,7 @@ function toFive() {}
  */
 function toFour(data: WorkspaceData | any) {
 	if (data.settings.autoSaveIntervalMS == undefined) {
-		data.settings.autoSaveIntervalMS = 60_000 * 5;
+		data.settings.autoSaveIntervalMS = MS_IN_MINUTE * 5;
 	}
 }
 
