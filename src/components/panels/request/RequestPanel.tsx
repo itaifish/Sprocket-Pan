@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { selectFullRequestInfoById } from '../../../state/active/selectors';
 import { useAppDispatch } from '../../../state/store';
-import { updateRequest } from '../../../state/active/slice';
 import { PanelProps } from '../panels.interface';
 import { EditableText } from '../../shared/input/EditableText';
 import { RequestEditTabs } from './RequestEditTabs';
 import { RequestActions, ResponseState } from './RequestActions';
 import { defaultResponse } from './constants';
 import { ResponsePanel } from './response/ResponsePanel';
+import { activeActions } from '../../../state/active/slice';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
@@ -25,7 +25,7 @@ export function RequestPanel({ id }: PanelProps) {
 	}
 
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 
 	return (
