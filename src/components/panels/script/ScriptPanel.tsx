@@ -17,7 +17,7 @@ import {
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';

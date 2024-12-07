@@ -18,6 +18,11 @@ and not even know, especially while refactoring. By naming them, it becomes
 much more difficult to get them out of order and much easier to fix if they do.
 */
 
+/*
+You likely DO NOT need to write a save converter to add new properties to the Settings.
+Instead, just make sure to add the new property at src\constants\defaults
+*/
+
 import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
 import { MS_IN_MINUTE } from '../constants/constants';
 import { Environment, HistoricalEndpointResponse, WorkspaceData } from '../types/application-data/application-data';
@@ -26,7 +31,6 @@ import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 /**
  * KeyValuePairs for everyone!
  */
-
 function toEight(data: WorkspaceData | any) {
 	function consolidateValues(obj: any) {
 		const pairs = new OrderedKeyValuePairs(obj.__data);

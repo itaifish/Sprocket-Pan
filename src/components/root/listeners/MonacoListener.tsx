@@ -1,7 +1,7 @@
 import { useMonaco } from '@monaco-editor/react';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { initMonaco, setMonacoInjectedTypeCode } from '../../../managers/MonacoInitManager';
+import { initMonaco, setMonacoInjectedTypeCode } from '../../../managers/monaco/MonacoInitManager';
 import { selectScripts } from '../../../state/active/selectors';
 
 export function MonacoListener() {

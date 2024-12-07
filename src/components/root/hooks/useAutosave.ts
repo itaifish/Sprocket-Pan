@@ -6,14 +6,15 @@ import { useAppDispatch } from '../../../state/store';
 
 export function useAutosave() {
 	const settings = useSelector(selectSettings);
+	const autosave = settings.data.autosave;
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		if (settings.autoSaveIntervalMS == null) return;
+		if (!settings.data.autosave.enabled) return;
 		const interval = setInterval(() => {
 			dispatch(saveActiveData());
-		}, settings.autoSaveIntervalMS);
+		}, settings.data.autosave.intervalMS);
 		return () => {
 			clearInterval(interval);
 		};
-	}, [settings.autoSaveIntervalMS]);
+	}, [autosave]);
 }

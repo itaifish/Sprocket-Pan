@@ -1,5 +1,5 @@
 import { Monaco } from '@monaco-editor/react';
-import { Script } from '../types/application-data/application-data';
+import { Script } from '../../types/application-data/application-data';
 import { editor } from 'monaco-editor';
 
 // this is hacky but how it has to be done because of
