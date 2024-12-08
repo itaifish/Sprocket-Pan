@@ -14,12 +14,7 @@ export function OpenDiffToolButton({ historyIndex, request }: OpenDiffToolButton
 	const dispatch = useAppDispatch();
 
 	const openDiffModal = () => {
-		dispatch(
-			tabsActions.addToDiffQueue({
-				left: { requestId: request.id, historyIndex },
-				right: { requestId: request.id, historyIndex },
-			}),
-		);
+		dispatch(tabsActions.addToDiffQueue({ request, index: historyIndex }));
 	};
 	return (
 		<SprocketTooltip text="Show Difference From Another Response">

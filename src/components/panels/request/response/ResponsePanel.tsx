@@ -1,4 +1,4 @@
-import { Typography, Card, Divider, Stack } from '@mui/joy';
+import { Typography, Divider, Stack } from '@mui/joy';
 import { EndpointRequest, HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
 import { useAppDispatch } from '../../../../state/store';
 import { HistoryControl } from './HistoryControl';
@@ -23,44 +23,38 @@ interface ResponsePanelProps {
 export function ResponsePanel({ responseState, request, setResponseState, lastError }: ResponsePanelProps) {
 	const dispatch = useAppDispatch();
 	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, request);
+
+	if (responseStateData == null) {
+		return (
+			<Stack justifyContent="center" alignItems="center" height="100%" width="100%">
+				<Typography level="title-md">No Response Data Available</Typography>
+				<Typography>Make a request to see the response here!</Typography>
+			</Stack>
+		);
+	}
 	return (
-		<Card sx={{ height: '100%', width: '100%' }}>
-			<Typography level="h3" sx={{ textAlign: 'center' }}>
-				Response
-			</Typography>
-			<Divider />
-			{responseStateData == null ? (
-				<Stack justifyContent="center" alignItems="center" height="100%" width="100%">
-					<Typography level="title-md">No Response Data Available</Typography>
-					<Typography>Make a request to see the response here!</Typography>
+		<>
+			<Stack direction="row" justifyContent="space-between" alignItems="center">
+				<Typography level="title-md" textAlign="center">
+					{formatFullDate(new Date(responseStateData?.response.dateTime))}
+				</Typography>
+				<Stack direction="row" spacing={0}>
+					<OpenDiffToolButton
+						historyIndex={typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)}
+						request={request}
+					/>
+					<HistoryControl
+						value={responseState}
+						onChange={setResponseState}
+						historyLength={request.history.length}
+						onDelete={(index) =>
+							dispatch(activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
+						}
+					/>
 				</Stack>
-			) : (
-				<>
-					<Stack direction="row" justifyContent="space-between" alignItems="center">
-						<Typography level="title-md" textAlign={'center'}>
-							{formatFullDate(new Date(responseStateData?.response.dateTime))}
-						</Typography>
-						<Stack direction="row" spacing={0}>
-							<OpenDiffToolButton
-								historyIndex={
-									typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)
-								}
-								request={request}
-							/>
-							<HistoryControl
-								value={responseState}
-								onChange={setResponseState}
-								historyLength={request.history.length}
-								onDelete={(index) =>
-									dispatch(activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
-								}
-							/>
-						</Stack>
-					</Stack>
-					<Divider />
-					<ResponseInfo response={responseStateData} requestId={request.id} />
-				</>
-			)}
-		</Card>
+			</Stack>
+			<Divider />
+			<ResponseInfo response={responseStateData} requestId={request.id} />
+		</>
 	);
 }

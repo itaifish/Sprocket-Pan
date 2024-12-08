@@ -1,6 +1,6 @@
 import { ReactNode, useEffect, useRef } from 'react';
 import { Editor, EditorProps } from '@monaco-editor/react';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { editor } from 'monaco-editor';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
 import { Box, Stack } from '@mui/joy';

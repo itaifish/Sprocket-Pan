@@ -19,6 +19,7 @@ export function TabRow({ list }: TabRowProps) {
 			disableUnderline
 			id="tabScroll"
 			sx={{
+				zIndex: 110,
 				overflowX: 'auto',
 				overflowY: 'hidden',
 				scrollSnapType: 'x mandatory',

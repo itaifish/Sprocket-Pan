@@ -39,7 +39,7 @@ class NetworkRequestManager {
 		const endpoint = data.endpoints[endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map((strat) => ({
+		const preRequestScripts = data.settings.script.strategy.pre.map((strat) => ({
 			script: scriptObjs[strat]?.preRequestScript,
 			name: `pre${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -70,7 +70,7 @@ class NetworkRequestManager {
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const postRequestScripts = data.settings.scriptRunnerStrategy.post.map((strat) => ({
+		const postRequestScripts = data.settings.script.strategy.post.map((strat) => ({
 			script: scriptObjs[strat]?.postRequestScript,
 			name: `post${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -196,7 +196,7 @@ class NetworkRequestManager {
 
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
 			networkCall,
-			data.settings.timeoutDurationMS,
+			data.settings.request.timeoutMS,
 		);
 		auditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
 		const responseText = res.data as string;

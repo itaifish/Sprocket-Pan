@@ -1,4 +1,4 @@
-import { Box, Button, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { Box, Button, Stack, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
 import { useMemo, useState } from 'react';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
@@ -12,7 +12,10 @@ import { DataTab } from './tabs/DataTab';
 import { GeneralTab } from './tabs/GeneralTab';
 import { ActionsTab } from './tabs/ActionsTab';
 import { globalActions } from '../../state/global/slice';
+import { RecursivePartial } from '../../types/utils/utils';
+import { mergeDeep } from '../../utils/variables';
 import { activeActions } from '../../state/active/slice';
+import { Tips } from './Tips';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -25,8 +28,8 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	const hasChanged = useMemo(() => {
 		return JSON.stringify(previousSettings) !== JSON.stringify(unsavedSettings);
 	}, [previousSettings, unsavedSettings]);
-	function setSettings(settings: Partial<Settings>) {
-		setUnsavedSettings({ ...unsavedSettings, ...settings });
+	function setSettings(settings: RecursivePartial<Settings>) {
+		setUnsavedSettings(mergeDeep(unsavedSettings, settings));
 	}
 	const dispatch = useAppDispatch();
 	function goToWorkspaceSelection() {
@@ -37,8 +40,8 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 	}
 	return (
 		<>
-			<Box>
-				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ minWidth: 300, minHeight: 160 }}>
+			<Box height="75vh">
+				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ height: 'calc(100% - 30px)' }}>
 					<TabList>
 						<Tab>General</Tab>
 						<Tab>Actions</Tab>
@@ -47,7 +50,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					<TabPanel value={0}>
 						<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
-					<TabPanel value={1}>
+					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={1}>
 						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
 					<TabPanel value={2}>
@@ -59,24 +62,21 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						/>
 					</TabPanel>
 				</Tabs>
-				<Box
-					sx={{
-						display: 'flex',
-						flexDirection: 'row-reverse',
-					}}
-				>
-					<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
-						Apply
-					</Button>
-					<Button
-						color={hasChanged ? 'danger' : 'warning'}
-						startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
-						sx={{ mr: '10px' }}
-						onClick={props.closePanel}
-					>
-						{hasChanged ? 'Cancel' : 'Close'}
-					</Button>
-				</Box>
+				<Stack gap={3} direction="row" justifyContent="space-between" alignItems="center" mt={1}>
+					<Tips />
+					<Stack gap={1} direction="row">
+						<Button
+							color={hasChanged ? 'danger' : 'warning'}
+							startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
+							onClick={props.closePanel}
+						>
+							{hasChanged ? 'Cancel' : 'Close'}
+						</Button>
+						<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
+							Apply
+						</Button>
+					</Stack>
+				</Stack>
 			</Box>
 			<AreYouSureModal
 				open={quitWithoutSavingModalOpen}
