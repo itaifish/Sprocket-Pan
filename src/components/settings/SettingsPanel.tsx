@@ -15,6 +15,7 @@ import { globalActions } from '../../state/global/slice';
 import { RecursivePartial } from '../../types/utils/utils';
 import { mergeDeep } from '../../utils/variables';
 import { activeActions } from '../../state/active/slice';
+import { Tips } from './Tips';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -61,17 +62,20 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						/>
 					</TabPanel>
 				</Tabs>
-				<Stack gap={1} direction="row" justifyContent="end" mt={1}>
-					<Button
-						color={hasChanged ? 'danger' : 'warning'}
-						startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
-						onClick={props.closePanel}
-					>
-						{hasChanged ? 'Cancel' : 'Close'}
-					</Button>
-					<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
-						Apply
-					</Button>
+				<Stack gap={3} direction="row" justifyContent="space-between" alignItems="center" mt={1}>
+					<Tips />
+					<Stack gap={1} direction="row">
+						<Button
+							color={hasChanged ? 'danger' : 'warning'}
+							startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
+							onClick={props.closePanel}
+						>
+							{hasChanged ? 'Cancel' : 'Close'}
+						</Button>
+						<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
+							Apply
+						</Button>
+					</Stack>
 				</Stack>
 			</Box>
 			<AreYouSureModal

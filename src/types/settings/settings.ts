@@ -23,7 +23,7 @@ export enum VARIABLE_NAME_DISPLAY {
 export enum BASE_THEME {
 	light = 'light',
 	dark = 'dark',
-	default = 'system_default',
+	default = 'system',
 }
 
 export enum LOG_LEVELS {

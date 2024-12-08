@@ -42,7 +42,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 			/>
 			<SprocketSelect
 				sx={{ width: 240 }}
-				label="Theme"
+				label="Base Theme"
 				value={settings.theme.base}
 				onChange={(val) => setSettings({ theme: { base: val } })}
 				options={[
@@ -54,6 +54,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 			<SprocketSelect
 				sx={{ width: 240 }}
 				label="Display Variable Names"
+				tooltip="Controls how {environment_variables} are displayed alongside their computed values."
 				value={settings.interface.variableNameDisplay}
 				onChange={(val) => setSettings({ interface: { variableNameDisplay: val } })}
 				options={[
@@ -79,7 +80,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 					View the docs
 				</Link>
 			</Typography>
-			<Stack direction="row" spacing={2} alignItems={'center'}>
+			<Stack direction="row" spacing={2} alignItems="center">
 				<Button
 					startDecorator={checkingForUpdate ? <CircularProgress /> : <></>}
 					onClick={async () => {

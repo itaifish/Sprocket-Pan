@@ -6,11 +6,12 @@ import { iconFromTabType } from '../../types/application-data/application-data';
 import { ScriptRunnerStrategy } from '../../types/settings/settings';
 
 interface ScriptChipsProps {
+	prefix: string;
 	strategy: ScriptRunnerStrategy;
 	setStrategy: (strategy: ScriptRunnerStrategy) => void;
 }
 
-export function ScriptChips({ strategy, setStrategy }: ScriptChipsProps) {
+export function ScriptChips({ prefix, strategy, setStrategy }: ScriptChipsProps) {
 	const [parent] = useAutoAnimate();
 	return (
 		<span ref={parent}>
@@ -32,7 +33,7 @@ export function ScriptChips({ strategy, setStrategy }: ScriptChipsProps) {
 						</IconButton>
 					)}
 					<Chip sx={{ verticalAlign: 'middle' }} startDecorator={iconFromTabType[strategyItem]}>
-						{'preOrPost'}-{strategyItem}
+						{prefix}-{strategyItem}
 					</Chip>
 					{index !== 2 && (
 						<IconButton

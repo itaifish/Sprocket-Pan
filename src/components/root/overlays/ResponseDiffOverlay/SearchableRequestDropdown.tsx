@@ -1,47 +1,42 @@
 import { Autocomplete, FormControl, FormLabel, IconButton, Stack } from '@mui/joy';
-import {
-	Endpoint,
-	EndpointRequest,
-	iconFromTabType,
-	Service,
-} from '../../../../types/application-data/application-data';
+import { iconFromTabType } from '../../../../types/application-data/application-data';
 import { camelCaseToTitle } from '../../../../utils/string';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../../state/store';
 import { tabsActions } from '../../../../state/tabs/slice';
 
-type Option = { label: string; value?: string };
+type SearchableItem = { name: string; id: string };
 
-interface SearchableRequestDropdownProps {
+interface SearchableRequestDropdownProps<T extends SearchableItem> {
 	name: 'service' | 'request' | 'endpoint';
-	options: Array<Service | Endpoint | EndpointRequest>;
-	selected?: Service | Endpoint | EndpointRequest;
-	onChange: (newValue: Option) => void;
+	options: T[];
+	selected?: T | null;
+	onChange: (id: string | null) => void;
 }
 
-export function SearchableRequestDropdown({ name, options, selected, onChange }: SearchableRequestDropdownProps) {
+export function SearchableRequestDropdown<T extends SearchableItem>({
+	name,
+	options,
+	selected,
+	onChange,
+}: SearchableRequestDropdownProps<T>) {
 	const dispatch = useAppDispatch();
 	const title = camelCaseToTitle(name);
+	const autocompleteOptions = options.map((option) => ({ label: option.name, id: option.id }));
 	return (
 		<FormControl>
 			<FormLabel>{title}</FormLabel>
 			<Stack direction="row">
 				<Autocomplete
-					disableClearable
 					startDecorator={iconFromTabType[name]}
 					autoHighlight
-					value={{
-						label: selected?.name ?? `No ${title} Selected`,
-						value: selected?.id,
-					}}
-					onChange={(_event, newValue) => {
-						if (newValue != null) {
-							onChange(newValue);
-						}
-					}}
-					options={options.map((option) => ({ label: option.name, value: option.id }))}
-				></Autocomplete>
+					placeholder={`No ${title} Selected`}
+					value={selected?.id == null ? null : { label: selected.name, id: selected.id }}
+					isOptionEqualToValue={(option, value) => option.id === value.id}
+					onChange={(_, nval) => onChange(nval?.id ?? null)}
+					options={autocompleteOptions}
+				/>
 				<SprocketTooltip text={`Open ${title}`}>
 					<IconButton
 						disabled={!selected}

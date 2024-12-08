@@ -11,7 +11,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			<Typography level="title-md">Requests</Typography>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
-					Network Call Timeout Duration
+					Network Call Timeout
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
@@ -36,7 +36,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			</FormControl>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="maximum-history-label" htmlFor="maximum-history-input">
-					Maximum Number of History Records
+					Maximum Saved History Records
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
@@ -64,7 +64,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			<Typography level="title-md">Scripts</Typography>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="script-timeout-label" htmlFor="script-timeout-input">
-					Script Timeout Duration
+					Script Timeout
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
@@ -88,9 +88,10 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				/>
 			</FormControl>
 			<Box>
-				<Typography>Script Strategy Order</Typography>
+				<Typography>Script Execution Order</Typography>
 				<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
 					<ScriptChips
+						prefix="pre"
 						setStrategy={(pre) => setSettings({ script: { strategy: { pre } } })}
 						strategy={settings.script.strategy.pre}
 					/>
@@ -98,6 +99,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 						Request
 					</Chip>
 					<ScriptChips
+						prefix="post"
 						setStrategy={(post) => setSettings({ script: { strategy: { post } } })}
 						strategy={settings.script.strategy.post}
 					/>
