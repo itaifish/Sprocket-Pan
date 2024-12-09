@@ -1,9 +1,24 @@
-import { PropsWithChildren } from 'react';
+import { BREAK_ALL_TEXT } from '../../styles/text';
+import { COMMAND, ShortcutManager } from '../../managers/ShortcutManager';
+import { open } from '@tauri-apps/api/shell';
 
-export function UriTypography({ children }: PropsWithChildren) {
+interface UriTypographyProps {
+	children: string;
+}
+
+export function UriTypography({ children }: UriTypographyProps) {
 	return (
 		<u>
-			<span style={{ overflowWrap: 'anywhere', wordBreak: 'break-all' }}>{children}</span>
+			<span
+				onClick={(event) => {
+					if (ShortcutManager.translateClick(event) === COMMAND.meta) {
+						open(children);
+					}
+				}}
+				style={BREAK_ALL_TEXT}
+			>
+				{children}
+			</span>
 		</u>
 	);
 }

@@ -13,7 +13,7 @@ export function DiffQueueModals() {
 		<Modal open={!!nextForDiff} onClose={() => dispatch(tabsActions.popDiffQueue())}>
 			<ModalDialog variant="outlined" role="diffdialog">
 				<ModalClose />
-				<DialogTitle>Diff Tool</DialogTitle>
+				<DialogTitle>Diff Tool - Compare Responses</DialogTitle>
 				<Divider />
 				<ResponseDiffOverlay initialSelection={nextForDiff} />
 			</ModalDialog>

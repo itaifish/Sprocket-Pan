@@ -1,4 +1,4 @@
-export const LIST_STYLING = {
+export const LIST_STYLES = {
 	compact: {
 		size: 'sm',
 		inset: '0.5rem',

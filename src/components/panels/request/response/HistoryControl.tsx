@@ -7,6 +7,13 @@ import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { EditableText } from '../../../shared/input/EditableText';
 import { clamp } from '../../../../utils/math';
 
+export function responseStateToNumber(value?: ResponseState, historyLength?: number) {
+	if (value == null || historyLength == null) return 0;
+	// mathematically, 'error' is treated as historyLength,
+	// and 'latest' is identical to historyLength - 1
+	return value === 'latest' ? historyLength - 1 : value === 'error' ? historyLength : value;
+}
+
 interface HistoryControlProps {
 	value: ResponseState;
 	onChange: (state: ResponseState) => void;
@@ -15,9 +22,7 @@ interface HistoryControlProps {
 }
 
 export function HistoryControl({ value, onChange, historyLength, onDelete }: HistoryControlProps) {
-	// mathematically in this component, 'error' is treated as historyLength,
-	// and 'latest' is identical to historyLength - 1
-	const numValue = value === 'latest' ? historyLength - 1 : value === 'error' ? historyLength : value;
+	const numValue = responseStateToNumber(value, historyLength);
 	return (
 		<Stack direction="row">
 			<SprocketTooltip text={'Previous Response'}>

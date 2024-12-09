@@ -1,11 +1,13 @@
 import { Box, Sheet } from '@mui/joy';
 import { PropsWithChildren } from 'react';
+import { useScrollbarTheme } from '../../hooks/useScrollbarTheme';
 
 interface SideDrawerProps extends PropsWithChildren {
 	open: boolean;
 }
 
 export function SideDrawer({ open, children }: SideDrawerProps) {
+	const { guttered: scrollbarTheme } = useScrollbarTheme();
 	if (!open) {
 		return null;
 	}
@@ -31,6 +33,7 @@ export function SideDrawer({ open, children }: SideDrawerProps) {
 					overflowX: 'hidden',
 					position: 'relative',
 					resize: 'horizontal',
+					...scrollbarTheme,
 				}}
 			>
 				{children}
