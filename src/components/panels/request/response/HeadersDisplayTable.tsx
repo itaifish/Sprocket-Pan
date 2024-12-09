@@ -1,7 +1,9 @@
-import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails } from '@mui/joy';
+import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Box } from '@mui/joy';
 import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
 import { toKeyValuePairs } from '../../../../utils/application';
 import { SprocketTable } from '../../../shared/SprocketTable';
+import { CopyToClipboardButton } from '../../../shared/buttons/CopyToClipboardButton';
+import { HoverDecorator } from '../../../shared/HoverDecorator';
 
 interface HeadersDisplayTableProps {
 	headers?: KeyValuePair[] | null | Record<string, string>;
@@ -24,7 +26,26 @@ export function HeadersDisplayTable({ headers, label }: HeadersDisplayTableProps
 							{ key: 'headerKey', label: 'Key' },
 							{ key: 'value', label: 'Value' },
 						]}
-						data={headers.map(({ key, value }) => ({ key, headerKey: key, value }))}
+						data={headers.map(({ key, value }) => ({
+							key,
+							headerKey: key,
+							value: (
+								<HoverDecorator
+									endDecorator={
+										value != null && (
+											<Box height="1.5em" marginTop="-.75em" width="0" marginLeft="-2em">
+												<CopyToClipboardButton size="sm" copyText={value} />
+											</Box>
+										)
+									}
+									direction="row"
+									justifyContent="space-between"
+									alignItems="center"
+								>
+									{value}
+								</HoverDecorator>
+							),
+						}))}
 					/>
 				</AccordionDetails>
 			</Accordion>

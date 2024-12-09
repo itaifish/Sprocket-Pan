@@ -23,7 +23,7 @@ export function SprocketTable<T extends SprocketTableRow>({ data, columns, ...pr
 				<thead style={{ backgroundColor: theme.palette.background.level1 }}>
 					<tr>
 						{columns.map((column) => (
-							<td key={column.key}>
+							<td key={column.key} style={column.style}>
 								<strong>{column.label}</strong>
 							</td>
 						))}
