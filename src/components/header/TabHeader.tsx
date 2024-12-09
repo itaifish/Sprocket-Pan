@@ -35,7 +35,7 @@ export function TabHeader() {
 					<TabRow list={list} />
 					{listList.map(([tabId, tabType], index) => (
 						<TabPanel value={tabId} key={index}>
-							<Sheet sx={{ boxSizing: 'content-box' }}>
+							<Sheet>
 								<TabContent id={tabId} type={tabType} />
 							</Sheet>
 						</TabPanel>

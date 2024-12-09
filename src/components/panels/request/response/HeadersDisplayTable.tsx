@@ -1,6 +1,7 @@
-import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Table } from '@mui/joy';
+import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails } from '@mui/joy';
 import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
 import { toKeyValuePairs } from '../../../../utils/application';
+import { SprocketTable } from '../../../shared/SprocketTable';
 
 interface HeadersDisplayTableProps {
 	headers?: KeyValuePair[] | null | Record<string, string>;
@@ -16,22 +17,15 @@ export function HeadersDisplayTable({ headers, label }: HeadersDisplayTableProps
 			<Accordion defaultExpanded>
 				<AccordionSummary>Headers</AccordionSummary>
 				<AccordionDetails>
-					<Table aria-label={`Headers table for ${label}`} variant="outlined" sx={{ overflowWrap: 'break-word' }}>
-						<thead>
-							<tr>
-								<th>Key</th>
-								<th>Value</th>
-							</tr>
-						</thead>
-						<tbody>
-							{headers.map(({ key, value }, index) => (
-								<tr key={index}>
-									<td>{key}</td>
-									<td>{value}</td>
-								</tr>
-							))}
-						</tbody>
-					</Table>
+					<SprocketTable
+						aria-label={`${label} Headers Table`}
+						sx={{ overflowWrap: 'break-word' }}
+						columns={[
+							{ key: 'headerKey', label: 'Key' },
+							{ key: 'value', label: 'Value' },
+						]}
+						data={headers.map(({ key, value }) => ({ key, headerKey: key, value }))}
+					/>
 				</AccordionDetails>
 			</Accordion>
 		</AccordionGroup>

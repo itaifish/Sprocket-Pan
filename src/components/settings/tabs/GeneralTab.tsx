@@ -1,7 +1,5 @@
 import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import { InputSlider } from '../../shared/input/InputSlider';
-import { BASE_THEME, LIST_STYLING, Settings, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
+import { Settings, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
@@ -32,25 +30,6 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 	}, []);
 	return (
 		<Stack spacing={3}>
-			<InputSlider
-				value={settings.theme.zoom}
-				label="Zoom"
-				setValue={(val) => setSettings({ theme: { zoom: val } })}
-				endDecorator="%"
-				icon={<ZoomInIcon />}
-				range={{ min: 25, max: 175 }}
-			/>
-			<SprocketSelect
-				sx={{ width: 240 }}
-				label="Base Theme"
-				value={settings.theme.base}
-				onChange={(val) => setSettings({ theme: { base: val } })}
-				options={[
-					{ value: BASE_THEME.light, label: 'Light Mode' },
-					{ value: BASE_THEME.dark, label: 'Dark Mode' },
-					{ value: BASE_THEME.default, label: 'System Default' },
-				]}
-			/>
 			<SprocketSelect
 				sx={{ width: 240 }}
 				label="Display Variable Names"
@@ -60,17 +39,6 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 				options={[
 					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
 					{ value: VARIABLE_NAME_DISPLAY.none, label: 'Value Only' },
-				]}
-			/>
-			<SprocketSelect
-				sx={{ width: 240 }}
-				label="List Style"
-				value={settings.theme.list}
-				onChange={(val) => setSettings({ theme: { list: val } })}
-				options={[
-					{ value: LIST_STYLING.compact, label: 'Compact' },
-					{ value: LIST_STYLING.default, label: 'Default' },
-					{ value: LIST_STYLING.cozy, label: 'Cozy' },
 				]}
 			/>
 			<Divider />

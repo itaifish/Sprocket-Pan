@@ -2,8 +2,6 @@ import { IconButton, Sheet, Stack, Typography } from '@mui/joy';
 import { useState } from 'react';
 import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
 import { statusCodes } from '../../../../constants/statusCodes';
-import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
-import { toKeyValuePairs } from '../../../../utils/application';
 import { DiffText } from '../../../shared/input/DiffText';
 import { SprocketTabs } from '../../../shared/SprocketTabs';
 import { UriTypography } from '../../../shared/UriTypography';
@@ -11,27 +9,7 @@ import { VerbChip } from '../../../shared/VerbChip';
 import { ResponseSelectForm, SelectedResponse } from './ResponseSelectForm';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-
-function headersToJson(headers: Record<string, string> | KeyValuePair[]) {
-	const convertedHeaders = Array.isArray(headers) ? headers.slice() : toKeyValuePairs(headers);
-	return JSON.stringify(
-		convertedHeaders
-			.sort((e1, e2) => e1.key.localeCompare(e2.key))
-			.reduce(
-				(acc, curr) => {
-					acc[curr.key] = curr.value ?? '';
-					return acc;
-				},
-				{} as Record<string, string>,
-			),
-	);
-}
-
-function multilineUrl(url: string): string {
-	const { protocol, username, password, host, pathname, searchParams: rawParams, hash } = new URL(url);
-	const searchParams = [...rawParams.entries()].map((entry) => entry.join('=')).sort();
-	return JSON.stringify({ protocol, username, password, host, pathname, searchParams, hash });
-}
+import { headersToJson, multilineUrl } from '../../../../utils/serialization';
 
 interface ResponseDiffOverlayProps {
 	initialSelection: SelectedResponse;

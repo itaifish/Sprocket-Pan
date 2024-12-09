@@ -31,6 +31,9 @@ const TIPS: React.ReactNode[] = [
 	<Tip>
 		You can <Keys commands={[COMMAND.meta, COMMAND.click]} /> on underlined URLs to open them.
 	</Tip>,
+	<Tip>
+		An endpoint&apos;s default request can be accessed via the <code>Jump to Request</code> button.
+	</Tip>,
 ];
 
 const DYKS: React.ReactNode[] = [

@@ -16,6 +16,7 @@ import { RecursivePartial } from '../../types/utils/utils';
 import { mergeDeep } from '../../utils/variables';
 import { activeActions } from '../../state/active/slice';
 import { Tips } from './Tips';
+import { ThemeTab } from './tabs/ThemeTab';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -45,6 +46,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 					<TabList>
 						<Tab>General</Tab>
 						<Tab>Actions</Tab>
+						<Tab>Theme</Tab>
 						<Tab>Data</Tab>
 					</TabList>
 					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={0}>
@@ -54,6 +56,9 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
 					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={2}>
+						<ThemeTab settings={unsavedSettings} setSettings={setSettings} />
+					</TabPanel>
+					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={3}>
 						<DataTab
 							settings={unsavedSettings}
 							setSettings={setSettings}

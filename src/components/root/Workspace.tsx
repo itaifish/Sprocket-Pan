@@ -6,12 +6,14 @@ import { SideDrawerActions } from '../sidebar/SideDrawerActions';
 import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
 import { selectActiveWorkspace } from '../../state/global/selectors';
 import { useAutosave } from './hooks/useAutosave';
+import { useScrollbarTheme } from '../../hooks/useScrollbarTheme';
 
 export function Workspace() {
 	useAutosave();
 
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const theme = useTheme();
+	const { guttered: scrollbarTheme } = useScrollbarTheme();
 
 	return (
 		<Stack
@@ -49,7 +51,7 @@ export function Workspace() {
 					<NavigableServicesFileSystem />
 				</SideDrawer>
 			</Box>
-			<Box flexGrow={1} width="200px" height="100%" sx={{ overflowY: 'auto' }}>
+			<Box flexGrow={1} width="200px" height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
 				<TabHeader />
 			</Box>
 		</Stack>

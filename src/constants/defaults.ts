@@ -1,4 +1,11 @@
-import { BASE_THEME, LIST_STYLING, LOG_LEVELS, Settings, VARIABLE_NAME_DISPLAY } from '../types/settings/settings';
+import {
+	BASE_THEME,
+	LIST_STYLING,
+	LOG_LEVELS,
+	SCROLLBAR_VISIBILITY,
+	Settings,
+	VARIABLE_NAME_DISPLAY,
+} from '../types/settings/settings';
 import { MS_IN_MINUTE } from './constants';
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -6,6 +13,7 @@ export const DEFAULT_SETTINGS: Settings = {
 		base: BASE_THEME.default,
 		list: LIST_STYLING.default,
 		zoom: 100,
+		scrollbarVisibility: SCROLLBAR_VISIBILITY.compact,
 	},
 	history: {
 		maxLength: 250,

@@ -29,7 +29,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 			color={isDefaultRequest ? 'primary' : 'neutral'}
 			menuOptions={[
 				{
-					Icon: isDefault ? Add : Close,
+					Icon: isDefault ? Close : Add,
 					label: isDefault ? 'Unset Endpoint Default' : 'Set Endpoint Default',
 					onClick: () =>
 						dispatch(

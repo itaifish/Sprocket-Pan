@@ -38,11 +38,18 @@ export enum LIST_STYLING {
 	cozy = 'cozy',
 }
 
+export enum SCROLLBAR_VISIBILITY {
+	hidden = 'hidden',
+	compact = 'compact',
+	visible = 'visible',
+}
+
 export interface Settings {
 	theme: {
 		base: BASE_THEME;
 		list: LIST_STYLING;
 		zoom: number;
+		scrollbarVisibility: SCROLLBAR_VISIBILITY;
 	};
 	history: {
 		maxLength: number;
