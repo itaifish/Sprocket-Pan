@@ -61,6 +61,7 @@ export function EditableData<T extends KeyValueValues>({
 	const [editorText, setEditorText] = useState(toEditorJSON(initialValues));
 	const [hasChanged, setChanged] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState(false);
+	const [isFormatting, setIsFormatting] = useState(false);
 
 	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -68,6 +69,7 @@ export function EditableData<T extends KeyValueValues>({
 	const format = async () => {
 		const prevIgnore = ignoreEditorUpdates.current;
 		const prevReadOnly = editorRef.current?.getRawOptions().readOnly;
+		setIsFormatting(true);
 		ignoreEditorUpdates.current = true;
 		editorRef.current?.updateOptions({ readOnly: false });
 		await editorRef.current?.getAction('editor.action.formatDocument')?.run();
@@ -107,7 +109,11 @@ export function EditableData<T extends KeyValueValues>({
 	const onEditorChange = (value: string | undefined) => {
 		if (ignoreEditorUpdates.current) return;
 		setEditorText(value ?? '');
-		setChanged(true);
+		if (isFormatting) {
+			setIsFormatting(false);
+		} else {
+			setChanged(true);
+		}
 	};
 
 	return (

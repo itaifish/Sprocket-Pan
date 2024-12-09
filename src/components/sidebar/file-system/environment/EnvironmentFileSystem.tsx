@@ -3,13 +3,13 @@ import TableChartIcon from '@mui/icons-material/TableChart';
 import { useSelector } from 'react-redux';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
 import { selectSelectedEnvironment, selectEnvironmentsById } from '../../../../state/active/selectors';
-import { selectEnvironment } from '../../../../state/active/slice';
 import { addNewEnvironmentById } from '../../../../state/active/thunks/environments';
 import { useAppDispatch } from '../../../../state/store';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
 import { tabsActions } from '../../../../state/tabs/slice';
+import { activeActions } from '../../../../state/active/slice';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -27,7 +27,7 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 			color={envSelected ? 'success' : 'neutral'}
 			menuOptions={[
 				{
-					onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.id)),
+					onClick: () => dispatch(activeActions.selectEnvironment(envSelected ? undefined : environment.id)),
 					Icon: CheckCircleOutlinedIcon,
 					label: envSelected ? 'Deselect' : 'Select',
 				},

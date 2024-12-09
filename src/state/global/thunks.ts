@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 import { WorkspaceDataManager } from '../../managers/data/WorkspaceDataManager';
-import { setFullState } from '../active/slice';
+import { activeActions } from '../active/slice';
 import { log } from '../../utils/logging';
 import { GlobalDataManager } from '../../managers/data/GlobalDataManager';
 import { tabsActions } from '../tabs/slice';
@@ -41,7 +41,7 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 				thunk.dispatch(tabsActions.clearTabs()),
 				thunk.dispatch(tabsActions.setSearchText('')),
 				thunk.dispatch(globalActions.setSelectedWorkspace(data.metadata)),
-				thunk.dispatch(setFullState(data)),
+				thunk.dispatch(activeActions.setFullState(data)),
 			]);
 		} else {
 			log.warn('Workspace failed to load!');

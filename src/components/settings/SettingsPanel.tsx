@@ -5,7 +5,6 @@ import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { Settings } from '../../types/settings/settings';
 import { useAppDispatch } from '../../state/store';
-import { insertSettings } from '../../state/active/slice';
 import { useSelector } from 'react-redux';
 import { selectSettings } from '../../state/active/selectors';
 import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
@@ -13,6 +12,7 @@ import { DataTab } from './tabs/DataTab';
 import { GeneralTab } from './tabs/GeneralTab';
 import { ActionsTab } from './tabs/ActionsTab';
 import { globalActions } from '../../state/global/slice';
+import { activeActions } from '../../state/active/slice';
 
 interface SettingsPanelProps {
 	closePanel: () => void;
@@ -33,7 +33,7 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 		dispatch(globalActions.setSelectedWorkspace(undefined));
 	}
 	function saveSettings() {
-		dispatch(insertSettings(unsavedSettings));
+		dispatch(activeActions.insertSettings(unsavedSettings));
 	}
 	return (
 		<>
