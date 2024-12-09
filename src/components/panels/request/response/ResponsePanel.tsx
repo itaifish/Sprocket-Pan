@@ -1,7 +1,7 @@
 import { Typography, Divider, Stack } from '@mui/joy';
 import { EndpointRequest, HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
 import { useAppDispatch } from '../../../../state/store';
-import { HistoryControl } from './HistoryControl';
+import { HistoryControl, responseStateToNumber } from './HistoryControl';
 import { ResponseInfo } from './ResponseInfo';
 import { ResponseState } from '../RequestActions';
 import { formatFullDate } from '../../../../utils/string';
@@ -39,10 +39,7 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 					{formatFullDate(new Date(responseStateData?.response.dateTime))}
 				</Typography>
 				<Stack direction="row" spacing={0}>
-					<OpenDiffToolButton
-						historyIndex={typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)}
-						request={request}
-					/>
+					<OpenDiffToolButton historyIndex={responseStateToNumber(responseState)} request={request} />
 					<HistoryControl
 						value={responseState}
 						onChange={setResponseState}

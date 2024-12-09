@@ -41,8 +41,8 @@ export function DiffText({ original, modified, options, width, height, language,
 			}}
 			original={original}
 			modified={modified}
-			width={width ?? '100%'}
-			height={height ?? '40vh'}
+			width={width}
+			height={height}
 			{...props}
 		/>
 	);

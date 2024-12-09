@@ -42,7 +42,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 
 	return (
 		<Sheet sx={{ overflowY: 'auto', px: '20px', height: '85vh', width: '85vw' }}>
-			<Stack gap={2}>
+			<Stack gap={2} sx={{ height: '100%' }}>
 				<Stack direction="row" gap={3} justifyContent="space-between">
 					<ResponseSelectForm
 						initialValue={initialSelection}
@@ -68,6 +68,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 				</Stack>
 				{original && modified && (
 					<SprocketTabs
+						sx={{ height: '100%' }}
 						tabs={[
 							{
 								title: 'Response Body',
@@ -83,7 +84,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 							{
 								title: 'Response Headers',
 								content: (
-									<>
+									<Stack height="100%">
 										<Stack direction="row" justifyContent="space-between">
 											<Typography>
 												{original.response.statusCode}: {statusCodes[original.response.statusCode]}
@@ -96,13 +97,13 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											original={headersToJson(original.response.headers)}
 											modified={headersToJson(modified.response.headers)}
 										/>
-									</>
+									</Stack>
 								),
 							},
 							{
 								title: 'Request Body',
 								content: (
-									<>
+									<Stack height="100%">
 										<Stack direction="row" justifyContent="space-between" textAlign="center" gap={3}>
 											<Stack direction="row" gap={1}>
 												<VerbChip method={original.request.method} />
@@ -119,7 +120,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 											originalLanguage={original.request.bodyType?.toLocaleLowerCase()}
 											modifiedLanguage={modified.request.bodyType?.toLocaleLowerCase()}
 										/>
-									</>
+									</Stack>
 								),
 							},
 							{
