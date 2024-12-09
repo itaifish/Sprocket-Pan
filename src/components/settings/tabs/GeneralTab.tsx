@@ -38,7 +38,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 				setValue={(val) => setSettings({ theme: { zoom: val } })}
 				endDecorator="%"
 				icon={<ZoomInIcon />}
-				range={{ min: 20, max: 300 }}
+				range={{ min: 25, max: 175 }}
 			/>
 			<SprocketSelect
 				sx={{ width: 240 }}

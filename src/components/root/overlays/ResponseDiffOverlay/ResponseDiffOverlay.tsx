@@ -27,6 +27,12 @@ function headersToJson(headers: Record<string, string> | KeyValuePair[]) {
 	);
 }
 
+function multilineUrl(url: string): string {
+	const { protocol, username, password, host, pathname, searchParams: rawParams, hash } = new URL(url);
+	const searchParams = [...rawParams.entries()].map((entry) => entry.join('=')).sort();
+	return JSON.stringify({ protocol, username, password, host, pathname, searchParams, hash });
+}
+
 interface ResponseDiffOverlayProps {
 	initialSelection: SelectedResponse;
 }
@@ -129,6 +135,15 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<DiffText
 										original={headersToJson(original.request.headers)}
 										modified={headersToJson(modified.request.headers)}
+									/>
+								),
+							},
+							{
+								title: 'Request Url',
+								content: (
+									<DiffText
+										original={multilineUrl(original.request.url)}
+										modified={multilineUrl(modified.request.url)}
 									/>
 								),
 							},

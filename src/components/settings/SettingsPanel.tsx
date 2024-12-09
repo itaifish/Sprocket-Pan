@@ -47,13 +47,13 @@ export const SettingsPanel = (props: SettingsPanelProps) => {
 						<Tab>Actions</Tab>
 						<Tab>Data</Tab>
 					</TabList>
-					<TabPanel value={0}>
+					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={0}>
 						<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
 					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={1}>
 						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
 					</TabPanel>
-					<TabPanel value={2}>
+					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={2}>
 						<DataTab
 							settings={unsavedSettings}
 							setSettings={setSettings}

@@ -8,6 +8,8 @@ import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
 import { EllipsisSpan } from '../../shared/EllipsisTypography';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
 import { tabsActions } from '../../../state/tabs/slice';
+import { Add, Close } from '@mui/icons-material';
+import { activeActions } from '../../../state/active/slice';
 
 interface RequestFileSystemProps {
 	requestId: string;
@@ -16,6 +18,7 @@ interface RequestFileSystemProps {
 export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 	const request = useSelector((state) => selectRequestsById(state, requestId));
 	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const isDefault = endpoint.defaultRequest === request.id;
 	const isDefaultRequest = request.id === endpoint.defaultRequest;
 	const dispatch = useAppDispatch();
 
@@ -25,6 +28,14 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 			tabType="request"
 			color={isDefaultRequest ? 'primary' : 'neutral'}
 			menuOptions={[
+				{
+					Icon: isDefault ? Add : Close,
+					label: isDefault ? 'Unset Endpoint Default' : 'Set Endpoint Default',
+					onClick: () =>
+						dispatch(
+							activeActions.updateEndpoint({ defaultRequest: isDefault ? null : request.id, id: request.endpointId }),
+						),
+				},
 				menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
 			]}
