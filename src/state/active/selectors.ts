@@ -97,9 +97,9 @@ export const selectUiMetadataById = createSelector(
 
 export const selectSettings = createSelector(selectActiveState, (state) => state.settings);
 
-export const selectZoomLevel = createSelector(selectSettings, (state) => state.zoomLevel);
+export const selectZoomLevel = createSelector(selectSettings, (state) => state.theme.zoom);
 
-export const selectDefaultTheme = createSelector(selectSettings, (state) => state.defaultTheme);
+export const selectDefaultTheme = createSelector(selectSettings, (state) => state.theme.base);
 
 export const selectSaveStateTimestamps = createSelector(selectActiveState, (state) => ({
 	modified: state.lastModified,
@@ -160,5 +160,6 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 			serviceData.selectedEnvironment == null ? null : serviceData.localEnvironments[serviceData.selectedEnvironment],
 		reqEnv: requestData.environmentOverride,
 		rootEnv: state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+		rootAncestors: Object.values(state.environments),
 	});
 });

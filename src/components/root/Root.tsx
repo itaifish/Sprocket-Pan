@@ -24,7 +24,7 @@ export function Root() {
 	}, [zoomLevel]);
 
 	useEffect(() => {
-		setMode(defaultTheme === 'system-default' ? 'system' : defaultTheme);
+		setMode(defaultTheme);
 	}, [defaultTheme]);
 
 	if (activeWorkspace == null) {

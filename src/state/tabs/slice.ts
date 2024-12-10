@@ -1,7 +1,9 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TabType } from '../../types/state/state';
-import { ResponseDiffSelection } from '../../components/root/overlays/ResponseDiffOverlay/ResponseDiffOverlay';
 import { log } from '../../utils/logging';
+import { SelectedResponse } from '../../components/root/overlays/ResponseDiffOverlay/ResponseSelectForm';
+
+export type DiffQueueEntry = { original: SelectedResponse; modified: SelectedResponse };
 
 export interface TabsState {
 	selected: string | null;
@@ -9,7 +11,7 @@ export interface TabsState {
 	history: { type: TabType; id: string }[];
 	historyLocation: number;
 	deleteQueue: string[];
-	diffQueue: ResponseDiffSelection[];
+	diffQueue: DiffQueueEntry[];
 	createQueue: TabType[];
 	searchText: string;
 }
@@ -29,8 +31,12 @@ export const tabsSlice = createSlice({
 	name: 'tabs',
 	initialState,
 	reducers: {
-		addToDiffQueue: (state, { payload }: PayloadAction<ResponseDiffSelection>) => {
-			state.diffQueue.push(payload);
+		addToDiffQueue: (state, { payload }: PayloadAction<SelectedResponse | DiffQueueEntry>) => {
+			if ('original' in payload) {
+				state.diffQueue.push(payload);
+			} else {
+				state.diffQueue.push({ original: payload, modified: payload });
+			}
 		},
 		addToDeleteQueue: (state, { payload }: PayloadAction<string>) => {
 			state.deleteQueue.push(payload);

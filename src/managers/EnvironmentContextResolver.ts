@@ -11,24 +11,24 @@ export type BuildEnvironmentVariablesArgs = Pick<WorkspaceData, 'secrets'> & {
 	rootEnv?: RootEnvironment | null;
 	reqEnv?: Environment | null;
 	servEnv?: Environment | null;
-	rootAncestors?: RootEnvironment[] | null;
-	// ensures you don't accidentally pass in WorkspaceData, which technically satisfies the above properties
-	environments?: never;
+	rootAncestors: RootEnvironment[];
 };
 
+type BuildEnvArgsOrComputedEnv = BuildEnvironmentVariablesArgs | OrderedKeyValuePairs;
+
 export class EnvironmentContextResolver {
-	public static stringWithVarsToSnippet(text: string, data: BuildEnvironmentVariablesArgs) {
+	public static stringWithVarsToSnippet(text: string, data: BuildEnvArgsOrComputedEnv) {
 		return this.parseStringWithEnvironmentOverrides(text, data);
 	}
 
-	public static resolveVariablesForString(text: string, data: BuildEnvironmentVariablesArgs) {
+	public static resolveVariablesForString(text: string, data: BuildEnvArgsOrComputedEnv) {
 		const snippets = this.parseStringWithEnvironmentOverrides(text, data);
 		return snippets.map((snippet) => snippet.value).join('');
 	}
 
 	public static resolveVariablesForMappedObject<T extends Record<string, unknown>>(
 		object: T,
-		data: BuildEnvironmentVariablesArgs,
+		data: BuildEnvArgsOrComputedEnv,
 	) {
 		if (!Array.isArray(object)) {
 			const newObj: Record<string, unknown> = {};
@@ -45,7 +45,7 @@ export class EnvironmentContextResolver {
 	private static resolveVariableForObjectKey<T extends object, TKey extends keyof T & (string | number)>(
 		object: T,
 		key: TKey,
-		data: BuildEnvironmentVariablesArgs,
+		data: BuildEnvArgsOrComputedEnv,
 	): T[TKey] {
 		const oldValue = object[key];
 		if (oldValue === null) {
@@ -69,17 +69,17 @@ export class EnvironmentContextResolver {
 		if (text == null) {
 			return [];
 		}
-		let state: 'variable' | 'text' = 'text';
+		let isVariable = false;
 		let startVariablePos = 0;
 		const resultText = [];
 		for (let i = 0; i < text.length; i++) {
-			if (text.charAt(i) === '{' && state === 'text') {
+			if (text.charAt(i) === '{' && !isVariable) {
 				resultText.push({ value: text.slice(startVariablePos, i) });
-				state = 'variable';
+				isVariable = true;
 				startVariablePos = i + 1;
 			}
-			if (text.charAt(i) === '}' && state === 'variable') {
-				state = 'text';
+			if (text.charAt(i) === '}' && isVariable) {
+				isVariable = false;
 				const variableName = text.slice(startVariablePos, i);
 				resultText.push({ variableName, value: envValues.get(variableName) ?? '' });
 				startVariablePos = i + 1;
@@ -92,9 +92,8 @@ export class EnvironmentContextResolver {
 		return resultText;
 	}
 
-	private static parseStringWithEnvironmentOverrides(text: string, data: BuildEnvironmentVariablesArgs) {
-		const env = this.buildEnvironmentVariables(data);
-		return this.parseStringWithEnvironment(text, env);
+	private static parseStringWithEnvironmentOverrides(text: string, data: BuildEnvArgsOrComputedEnv) {
+		return this.parseStringWithEnvironment(text, 'rootAncestors' in data ? this.buildEnvironmentVariables(data) : data);
 	}
 
 	private static applyLayerOntoEnv(
@@ -142,7 +141,6 @@ export class EnvironmentContextResolver {
 				),
 			);
 		});
-
 		return merged.toArray();
 	}
 }

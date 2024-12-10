@@ -7,9 +7,10 @@ import { EditableData } from '../../shared/input/EditableData';
 import { SprocketTabs } from '../../shared/SprocketTabs';
 import { useComputedRequestEnvironment } from '../../../hooks/useComputedEnvironment';
 import { activeActions } from '../../../state/active/slice';
+import { RequestInfoSection } from './RequestInfoSection';
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
-	const envPairs = useComputedRequestEnvironment(request.id);
+	const envPairs = useComputedRequestEnvironment(request.id).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
@@ -60,6 +61,10 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 							envPairs={envPairs}
 						/>
 					),
+				},
+				{
+					title: 'Info',
+					content: <RequestInfoSection request={request} />,
 				},
 			]}
 		/>

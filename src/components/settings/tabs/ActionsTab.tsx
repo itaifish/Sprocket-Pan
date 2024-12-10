@@ -11,15 +11,15 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			<Typography level="title-md">Requests</Typography>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
-					Network Call Timeout Duration
+					Network Call Timeout
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.timeoutDurationMS / 1000}
+					value={settings.request.timeoutMS / 1000}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ timeoutDurationMS: value * 1000 });
+							setSettings({ request: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -36,15 +36,15 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			</FormControl>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="maximum-history-label" htmlFor="maximum-history-input">
-					Maximum Number of History Records
+					Maximum Saved History Records
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.maxHistoryLength}
+					value={settings.history.maxLength}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ maxHistoryLength: value });
+							setSettings({ history: { maxLength: value } });
 						}
 					}}
 					slotProps={{
@@ -64,15 +64,15 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 			<Typography level="title-md">Scripts</Typography>
 			<FormControl sx={{ width: 300 }}>
 				<FormLabel id="script-timeout-label" htmlFor="script-timeout-input">
-					Script Timeout Duration
+					Script Timeout
 				</FormLabel>
 				<Input
 					sx={{ width: 200 }}
-					value={settings.scriptTimeoutDurationMS / 1000}
+					value={settings.script.timeoutMS / 1000}
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ scriptTimeoutDurationMS: value * 1000 });
+							setSettings({ script: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -88,13 +88,21 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				/>
 			</FormControl>
 			<Box>
-				<Typography>Script Strategy Order</Typography>
+				<Typography>Script Execution Order</Typography>
 				<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
-					<ScriptChips preOrPost="pre" setSettings={setSettings} settings={settings} />
+					<ScriptChips
+						prefix="pre"
+						setStrategy={(pre) => setSettings({ script: { strategy: { pre } } })}
+						strategy={settings.script.strategy.pre}
+					/>
 					<Chip sx={{ verticalAlign: 'middle' }} color="primary" startDecorator={iconFromTabType['request']}>
 						Request
 					</Chip>
-					<ScriptChips preOrPost="post" setSettings={setSettings} settings={settings} />
+					<ScriptChips
+						prefix="post"
+						setStrategy={(post) => setSettings({ script: { strategy: { post } } })}
+						strategy={settings.script.strategy.post}
+					/>
 				</Sheet>
 			</Box>
 		</Stack>

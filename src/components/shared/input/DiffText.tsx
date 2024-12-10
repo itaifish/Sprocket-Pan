@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { DiffEditor, DiffEditorProps } from '@monaco-editor/react';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { editor } from 'monaco-editor';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
 
@@ -41,8 +41,8 @@ export function DiffText({ original, modified, options, width, height, language,
 			}}
 			original={original}
 			modified={modified}
-			width={width ?? '100%'}
-			height={height ?? '40vh'}
+			width={width}
+			height={height}
 			{...props}
 		/>
 	);

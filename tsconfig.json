@@ -17,14 +17,12 @@
 		"emitDeclarationOnly": true,
 		"outDir": "typeDefs",
 		"jsx": "react-jsx",
-
 		/* Linting */
 		"strict": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
 		"forceConsistentCasingInFileNames": true
 	},
 	"include": ["src"],
