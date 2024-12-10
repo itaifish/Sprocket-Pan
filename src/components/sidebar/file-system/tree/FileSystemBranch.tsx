@@ -7,7 +7,10 @@ import { useAppDispatch } from '../../../../state/store';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { Folder, FolderOpen } from '@mui/icons-material';
 import { activeActions } from '../../../../state/active/slice';
+<<<<<<< HEAD
 import { LIST_STYLES } from '../../../../styles/list';
+=======
+>>>>>>> 162381e4a60e1ccf53467e244a7a90de3ad43524
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
