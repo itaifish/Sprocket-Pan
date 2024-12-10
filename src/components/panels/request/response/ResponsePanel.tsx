@@ -39,7 +39,10 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 					{formatFullDate(new Date(responseStateData?.response.dateTime))}
 				</Typography>
 				<Stack direction="row" spacing={0}>
-					<OpenDiffToolButton historyIndex={responseStateToNumber(responseState)} request={request} />
+					<OpenDiffToolButton
+						historyIndex={responseStateToNumber(responseState, request.history.length)}
+						request={request}
+					/>
 					<HistoryControl
 						value={responseState}
 						onChange={setResponseState}

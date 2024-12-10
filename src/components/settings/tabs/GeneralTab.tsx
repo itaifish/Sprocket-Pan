@@ -39,6 +39,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 				options={[
 					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
 					{ value: VARIABLE_NAME_DISPLAY.none, label: 'Value Only' },
+					{ value: VARIABLE_NAME_DISPLAY.hover, label: 'Key on Hover' },
 				]}
 			/>
 			<Divider />

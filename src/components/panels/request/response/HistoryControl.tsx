@@ -9,8 +9,7 @@ import { clamp } from '../../../../utils/math';
 
 export function responseStateToNumber(value?: ResponseState, historyLength?: number) {
 	if (value == null || historyLength == null) return 0;
-	// mathematically, 'error' is treated as historyLength,
-	// and 'latest' is identical to historyLength - 1
+	// mathematically, 'error' is treated as historyLength, and 'latest' is identical to historyLength - 1
 	return value === 'latest' ? historyLength - 1 : value === 'error' ? historyLength : value;
 }
 

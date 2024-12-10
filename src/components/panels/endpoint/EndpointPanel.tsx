@@ -3,14 +3,7 @@ import { EnvironmentContextResolver } from '../../../managers/EnvironmentContext
 import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-
-import {
-	selectEndpointById,
-	selectSecrets,
-	selectSelectedEnvironmentValue,
-	selectServicesById,
-	selectServiceSelectedEnvironmentValue,
-} from '../../../state/active/selectors';
+import { selectEndpointById, selectServicesById } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '../../../state/store';
 import { useDebounce } from '../../../hooks/useDebounce';
@@ -22,20 +15,15 @@ import { Constants } from '../../../constants/constants';
 import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
 import { verbColors } from '../../../constants/style';
 import { activeActions } from '../../../state/active/slice';
+import { useComputedServiceEnvironment } from '../../../hooks/useComputedEnvironment';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
 	const endpoint = useSelector((state) => selectEndpointById(state, id));
 	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
-	const secrets = useSelector(selectSecrets);
-	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
-	const rootEnv = useSelector(selectSelectedEnvironmentValue);
 
-	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', {
-		secrets,
-		servEnv,
-		rootEnv,
-	});
+	const computedEnv = useComputedServiceEnvironment(endpoint.serviceId);
+	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', computedEnv);
 
 	const update = (values: Partial<Endpoint>) => {
 		dispatch(activeActions.updateEndpoint({ ...values, id }));

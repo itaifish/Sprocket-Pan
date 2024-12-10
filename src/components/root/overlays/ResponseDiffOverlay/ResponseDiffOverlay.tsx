@@ -10,16 +10,21 @@ import { ResponseSelectForm, SelectedResponse } from './ResponseSelectForm';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { headersToJson, multilineUrl } from '../../../../utils/serialization';
+import { DiffQueueEntry } from '../../../../state/tabs/slice';
 
 interface ResponseDiffOverlayProps {
-	initialSelection: SelectedResponse;
+	initialSelection: DiffQueueEntry;
 }
 
 export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayProps) {
 	const [isFormCollapsed, setIsFormCollapsed] = useState(false);
 
-	const [selectedOriginalRequest, setSelectedOriginalRequest] = useState<SelectedResponse | null>(initialSelection);
-	const [selectedModifiedRequest, setSelectedModifiedRequest] = useState<SelectedResponse | null>(initialSelection);
+	const [selectedOriginalRequest, setSelectedOriginalRequest] = useState<SelectedResponse | null>(
+		initialSelection.original,
+	);
+	const [selectedModifiedRequest, setSelectedModifiedRequest] = useState<SelectedResponse | null>(
+		initialSelection.modified,
+	);
 
 	const original = selectedOriginalRequest?.request?.history[selectedOriginalRequest?.index];
 	const modified = selectedModifiedRequest?.request?.history[selectedModifiedRequest?.index];
@@ -29,7 +34,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 			<Stack gap={2} sx={{ height: '100%' }}>
 				<Stack direction="row" gap={3} justifyContent="space-between">
 					<ResponseSelectForm
-						initialValue={initialSelection}
+						initialValue={initialSelection.original}
 						onChange={setSelectedOriginalRequest}
 						collapsed={isFormCollapsed}
 					/>
@@ -44,7 +49,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 						</IconButton>
 					</SprocketTooltip>
 					<ResponseSelectForm
-						initialValue={initialSelection}
+						initialValue={initialSelection.modified}
 						onChange={setSelectedModifiedRequest}
 						collapsed={isFormCollapsed}
 						sx={{ alignItems: isFormCollapsed ? 'end' : 'start' }}

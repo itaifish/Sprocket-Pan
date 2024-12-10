@@ -18,7 +18,7 @@ function useRootEnvironmentArgs() {
 
 export function useComputedRootEnvironment() {
 	const args = useRootEnvironmentArgs();
-	return EnvironmentContextResolver.buildEnvironmentVariables(args).toArray();
+	return EnvironmentContextResolver.buildEnvironmentVariables(args);
 }
 
 export function useComputedServiceEnvironment(id: string) {
@@ -27,7 +27,7 @@ export function useComputedServiceEnvironment(id: string) {
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
 		servEnv,
-	}).toArray();
+	});
 }
 
 export function useComputedRequestEnvironment(id: string) {
@@ -39,5 +39,5 @@ export function useComputedRequestEnvironment(id: string) {
 		...args,
 		reqEnv: request.environmentOverride,
 		servEnv,
-	}).toArray();
+	});
 }

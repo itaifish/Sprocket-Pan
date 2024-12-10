@@ -160,5 +160,6 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 			serviceData.selectedEnvironment == null ? null : serviceData.localEnvironments[serviceData.selectedEnvironment],
 		reqEnv: requestData.environmentOverride,
 		rootEnv: state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
+		rootAncestors: Object.values(state.environments),
 	});
 });

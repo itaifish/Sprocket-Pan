@@ -8,7 +8,7 @@ import { activeActions } from '../../../state/active/slice';
 import { SprocketTabs } from '../../shared/SprocketTabs';
 
 export function EndpointEditTabs({ endpoint }: { endpoint: Endpoint }) {
-	const envPairs = useComputedServiceEnvironment(endpoint.serviceId);
+	const envPairs = useComputedServiceEnvironment(endpoint.serviceId).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Endpoint>) {
 		dispatch(activeActions.updateEndpoint({ ...values, id: endpoint.id }));

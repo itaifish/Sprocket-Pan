@@ -23,7 +23,7 @@ export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const dispatch = useAppDispatch();
 	const selectedEnv = useSelector(selectSelectedEnvironment);
 
-	const envPairs = useComputedRootEnvironment();
+	const envPairs = useComputedRootEnvironment().toArray();
 
 	function addEnv(
 		env: Partial<Environment> = { name: `${data.name}.env.${Object.keys(data.localEnvironments).length}` },

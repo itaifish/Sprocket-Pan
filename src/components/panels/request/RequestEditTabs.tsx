@@ -10,7 +10,7 @@ import { activeActions } from '../../../state/active/slice';
 import { RequestInfoSection } from './RequestInfoSection';
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
-	const envPairs = useComputedRequestEnvironment(request.id);
+	const envPairs = useComputedRequestEnvironment(request.id).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
