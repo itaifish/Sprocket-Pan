@@ -22,14 +22,14 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 					{request.name}
 				</ListItemDecorator>
 				<ListItemContent>
-					<Stack direction="row" alignItems={'center'} gap={1}>
+					<Stack direction="row" alignItems="center" gap={1}>
 						<EventIcon />
 						<Typography level="title-sm">
 							{request.history.length > 0
 								? formatFullDate(new Date(request.history[request.history.length - 1].request.dateTime))
 								: 'Never'}
 						</Typography>
-						<SprocketTooltip text={`Open "${request.name}" request`}>
+						<SprocketTooltip text="Open Request">
 							<IconButton
 								color="primary"
 								onClick={() => {

@@ -20,7 +20,7 @@ export function TabHeader() {
 	const listList = useMemo(() => Object.entries(list), [list]);
 
 	return (
-		<div style={{ width: '100%', height: '100%', overflowY: 'auto', maxHeight: '100vh' }}>
+		<>
 			{listList.length !== 0 && (
 				<Tabs
 					aria-label="tabs"
@@ -30,18 +30,18 @@ export function TabHeader() {
 						const newTabId = newValue as string;
 						dispatch(tabsActions.setSelectedTab(newTabId));
 					}}
-					sx={{ height: '100%' }}
+					sx={{ minHeight: '100%' }}
 				>
 					<TabRow list={list} />
 					{listList.map(([tabId, tabType], index) => (
 						<TabPanel value={tabId} key={index}>
-							<Sheet sx={{ boxSizing: 'content-box' }}>
+							<Sheet>
 								<TabContent id={tabId} type={tabType} />
 							</Sheet>
 						</TabPanel>
 					))}
 				</Tabs>
 			)}
-		</div>
+		</>
 	);
 }

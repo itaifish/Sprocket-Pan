@@ -17,7 +17,7 @@ import {
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
 import { Script } from '../../../types/application-data/application-data';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { useDebounce } from '../../../hooks/useDebounce';
 import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
@@ -227,7 +227,7 @@ export function ScriptPanel({ id }: PanelProps) {
 									const scriptToRun = { ...script, content: localDataState };
 									const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
 									await Promise.all([
-										asyncCallWithTimeout(ranScript, settings.scriptTimeoutDurationMS),
+										asyncCallWithTimeout(ranScript, settings.script.timeoutMS),
 										sleep(Constants.minimumScriptRunTimeMS),
 									]);
 									const output = await ranScript;

@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react';
+import { maxAmplitude } from '../utils/math';
 
-export function useHorizontalScroll() {
+export function useSingleAxisScroll(axis: 'left' | 'top' = 'left') {
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	function scrollHorizontally(e: WheelEvent) {
 		if (scrollRef.current == null) return;
 		e.preventDefault();
-		// the best strat would be to get the one with the highest amplitude and use that
-		// but I don't want to atm
-		scrollRef.current.scrollBy({ left: e.deltaX + e.deltaY + e.deltaZ });
+		scrollRef.current.scrollBy({ [axis]: maxAmplitude(e.deltaX, e.deltaY, e.deltaZ) });
 	}
 	useEffect(() => {
 		scrollRef.current?.addEventListener('wheel', scrollHorizontally);

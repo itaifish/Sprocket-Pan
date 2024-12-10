@@ -1,9 +1,9 @@
-import { Badge, Box, IconButton } from '@mui/joy';
+import { Badge, Box, IconButton, Snackbar } from '@mui/joy';
 import { useState, useRef } from 'react';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import { Editor } from '@monaco-editor/react';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
+import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { clamp } from '../../../utils/math';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
@@ -17,6 +17,7 @@ import { replaceValuesByKey } from '../../../utils/variables';
 import { FormatButton } from '../buttons/FormatButton';
 import { useEditorTheme } from '../../../hooks/useEditorTheme';
 import { ActionBar, ActionBarPassthroughProps } from './ActionBar';
+import { ReportProblem } from '@mui/icons-material';
 
 export function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};
@@ -62,6 +63,7 @@ export function EditableData<T extends KeyValueValues>({
 	const [hasChanged, setChanged] = useState(false);
 	const [isReadOnly, setIsReadOnly] = useState(false);
 	const [isFormatting, setIsFormatting] = useState(false);
+	const [isMalformedJSON, setIsMalformedJSON] = useState(false);
 
 	const ignoreEditorUpdates = useRef<boolean>(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -84,11 +86,15 @@ export function EditableData<T extends KeyValueValues>({
 	};
 
 	const save = () => {
-		const tableData = parseEditorJSON<T>(editorText);
-		if (tableData != null) {
-			onChange(Object.entries(tableData).map(([key, value]) => ({ key, value })));
-			setChanged(false);
-			format();
+		try {
+			const tableData = parseEditorJSON<T>(editorText);
+			if (tableData != null) {
+				onChange(Object.entries(tableData).map(([key, value]) => ({ key, value })));
+				setChanged(false);
+				format();
+			}
+		} catch {
+			setIsMalformedJSON(true);
 		}
 	};
 
@@ -107,6 +113,7 @@ export function EditableData<T extends KeyValueValues>({
 	};
 
 	const onEditorChange = (value: string | undefined) => {
+		setIsMalformedJSON(false);
 		if (ignoreEditorUpdates.current) return;
 		setEditorText(value ?? '');
 		if (isFormatting) {
@@ -132,14 +139,24 @@ export function EditableData<T extends KeyValueValues>({
 							</IconButton>
 						</SprocketTooltip>
 						<SprocketTooltip text="Save Changes">
-							<IconButton disabled={!hasChanged} onClick={save}>
+							<IconButton disabled={!hasChanged || isMalformedJSON} onClick={save}>
 								<Badge invisible={!hasChanged} color="primary">
-									<SaveIcon></SaveIcon>
+									<SaveIcon />
 								</Badge>
 							</IconButton>
 						</SprocketTooltip>
 						<CopyToClipboardButton copyText={editorText} />
 						<FormatButton disabled={isReadOnly} onClick={format} />
+						<Snackbar
+							color="danger"
+							variant="soft"
+							sx={{ top: '100px', right: '20px', position: 'absolute' }}
+							anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+							open={isMalformedJSON}
+							startDecorator={<ReportProblem />}
+						>
+							Could not save due to malformed JSON!
+						</Snackbar>
 					</>
 				}
 			>

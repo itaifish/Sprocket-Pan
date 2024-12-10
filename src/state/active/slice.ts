@@ -124,7 +124,7 @@ export const activeSlice = createSlice({
 		},
 		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
 			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
-			Object.assign(state.settings, action.payload);
+			state.settings = action.payload;
 		},
 		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
 			const { id, ...updateFields } = action.payload;
@@ -214,7 +214,7 @@ export const activeSlice = createSlice({
 				response,
 				auditLog,
 			});
-			if (state.settings.maxHistoryLength > 0 && reqToUpdate.history.length > state.settings.maxHistoryLength) {
+			if (state.settings.history.maxLength > 0 && reqToUpdate.history.length > state.settings.history.maxLength) {
 				reqToUpdate.history.shift();
 			}
 			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);

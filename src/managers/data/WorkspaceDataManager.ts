@@ -17,6 +17,8 @@ import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
+import { DEFAULT_SETTINGS } from '../../constants/defaults';
+import { mergeDeep } from '../../utils/variables';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -30,21 +32,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 	uiMetadata: {
 		idSpecific: {},
 	},
-	settings: {
-		debugLogs: true,
-		zoomLevel: 100,
-		timeoutDurationMS: 1_000 * 30,
-		scriptTimeoutDurationMS: 1_000 * 10,
-		autoSaveIntervalMS: 60_000 * 5,
-		defaultTheme: 'system-default',
-		maxHistoryLength: -1,
-		displayVariableNames: true,
-		scriptRunnerStrategy: {
-			pre: ['service', 'endpoint', 'request'],
-			post: ['request', 'endpoint', 'service'],
-		},
-		listStyle: 'default',
-	},
+	settings: DEFAULT_SETTINGS,
 	version: SaveUpdateManager.getCurrentVersion(),
 };
 
@@ -173,6 +161,8 @@ export class WorkspaceDataManager {
 		} as WorkspaceMetadata;
 		parsedData.uiMetadata = JSON.parse(uiMetadata) as UiMetadata;
 		parsedData.secrets = JSON.parse(secrets);
+		// settings gains new properties often, so as an exception we merge settings with the Default to populate new fields
+		parsedData.settings = mergeDeep(DEFAULT_SETTINGS, parsedData.settings);
 		SaveUpdateManager.update(parsedData);
 		return parsedData;
 	}
