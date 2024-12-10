@@ -1,11 +1,11 @@
-import { IconButton } from '@mui/joy';
+import { IconButton, IconButtonProps } from '@mui/joy';
 import { SprocketTooltip } from '../SprocketTooltip';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 
-export function FormatIcon({ actionFunction }: { actionFunction: () => void }) {
+export function FormatButton(props: IconButtonProps) {
 	return (
 		<SprocketTooltip text={'Format'}>
-			<IconButton onClick={() => actionFunction()}>
+			<IconButton {...props}>
 				<AutoFixHighIcon />
 			</IconButton>
 		</SprocketTooltip>

@@ -1,30 +1,23 @@
-import { IconButton, Input, Typography, TypographyProps } from '@mui/joy';
+import { Box, IconButton, Input, Stack, TypographyProps } from '@mui/joy';
 import { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import ModeEditIcon from '@mui/icons-material/ModeEdit';
-import { keepStringLengthReasonable } from '../../../utils/string';
 import { SprocketTooltip } from '../SprocketTooltip';
-interface EditableTextProps {
+import { EllipsisTypography } from '../EllipsisTypography';
+
+interface EditableTextProps extends Partial<TypographyProps> {
 	text: string;
 	setText: (text: string) => void;
 	isValidFunc: (text: string) => boolean;
-	isTitle?: boolean;
+	narrow?: boolean;
 }
 
-export function EditableText({
-	text,
-	setText,
-	isValidFunc,
-	isTitle,
-	...props
-}: EditableTextProps & Partial<TypographyProps>) {
+export function EditableText({ text, setText, isValidFunc, sx, narrow = false, ...props }: EditableTextProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [typingText, setTypingText] = useState(text);
-	const [isValid, setIsValid] = useState(true);
-	useEffect(() => {
-		setIsValid(isValidFunc(typingText));
-	}, [typingText, isValidFunc]);
+
+	const isValid = isValidFunc(text);
 
 	const commitInput = () => {
 		if (isValid) {
@@ -32,64 +25,75 @@ export function EditableText({
 			setIsEditing(false);
 		}
 	};
-	return isEditing ? (
-		<Input
-			size={isTitle ? 'lg' : 'md'}
-			sx={{
-				maxWidth: isTitle ? '100%' : '600px',
-				marginLeft: 'auto',
-				marginRight: 'auto',
-				width: isTitle ? '80%' : undefined,
-			}}
-			placeholder={isTitle ? `Enter your title here` : `${text}`}
-			variant="outlined"
-			value={typingText}
-			onChange={(e) => setTypingText(e.target.value)}
-			onKeyDown={(e) => {
-				if (e.key === 'Enter') {
-					commitInput();
-				}
-			}}
-			error={!isValid}
-			endDecorator={
-				<>
-					<SprocketTooltip text="Cancel">
-						<IconButton
-							onClick={() => {
-								setIsEditing(false);
-							}}
-							sx={{ marginRight: '2px' }}
-						>
-							<CancelIcon fontSize="large" />
-						</IconButton>
-					</SprocketTooltip>
-					<SprocketTooltip text="Save">
-						<IconButton
-							onClick={() => {
-								commitInput();
-							}}
-							disabled={!isValid}
-						>
-							<CheckIcon fontSize="large" />
-						</IconButton>
-					</SprocketTooltip>
-				</>
-			}
-		/>
-	) : (
-		<Typography
-			level={isTitle ? `h2` : 'body-md'}
-			sx={{ textAlign: 'center', ml: 'auto', mr: 'auto' }}
-			onClick={() => {
-				setTypingText(text);
-				setIsEditing(true);
-			}}
-			{...props}
+
+	const toggleEditing = () => {
+		if (isEditing) {
+			commitInput();
+		} else {
+			setTypingText(text);
+			setIsEditing(true);
+		}
+	};
+
+	useEffect(() => {
+		setTypingText(text);
+		setIsEditing(false);
+	}, [text]);
+
+	return (
+		<Stack
+			direction="row"
+			maxWidth={narrow ? '100%' : 'calc(100% - 100px)'}
+			width="fit-content"
+			alignItems="center"
+			minHeight="2.5em"
+			sx={sx}
 		>
-			<SprocketTooltip text="Edit">
-				<ModeEditIcon sx={{ verticalAlign: 'middle', pr: '5px' }} />
+			<SprocketTooltip text={isEditing ? 'Save' : 'Edit'} sx={{ flexBasis: 0 }}>
+				<IconButton onClick={toggleEditing} disabled={isEditing && !isValid} size="sm">
+					{isEditing ? <CheckIcon /> : <ModeEditIcon />}
+				</IconButton>
 			</SprocketTooltip>
-			{keepStringLengthReasonable(text, isTitle ? 100 : 30)}
-		</Typography>
+			<Box position="relative" flexGrow={1} width="100%" minWidth={0}>
+				{isEditing && (
+					<Input
+						autoFocus
+						sx={{
+							zIndex: 100,
+							position: 'absolute',
+							left: 0,
+							width: 'calc(100% + 50px)',
+							minWidth: narrow ? 0 : '200px',
+							height: '100%',
+							'--Input-minHeight': '1.5em',
+							'--Input-gap': 2,
+						}}
+						variant="soft"
+						placeholder={text}
+						value={typingText}
+						onChange={(e) => setTypingText(e.target.value)}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter') {
+								commitInput();
+							}
+						}}
+						error={!isValid}
+						endDecorator={
+							<SprocketTooltip text="Cancel">
+								<IconButton
+									onClick={() => {
+										setIsEditing(false);
+									}}
+									size="sm"
+								>
+									<CancelIcon />
+								</IconButton>
+							</SprocketTooltip>
+						}
+					/>
+				)}
+				<EllipsisTypography {...props}>{text}</EllipsisTypography>
+			</Box>
+		</Stack>
 	);
 }

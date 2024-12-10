@@ -1,13 +1,4 @@
-import {
-	Box,
-	IconButton,
-	ListDivider,
-	ListItem,
-	ListItemContent,
-	ListItemDecorator,
-	Stack,
-	Typography,
-} from '@mui/joy';
+import { Box, IconButton, ListItem, ListItemContent, ListItemDecorator, Stack, Typography } from '@mui/joy';
 import EventIcon from '@mui/icons-material/Event';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useAppDispatch } from '../../../state/store';
@@ -31,14 +22,14 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 					{request.name}
 				</ListItemDecorator>
 				<ListItemContent>
-					<Stack direction="row" alignItems={'center'} gap={1}>
+					<Stack direction="row" alignItems="center" gap={1}>
 						<EventIcon />
 						<Typography level="title-sm">
 							{request.history.length > 0
 								? formatFullDate(new Date(request.history[request.history.length - 1].request.dateTime))
 								: 'Never'}
 						</Typography>
-						<SprocketTooltip text={`Open "${request.name}" request`}>
+						<SprocketTooltip text="Open Request">
 							<IconButton
 								color="primary"
 								onClick={() => {
@@ -52,7 +43,6 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 					</Stack>
 				</ListItemContent>
 			</ListItem>
-			<ListDivider inset="gutter" />
 		</>
 	);
 }

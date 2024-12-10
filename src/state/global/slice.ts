@@ -1,13 +1,6 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { GlobalData, WorkspaceMetadata } from '../../types/application-data/application-data';
-import { Settings } from '../../types/settings/settings';
-
-export const defaultWorkspace: WorkspaceMetadata = {
-	name: 'Default Workspace',
-	description: 'The default workspace in SprocketPan',
-	lastModified: new Date().getTime(),
-	fileName: undefined,
-};
+import { DEFAULT_SETTINGS } from '../../constants/defaults';
 
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: WorkspaceMetadata;
@@ -16,7 +9,7 @@ export interface GlobalState extends GlobalData {
 const initialState: GlobalState = {
 	workspaces: [],
 	uiMetadata: { idSpecific: {} },
-	settings: {} as Settings,
+	settings: DEFAULT_SETTINGS,
 };
 
 export const globalSlice = createSlice({

@@ -12,31 +12,22 @@ import {
 	Service,
 	SPHeaders,
 } from '../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
 import type {
-	Auth as V200Auth,
 	EventList as V200EventList,
-	Folder as V200Folder,
-	FormParameter as V200FormParameter,
 	Header as V200Header,
 	HttpsSchemaGetpostmanComJsonCollectionV200 as V200Schema,
 	Item as V200Item,
 	Url,
 	Request1 as V200Request1,
-	UrlEncodedParameter as V200UrlEncodedParameter,
 	Description as V200Description,
 } from './parseTypes/postman2.0Types';
 import type {
-	Auth as V210Auth,
 	EventList as V210EventList,
-	Folder as V210Folder,
-	FormParameter as V210FormParameter,
 	Header as V210Header,
 	HttpsSchemaGetpostmanComJsonCollectionV210 as V210Schema,
 	Item as V210Item,
 	Request1 as V210Request1,
 	QueryParam,
-	UrlEncodedParameter as V210UrlEncodedParameter,
 	Description as V210Description,
 } from './parseTypes/postman2.1Types';
 import mime from 'mime';
@@ -49,22 +40,16 @@ import {
 import { readTextFile } from '@tauri-apps/api/fs';
 import { log } from '../../utils/logging';
 import yaml from 'js-yaml';
+import { CONTENT_TYPE } from '../../constants/request';
+import { cloneEnv } from '../../utils/application';
 
 type PostmanCollection = V200Schema | V210Schema;
 
 type EventList = V200EventList | V210EventList;
 
-type Authetication = V200Auth | V210Auth;
-
 type Body = V200Request1['body'] | V210Request1['body'];
 
-type UrlEncodedParameter = V200UrlEncodedParameter | V210UrlEncodedParameter;
-
-type FormParameter = V200FormParameter | V210FormParameter;
-
 type Item = V200Item | V210Item;
-
-type Folder = V200Folder | V210Folder;
 
 type Header = V200Header | V210Header;
 
@@ -204,14 +189,11 @@ class PostmanParseManager {
 	}
 
 	private importVariables(variables: { [key: string]: string }[]): Environment {
-		const env = EnvironmentUtils.new();
-		variables.forEach((variable) => {
-			const { key, value } = variable;
-			if (key) {
-				EnvironmentUtils.set(env, key, value);
-			}
+		const env = cloneEnv();
+		variables.forEach(({ key, value }) => {
+			env.pairs.push({ key, value });
 		});
-		env.__name = 'Postman Variables';
+		env.name = 'Postman Variables';
 		return env;
 	}
 
@@ -275,7 +257,7 @@ class PostmanParseManager {
 
 		const headers = this.importHeaders(request.header);
 
-		let parameters = QueryParamUtils.new();
+		let parameters: QueryParams = [];
 
 		const url = this.importUrl(request.url);
 		if (typeof request.url === 'object' && request.url?.query) {
@@ -288,19 +270,21 @@ class PostmanParseManager {
 		const endpointId = v4();
 		const requestId = v4();
 
+		const contentTypeValue = headers.find((header) => header.key === CONTENT_TYPE)?.value;
+
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
-			(camelCaseToTitle(mime.getExtension(headers['Content-Type']) ?? '') as RawBodyType) || undefined,
+			camelCaseToTitle(mime.getExtension(contentTypeValue ?? '') ?? '') as RawBodyType,
 		);
 
 		const newRequest: EndpointRequest = {
 			id: requestId,
 			endpointId,
 			name,
-			headers: HeaderUtils.new(),
-			queryParams: QueryParamUtils.new(),
+			headers: [],
+			queryParams: [],
 			history: [],
-			environmentOverride: EnvironmentUtils.new(),
+			environmentOverride: cloneEnv(),
 			body,
 			bodyType,
 			rawType,
@@ -334,33 +318,23 @@ class PostmanParseManager {
 	}
 
 	private importHeaders = (headers?: Header[] | string): SPHeaders => {
-		const result = HeaderUtils.new();
 		if (typeof headers === 'string' || typeof headers === 'undefined') {
-			return result;
+			return [];
 		}
-		headers.forEach((header) => {
-			HeaderUtils.set(
-				result,
-				this.convertVariablesToSprocketVariables(header.key),
-				this.convertVariablesToSprocketVariables(header.value),
-			);
-		});
-		return result;
+		return headers.map(({ key, value }) => ({
+			key: this.convertVariablesToSprocketVariables(key),
+			value: this.convertVariablesToSprocketVariables(value),
+		}));
 	};
 
 	private importParameters = (parameters: QueryParam[]): QueryParams => {
-		const result = QueryParamUtils.new();
 		if (!parameters || parameters?.length === 0) {
-			return result;
+			return [];
 		}
-		parameters.forEach(({ key, value }) =>
-			QueryParamUtils.add(
-				result,
-				this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
-				this.convertVariablesToSprocketVariables(value ?? ''),
-			),
-		);
-		return result;
+		return parameters.map(({ key, value }) => ({
+			key: this.convertVariablesToSprocketVariables(key ?? 'Unknown Key'),
+			value: this.convertVariablesToSprocketVariables(value ?? ''),
+		}));
 	};
 
 	private importBody = (

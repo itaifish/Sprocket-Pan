@@ -9,10 +9,10 @@ import { deleteService } from '../../../state/active/thunks/services';
 import { deleteRequest } from '../../../state/active/thunks/requests';
 import { deleteScriptById } from '../../../state/active/thunks/scripts';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
-import { TabType } from '../../../types/state/state';
+import { TabTypeWithData } from '../../../types/state/state';
 import { tabsActions } from '../../../state/tabs/slice';
 
-function getAttributesAndSelectorsForId(id: string, state: Pick<WorkspaceData, `${TabType}s`>) {
+function getAttributesAndSelectorsForId(id: string, state: Pick<WorkspaceData, `${TabTypeWithData}s`>) {
 	// this is messy, there's better ways to do this but I'd like to bring env in alignment with the others first
 	if (state.endpoints[id]) {
 		return {
@@ -44,7 +44,7 @@ function getAttributesAndSelectorsForId(id: string, state: Pick<WorkspaceData, `
 
 	if (state.environments[id]) {
 		return {
-			name: state.environments[id].__name,
+			name: state.environments[id].name,
 			func: deleteEnvironmentById(id),
 		};
 	}

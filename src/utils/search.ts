@@ -9,11 +9,11 @@ import {
 import { log } from './logging';
 
 function cleanText(text: string) {
-	return text.toLocaleLowerCase();
+	return text?.toLocaleLowerCase() ?? '';
 }
 
 function envMatches(env: Environment, text: string) {
-	return cleanText(env.__name).includes(text);
+	return cleanText(env.name).includes(text);
 }
 
 function scriptMatches(script: Script, text: string) {

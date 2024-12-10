@@ -113,7 +113,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 						requests[requestEvent.associatedId].name}{' '}
 					{camelCaseToTitle(requestEvent.eventType)}
 					{transformedLog.innerEvents.length > 0 && (
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						<CollapseExpandButton collapsed={collapsed} toggleCollapsed={() => setCollapsed(!collapsed)} />
 					)}
 				</ListItemDecorator>
 				<ListItemButton>
@@ -125,7 +125,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 								{formatMilliseconds(transformedLog.after.timestamp - transformedLog.before.timestamp)}
 							</Stack>
 							{dataType && requestEvent.associatedId && (
-								<Stack direction="row" alignItems={'center'} gap={1}>
+								<Stack direction="row" alignItems="center" gap={1}>
 									<BadgeIcon />
 									{associatedItem?.name ?? 'Unknown'} {camelCaseToTitle(dataType)}
 									{requestEvent.associatedId != requestId ? (

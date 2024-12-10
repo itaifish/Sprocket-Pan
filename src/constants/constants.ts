@@ -6,3 +6,5 @@ export const Constants = {
 	networkRequestTimeoutMS: 10_000,
 	minimumScriptRunTimeMS: 400,
 };
+
+export const MS_IN_MINUTE = 60_000;

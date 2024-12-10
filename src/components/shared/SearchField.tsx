@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { IconButton, Input } from '@mui/joy';
 import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
 import { useDebounce } from '../../hooks/useDebounce';
-import { Constants } from '../../utils/constants';
 import { SprocketTooltip } from './SprocketTooltip';
+import { Constants } from '../../constants/constants';
 
 export interface SearchFieldProps {
 	onChange: (text: string) => void;
@@ -15,9 +15,9 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 	const [isTyping, setTyping] = useState(false);
 	const [active, setActive] = useState(false);
 
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
+	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce<string | null>({
 		state: null,
-		setState: onChange,
+		setState: (text: string | null) => onChange(text ?? ''),
 		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
 	});
 
@@ -44,10 +44,10 @@ export function SearchField({ onChange, debounce, slideout = true }: SearchField
 				variant="outlined"
 				placeholder="Search for something"
 				endDecorator={
-					isTyping && localDataState !== '' ? (
+					isTyping ? (
 						<PendingOutlined color="secondary" />
 					) : (
-						<SprocketTooltip text="clear search">
+						<SprocketTooltip text="Clear search">
 							<IconButton onClick={cancel}>
 								<ClearRounded color="primary" />
 							</IconButton>

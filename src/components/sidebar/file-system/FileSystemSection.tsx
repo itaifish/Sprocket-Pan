@@ -17,7 +17,7 @@ export function FileSystemSection({ children, header, actions, isCollapsed = fal
 					{header}
 					<Stack direction="row" flex={1} justifyContent="end">
 						{actions}
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						<CollapseExpandButton collapsed={collapsed} toggleCollapsed={() => setCollapsed(!collapsed)} />
 					</Stack>
 				</Stack>
 			</ListSubheader>

@@ -51,7 +51,7 @@ class ScriptRunnerManager {
 			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
 			const result = await asyncCallWithTimeout<TReturnType>(
 				scriptTask,
-				stateAccess.getState().settings.timeoutDurationMS,
+				stateAccess.getState().settings.request.timeoutMS,
 			);
 			if (auditInfo) {
 				auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);

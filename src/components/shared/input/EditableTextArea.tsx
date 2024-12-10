@@ -1,73 +1,69 @@
-import { IconButton, Typography } from '@mui/joy';
+import { Box, IconButton, Stack, Textarea } from '@mui/joy';
 import { useEffect, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import CancelIcon from '@mui/icons-material/Cancel';
 import Markdown from 'react-markdown';
-import { FloatingLabelTextArea } from './FloatingLabelTextArea';
+import { SprocketTooltip } from '../SprocketTooltip';
+import { ModeEdit } from '@mui/icons-material';
 
 interface EditableTextAreaProps {
 	text: string;
 	setText: (text: string) => void;
 	isValidFunc: (text: string) => boolean;
-	label: string;
-	renderAsMarkdown?: boolean;
 }
 
-export function EditableTextArea(props: EditableTextAreaProps) {
+export function EditableTextArea({ text, setText, isValidFunc }: EditableTextAreaProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [typingText, setTypingText] = useState(props.text);
-	const [isValid, setIsValid] = useState(true);
+	const [typingText, setTypingText] = useState(text);
+
+	const isValid = isValidFunc(typingText);
+
+	function toggleEditing() {
+		if (isEditing) {
+			if (isValid) {
+				setText(typingText);
+				setIsEditing(false);
+			}
+		} else {
+			setTypingText(text);
+			setIsEditing(true);
+		}
+	}
+
 	useEffect(() => {
-		setIsValid(props.isValidFunc(typingText));
-	}, [typingText, props.isValidFunc]);
-	const decorator = (
-		<div style={{ marginLeft: 'auto' }}>
-			<IconButton
-				onClick={() => {
-					setIsEditing(false);
-				}}
-				sx={{ marginRight: '2px' }}
-			>
-				<CancelIcon fontSize="large" />
-			</IconButton>
-			<IconButton
-				onClick={() => {
-					if (isValid) {
-						props.setText(typingText);
-						setIsEditing(false);
-					}
-				}}
-				disabled={!isValid}
-			>
-				<CheckIcon fontSize="large" />
-			</IconButton>
-		</div>
-	);
-	return isEditing ? (
-		<FloatingLabelTextArea
-			size={'md'}
-			label={props.label}
-			variant="outlined"
-			value={typingText}
-			onChange={(e) => setTypingText(e.target.value)}
-			error={!isValid}
-			endDecorator={decorator}
-			startDecorator={decorator}
-		/>
-	) : (
-		<div
-			onClick={() => {
-				setTypingText(props.text);
-				setIsEditing(true);
-			}}
-		>
-			{props.renderAsMarkdown ? (
-				<Markdown>{props.text}</Markdown>
+		setTypingText(text);
+		setIsEditing(false);
+	}, [text]);
+
+	return (
+		<Stack direction="row">
+			<Stack sx={{ mt: '10px' }}>
+				<SprocketTooltip text={isEditing ? 'Save' : 'Edit'}>
+					<IconButton onClick={toggleEditing} disabled={isEditing && !isValid} size="sm">
+						{isEditing ? <CheckIcon /> : <ModeEdit />}
+					</IconButton>
+				</SprocketTooltip>
+				{isEditing && (
+					<SprocketTooltip text="Cancel">
+						<IconButton onClick={() => setIsEditing(false)} size="sm">
+							<CancelIcon />
+						</IconButton>
+					</SprocketTooltip>
+				)}
+			</Stack>
+			{isEditing ? (
+				<Textarea
+					sx={{ width: '100%', mt: '10px' }}
+					variant="outlined"
+					value={typingText}
+					onChange={(e) => setTypingText(e.target.value)}
+					error={!isValid}
+				/>
 			) : (
-				<Typography level="body-md" sx={{ textAlign: 'left' }}>
-					{props.text}
-				</Typography>
+				<Box sx={{ px: '10px' }}>
+					<Markdown>{text}</Markdown>
+				</Box>
 			)}
-		</div>
+		</Stack>
 	);
 }
