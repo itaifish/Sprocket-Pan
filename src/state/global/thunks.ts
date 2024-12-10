@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
 import { WorkspaceDataManager } from '../../managers/data/WorkspaceDataManager';
-import { activeActions } from '../active/slice';
+import { setFullState } from '../active/slice';
 import { log } from '../../utils/logging';
 import { GlobalDataManager } from '../../managers/data/GlobalDataManager';
 import { tabsActions } from '../tabs/slice';
@@ -19,8 +19,8 @@ export const deleteWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state
 			throw new Error('cannot delete a workspace without a path');
 		}
 		await GlobalDataManager.deleteWorkspace(path);
-		if (path === state.activeWorkspace?.fileName) {
-			state.activeWorkspace = undefined;
+		if (path === state.selected?.fileName) {
+			state.selected = undefined;
 		}
 	},
 );
@@ -41,10 +41,10 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 				thunk.dispatch(tabsActions.clearTabs()),
 				thunk.dispatch(tabsActions.setSearchText('')),
 				thunk.dispatch(globalActions.setSelectedWorkspace(data.metadata)),
-				thunk.dispatch(activeActions.setFullState(data)),
+				thunk.dispatch(setFullState(data)),
 			]);
 		} else {
-			log.warn('Workspace failed to load!');
+			log.warn('Workspace failed to load');
 		}
 	},
 );

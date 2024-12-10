@@ -133,6 +133,13 @@ export const activeSlice = createSlice({
 			}
 			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
 		},
+		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
+			const { id, ...updateFields } = action.payload;
+			if (state.uiMetadata.idSpecific[id] == null) {
+				state.uiMetadata.idSpecific[id] = {};
+			}
+			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
+		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
 			for (const key in state.services) {
