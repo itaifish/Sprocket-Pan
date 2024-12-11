@@ -1,10 +1,11 @@
 import { Stack } from '@mui/joy';
-import { OpenSettingsButton } from '../settings/OpenSettingsButton';
+import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
 import { NewButton } from './buttons/NewButton';
 import { ImportFromFileButton } from './buttons/ImportFromFileButton';
 import { SaveButton } from './buttons/SaveButton';
 import { UndoRedoTabsButton } from '../header/UndoRedoTabsButton';
 import { OpenSecretsButton } from './buttons/OpenSecretsButton';
+import { SettingsPanel } from '../settings/SettingsPanel';
 
 export function SideDrawerActions() {
 	return (
@@ -14,7 +15,7 @@ export function SideDrawerActions() {
 				<NewButton />
 				<SaveButton />
 				<OpenSecretsButton />
-				<OpenSettingsButton />
+				<OpenSettingsButton Content={SettingsPanel} />
 			</Stack>
 			<UndoRedoTabsButton />
 		</Stack>

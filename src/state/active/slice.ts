@@ -33,6 +33,7 @@ interface AddResponseToHistory {
 	networkRequest: NetworkFetchRequest;
 	response: EndpointResponse;
 	auditLog?: AuditLog;
+	maxLength: number;
 }
 
 interface DeleteResponseFromHistory {
@@ -133,13 +134,6 @@ export const activeSlice = createSlice({
 			}
 			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
 		},
-		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
-			const { id, ...updateFields } = action.payload;
-			if (state.uiMetadata.idSpecific[id] == null) {
-				state.uiMetadata.idSpecific[id] = {};
-			}
-			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
-		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
 			for (const key in state.services) {
@@ -211,7 +205,7 @@ export const activeSlice = createSlice({
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, networkRequest, response, auditLog } = action.payload;
+			const { requestId, networkRequest, response, auditLog, maxLength } = action.payload;
 			const reqToUpdate = state.requests[requestId];
 			if (reqToUpdate == null) {
 				throw new Error('addResponseToHistory called with no associated request');
@@ -221,7 +215,7 @@ export const activeSlice = createSlice({
 				response,
 				auditLog,
 			});
-			if (state.settings.history.maxLength > 0 && reqToUpdate.history.length > state.settings.history.maxLength) {
+			if (maxLength > 0 && reqToUpdate.history.length > maxLength) {
 				reqToUpdate.history.shift();
 			}
 			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);

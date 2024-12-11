@@ -14,6 +14,17 @@ export class FileSystemWorker {
 		return writeFile({ contents, path }, { dir: FileSystemWorker.DEFAULT_DIRECTORY });
 	}
 
+	public static async upsertFile(path: string, contents: string) {
+		const doesExist = await FileSystemWorker.exists(path);
+		if (doesExist) {
+			log.trace(`${path} already exists, no need to create.`);
+			return FileSystemWorker.writeFile(path, contents);
+		} else {
+			log.debug(`${path} does not exist, creating...`);
+			return FileSystemWorker.writeFile(path, contents);
+		}
+	}
+
 	/**
 	 * @returns true if the file was updated and written to, false if not
 	 */
@@ -23,7 +34,7 @@ export class FileSystemWorker {
 			await this.writeFile(path, contents);
 			return true;
 		} else {
-			log.warn('File does not exist, creating new...');
+			log.warn('File does not exist...');
 			return false;
 		}
 	}

@@ -1,98 +1,49 @@
-import { Box, Button, Stack, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { Box } from '@mui/joy';
 import { useMemo, useState } from 'react';
-import NotInterestedIcon from '@mui/icons-material/NotInterested';
-import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
-import { Settings } from '../../types/settings/settings';
 import { useAppDispatch } from '../../state/store';
 import { useSelector } from 'react-redux';
-import { selectSettings } from '../../state/active/selectors';
-import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
-import { DataTab } from './tabs/DataTab';
-import { GeneralTab } from './tabs/GeneralTab';
-import { ActionsTab } from './tabs/ActionsTab';
+import { selectActiveState, selectWorkspaceSettings } from '../../state/active/selectors';
 import { globalActions } from '../../state/global/slice';
-import { RecursivePartial } from '../../types/utils/utils';
 import { mergeDeep } from '../../utils/variables';
+import { SettingsTabs } from './tabs/SettingsTabs';
+import { SettingsBar } from './SettingsBar';
 import { activeActions } from '../../state/active/slice';
-import { Tips } from './Tips';
-import { ThemeTab } from './tabs/ThemeTab';
+import { selectGlobalSettings } from '../../state/global/selectors';
 
-interface SettingsPanelProps {
-	closePanel: () => void;
+export interface SettingsPanelProps {
+	onClose: () => void;
 }
 
-export const SettingsPanel = (props: SettingsPanelProps) => {
-	const previousSettings = useSelector(selectSettings);
-	const [unsavedSettings, setUnsavedSettings] = useState(previousSettings);
-	const [quitWithoutSavingModalOpen, setQuitWithoutSavingModalOpen] = useState(false);
+export function SettingsPanel({ onClose }: SettingsPanelProps) {
+	const lastSaved = useSelector(selectActiveState).lastSaved;
+	const workspaceSettings = useSelector(selectWorkspaceSettings);
+	const globalSettings = useSelector(selectGlobalSettings);
+	const [unsavedSettings, setUnsavedSettings] = useState(workspaceSettings);
 	const hasChanged = useMemo(() => {
-		return JSON.stringify(previousSettings) !== JSON.stringify(unsavedSettings);
-	}, [previousSettings, unsavedSettings]);
-	function setSettings(settings: RecursivePartial<Settings>) {
-		setUnsavedSettings(mergeDeep(unsavedSettings, settings));
-	}
+		return JSON.stringify(workspaceSettings) !== JSON.stringify(unsavedSettings);
+	}, [workspaceSettings, unsavedSettings]);
 	const dispatch = useAppDispatch();
 	function goToWorkspaceSelection() {
 		dispatch(globalActions.setSelectedWorkspace(undefined));
 	}
-	function saveSettings() {
-		dispatch(activeActions.insertSettings(unsavedSettings));
-	}
 	return (
 		<>
 			<Box height="75vh">
-				<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ height: 'calc(100% - 30px)' }}>
-					<TabList>
-						<Tab>General</Tab>
-						<Tab>Actions</Tab>
-						<Tab>Theme</Tab>
-						<Tab>Data</Tab>
-					</TabList>
-					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={0}>
-						<GeneralTab settings={unsavedSettings} setSettings={setSettings} />
-					</TabPanel>
-					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={1}>
-						<ActionsTab settings={unsavedSettings} setSettings={setSettings} />
-					</TabPanel>
-					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={2}>
-						<ThemeTab settings={unsavedSettings} setSettings={setSettings} />
-					</TabPanel>
-					<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={3}>
-						<DataTab
-							settings={unsavedSettings}
-							setSettings={setSettings}
-							onQuit={() => setQuitWithoutSavingModalOpen(true)}
-							goToWorkspaceSelection={goToWorkspaceSelection}
-						/>
-					</TabPanel>
-				</Tabs>
-				<Stack gap={3} direction="row" justifyContent="space-between" alignItems="center" mt={1}>
-					<Tips />
-					<Stack gap={1} direction="row">
-						<Button
-							color={hasChanged ? 'danger' : 'warning'}
-							startDecorator={hasChanged ? <NotInterestedIcon /> : <ExitToAppIcon />}
-							onClick={props.closePanel}
-						>
-							{hasChanged ? 'Cancel' : 'Close'}
-						</Button>
-						<Button startDecorator={<ThumbUpAltIcon />} disabled={!hasChanged} onClick={saveSettings}>
-							Apply
-						</Button>
-					</Stack>
-				</Stack>
+				<SettingsTabs
+					overlay={unsavedSettings}
+					settings={globalSettings}
+					onChange={(settings) => setUnsavedSettings(mergeDeep(unsavedSettings, settings))}
+					goToWorkspaceSelection={goToWorkspaceSelection}
+				/>
+				<SettingsBar
+					onSave={() => dispatch(activeActions.insertSettings(unsavedSettings))}
+					onClose={onClose}
+					overlay={unsavedSettings}
+					settings={globalSettings}
+					hasChanged={hasChanged}
+					lastSaved={lastSaved}
+				/>
 			</Box>
-			<AreYouSureModal
-				open={quitWithoutSavingModalOpen}
-				closeFunc={() => {
-					setQuitWithoutSavingModalOpen(false);
-				}}
-				action="Quit Without Saving"
-				actionFunc={() => {
-					goToWorkspaceSelection();
-				}}
-			/>
 		</>
 	);
-};
+}

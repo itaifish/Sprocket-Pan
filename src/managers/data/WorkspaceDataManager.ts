@@ -13,12 +13,11 @@ import { SaveUpdateManager } from '../SaveUpdateManager';
 import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
 import { insomniaParseManager } from '../parsers/InsomniaParseManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
-import { fileSystemManager } from '../file-system/FileSystemManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
 import { DEFAULT_SETTINGS } from '../../constants/defaults';
-import { mergeDeep } from '../../utils/variables';
+import { FileSystemManager } from '../file-system/FileSystemManager';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},
@@ -127,7 +126,7 @@ export class WorkspaceDataManager {
 
 	public static async initializeWorkspace(workspace: WorkspaceMetadata) {
 		try {
-			await fileSystemManager.createDataFolderIfNotExists();
+			await FileSystemManager.createDataFolderIfNotExists();
 			await this.createDataFilesIfNotExist(workspace);
 			return await this.loadDataFromFile(workspace);
 		} catch (err) {
@@ -161,14 +160,12 @@ export class WorkspaceDataManager {
 		} as WorkspaceMetadata;
 		parsedData.uiMetadata = JSON.parse(uiMetadata) as UiMetadata;
 		parsedData.secrets = JSON.parse(secrets);
-		// settings gains new properties often, so as an exception we merge settings with the Default to populate new fields
-		parsedData.settings = mergeDeep(DEFAULT_SETTINGS, parsedData.settings);
 		SaveUpdateManager.update(parsedData);
 		return parsedData;
 	}
 
 	/**
-	 * This function creates the data folder and workspace data files they do not already exist.
+	 * This function creates the data folder and workspace data files if they do not already exist.
 	 * @returns true if it created at least one file or folder, false if not.
 	 */
 	private static async createDataFilesIfNotExist({ fileName, ...workspace }: WorkspaceMetadata) {
@@ -177,11 +174,11 @@ export class WorkspaceDataManager {
 		const { metadata, uiMetadata, ...defaultData } = defaultWorkspaceData;
 		const paths = this.getWorkspacePath(fileName);
 		const promises = [
-			fileSystemManager.createFileIfNotExists(paths.data, defaultData),
-			fileSystemManager.createFileIfNotExists(paths.history, []),
-			fileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
-			fileSystemManager.createFileIfNotExists(paths.metadata, workspace),
-			fileSystemManager.createFileIfNotExists(paths.secrets, []),
+			FileSystemManager.createFileIfNotExists(paths.data, defaultData),
+			FileSystemManager.createFileIfNotExists(paths.history, []),
+			FileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
+			FileSystemManager.createFileIfNotExists(paths.metadata, workspace),
+			FileSystemManager.createFileIfNotExists(paths.secrets, []),
 		];
 		const results = await Promise.all(promises);
 		return results.includes(true);

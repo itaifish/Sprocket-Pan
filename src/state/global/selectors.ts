@@ -8,3 +8,7 @@ export const selectWorkspacesList = createSelector(selectGlobalState, (state) =>
 );
 
 export const selectActiveWorkspace = createSelector(selectGlobalState, (state) => state.activeWorkspace);
+
+export const selectGlobalSettings = createSelector(selectGlobalState, (state) => state.settings);
+
+export const selectGlobalLastSaved = createSelector(selectGlobalState, (state) => state.lastSaved);

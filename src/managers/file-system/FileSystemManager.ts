@@ -1,24 +1,14 @@
 import { WorkspaceDataManager } from './../data/WorkspaceDataManager';
 import { log } from '../../utils/logging';
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { EventEmitter } from '@tauri-apps/api/shell';
 import { FileSystemWorker } from './FileSystemWorker';
 
-type WorkspacePaths = { metadata: string; root: string };
-export const FILE_SYSTEM_CHANGE_EVENT = 'fsChange';
-
-class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
-	public static INSTANCE = new FileSystemManager();
-
-	private constructor() {
-		super();
-	}
-
+export class FileSystemManager {
 	/**
 	 * This function creates a data folder if it does not already exist.
 	 * @returns true if it created a folder, false if not
 	 */
-	async createDataFolderIfNotExists() {
+	static async createDataFolderIfNotExists() {
 		log.trace(`createDataFolderIfNotExists called`);
 		const dataFolderLocalPath = FileSystemWorker.DATA_FOLDER_NAME;
 		const doesExist = await FileSystemWorker.exists(dataFolderLocalPath);
@@ -36,7 +26,7 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 	 * This function creates a data file if it does not already exist.
 	 * @returns true if it created a file, false if not
 	 */
-	async createFileIfNotExists(path: string, content: unknown) {
+	static async createFileIfNotExists(path: string, content: unknown) {
 		log.trace('createFileIfNotExists called');
 		const doesExist = await FileSystemWorker.exists(path);
 		if (doesExist) {
@@ -49,7 +39,7 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 		}
 	}
 
-	async getDirectories(): Promise<string[]> {
+	static async getDirectories(): Promise<string[]> {
 		try {
 			const directoryNames = await FileSystemWorker.readDir(FileSystemWorker.DATA_FOLDER_NAME);
 			return directoryNames
@@ -62,7 +52,7 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 		}
 	}
 
-	async getWorkspaces() {
+	static async getWorkspaces() {
 		const workspaceFolders = await this.getDirectories();
 		const metadataTasks: Promise<null | WorkspaceMetadata>[] = [];
 		for (const workspaceFolder of workspaceFolders) {
@@ -84,28 +74,4 @@ class FileSystemManager extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 			.filter((x) => x != null) as WorkspaceMetadata[];
 		return filteredResult;
 	}
-
-	async createWorkspace(paths: WorkspacePaths, content: string) {
-		try {
-			if (await FileSystemWorker.exists(paths.metadata)) {
-				return;
-			}
-			await FileSystemWorker.createDir(paths.root);
-			await FileSystemWorker.writeFile(paths.metadata, content);
-			this.emit(FILE_SYSTEM_CHANGE_EVENT);
-		} catch (e) {
-			log.error(e);
-		}
-	}
-
-	async deleteWorkspace(paths: WorkspacePaths) {
-		const doesExist = await FileSystemWorker.exists(paths.metadata);
-		if (!doesExist) {
-			return null;
-		}
-		await FileSystemWorker.removeDir(paths.root);
-		this.emit(FILE_SYSTEM_CHANGE_EVENT);
-	}
 }
-
-export const fileSystemManager = FileSystemManager.INSTANCE;

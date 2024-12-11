@@ -9,6 +9,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import mime from 'mime';
 import { Key } from '@mui/icons-material';
 import { KeyValuePair, KeyValueValues } from '../../classes/OrderedKeyValuePairs';
+import { RecursivePartial } from '../utils/utils';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Reference<TVariable extends string> = `{{${TVariable}}}`;
@@ -157,7 +158,7 @@ export type UiMetadata = {
 export type GlobalData = {
 	uiMetadata: UiMetadata;
 	settings: Settings;
-	workspaces: WorkspaceMetadata[];
+	lastSaved: number;
 };
 
 export type WorkspaceData = {
@@ -168,7 +169,7 @@ export type WorkspaceData = {
 	secrets: KeyValuePair[];
 	scripts: Record<string, Script>;
 	selectedEnvironment?: string;
-	settings: Settings;
+	settings: RecursivePartial<Settings>;
 	metadata: WorkspaceMetadata;
 	uiMetadata: UiMetadata;
 	version: number | null;
