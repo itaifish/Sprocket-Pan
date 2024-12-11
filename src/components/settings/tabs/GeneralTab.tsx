@@ -1,5 +1,5 @@
 import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
-import { Settings, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
+import { TIPS_SECTION, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
@@ -10,14 +10,9 @@ import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
 import { SprocketSelect } from '../../shared/SprocketSelect';
 import { Constants } from '../../../constants/constants';
-import { RecursivePartial } from '../../../types/utils/utils';
+import { SettingsTabProps } from './types';
 
-export interface SettingsTabProps {
-	settings: Settings;
-	setSettings: (settings: RecursivePartial<Settings>) => void;
-}
-
-export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
+export function GeneralTab({ settings, onChange }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
 	const [version, setVersion] = useState('Loading Version...');
@@ -35,11 +30,23 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 				label="Display Variable Names"
 				tooltip="Controls how {environment_variables} are displayed alongside their computed values."
 				value={settings.interface.variableNameDisplay}
-				onChange={(val) => setSettings({ interface: { variableNameDisplay: val } })}
+				onChange={(val) => onChange({ interface: { variableNameDisplay: val } })}
 				options={[
 					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
 					{ value: VARIABLE_NAME_DISPLAY.none, label: 'Value Only' },
 					{ value: VARIABLE_NAME_DISPLAY.hover, label: 'Key on Hover' },
+				]}
+			/>
+			<SprocketSelect
+				sx={{ width: 240 }}
+				label="Tips Section Messages"
+				value={settings.interface.tipsSection}
+				onChange={(val) => onChange({ interface: { tipsSection: val } })}
+				options={[
+					{ value: TIPS_SECTION.tips, label: 'Sprocket Tips Only' },
+					{ value: TIPS_SECTION.all, label: 'All Messages' },
+					{ value: TIPS_SECTION.dyk, label: 'Did You Know Only' },
+					{ value: TIPS_SECTION.hidden, label: 'Hidden' },
 				]}
 			/>
 			<Divider />

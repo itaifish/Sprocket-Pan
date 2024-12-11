@@ -1,11 +1,11 @@
-import { SettingsTabProps } from './GeneralTab';
 import { Box, Sheet, Stack, FormControl, FormLabel, Input, FormHelperText, Chip, Typography, Divider } from '@mui/joy';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import { iconFromTabType } from '../../../types/application-data/application-data';
 import { ScriptChips } from '../ScriptChips';
+import { SettingsTabProps } from './types';
 
-export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
+export function ActionsTab({ settings, onChange }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
 			<Typography level="title-md">Requests</Typography>
@@ -19,7 +19,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ request: { timeoutMS: value * 1000 } });
+							onChange({ request: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -44,7 +44,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ history: { maxLength: value } });
+							onChange({ history: { maxLength: value } });
 						}
 					}}
 					slotProps={{
@@ -72,7 +72,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
 						const value = +e.target.value;
 						if (!isNaN(value)) {
-							setSettings({ script: { timeoutMS: value * 1000 } });
+							onChange({ script: { timeoutMS: value * 1000 } });
 						}
 					}}
 					slotProps={{
@@ -92,7 +92,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 				<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
 					<ScriptChips
 						prefix="pre"
-						setStrategy={(pre) => setSettings({ script: { strategy: { pre } } })}
+						setStrategy={(pre) => onChange({ script: { strategy: { pre } } })}
 						strategy={settings.script.strategy.pre}
 					/>
 					<Chip sx={{ verticalAlign: 'middle' }} color="primary" startDecorator={iconFromTabType['request']}>
@@ -100,7 +100,7 @@ export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
 					</Chip>
 					<ScriptChips
 						prefix="post"
-						setStrategy={(post) => setSettings({ script: { strategy: { post } } })}
+						setStrategy={(post) => onChange({ script: { strategy: { post } } })}
 						strategy={settings.script.strategy.post}
 					/>
 				</Sheet>

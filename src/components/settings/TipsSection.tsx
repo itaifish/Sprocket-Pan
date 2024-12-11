@@ -1,12 +1,11 @@
 /* eslint-disable react/jsx-key */
 // disabling jsx-key because we don't need keys for single items picked from an array
-import { Chip, Divider, Stack, Typography } from '@mui/joy';
+import { Box, Chip, Divider, Stack, Typography } from '@mui/joy';
 import { COMMAND } from '../../managers/ShortcutManager';
 import { Keys } from '../shared/Keys';
 import { A } from '../shared/Link';
-import { selectActiveState } from '../../state/active/selectors';
-import { useSelector } from 'react-redux';
 import { PropsWithChildren } from 'react';
+import { TIPS_SECTION } from '../../types/settings/settings';
 
 const DYK_LABEL = 'Did You Know?';
 
@@ -34,6 +33,14 @@ const TIPS: React.ReactNode[] = [
 	<Tip>
 		An endpoint&apos;s default request can be accessed via the <code>Jump to Request</code> button.
 	</Tip>,
+	<Tip>
+		Global settings are the baseline settings for all workspaces. Workspace-level settings that override global ones are
+		marked with *.
+	</Tip>,
+	<Tip>
+		SprocketPan is free to use and open source. You can read the license{' '}
+		<A href="https://github.com/itaifish/Sprocket-Pan?tab=License-1-ov-file#readme">here</A>.
+	</Tip>,
 ];
 
 const DYKS: React.ReactNode[] = [
@@ -46,10 +53,6 @@ const DYKS: React.ReactNode[] = [
 		<A href="https://en.wikipedia.org/wiki/Email_address">valid email address</A>.
 	</Tip>,
 	<Tip label={DYK_LABEL}>
-		SprocketPan is free to use and open source. You can read the license{' '}
-		<A href="https://github.com/itaifish/Sprocket-Pan?tab=License-1-ov-file#readme">here</A>.
-	</Tip>,
-	<Tip label={DYK_LABEL}>
 		There are over <A href="https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains">1500 top-level domains</A>
 		, from <code>.academy</code> to <code>.zone</code>.
 	</Tip>,
@@ -57,8 +60,20 @@ const DYKS: React.ReactNode[] = [
 
 const ALL = [...TIPS, ...DYKS];
 
-export function Tips() {
-	const lastSaved = useSelector(selectActiveState).lastSaved;
-	const num = lastSaved % ALL.length;
-	return ALL[num];
+const MESSAGES = {
+	[TIPS_SECTION.all]: ALL,
+	[TIPS_SECTION.dyk]: DYKS,
+	[TIPS_SECTION.tips]: TIPS,
+} as const;
+
+interface TipsSection {
+	variant: TIPS_SECTION;
+	timestamp: number;
+}
+
+export function TipsSection({ variant, timestamp }: TipsSection) {
+	if (variant === TIPS_SECTION.hidden) return <Box />;
+	const messages = MESSAGES[variant];
+	const num = timestamp % messages.length;
+	return messages[num];
 }

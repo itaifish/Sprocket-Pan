@@ -51,12 +51,6 @@ export enum TIPS_SECTION {
 	all = 'all',
 }
 
-export enum SPLASHSCREEN {
-	none = 'none',
-	cooking = 'cooking',
-	legacy = 'legacy',
-}
-
 export interface Settings {
 	theme: {
 		base: BASE_THEME;
@@ -86,7 +80,6 @@ export interface Settings {
 	interface: {
 		variableNameDisplay: VARIABLE_NAME_DISPLAY;
 		tipsSection: TIPS_SECTION;
-		splashScreen: SPLASHSCREEN;
 	};
 	log: {
 		level: LOG_LEVELS;
