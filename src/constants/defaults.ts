@@ -4,6 +4,7 @@ import {
 	LOG_LEVELS,
 	SCROLLBAR_VISIBILITY,
 	Settings,
+	TIPS_SECTION,
 	VARIABLE_NAME_DISPLAY,
 } from '../types/settings/settings';
 import { MS_IN_MINUTE } from './constants';
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	},
 	interface: {
 		variableNameDisplay: VARIABLE_NAME_DISPLAY.before,
+		tipsSection: TIPS_SECTION.tips,
 	},
 	log: {
 		level: LOG_LEVELS.warn,

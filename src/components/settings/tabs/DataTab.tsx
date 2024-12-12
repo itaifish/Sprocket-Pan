@@ -1,47 +1,27 @@
-import { Box, Button, FormControl, FormLabel, Input, Stack, Switch, Typography } from '@mui/joy';
-import { useState } from 'react';
+import { Button, FormControl, FormLabel, Stack, Typography } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
-import DeleteForever from '@mui/icons-material/DeleteForever';
-import SaveIcon from '@mui/icons-material/Save';
 import { invoke } from '@tauri-apps/api';
-import { useAppDispatch } from '../../../state/store';
-import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { log } from '../../../utils/logging';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { useSelector } from 'react-redux';
-import { saveActiveData } from '../../../state/active/thunks/data';
-import { selectActiveState } from '../../../state/active/selectors';
-import { Settings } from '../../../types/settings/settings';
 import TimerIcon from '@mui/icons-material/Timer';
 import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
-import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
 import { MS_IN_MINUTE } from '../../../constants/constants';
-import { RecursivePartial } from '../../../types/utils/utils';
-import { activeActions } from '../../../state/active/slice';
+import { SettingsTabProps } from './types';
+import { WorkspaceDataSection, WorkspaceDataSectionProps } from './WorkspaceDataSection';
+import { SettingsInput, SettingsSwitch } from './SettingsFields';
+import { toNumberOrUndefined } from '../../../utils/math';
 
-interface DataTabProps {
-	onQuit: () => void;
-	goToWorkspaceSelection: () => void;
-	settings: Settings;
-	setSettings: (settings: RecursivePartial<Settings>) => void;
+export type DataTabProps = SettingsTabProps & Partial<WorkspaceDataSectionProps>;
+
+function toMSMinuteOrUndefined(num: unknown) {
+	const ret = toNumberOrUndefined(num);
+	return ret == null ? undefined : ret * MS_IN_MINUTE;
 }
 
-export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings }: DataTabProps) {
-	const dispatch = useAppDispatch();
-	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
-	const state = useSelector(selectActiveState);
-	function save() {
-		dispatch(saveActiveData());
-	}
-
-	function deleteHistory() {
-		dispatch(activeActions.deleteAllHistory());
-	}
-	const exportData = () => WorkspaceDataManager.exportData(state);
-
+export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }: DataTabProps) {
 	const autosave = settings.data.autosave;
-
+	const oversave = overlay?.data?.autosave;
+	const autosaveEnabled = oversave?.enabled ?? autosave.enabled;
 	return (
 		<>
 			<Stack spacing={2}>
@@ -49,43 +29,25 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 				<Stack direction="row" gap={2}>
 					<FormControl sx={{ width: 250 }}>
 						<FormLabel>Autosave</FormLabel>
-						<Box>
-							<Switch
-								checked={autosave.enabled}
-								onChange={(event) => setSettings({ data: { autosave: { enabled: event.target.checked } } })}
-								color={autosave.enabled ? 'success' : 'neutral'}
-								variant={autosave.enabled ? 'solid' : 'outlined'}
-								endDecorator={autosave.enabled ? 'Enabled' : 'Disabled'}
-							/>
-						</Box>
-					</FormControl>
-
-					<FormControl sx={{ width: 250 }}>
-						<FormLabel id="autosave-duration-label" htmlFor="autosave-duration-input">
-							Interval
-						</FormLabel>
-						<Input
-							disabled={!autosave.enabled}
-							sx={{ width: 250 }}
-							value={autosave.intervalMS / MS_IN_MINUTE}
-							onChange={(e) => {
-								const value = +e.target.value;
-								if (!isNaN(value) && value > 0) {
-									setSettings({ data: { autosave: { intervalMS: value * MS_IN_MINUTE } } });
-								}
-							}}
-							slotProps={{
-								input: {
-									id: 'autosave-duration-input',
-									// TODO: Material UI set aria-labelledby correctly & automatically
-									// but Base UI and Joy UI don't yet.
-									'aria-labelledby': 'autosave-duration-label autosave-duration-input',
-								},
-							}}
-							startDecorator={<TimerIcon />}
-							endDecorator={'Minutes'}
+						<SettingsSwitch
+							checked={autosave.enabled}
+							onChange={(enabled) => onChange({ data: { autosave: { enabled } } })}
+							endDecorator={autosaveEnabled ? 'Enabled' : 'Disabled'}
+							overlay={oversave?.enabled}
 						/>
 					</FormControl>
+					<SettingsInput
+						sx={{ width: 250 }}
+						inputSx={{ width: 250 }}
+						disabled={!autosaveEnabled}
+						id="autosave-duration"
+						label="Interval"
+						value={autosave.intervalMS / MS_IN_MINUTE}
+						overlay={oversave?.intervalMS == null ? undefined : oversave.intervalMS / MS_IN_MINUTE}
+						onChange={(val) => onChange({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
+						startDecorator={<TimerIcon />}
+						endDecorator={'Minutes'}
+					/>
 				</Stack>
 
 				<Typography>Data</Typography>
@@ -116,62 +78,8 @@ export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings 
 						Open Logs Folder
 					</Button>
 				</Stack>
-
-				<Typography>History</Typography>
-				<Button
-					sx={{ width: '250px' }}
-					startDecorator={<DeleteForever />}
-					color="danger"
-					onClick={() => setDeleteHistoryModalOpen(true)}
-					variant="outlined"
-				>
-					Delete All History
-				</Button>
-
-				<Typography>Workspace</Typography>
-
-				<Button
-					sx={{ width: '250px' }}
-					startDecorator={<FileUploadIcon />}
-					color="primary"
-					variant="outlined"
-					onClick={exportData}
-				>
-					Export Workspace
-				</Button>
-
-				<Stack direction="row" gap={2}>
-					<Button
-						sx={{ width: '250px' }}
-						startDecorator={<SaveIcon />}
-						color="danger"
-						variant="outlined"
-						onClick={onQuit}
-					>
-						Exit to Workspace Selection Without Saving
-					</Button>
-					<Button
-						sx={{ width: '250px' }}
-						startDecorator={<SaveIcon />}
-						color="success"
-						variant="outlined"
-						onClick={async () => {
-							save();
-							goToWorkspaceSelection();
-						}}
-					>
-						Save & Exit to Workspace Selection
-					</Button>
-				</Stack>
+				{goToWorkspaceSelection && <WorkspaceDataSection goToWorkspaceSelection={goToWorkspaceSelection} />}
 			</Stack>
-			<AreYouSureModal
-				open={deleteHistoryModalOpen}
-				closeFunc={function (): void {
-					setDeleteHistoryModalOpen(false);
-				}}
-				action={'Delete All History'}
-				actionFunc={deleteHistory}
-			/>
 		</>
 	);
 }

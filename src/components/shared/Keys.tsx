@@ -7,7 +7,7 @@ interface KeysProps {
 
 export function Keys({ commands }: KeysProps) {
 	return (
-		<Chip size="sm" variant="outlined">
+		<Chip component="span" size="sm" variant="outlined">
 			<code>{ShortcutManager.getKeys(commands)}</code>
 		</Chip>
 	);

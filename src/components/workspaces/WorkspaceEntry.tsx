@@ -1,5 +1,5 @@
 import { WorkspaceMetadata } from '../../types/application-data/application-data';
-import { Button, Card, CardContent, Typography } from '@mui/joy';
+import { Button, Card, Stack, Typography } from '@mui/joy';
 import { formatFullDate } from '../../utils/string';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import InfoIcon from '@mui/icons-material/Info';
@@ -10,6 +10,7 @@ import { SprocketTooltip } from '../shared/SprocketTooltip';
 import { TextAvatar } from '../shared/TextAvatar';
 import { loadAndSelectWorkspace } from '../../state/global/thunks';
 import { GradientBorderBoundingBox } from '../shared/GradientBorderBoundingBox';
+import { EllipsisTypography } from '../shared/EllipsisTypography';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;
@@ -27,43 +28,46 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 	return (
 		<Card
 			sx={{
-				minHeight: 200,
-				minWidth: 400,
+				overflow: 'hidden',
+				height: 200,
+				width: 400,
 				'--Card-radius': (theme) => theme.vars.radius.xs,
 			}}
 		>
-			<CardContent orientation="horizontal" sx={{ alignItems: 'center', gap: 1 }}>
-				<GradientBorderBoundingBox>
-					<TextAvatar
-						username={workspace.name}
-						size="lg"
-						sx={{ p: 0.5, border: '2px solid', borderColor: 'background.body' }}
-					/>
-				</GradientBorderBoundingBox>
-				<Typography level="title-lg">{workspace.name}</Typography>
-			</CardContent>
-			<CardContent orientation="horizontal">
-				<SprocketTooltip text="Last Modified">
-					<EditCalendarIcon></EditCalendarIcon>
-				</SprocketTooltip>
-				<Typography level="body-md"> {formatFullDate(new Date(workspace.lastModified))}</Typography>
-			</CardContent>
-			<CardContent orientation="horizontal">
-				<SprocketTooltip text="Description">
-					<InfoIcon></InfoIcon>
-				</SprocketTooltip>
-				<Typography level="body-sm" sx={{ wordBreak: 'break-all' }}>
-					{workspace.description}
-				</Typography>
-			</CardContent>
-			<CardContent orientation="horizontal" sx={{ gap: 1 }}>
-				<Button variant="outlined" color="danger" startDecorator={<DeleteIcon />} onClick={deleteWorkspace}>
-					Delete
-				</Button>
-				<Button variant="outlined" startDecorator={<OpenInNewIcon />} onClick={openWorkspace}>
-					Open
-				</Button>
-			</CardContent>
+			<Stack gap={2}>
+				<Stack direction="row" gap={2} alignItems="center">
+					<GradientBorderBoundingBox>
+						<TextAvatar
+							username={workspace.name}
+							size="md"
+							sx={{ p: 0.5, border: '2px solid', borderColor: 'background.body' }}
+						/>
+					</GradientBorderBoundingBox>
+					<EllipsisTypography level="title-lg">{workspace.name}</EllipsisTypography>
+				</Stack>
+				<Stack gap={1} ml={1}>
+					<Stack direction="row" gap={1} alignItems="center">
+						<SprocketTooltip text="Last Modified">
+							<EditCalendarIcon />
+						</SprocketTooltip>
+						<Typography level="body-md"> {formatFullDate(new Date(workspace.lastModified))}</Typography>
+					</Stack>
+					<Stack direction="row" gap={1} alignItems="center">
+						<SprocketTooltip text="Description">
+							<InfoIcon />
+						</SprocketTooltip>
+						<EllipsisTypography level="body-sm">{workspace.description}</EllipsisTypography>
+					</Stack>
+				</Stack>
+				<Stack justifyContent="space-between" direction="row" gap={6} ml="-2px">
+					<Button variant="plain" color="danger" startDecorator={<DeleteIcon />} onClick={deleteWorkspace}>
+						Delete
+					</Button>
+					<Button sx={{ width: '100%' }} variant="outlined" startDecorator={<OpenInNewIcon />} onClick={openWorkspace}>
+						Open
+					</Button>
+				</Stack>
+			</Stack>
 		</Card>
 	);
 }

@@ -24,3 +24,9 @@ export function setsAreEqual<T>(setA: Set<T>, setB: Set<T>): boolean {
 export function maxAmplitude(...nums: number[]) {
 	return nums.sort((a, b) => Math.abs(b) - Math.abs(a))[0];
 }
+
+export function toNumberOrUndefined(num: unknown) {
+	if (num == null) return undefined;
+	const value = +num;
+	return isNaN(value) ? undefined : value;
+}

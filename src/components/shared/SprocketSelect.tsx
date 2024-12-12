@@ -8,8 +8,9 @@ interface SelectOption<T> {
 	label: string;
 }
 
-interface SprocketSelectProps<T> {
-	label: string;
+export interface SprocketSelectProps<T> {
+	decorator?: React.ReactNode;
+	label: string | React.ReactNode;
 	value: T;
 	options: SelectOption<T>[];
 	onChange: (value: T) => void;
@@ -18,7 +19,16 @@ interface SprocketSelectProps<T> {
 	tooltip?: string;
 }
 
-export function SprocketSelect<T>({ label, options, onChange, sx, value, hint, tooltip }: SprocketSelectProps<T>) {
+export function SprocketSelect<T>({
+	decorator,
+	label,
+	options,
+	onChange,
+	sx,
+	value,
+	hint,
+	tooltip,
+}: SprocketSelectProps<T>) {
 	return (
 		<FormControl sx={sx}>
 			<FormLabel id={`select-${label}-label`} htmlFor={`select-${label}-button`}>
@@ -30,6 +40,7 @@ export function SprocketSelect<T>({ label, options, onChange, sx, value, hint, t
 				)}
 			</FormLabel>
 			<Select
+				startDecorator={decorator}
 				slotProps={{
 					button: {
 						id: `select-${label}-button`,
