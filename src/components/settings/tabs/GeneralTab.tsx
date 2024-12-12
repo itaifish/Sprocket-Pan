@@ -20,9 +20,11 @@ export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
 		const newVersion = await getVersion();
 		setVersion(newVersion);
 	};
+
 	useEffect(() => {
 		updateVersion();
 	}, []);
+
 	return (
 		<Stack spacing={3}>
 			<SettingsSelect
