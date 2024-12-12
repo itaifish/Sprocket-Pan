@@ -35,7 +35,7 @@ const TIPS: React.ReactNode[] = [
 	</Tip>,
 	<Tip>
 		Global settings are the baseline settings for all workspaces. Workspace-level settings that override global ones are
-		marked with *.
+		marked with a globe icon.
 	</Tip>,
 	<Tip>
 		SprocketPan is free to use and open source. You can read the license{' '}

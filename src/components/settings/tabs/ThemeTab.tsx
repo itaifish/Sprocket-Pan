@@ -1,25 +1,26 @@
 import { Stack } from '@mui/joy';
 import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import { InputSlider } from '../../shared/input/InputSlider';
 import { BASE_THEME, LIST_STYLING, SCROLLBAR_VISIBILITY } from '../../../types/settings/settings';
-import { SprocketSelect } from '../../shared/SprocketSelect';
 import { SettingsTabProps } from './types';
+import { SettingsSelect, SettingsSlider } from './SettingsFields';
 
-export function ThemeTab({ settings, onChange }: SettingsTabProps) {
+export function ThemeTab({ overlay, settings, onChange }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
-			<InputSlider
+			<SettingsSlider
 				value={settings.theme.zoom}
+				overlay={overlay?.theme?.zoom}
 				label="Zoom"
-				setValue={(val) => onChange({ theme: { zoom: val } })}
+				onChange={(val) => onChange({ theme: { zoom: val } })}
 				endDecorator="%"
 				icon={<ZoomInIcon />}
 				range={{ min: 25, max: 175 }}
 			/>
-			<SprocketSelect
+			<SettingsSelect
 				sx={{ width: 240 }}
 				label="Base Theme"
 				value={settings.theme.base}
+				overlay={overlay?.theme?.base}
 				onChange={(val) => onChange({ theme: { base: val } })}
 				options={[
 					{ value: BASE_THEME.light, label: 'Light Mode' },
@@ -27,10 +28,11 @@ export function ThemeTab({ settings, onChange }: SettingsTabProps) {
 					{ value: BASE_THEME.default, label: 'System Default' },
 				]}
 			/>
-			<SprocketSelect
+			<SettingsSelect
 				sx={{ width: 240 }}
 				label="List Style"
 				value={settings.theme.list}
+				overlay={overlay?.theme?.list}
 				onChange={(val) => onChange({ theme: { list: val } })}
 				options={[
 					{ value: LIST_STYLING.compact, label: 'Compact' },
@@ -38,10 +40,11 @@ export function ThemeTab({ settings, onChange }: SettingsTabProps) {
 					{ value: LIST_STYLING.cozy, label: 'Cozy' },
 				]}
 			/>
-			<SprocketSelect
+			<SettingsSelect
 				sx={{ width: 240 }}
 				label="Scrollbar Visibility"
 				value={settings.theme.scrollbarVisibility}
+				overlay={overlay?.theme?.scrollbarVisibility}
 				onChange={(val) => onChange({ theme: { scrollbarVisibility: val } })}
 				options={[
 					{ value: SCROLLBAR_VISIBILITY.compact, label: 'Compact' },

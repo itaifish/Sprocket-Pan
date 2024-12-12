@@ -8,11 +8,11 @@ import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
 import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
-import { SprocketSelect } from '../../shared/SprocketSelect';
 import { Constants } from '../../../constants/constants';
 import { SettingsTabProps } from './types';
+import { SettingsSelect } from './SettingsFields';
 
-export function GeneralTab({ settings, onChange }: SettingsTabProps) {
+export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
 	const [version, setVersion] = useState('Loading Version...');
@@ -25,11 +25,12 @@ export function GeneralTab({ settings, onChange }: SettingsTabProps) {
 	}, []);
 	return (
 		<Stack spacing={3}>
-			<SprocketSelect
+			<SettingsSelect
+				value={settings.interface.variableNameDisplay}
+				overlay={overlay?.interface?.variableNameDisplay}
 				sx={{ width: 240 }}
 				label="Display Variable Names"
 				tooltip="Controls how {environment_variables} are displayed alongside their computed values."
-				value={settings.interface.variableNameDisplay}
 				onChange={(val) => onChange({ interface: { variableNameDisplay: val } })}
 				options={[
 					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
@@ -37,10 +38,11 @@ export function GeneralTab({ settings, onChange }: SettingsTabProps) {
 					{ value: VARIABLE_NAME_DISPLAY.hover, label: 'Key on Hover' },
 				]}
 			/>
-			<SprocketSelect
+			<SettingsSelect
 				sx={{ width: 240 }}
 				label="Tips Section Messages"
 				value={settings.interface.tipsSection}
+				overlay={overlay?.interface?.tipsSection}
 				onChange={(val) => onChange({ interface: { tipsSection: val } })}
 				options={[
 					{ value: TIPS_SECTION.tips, label: 'Sprocket Tips Only' },

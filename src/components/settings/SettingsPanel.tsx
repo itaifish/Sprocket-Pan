@@ -26,6 +26,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 	function goToWorkspaceSelection() {
 		dispatch(globalActions.setSelectedWorkspace(undefined));
 	}
+
 	return (
 		<>
 			<Box height="75vh">

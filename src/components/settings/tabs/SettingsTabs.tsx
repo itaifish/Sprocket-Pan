@@ -4,7 +4,7 @@ import { GeneralTab } from './GeneralTab';
 import { ActionsTab } from './ActionsTab';
 import { ThemeTab } from './ThemeTab';
 
-export function SettingsTabs({ settings, onChange, ...dataProps }: DataTabProps) {
+export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabProps) {
 	return (
 		<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ height: 'calc(100% - 30px)' }}>
 			<TabList>
@@ -14,16 +14,16 @@ export function SettingsTabs({ settings, onChange, ...dataProps }: DataTabProps)
 				<Tab>Data</Tab>
 			</TabList>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={0}>
-				<GeneralTab settings={settings} onChange={onChange} />
+				<GeneralTab {...tabProps} />
 			</TabPanel>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={1}>
-				<ActionsTab settings={settings} onChange={onChange} />
+				<ActionsTab {...tabProps} />
 			</TabPanel>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={2}>
-				<ThemeTab settings={settings} onChange={onChange} />
+				<ThemeTab {...tabProps} />
 			</TabPanel>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={3}>
-				<DataTab settings={settings} onChange={onChange} {...dataProps} />
+				<DataTab goToWorkspaceSelection={goToWorkspaceSelection} {...tabProps} />
 			</TabPanel>
 		</Tabs>
 	);
