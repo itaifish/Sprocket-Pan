@@ -1,31 +1,73 @@
-import { QueryParams } from '../types/application-data/application-data';
+import { v4 } from 'uuid';
+import { QueryParams } from '@/types/data/shared';
+import { Environment, WorkspaceData } from '@/types/data/workspace';
+import { KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { mergeDeep } from './variables';
+import { Settings } from '@/types/data/settings';
+import { RootState } from '@/state/store';
 
-export function queryParamsToString(queryParams: QueryParams): string {
-	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				searchParams.append(queryParamKey, queryParamVal);
-			});
-		}
-	});
-
-	return decodeURIComponent(searchParams.toString());
-}
-
-export function queryParamsToStringReplaceVars(
+export function queryParamsToString(
 	queryParams: QueryParams,
-	replaceFunc: (text: string) => string,
+	encoded = false,
+	replaceFunc: (text: string) => string = (element) => element,
 ): string {
 	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				const newKey = replaceFunc(queryParamKey);
-				const newVal = replaceFunc(queryParamVal);
-				searchParams.append(newKey, newVal);
-			});
+	queryParams.forEach(({ key, value }) => {
+		if (Array.isArray(value)) {
+			value.forEach((element) => searchParams.append(replaceFunc(key), replaceFunc(element)));
+		} else {
+			searchParams.append(replaceFunc(key), replaceFunc(value ?? ''));
 		}
 	});
-	return searchParams.toString();
+	return encoded ? searchParams.toString() : decodeURIComponent(searchParams.toString());
+}
+
+export function cloneEnv(env?: Partial<Environment>, nameMod?: string): Environment {
+	const newEnv = {
+		name: env?.name ?? '',
+		id: v4(),
+		pairs: env?.pairs ?? [],
+	};
+	if (nameMod != null) {
+		newEnv.name = newEnv.name + nameMod;
+	}
+	return newEnv;
+}
+
+export function toKeyValuePairs<T>(object: Record<string, T>) {
+	return Object.entries(object).map(([key, value]) => ({ key, value }));
+}
+
+export function envParse(value: KeyValueValues | undefined, envValues: OrderedKeyValuePairs<string>) {
+	if (value == null) {
+		return '';
+	}
+	if (Array.isArray(value)) {
+		value = value.join(', ');
+	}
+	return EnvironmentContextResolver.parseStringWithEnvironment(value, envValues)
+		.map((x) => x.value)
+		.join('');
+}
+
+export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): BuildEnvironmentVariablesArgs {
+	const values: BuildEnvironmentVariablesArgs = {
+		secrets: data.secrets,
+		rootEnv: data.selectedEnvironment == null ? null : data.environments[data.selectedEnvironment],
+		rootAncestors: Object.values(data.environments),
+	};
+	if (requestId != null) {
+		const request = data.requests[requestId];
+		const endpoint = data.endpoints[request.endpointId];
+		const service = data.services[endpoint.serviceId];
+		values.servEnv =
+			service.selectedEnvironment == null ? null : service.localEnvironments[service.selectedEnvironment];
+		values.reqEnv = request.environmentOverride;
+	}
+	return values;
+}
+
+export function getSettingsFromState({ global, active }: RootState): Settings {
+	return mergeDeep(global.settings, active.settings);
 }

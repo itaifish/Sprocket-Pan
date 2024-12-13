@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { tabsSlice } from './slice';
-import { selectEndpoints, selectRequests, selectServices } from '../active/selectors';
-import { getValidIdsFromSearchTerm } from '../../utils/search';
+import { getValidIdsFromSearchTerm } from '@/utils/search';
+import { selectServices, selectEndpoints, selectRequests } from '../active/selectors';
 
 export const selectTabsState = tabsSlice.selectSlice;
 

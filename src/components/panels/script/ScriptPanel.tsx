@@ -1,7 +1,4 @@
 import { useSelector } from 'react-redux';
-import { selectScript, selectScripts, selectSettings } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { updateScript } from '../../../state/active/slice';
 import {
 	Button,
 	Chip,
@@ -14,32 +11,35 @@ import {
 	Select,
 	Stack,
 	Typography,
-	useColorScheme,
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
-import { Script } from '../../../types/application-data/application-data';
-import { defaultEditorOptions } from '../../../managers/MonacoInitManager';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../utils/constants';
-import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { asyncCallWithTimeout, getVariablesFromCode, VariableFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { runScript } from '../../../state/active/thunks/requests';
 import { editor } from 'monaco-editor';
-import { PanelProps } from '../panels.interface';
-import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
-import { FormatIcon } from '../../shared/buttons/FormatIcon';
-import { EditableText } from '../../shared/input/EditableText';
-import { sleep } from '../../../utils/misc';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
+import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
+import { FormatButton } from '@/components/shared/buttons/FormatButton';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Constants } from '@/constants/constants';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useEditorTheme } from '@/hooks/useEditorTheme';
+import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
+import { selectScript, selectScripts, selectSettings } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { runScript } from '@/state/active/thunks/requests';
+import { useAppDispatch } from '@/state/store';
+import { Script } from '@/types/data/workspace';
+import { VariableFromCode, getVariablesFromCode, asyncCallWithTimeout } from '@/utils/functions';
+import { sleep } from '@/utils/misc';
+import { toValidFunctionName } from '@/utils/string';
+import { PanelProps } from '../panels.interface';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -48,11 +48,10 @@ const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 };
 
 export function ScriptPanel({ id }: PanelProps) {
+	const theme = useEditorTheme();
 	const script = useSelector((state) => selectScript(state, id));
 	const scripts = useSelector(selectScripts);
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
-	const { mode, systemMode } = useColorScheme();
-	const resolvedMode = mode === 'system' ? systemMode : mode;
 	const [isRunning, setRunning] = useState(false);
 	const [isDebouncing, setDebouncing] = useState(false);
 	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -91,7 +90,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	};
 	const dispatch = useAppDispatch();
 	function update(values: Partial<Script>) {
-		dispatch(updateScript({ ...values, id: script.id }));
+		dispatch(activeActions.updateScript({ ...values, id: script.id }));
 	}
 	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
 		state: script.content,
@@ -138,12 +137,13 @@ export function ScriptPanel({ id }: PanelProps) {
 	return (
 		<>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={script.name}
 				setText={(newText: string) => update({ name: newText, id, scriptCallableName: toValidFunctionName(newText) })}
 				isValidFunc={(text: string) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
-				isTitle
+				level="h2"
 			/>
-			<Stack direction={'row'} spacing={2}>
+			<Stack direction="row" spacing={2}>
 				<FormControl>
 					<FormLabel>Script-Callable Name</FormLabel>
 					<Input
@@ -227,7 +227,7 @@ export function ScriptPanel({ id }: PanelProps) {
 									const scriptToRun = { ...script, content: localDataState };
 									const ranScript = dispatch(runScript({ script: scriptToRun, requestId: null })).unwrap();
 									await Promise.all([
-										asyncCallWithTimeout(ranScript, settings.scriptTimeoutDurationMS),
+										asyncCallWithTimeout(ranScript, settings.script.timeoutMS),
 										sleep(Constants.minimumScriptRunTimeMS),
 									]);
 									const output = await ranScript;
@@ -262,8 +262,8 @@ export function ScriptPanel({ id }: PanelProps) {
 					)}
 				</FormControl>
 			</Stack>
-			<Stack direction={'row'} spacing={2}>
-				<FormatIcon actionFunction={() => format()} />
+			<Stack direction="row" spacing={2}>
+				<FormatButton onChange={format} />
 				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
 			<Editor
@@ -275,7 +275,7 @@ export function ScriptPanel({ id }: PanelProps) {
 					}
 				}}
 				language={'typescript'}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={defaultEditorOptions}
 				onMount={handleMainEditorDidMount}
 			/>
@@ -286,7 +286,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				height={'15vh'}
 				value={scriptOutput}
 				language={scriptOutputLang}
-				theme={resolvedMode === 'dark' ? 'vs-dark' : resolvedMode}
+				theme={theme}
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 				onMount={handleReturnEditorDidMount}
 			/>

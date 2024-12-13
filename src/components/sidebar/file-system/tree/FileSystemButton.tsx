@@ -1,11 +1,12 @@
-import { Box, ListItemButton, Stack } from '@mui/joy';
+import { Box, ListItemButton } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { FileSystemDropdown, FileSystemMenuOption } from '../FileSystemDropdown';
-import { useAppDispatch } from '../../../../state/store';
-import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { useSelector } from 'react-redux';
-import { TabType } from '../../../../types/state/state';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { HoverDecorator } from '@/components/shared/HoverDecorator';
+import { useAppDispatch } from '@/state/store';
+import { selectIsActiveTab } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
+import { TabType } from '@/types/state/state';
 
 export interface FileSystemButtonProps extends PropsWithChildren {
 	id: string;
@@ -18,9 +19,14 @@ export function FileSystemButton({ id, children, tabType, color = 'neutral', men
 	const isSelected = useSelector((state) => selectIsActiveTab(state, id));
 	const dispatch = useAppDispatch();
 	return (
-		<Stack
-			direction="row"
-			sx={{ ':hover': { '& .on-hover': { opacity: 100 } } }}
+		<HoverDecorator
+			endDecorator={
+				menuOptions == null ? null : (
+					<Box width="10px">
+						<FileSystemDropdown options={menuOptions} />
+					</Box>
+				)
+			}
 			justifyContent="stretch"
 			alignItems="center"
 		>
@@ -35,11 +41,6 @@ export function FileSystemButton({ id, children, tabType, color = 'neutral', men
 			>
 				{children}
 			</ListItemButton>
-			{menuOptions == null ? null : (
-				<Box className="on-hover" sx={{ opacity: 0, width: '10px' }}>
-					<FileSystemDropdown options={menuOptions} />
-				</Box>
-			)}
-		</Stack>
+		</HoverDecorator>
 	);
 }

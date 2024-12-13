@@ -1,12 +1,13 @@
 import { Box, ListDivider } from '@mui/joy';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { useSelector } from 'react-redux';
-import { selectServices } from '../../../../state/active/selectors';
-import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
-import { useAppDispatch } from '../../../../state/store';
-import { SearchField } from '../../../shared/SearchField';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { SearchField } from '@/components/shared/SearchField';
+import { ELEMENT_ID } from '@/constants/uiElementIds';
+import { selectServices } from '@/state/active/selectors';
+import { useAppDispatch } from '@/state/store';
+import { selectFilteredNestedIds } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -16,6 +17,7 @@ export function ServicesFileSystem() {
 
 	return (
 		<FileSystemTrunk
+			id={ELEMENT_ID.sidebar.services}
 			header="Services"
 			actions={<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />}
 		>

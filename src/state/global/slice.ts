@@ -1,22 +1,19 @@
+import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
+import { GlobalData } from '@/types/data/global';
+import { WorkspaceMetadata } from '@/types/data/workspace';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { GlobalData, WorkspaceMetadata } from '../../types/application-data/application-data';
-import { Settings } from '../../types/settings/settings';
-
-export const defaultWorkspace: WorkspaceMetadata = {
-	name: 'Default Workspace',
-	description: 'The default workspace in SprocketPan',
-	lastModified: new Date().getTime(),
-	fileName: undefined,
-};
 
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: WorkspaceMetadata;
+	workspaces: WorkspaceMetadata[];
 }
 
 const initialState: GlobalState = {
 	workspaces: [],
 	uiMetadata: { idSpecific: {} },
-	settings: {} as Settings,
+	settings: DEFAULT_SETTINGS,
+	lastSaved: 0,
 };
 
 export const globalSlice = createSlice({
@@ -29,6 +26,14 @@ export const globalSlice = createSlice({
 		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
 			const workspace = action.payload;
 			state.activeWorkspace = workspace;
+		},
+		insertSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
+			GlobalDataManager.saveGlobalData({ ...state, settings: action.payload, lastSaved: new Date().getTime() });
+		},
+		setData: (state, { payload }: PayloadAction<GlobalData>) => {
+			state.settings = payload.settings;
+			state.lastSaved = payload.lastSaved;
+			state.uiMetadata = payload.uiMetadata;
 		},
 	},
 });

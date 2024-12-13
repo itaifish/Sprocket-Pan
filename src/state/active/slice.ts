@@ -1,18 +1,19 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
+import { defaultWorkspaceData } from '@/managers/data/WorkspaceDataManager';
+import { AuditLog } from '@/types/data/audit';
+import { IdSpecificUiMetadata } from '@/types/data/shared';
 import {
-	WorkspaceData,
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
-	Environment,
-	IdSpecificUiMetadata,
 	NetworkFetchRequest,
+	RootEnvironment,
 	Script,
 	Service,
-} from '../../types/application-data/application-data';
-import { AuditLog } from '../../managers/AuditLogManager';
-import { log } from '../../utils/logging';
-import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
+	WorkspaceData,
+} from '@/types/data/workspace';
+import { log } from '@/utils/logging';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
@@ -32,6 +33,7 @@ interface AddResponseToHistory {
 	networkRequest: NetworkFetchRequest;
 	response: EndpointResponse;
 	auditLog?: AuditLog;
+	maxLength: number;
 }
 
 interface DeleteResponseFromHistory {
@@ -53,6 +55,12 @@ interface DeleteScript {
 	scriptId: string;
 }
 
+export interface UpdateLinkedEnv {
+	envId: string;
+	serviceEnvId: string;
+	serviceId: string;
+}
+
 export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
@@ -70,12 +78,6 @@ export const activeSlice = createSlice({
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
 			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
-		},
-		setAutosaveInterval: (state, action: PayloadAction<NodeJS.Timeout | undefined>) => {
-			if (state.autosaveInterval != undefined) {
-				clearInterval(state.autosaveInterval);
-			}
-			state.autosaveInterval = action.payload;
 		},
 		// basic CRUD
 		insertService: (state, action: PayloadAction<Service>) => {
@@ -108,22 +110,22 @@ export const activeSlice = createSlice({
 			log.debug(`updateRequest called for fields ${JSON.stringify(updateFields)} on request ${id}`);
 			Object.assign(state.requests[id], updateFields);
 		},
-		insertEnvironment: (state, action: PayloadAction<Environment>) => {
+		insertEnvironment: (state, action: PayloadAction<RootEnvironment>) => {
 			const environment = action.payload;
 			log.debug(`insertEnvironment called with environment ${JSON.stringify(environment)}`);
-			Object.assign(state.environments, { [environment.__id]: environment });
+			Object.assign(state.environments, { [environment.id]: environment });
 		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
-			const { __id, ...updateFields } = action.payload;
-			if (__id == null) {
-				throw new Error('attempted to update environment with null __id');
+		updateEnvironment: (state, action: PayloadAction<Update<RootEnvironment, 'id'>>) => {
+			const { id, ...updateFields } = action.payload;
+			if (id == null) {
+				throw new Error('attempted to update environment with null id');
 			}
-			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${__id}`);
-			Object.assign(state.environments[__id], updateFields);
+			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${id}`);
+			Object.assign(state.environments[id], updateFields);
 		},
 		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
 			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
-			Object.assign(state.settings, action.payload);
+			state.settings = action.payload;
 		},
 		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
 			const { id, ...updateFields } = action.payload;
@@ -134,7 +136,20 @@ export const activeSlice = createSlice({
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
 			log.debug(`selectEnvironment called on env ${action.payload}`);
+			for (const key in state.services) {
+				if (state.services[key].linkedEnvMode) {
+					state.services[key].selectedEnvironment = undefined;
+				}
+			}
 			state.selectedEnvironment = action.payload;
+			if (state.selectedEnvironment != null) {
+				const linkedValues = Object.entries(state.environments[state.selectedEnvironment].linked ?? {});
+				for (const [key, value] of linkedValues) {
+					if (state.services[key].linkedEnvMode) {
+						state.services[key].selectedEnvironment = value ?? undefined;
+					}
+				}
+			}
 		},
 		deleteServiceFromState: (state, action: PayloadAction<string>) => {
 			log.debug(`deleteServiceFromState called on service ${action.payload}`);
@@ -151,6 +166,9 @@ export const activeSlice = createSlice({
 		deleteEnvironmentFromState: (state, action: PayloadAction<string>) => {
 			log.debug(`deleteEnvironmentFromState called on env ${action.payload}`);
 			delete state.environments[action.payload];
+		},
+		updateSecrets: (state, action: PayloadAction<KeyValuePair[]>) => {
+			state.secrets = action.payload;
 		},
 		// more specific logic
 		addRequestToEndpoint: (state, action: PayloadAction<AddRequestToEndpoint>) => {
@@ -187,7 +205,7 @@ export const activeSlice = createSlice({
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, networkRequest, response, auditLog } = action.payload;
+			const { requestId, networkRequest, response, auditLog, maxLength } = action.payload;
 			const reqToUpdate = state.requests[requestId];
 			if (reqToUpdate == null) {
 				throw new Error('addResponseToHistory called with no associated request');
@@ -197,7 +215,7 @@ export const activeSlice = createSlice({
 				response,
 				auditLog,
 			});
-			if (state.settings.maxHistoryLength > 0 && reqToUpdate.history.length > state.settings.maxHistoryLength) {
+			if (maxLength > 0 && reqToUpdate.history.length > maxLength) {
 				reqToUpdate.history.shift();
 			}
 			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);
@@ -225,37 +243,28 @@ export const activeSlice = createSlice({
 			log.debug(`deleteScript called on script ${action.payload.scriptId}`);
 			delete state.scripts[action.payload.scriptId];
 		},
+		addLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
+			const { serviceEnvId, serviceId, envId } = action.payload;
+			state.environments[envId].linked = {
+				...state.environments[envId].linked,
+				[serviceId]: serviceEnvId,
+			};
+			if (state.selectedEnvironment === envId) {
+				state.services[serviceId].selectedEnvironment = serviceEnvId;
+			}
+		},
+		removeLinkedEnv: (state, action: PayloadAction<Omit<UpdateLinkedEnv, 'serviceEnvId'>>) => {
+			const { serviceId, envId } = action.payload;
+			if (state.environments[envId].linked != null) {
+				delete state.environments[envId].linked[serviceId];
+			}
+			if (state.selectedEnvironment === envId) {
+				state.services[serviceId].selectedEnvironment = undefined;
+			}
+		},
 	},
 });
 
-export const {
-	setFullState,
-	setSavedNow,
-	setModifiedNow,
-	setAutosaveInterval,
-	insertService,
-	updateService,
-	insertEndpoint,
-	updateEndpoint,
-	insertRequest,
-	updateRequest,
-	insertEnvironment,
-	updateEnvironment,
-	insertSettings,
-	selectEnvironment,
-	deleteEndpointFromState,
-	deleteEnvironmentFromState,
-	deleteRequestFromState,
-	deleteServiceFromState,
-	addRequestToEndpoint,
-	removeRequestFromEndpoint,
-	addEndpointToService,
-	removeEndpointFromService,
-	deleteAllHistory,
-	addResponseToHistory,
-	deleteResponseFromHistory,
-	insertScript,
-	deleteScript,
-	updateScript,
-	setUiMetadataById,
-} = activeSlice.actions;
+export const activeActions = activeSlice.actions;
+
+export const activeThunkName = `t/${activeSlice.name}`;

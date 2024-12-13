@@ -1,20 +1,20 @@
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { Service } from '@/types/data/workspace';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Service } from '../../../types/application-data/application-data';
-import { RootState } from '../../store';
-import { insertService, deleteEndpointFromState, deleteServiceFromState } from '../slice';
-import { createNewServiceObject } from './util';
+import { activeThunkName, activeActions } from '../slice';
 import { addNewEndpoint } from './endpoints';
-import { tabsActions } from '../../tabs/slice';
+import { createNewServiceObject } from './util';
 
 interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;
 }
 
 export const cloneService = createAsyncThunk<string, CloneServiceInput, { state: RootState }>(
-	'active/cloneService',
+	`${activeThunkName}/cloneService`,
 	async ({ data: { endpointIds, ...data } = {} }, thunk) => {
 		const newService = { ...createNewServiceObject(), ...structuredClone(data), name: `${data.name} (Copy)` };
-		thunk.dispatch(insertService(newService));
+		thunk.dispatch(activeActions.insertService(newService));
 		const endpoints = thunk.getState().active.endpoints;
 		// clone endpoints, if we're cloning the service
 		for (const endpointId of endpointIds ?? []) {
@@ -26,8 +26,19 @@ export const cloneService = createAsyncThunk<string, CloneServiceInput, { state:
 	},
 );
 
+type NewServiceArgs = Pick<Service, 'baseUrl' | 'description' | 'name'>;
+
+export const addNewService = createAsyncThunk<string, NewServiceArgs, { state: RootState }>(
+	`${activeThunkName}/addNewService`,
+	async (serviceData, thunk) => {
+		const newService = { ...createNewServiceObject(), ...serviceData };
+		thunk.dispatch(activeActions.insertService(newService));
+		return newService.id;
+	},
+);
+
 export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootState }>(
-	'active/cloneServiceFromId',
+	`${activeThunkName}/cloneServiceFromId`,
 	async (oldId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...service } = thunk.getState().active.services[oldId];
@@ -38,7 +49,7 @@ export const cloneServiceFromId = createAsyncThunk<void, string, { state: RootSt
 );
 
 export const deleteService = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteService',
+	`${activeThunkName}/deleteService`,
 	async (id, thunk) => {
 		const service = thunk.getState().active.services[id];
 		if (service == null) {
@@ -46,9 +57,9 @@ export const deleteService = createAsyncThunk<void, string, { state: RootState }
 		}
 		for (const endpointId in service.endpointIds) {
 			thunk.dispatch(tabsActions.closeTab(endpointId));
-			thunk.dispatch(deleteEndpointFromState(endpointId));
+			thunk.dispatch(activeActions.deleteEndpointFromState(endpointId));
 		}
 		thunk.dispatch(tabsActions.closeTab(service.id));
-		thunk.dispatch(deleteServiceFromState(service.id));
+		thunk.dispatch(activeActions.deleteServiceFromState(service.id));
 	},
 );

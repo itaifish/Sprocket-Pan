@@ -26,14 +26,13 @@ export function EllipsisTypography({ sx, children, ...props }: TypographyProps) 
 			sx={{
 				flex: 1,
 				maxWidth: '100%',
-				width: '100%',
+				width: 'fit-content',
 				textOverflow: 'ellipsis',
 				textWrap: 'nowrap',
 				whiteSpace: 'nowrap',
 				overflow: 'hidden',
 				...sx,
 			}}
-			fontSize="sm"
 		>
 			{children}
 		</Typography>

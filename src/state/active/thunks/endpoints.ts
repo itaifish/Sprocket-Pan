@@ -1,16 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Endpoint } from '../../../types/application-data/application-data';
-import { RootState } from '../../store';
-import {
-	insertEndpoint,
-	addEndpointToService,
-	deleteRequestFromState,
-	removeEndpointFromService,
-	deleteEndpointFromState,
-} from '../slice';
-import { createNewEndpointObject } from './util';
+import { activeActions, activeThunkName } from '../slice';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { Endpoint } from '@/types/data/workspace';
 import { addNewRequest } from './requests';
-import { tabsActions } from '../../tabs/slice';
+import { createNewEndpointObject } from './util';
 
 interface AddNewEndpoint {
 	data?: Partial<Omit<Endpoint, 'id' | 'serviceId'>>;
@@ -18,7 +12,7 @@ interface AddNewEndpoint {
 }
 
 export const addNewEndpoint = createAsyncThunk<string, AddNewEndpoint, { state: RootState }>(
-	'active/addEndpoint',
+	`${activeThunkName}/addNewEndpoint`,
 	async ({ serviceId, data: { requestIds, ...data } = {} }, thunk) => {
 		const newEndpoint: Endpoint = {
 			...createNewEndpointObject(serviceId),
@@ -27,8 +21,8 @@ export const addNewEndpoint = createAsyncThunk<string, AddNewEndpoint, { state: 
 			requestIds: [],
 			serviceId,
 		};
-		thunk.dispatch(insertEndpoint(newEndpoint));
-		thunk.dispatch(addEndpointToService({ endpointId: newEndpoint.id, serviceId }));
+		thunk.dispatch(activeActions.insertEndpoint(newEndpoint));
+		thunk.dispatch(activeActions.addEndpointToService({ endpointId: newEndpoint.id, serviceId }));
 		const requests = thunk.getState().active.requests;
 		for (const requestId of requestIds ?? []) {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,7 +34,7 @@ export const addNewEndpoint = createAsyncThunk<string, AddNewEndpoint, { state: 
 );
 
 export const addNewEndpointById = createAsyncThunk<void, string, { state: RootState }>(
-	'active/addEndpointById',
+	`${activeThunkName}/addNewEndpointById`,
 	async (oldId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...endpoint } = thunk.getState().active.endpoints[oldId];
@@ -51,7 +45,7 @@ export const addNewEndpointById = createAsyncThunk<void, string, { state: RootSt
 );
 
 export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteEndpoint',
+	`${activeThunkName}/deleteEndpoint`,
 	async (id, thunk) => {
 		const endpoint = thunk.getState().active.endpoints[id];
 		if (endpoint == null) {
@@ -59,10 +53,10 @@ export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState 
 		}
 		for (const requestId in endpoint.requestIds) {
 			thunk.dispatch(tabsActions.closeTab(requestId));
-			thunk.dispatch(deleteRequestFromState(requestId));
+			thunk.dispatch(activeActions.deleteRequestFromState(requestId));
 		}
 		thunk.dispatch(tabsActions.closeTab(endpoint.id));
-		thunk.dispatch(removeEndpointFromService(endpoint.id));
-		thunk.dispatch(deleteEndpointFromState(endpoint.id));
+		thunk.dispatch(activeActions.removeEndpointFromService(endpoint.id));
+		thunk.dispatch(activeActions.deleteEndpointFromState(endpoint.id));
 	},
 );

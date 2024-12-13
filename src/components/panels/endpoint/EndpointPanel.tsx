@@ -1,116 +1,100 @@
-import { Button, Grid, Select, Stack, Option, Input } from '@mui/joy';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
-import { verbColors } from '../../../utils/style';
+import { Button, Select, Stack, Option, Input } from '@mui/joy';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-
-import {
-	selectEndpoints,
-	selectEnvironments,
-	selectRequests,
-	selectSelectedEnvironment,
-	selectServices,
-	selectSettings,
-} from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { updateEndpoint } from '../../../state/active/slice';
-import { useAppDispatch } from '../../../state/store';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../utils/constants';
-import { EditableText } from '../../shared/input/EditableText';
+import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Constants } from '@/constants/constants';
+import { verbColors } from '@/constants/style';
+import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
+import { useDebounce } from '@/hooks/useDebounce';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { selectEndpointById, selectServicesById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { RESTfulRequestVerbs } from '@/types/data/shared';
+import { Endpoint } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
-import { tabsActions } from '../../../state/tabs/slice';
 
 export function EndpointPanel({ id }: PanelProps) {
-	const endpoints = useSelector(selectEndpoints);
-	const services = useSelector(selectServices);
-	const settings = useSelector(selectSettings);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const environments = useSelector(selectEnvironments);
-	const requests = useSelector(selectRequests);
-	const endpointData = endpoints[id];
-	const serviceData = services[endpointData.serviceId];
 	const dispatch = useAppDispatch();
+	const endpoint = useSelector((state) => selectEndpointById(state, id));
+	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
+
+	const computedEnv = useComputedServiceEnvironment(endpoint.serviceId);
+	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', computedEnv);
 
 	const update = (values: Partial<Endpoint>) => {
-		dispatch(updateEndpoint({ ...values, id }));
+		dispatch(activeActions.updateEndpoint({ ...values, id }));
 	};
 
 	const { localDataState, setLocalDataState } = useDebounce({
-		state: endpointData.url,
+		state: endpoint.url,
 		setState: (newUrl: string) => update({ url: newUrl }),
 		debounceOverride: Constants.debounceTimeMS,
 	});
 
-	if (endpointData == null || serviceData == null) {
+	if (endpoint == null || service == null) {
 		return <>Endpoint data not found</>;
 	}
 
 	return (
-		<>
+		<Stack gap={2}>
 			<EditableText
-				text={endpointData.name}
+				sx={{ margin: 'auto' }}
+				text={endpoint.name}
 				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
-				isTitle
+				level="h2"
 			/>
-			<Grid container spacing={2} sx={{ paddingTop: '30px' }} alignItems="center" justifyContent={'center'}>
-				<Grid xs={2}>
-					<Select
-						value={endpointData.verb}
-						startDecorator={<LabelIcon />}
-						color={verbColors[endpointData.verb]}
-						variant="soft"
-						onChange={(_e, newVerb) => {
-							if (newVerb) {
-								update({ verb: newVerb });
-							}
-						}}
-					>
-						{RESTfulRequestVerbs.map((verb, index) => (
-							<Option key={index} value={verb} color={verbColors[verb]}>
-								{verb}
-							</Option>
-						))}
-					</Select>
-				</Grid>
-				<Grid xs={8}>
-					<Input
-						startDecorator={environmentContextResolver.stringWithVarsToTypography(
-							serviceData.baseUrl || 'unknown',
-							{ environments, selectedEnvironment, services, settings, requests },
-							serviceData.id,
-							undefined,
-							{ variant: 'outlined', color: 'primary' },
-						)}
-						value={localDataState}
-						onChange={(e) => {
-							setLocalDataState(e.target.value);
-						}}
-						color="primary"
-					></Input>
-				</Grid>
-				<Grid xs={2}>
-					<Stack direction={'row'} spacing={2}>
-						<Button
-							color="primary"
-							startDecorator={<ExitToAppIcon />}
-							disabled={!endpointData.defaultRequest}
-							onClick={() => {
-								if (endpointData.defaultRequest) {
-									dispatch(tabsActions.addTabs({ [endpointData.defaultRequest]: 'request' }));
-									dispatch(tabsActions.setSelectedTab(endpointData.defaultRequest));
-								}
-							}}
-						>
-							Jump To Request
-						</Button>
-					</Stack>
-				</Grid>
-			</Grid>
-			<EndpointEditTabs endpoint={endpointData} />
-		</>
+			<Stack direction="row" gap={2}>
+				<Select
+					sx={{ minWidth: 150 }}
+					value={endpoint.verb}
+					startDecorator={<LabelIcon />}
+					color={verbColors[endpoint.verb]}
+					variant="soft"
+					onChange={(_e, newVerb) => {
+						if (newVerb) {
+							update({ verb: newVerb });
+						}
+					}}
+				>
+					{RESTfulRequestVerbs.map((verb, index) => (
+						<Option key={index} value={verb} color={verbColors[verb]}>
+							{verb}
+						</Option>
+					))}
+				</Select>
+				<Input
+					sx={{ flexGrow: 1 }}
+					startDecorator={
+						<EnvironmentTypography typographyProps={{ variant: 'outlined', color: 'primary' }} snippets={envSnippets} />
+					}
+					value={localDataState}
+					onChange={(e) => {
+						setLocalDataState(e.target.value);
+					}}
+					color="primary"
+				/>
+				<Button
+					sx={{ minWidth: 150 }}
+					color="primary"
+					startDecorator={<ExitToAppIcon />}
+					disabled={!endpoint.defaultRequest}
+					onClick={() => {
+						if (endpoint.defaultRequest) {
+							dispatch(tabsActions.addTabs({ [endpoint.defaultRequest]: 'request' }));
+							dispatch(tabsActions.setSelectedTab(endpoint.defaultRequest));
+						}
+					}}
+				>
+					Jump to Request
+				</Button>
+			</Stack>
+			<EndpointEditTabs endpoint={endpoint} />
+		</Stack>
 	);
 }

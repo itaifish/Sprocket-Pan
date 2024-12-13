@@ -8,6 +8,9 @@
 		"noErrorTruncation": true,
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
+		"paths": {
+			"@/*": ["./src/*"]
+		},
 		/* Bundler mode */
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
@@ -17,14 +20,12 @@
 		"emitDeclarationOnly": true,
 		"outDir": "typeDefs",
 		"jsx": "react-jsx",
-
 		/* Linting */
 		"strict": true,
 		"strictFunctionTypes": true,
 		"strictNullChecks": true,
 		"noUnusedLocals": false,
 		"noUnusedParameters": true,
-		"noFallthroughCasesInSwitch": true,
 		"forceConsistentCasingInFileNames": true
 	},
 	"include": ["src"],

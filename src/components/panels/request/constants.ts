@@ -1,18 +1,18 @@
-import { EMPTY_HEADERS, HistoricalEndpointResponse } from '../../../types/application-data/application-data';
+import { HistoricalEndpointResponse } from '@/types/data/workspace';
 
 export const defaultResponse: HistoricalEndpointResponse = {
 	response: {
 		statusCode: 200,
 		body: 'View the response here',
 		bodyType: 'Text',
-		headers: structuredClone(EMPTY_HEADERS),
+		headers: [],
 		dateTime: new Date().getTime(),
 	},
 	request: {
 		method: 'GET',
 		url: '',
-		headers: structuredClone(EMPTY_HEADERS),
-		body: {},
+		headers: {},
+		body: '',
 		dateTime: new Date().getTime(),
 	},
 };

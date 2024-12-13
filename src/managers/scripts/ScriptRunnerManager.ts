@@ -1,10 +1,12 @@
+import { StateAccess } from '@/state/types';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { Script, EndpointResponse } from '@/types/data/workspace';
+import { evalAsync, asyncCallWithTimeout } from '@/utils/functions';
+import { log } from '@/utils/logging';
 import ts from 'typescript';
-import { EndpointResponse, Script } from '../../types/application-data/application-data';
-import { asyncCallWithTimeout, evalAsync } from '../../utils/functions';
-import { StateAccess } from '../../state/types';
-import { AuditLog, RequestEvent, auditLogManager } from '../AuditLogManager';
+import { auditLogManager } from '../AuditLogManager';
 import { getScriptInjectionCode } from './ScriptInjectionManager';
-import { log } from '../../utils/logging';
+import { getSettingsFromState } from '@/utils/application';
 
 class ScriptRunnerManager {
 	public static readonly INSTANCE = new ScriptRunnerManager();
@@ -51,7 +53,7 @@ class ScriptRunnerManager {
 			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
 			const result = await asyncCallWithTimeout<TReturnType>(
 				scriptTask,
-				stateAccess.getState().settings.timeoutDurationMS,
+				getSettingsFromState(stateAccess.getState()).request.timeoutMS,
 			);
 			if (auditInfo) {
 				auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);

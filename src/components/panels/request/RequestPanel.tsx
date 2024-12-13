@@ -1,22 +1,30 @@
-import { Grid, Typography, Card, Divider } from '@mui/joy';
-import { EndpointRequest } from '../../../types/application-data/application-data';
+import { Typography, Card, Divider, Stack, IconButton, Box } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectFullRequestInfoById } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { updateRequest } from '../../../state/active/slice';
-import { PanelProps } from '../panels.interface';
-import { EditableText } from '../../shared/input/EditableText';
 import { RequestEditTabs } from './RequestEditTabs';
 import { RequestActions, ResponseState } from './RequestActions';
 import { defaultResponse } from './constants';
 import { ResponsePanel } from './response/ResponsePanel';
+import EditIcon from '@mui/icons-material/Edit';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { DissolvingButton } from '@/components/shared/buttons/DissolvingButton';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { selectFullRequestInfoById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { EndpointRequest } from '@/types/data/workspace';
+import { PanelProps } from '../panels.interface';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
 
 	const [responseState, setResponseState] = useState<ResponseState>('latest');
 	const [lastError, setLastError] = useState(defaultResponse);
+	const [shouldDissolvingAnimate, setShouldDissolvingAnimate] = useState(false);
+
+	const triggerDissolve = () => setShouldDissolvingAnimate(true);
+	const endDissolve = () => setShouldDissolvingAnimate(false);
 
 	const dispatch = useAppDispatch();
 
@@ -25,37 +33,62 @@ export function RequestPanel({ id }: PanelProps) {
 	}
 
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 
 	return (
-		<>
+		<Stack gap={2}>
+			<Box position="absolute" top={0} left={0}>
+				<DissolvingButton shouldAnimate={shouldDissolvingAnimate} clearShouldAnimate={endDissolve}>
+					<SprocketTooltip text="Edit Parent Endpoint">
+						<IconButton
+							variant="outlined"
+							color="primary"
+							onClick={() => {
+								dispatch(tabsActions.addTabs({ [request.endpointId]: 'endpoint' }));
+								dispatch(tabsActions.setSelectedTab(request.endpointId));
+							}}
+						>
+							<EditIcon />
+						</IconButton>
+					</SprocketTooltip>
+				</DissolvingButton>
+			</Box>
 			<EditableText
+				sx={{ margin: 'auto' }}
 				text={request.name}
 				setText={(newText: string) => update({ name: newText })}
 				isValidFunc={(text: string) => text.length >= 1}
-				isTitle
+				level="h2"
 			/>
-			<RequestActions endpoint={endpoint} request={request} onError={setLastError} onResponse={setResponseState} />
-			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
-				<Grid xs={6}>
-					<Card sx={{ height: '100%', width: '100%' }}>
-						<Typography level="h3" sx={{ textAlign: 'center' }}>
-							Request
-						</Typography>
-						<Divider />
-						<RequestEditTabs request={request} />
-					</Card>
-				</Grid>
-				<Grid xs={6}>
+			<RequestActions
+				activateEditButton={triggerDissolve}
+				endpoint={endpoint}
+				request={request}
+				onError={setLastError}
+				onResponse={setResponseState}
+			/>
+			<Stack direction="row" gap={2}>
+				<Card sx={{ width: '1px', flexGrow: 1, height: 'fit-content' }}>
+					<Typography level="h3" sx={{ textAlign: 'center' }}>
+						Request
+					</Typography>
+					<Divider />
+					<RequestEditTabs request={request} />
+				</Card>
+				<Card sx={{ width: '1px', flexGrow: 1, height: 'fit-content' }}>
+					<Typography level="h3" sx={{ textAlign: 'center' }}>
+						Response
+					</Typography>
+					<Divider />
 					<ResponsePanel
 						responseState={responseState}
 						setResponseState={setResponseState}
 						lastError={lastError}
 						request={request}
 					/>
-				</Grid>
-			</Grid>
-		</>
+				</Card>
+			</Stack>
+		</Stack>
 	);
 }

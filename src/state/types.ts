@@ -1,5 +1,4 @@
-import { WorkspaceData } from '../types/application-data/application-data';
-import { AppDispatch } from './store';
+import { AppDispatch, RootState } from './store';
 
 /**
  * This a TEMPORARY type that exists to facilitate the transition from a manager-based
@@ -8,6 +7,6 @@ import { AppDispatch } from './store';
  * @deprecated
  */
 export interface StateAccess {
-	getState: () => WorkspaceData;
+	getState: () => RootState;
 	dispatch: AppDispatch;
 }

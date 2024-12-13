@@ -1,102 +1,62 @@
-import { SettingsTabProps } from './GeneralTab';
-import { Box, Sheet, Stack, FormControl, FormLabel, Input, FormHelperText, Chip, Typography, Divider } from '@mui/joy';
+import { Stack, Typography, Divider } from '@mui/joy';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
-import { iconFromTabType } from '../../../types/application-data/application-data';
-import { ScriptChips } from '../ScriptChips';
+import { SettingsTabProps } from './types';
+import { SettingsInput, SettingsStrategyInput } from './SettingsFields';
+import { toNumberOrUndefined } from '@/utils/math';
 
-export function ActionsTab({ settings, setSettings }: SettingsTabProps) {
+function toMSOrUndefined(num: unknown) {
+	const ret = toNumberOrUndefined(num);
+	return ret == null ? undefined : ret * 1000;
+}
+
+export function ActionsTab({ overlay, settings, onChange }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
 			<Typography level="title-md">Requests</Typography>
-			<FormControl sx={{ width: 300 }}>
-				<FormLabel id="network-timeout-label" htmlFor="network-timeout-input">
-					Network Call Timeout Duration
-				</FormLabel>
-				<Input
-					sx={{ width: 200 }}
-					value={settings.timeoutDurationMS / 1000}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						const value = +e.target.value;
-						if (!isNaN(value)) {
-							setSettings({ timeoutDurationMS: value * 1000 });
-						}
-					}}
-					slotProps={{
-						input: {
-							id: 'network-timeout-input',
-							// TODO: Material UI set aria-labelledby correctly & automatically
-							// but Base UI and Joy UI don't yet.
-							'aria-labelledby': 'network-timeout-label network-timeout-input',
-						},
-					}}
-					startDecorator={<HourglassBottomIcon />}
-					endDecorator={'Seconds'}
-				/>
-			</FormControl>
-			<FormControl sx={{ width: 300 }}>
-				<FormLabel id="maximum-history-label" htmlFor="maximum-history-input">
-					Maximum Number of History Records
-				</FormLabel>
-				<Input
-					sx={{ width: 200 }}
-					value={settings.maxHistoryLength}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						const value = +e.target.value;
-						if (!isNaN(value)) {
-							setSettings({ maxHistoryLength: value });
-						}
-					}}
-					slotProps={{
-						input: {
-							id: 'maximum-history-input',
-							// TODO: Material UI set aria-labelledby correctly & automatically
-							// but Base UI and Joy UI don't yet.
-							'aria-labelledby': 'maximum-history-label maximum-history-input',
-						},
-					}}
-					startDecorator={<ManageHistoryIcon />}
-					endDecorator={'Records'}
-				/>
-				<FormHelperText>Set this value as -1 for no maximum</FormHelperText>
-			</FormControl>
+			<SettingsInput
+				sx={{ width: 250 }}
+				inputSx={{ width: 250 }}
+				id="network-timeout"
+				label="Network Call Timeout"
+				value={settings.request.timeoutMS / 1000}
+				overlay={overlay?.request?.timeoutMS == null ? undefined : overlay.request.timeoutMS / 1000}
+				onChange={(val) => onChange({ request: { timeoutMS: toMSOrUndefined(val) } })}
+				startDecorator={<HourglassBottomIcon />}
+				endDecorator={'Seconds'}
+			/>
+			<SettingsInput
+				type="number"
+				sx={{ width: 250 }}
+				inputSx={{ width: 250 }}
+				id="maximum-history"
+				label="Maximum Saved History Records"
+				value={settings.history.maxLength}
+				overlay={overlay?.history?.maxLength}
+				onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
+				startDecorator={<ManageHistoryIcon />}
+				endDecorator={'Records'}
+				hint="Set this value as -1 for no maximum."
+			/>
 			<Divider></Divider>
 			<Typography level="title-md">Scripts</Typography>
-			<FormControl sx={{ width: 300 }}>
-				<FormLabel id="script-timeout-label" htmlFor="script-timeout-input">
-					Script Timeout Duration
-				</FormLabel>
-				<Input
-					sx={{ width: 200 }}
-					value={settings.scriptTimeoutDurationMS / 1000}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						const value = +e.target.value;
-						if (!isNaN(value)) {
-							setSettings({ scriptTimeoutDurationMS: value * 1000 });
-						}
-					}}
-					slotProps={{
-						input: {
-							id: 'script-timeout-input',
-							// TODO: Material UI set aria-labelledby correctly & automatically
-							// but Base UI and Joy UI don't yet.
-							'aria-labelledby': 'script-timeout-label script-timeout-input',
-						},
-					}}
-					startDecorator={<HourglassBottomIcon />}
-					endDecorator={'Seconds'}
-				/>
-			</FormControl>
-			<Box>
-				<Typography>Script Strategy Order</Typography>
-				<Sheet variant="outlined" color="neutral" sx={{ padding: 4 }}>
-					<ScriptChips preOrPost="pre" setSettings={setSettings} settings={settings} />
-					<Chip sx={{ verticalAlign: 'middle' }} color="primary" startDecorator={iconFromTabType['request']}>
-						Request
-					</Chip>
-					<ScriptChips preOrPost="post" setSettings={setSettings} settings={settings} />
-				</Sheet>
-			</Box>
+			<SettingsInput
+				type="number"
+				sx={{ width: 250 }}
+				inputSx={{ width: 250 }}
+				id="script-timeout"
+				label="Script Timeout"
+				value={settings.script.timeoutMS / 1000}
+				overlay={overlay?.script?.timeoutMS == null ? undefined : overlay.script.timeoutMS / 1000}
+				onChange={(val) => onChange({ script: { timeoutMS: toMSOrUndefined(val) } })}
+				startDecorator={<HourglassBottomIcon />}
+				endDecorator={'Seconds'}
+			/>
+			<SettingsStrategyInput
+				value={settings.script.strategy}
+				overlay={overlay?.script?.strategy as any}
+				onChange={(strategy) => onChange({ script: { strategy } })}
+			/>
 		</Stack>
 	);
 }

@@ -1,28 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AuditLog, RequestEvent } from '../../../managers/AuditLogManager';
-import { RootState } from '../../store';
-import {
-	addRequestToEndpoint,
-	addResponseToHistory,
-	deleteRequestFromState,
-	insertRequest,
-	removeRequestFromEndpoint,
-} from '../slice';
-import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
+import { activeActions, activeThunkName } from '../slice';
+import { networkRequestManager } from '@/managers/NetworkRequestManager';
+import { scriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { Script, EndpointResponse, EndpointRequest } from '@/types/data/workspace';
+import { SprocketError } from '@/types/state/state';
+import { log } from '@/utils/logging';
 import { createNewRequestObject } from './util';
-import { log } from '../../../utils/logging';
-import { SprocketError } from '../../../types/state/state';
-import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
-import { networkRequestManager } from '../../../managers/NetworkRequestManager';
-import { tabsActions } from '../../tabs/slice';
-
-/**
- * Only exists until managers can be entirely migrated.
- * @deprecated
- */
-function extractStateAccess(thunk: any) {
-	return { getState: () => thunk.getState().active, dispatch: thunk.dispatch };
-}
 
 export const runScript = createAsyncThunk<
 	| {
@@ -40,8 +26,8 @@ export const runScript = createAsyncThunk<
 		};
 	},
 	{ state: RootState }
->('active/runScipt', async (options, thunk) => {
-	const stateAccess = extractStateAccess(thunk);
+>(`${activeThunkName}/runScript`, async (options, thunk) => {
+	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
 
 	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
 		options.script,
@@ -57,8 +43,8 @@ export const makeRequest = createAsyncThunk<
 	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },
 	{ state: RootState }
->('active/makeRequest', async ({ requestId, auditLog = [] }, thunk) => {
-	const stateAccess = extractStateAccess(thunk);
+>(`${activeThunkName}/makeRequest`, async ({ requestId, auditLog = [] }, thunk) => {
+	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
 	const localAuditLog: AuditLog = [];
 	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, localAuditLog);
 	if (error) {
@@ -67,7 +53,7 @@ export const makeRequest = createAsyncThunk<
 	}
 	const { networkRequest, response } = await networkRequestManager.sendRequest(
 		requestId,
-		thunk.getState().active,
+		thunk.getState(),
 		localAuditLog,
 	);
 	error = await networkRequestManager.runPostScripts(requestId, stateAccess, response, localAuditLog);
@@ -76,7 +62,16 @@ export const makeRequest = createAsyncThunk<
 		return error;
 	}
 	auditLog.push(...localAuditLog);
-	thunk.dispatch(addResponseToHistory({ requestId: requestId, response, networkRequest, auditLog: localAuditLog }));
+	const state = thunk.getState();
+	thunk.dispatch(
+		activeActions.addResponseToHistory({
+			requestId: requestId,
+			response,
+			networkRequest,
+			auditLog: localAuditLog,
+			maxLength: state.active.settings.history?.maxLength ?? state.global.settings.history.maxLength,
+		}),
+	);
 });
 
 interface AddNewRequest {
@@ -85,16 +80,16 @@ interface AddNewRequest {
 }
 
 export const addNewRequest = createAsyncThunk<void, AddNewRequest, { state: RootState }>(
-	'active/addRequest',
+	`${activeThunkName}/addRequest`,
 	async ({ endpointId, data = {} }, thunk) => {
 		const newRequest: EndpointRequest = { ...createNewRequestObject(endpointId), ...data, history: [], endpointId };
-		thunk.dispatch(insertRequest(newRequest));
-		thunk.dispatch(addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
+		thunk.dispatch(activeActions.insertRequest(newRequest));
+		thunk.dispatch(activeActions.addRequestToEndpoint({ requestId: newRequest.id, endpointId }));
 	},
 );
 
 export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootState }>(
-	'active/addRequestFromId',
+	`${activeThunkName}/addNewRequestFromId`,
 	async (requestId, thunk) => {
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		const { id, ...request } = thunk.getState().active.requests[requestId];
@@ -105,10 +100,10 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 );
 
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
-	'active/deleteRequest',
+	`${activeThunkName}/deleteRequest`,
 	async (id, thunk) => {
 		thunk.dispatch(tabsActions.closeTab(id));
-		thunk.dispatch(removeRequestFromEndpoint(id));
-		thunk.dispatch(deleteRequestFromState(id));
+		thunk.dispatch(activeActions.removeRequestFromEndpoint(id));
+		thunk.dispatch(activeActions.deleteRequestFromState(id));
 	},
 );

@@ -1,102 +1,72 @@
-import { AccordionGroup, Tab, TabList, TabPanel, Tabs } from '@mui/joy';
-import { useState } from 'react';
+import { AccordionGroup } from '@mui/joy';
 import { RequestBody } from './RequestBody';
-import { useSelector } from 'react-redux';
-import { environmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import {
-	selectEnvironments,
-	selectServices,
-	selectSelectedEnvironment,
-	selectSettings,
-	selectRequests,
-	selectEndpoints,
-} from '../../../state/active/selectors';
-import { updateRequest } from '../../../state/active/slice';
-import { useAppDispatch } from '../../../state/store';
-import {
-	EndpointRequest,
-	QueryParams,
-	Environment,
-	newEnvironment,
-} from '../../../types/application-data/application-data';
-import { camelCaseToTitle } from '../../../utils/string';
-import { QueryParamEditableTable } from '../../shared/input/QueryParamEditableTable';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
-
-const requestTabs = ['body', 'headers', 'queryParams', 'scripts', 'environment'] as const;
-type RequestTabType = (typeof requestTabs)[number];
+import { RequestInfoSection } from './RequestInfoSection';
+import { EditableData } from '@/components/shared/input/EditableData';
+import { SprocketTabs } from '@/components/shared/SprocketTabs';
+import { useComputedRequestEnvironment } from '@/hooks/useComputedEnvironment';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { EndpointRequest } from '@/types/data/workspace';
 
 export function RequestEditTabs({ request }: { request: EndpointRequest }) {
-	const [tab, setTab] = useState<RequestTabType>('body');
-	const environments = useSelector(selectEnvironments);
-	const services = useSelector(selectServices);
-	const selectedEnvironment = useSelector(selectSelectedEnvironment);
-	const settings = useSelector(selectSettings);
-	const requests = useSelector(selectRequests);
-	const endpoints = useSelector(selectEndpoints);
-	const endpoint = endpoints[request.endpointId];
-	const varsEnv = environmentContextResolver.buildEnvironmentVariables(
-		{ environments, selectedEnvironment, services, settings, requests },
-		endpoint?.serviceId,
-		request.id,
-	);
+	const envPairs = useComputedRequestEnvironment(request.id).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
+
 	return (
-		<Tabs
-			aria-label="tabs"
-			size="lg"
-			value={tab}
-			onChange={(_event, newValue) => {
-				const newTabId = newValue as RequestTabType;
-				setTab(newTabId);
-			}}
-		>
-			<TabList color="primary">
-				{requestTabs.map((curTab, index) => (
-					<Tab color={curTab === tab ? 'primary' : 'neutral'} value={curTab} key={index}>
-						{camelCaseToTitle(curTab)}
-					</Tab>
-				))}
-			</TabList>
-			<TabPanel value={'body'}>
-				<RequestBody request={request}></RequestBody>
-			</TabPanel>
-			<TabPanel value="headers">
-				<EnvironmentEditableTable
-					environment={request.headers as Environment}
-					setNewEnvironment={(newEnvironment: Environment) => update({ headers: newEnvironment })}
-					varsEnv={varsEnv}
-				/>
-			</TabPanel>
-			<TabPanel value="queryParams">
-				<QueryParamEditableTable
-					queryParams={request.queryParams}
-					setNewQueryParams={(newQueryParams: QueryParams) => {
-						update({ queryParams: newQueryParams });
-					}}
-					varsEnv={varsEnv}
-				/>
-			</TabPanel>
-			<TabPanel value="scripts">
-				<AccordionGroup>
-					<PrePostScriptDisplay
-						onChange={update}
-						preRequestScript={request.preRequestScript}
-						postRequestScript={request.postRequestScript}
-					/>
-				</AccordionGroup>
-			</TabPanel>
-			<TabPanel value="environment">
-				<EnvironmentEditableTable
-					environment={(request.environmentOverride ?? newEnvironment()) as Environment}
-					setNewEnvironment={(newEnvironment: Environment) => update({ environmentOverride: newEnvironment })}
-					varsEnv={varsEnv}
-				/>
-			</TabPanel>
-		</Tabs>
+		<SprocketTabs
+			tabs={[
+				{ title: 'Body', content: <RequestBody request={request} /> },
+				{
+					title: 'Headers',
+					content: (
+						<EditableData
+							initialValues={request.headers}
+							onChange={(values) => update({ headers: values })}
+							envPairs={envPairs}
+						/>
+					),
+				},
+				{
+					title: 'Query Params',
+					content: (
+						<EditableData
+							initialValues={request.queryParams}
+							onChange={(queryParams) => update({ queryParams })}
+							envPairs={envPairs}
+						/>
+					),
+				},
+				{
+					title: 'Scripts',
+					content: (
+						<AccordionGroup>
+							<PrePostScriptDisplay
+								onChange={update}
+								preRequestScript={request.preRequestScript}
+								postRequestScript={request.postRequestScript}
+							/>
+						</AccordionGroup>
+					),
+				},
+				{
+					title: 'Environment',
+					content: (
+						<EditableData
+							initialValues={request.environmentOverride?.pairs ?? []}
+							onChange={(pairs) => update({ environmentOverride: { ...request.environmentOverride, pairs } })}
+							envPairs={envPairs}
+						/>
+					),
+				},
+				{
+					title: 'Info',
+					content: <RequestInfoSection request={request} />,
+				},
+			]}
+		/>
 	);
 }

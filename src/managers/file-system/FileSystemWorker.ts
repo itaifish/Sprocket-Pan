@@ -1,5 +1,5 @@
+import { log } from '@/utils/logging';
 import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, writeFile } from '@tauri-apps/api/fs';
-import { log } from '../../utils/logging';
 
 export class FileSystemWorker {
 	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -14,13 +14,28 @@ export class FileSystemWorker {
 		return writeFile({ contents, path }, { dir: FileSystemWorker.DEFAULT_DIRECTORY });
 	}
 
+	public static async upsertFile(path: string, contents: string) {
+		const doesExist = await FileSystemWorker.exists(path);
+		if (doesExist) {
+			log.trace(`${path} already exists, no need to create.`);
+			return FileSystemWorker.writeFile(path, contents);
+		} else {
+			log.debug(`${path} does not exist, creating...`);
+			return FileSystemWorker.writeFile(path, contents);
+		}
+	}
+
+	/**
+	 * @returns true if the file was updated and written to, false if not
+	 */
 	public static async tryUpdateFile(path: string, contents: string) {
 		if (await this.exists(path)) {
 			log.trace('File already exists, updating...');
 			await this.writeFile(path, contents);
+			return true;
 		} else {
-			log.warn('File does not exist, exiting...');
-			return 'doesNotExist' as const;
+			log.warn('File does not exist...');
+			return false;
 		}
 	}
 

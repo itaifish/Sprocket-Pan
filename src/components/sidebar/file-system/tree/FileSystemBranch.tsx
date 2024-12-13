@@ -1,13 +1,13 @@
 import { Box, IconButton, List, ListItem, ListItemDecorator } from '@mui/joy';
 import { FileSystemLeafProps } from './FileSystemLeaf';
 import { FileSystemButton } from './FileSystemButton';
-import { selectSettings, selectUiMetadataById } from '../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { LIST_STYLING } from '../../../../styles/list';
-import { useAppDispatch } from '../../../../state/store';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { Folder, FolderOpen } from '@mui/icons-material';
-import { setUiMetadataById } from '../../../../state/active/slice';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { selectSettings, selectUiMetadataById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { LIST_STYLES } from '@/styles/list';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
@@ -22,11 +22,11 @@ export function FileSystemBranch({
 	id,
 	folderSize = 'md',
 }: FileSystemBranchProps) {
-	const style = LIST_STYLING[useSelector(selectSettings).listStyle];
+	const style = LIST_STYLES[useSelector(selectSettings).theme.list];
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const setCollapsed = (value: boolean) => {
-		dispatch(setUiMetadataById({ id: id, collapsed: value }));
+		dispatch(activeActions.setUiMetadataById({ id: id, collapsed: value }));
 	};
 	return (
 		<>

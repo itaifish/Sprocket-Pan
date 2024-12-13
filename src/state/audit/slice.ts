@@ -1,5 +1,6 @@
+import { auditLogManager } from '@/managers/AuditLogManager';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AuditLog, RequestEvent, auditLogManager } from '../../managers/AuditLogManager';
 
 export type AuditLogState = Map<string, AuditLog>;
 const initialAuditLogSliceState: AuditLogState = new Map();
@@ -33,4 +34,4 @@ export const auditLogSlice = createSlice({
 	},
 });
 
-export const { addToAuditLog, clearAuditLogEntry } = auditLogSlice.actions;
+export const auditActions = auditLogSlice.actions;

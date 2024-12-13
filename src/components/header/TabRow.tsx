@@ -1,14 +1,16 @@
 import { TabList, tabClasses } from '@mui/joy';
-import { TabType } from '../../types/state/state';
 import { Tab } from './Tab';
-import { useHorizontalScroll } from '../../hooks/useHorizontalScroll';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
+import { useSingleAxisScroll } from '@/hooks/useSingleAxisScroll';
+import { TabType } from '@/types/state/state';
 
 interface TabRowProps {
 	list: Record<string, TabType>;
 }
 
 export function TabRow({ list }: TabRowProps) {
-	const ref = useHorizontalScroll();
+	const ref = useSingleAxisScroll();
+	const { average: scrollbarTheme } = useScrollbarTheme();
 	return (
 		<TabList
 			ref={ref}
@@ -19,6 +21,8 @@ export function TabRow({ list }: TabRowProps) {
 			disableUnderline
 			id="tabScroll"
 			sx={{
+				...scrollbarTheme,
+				zIndex: 110,
 				overflowX: 'auto',
 				overflowY: 'hidden',
 				scrollSnapType: 'x mandatory',
@@ -27,7 +31,6 @@ export function TabRow({ list }: TabRowProps) {
 						color: `secondary.500`,
 						bgcolor: 'background.surface',
 						borderColor: 'divider',
-						outline: 'none',
 						'&::before': {
 							content: '""',
 							display: 'block',

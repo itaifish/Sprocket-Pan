@@ -1,44 +1,29 @@
 import * as React from 'react';
+import { Box, FormLabel, Grid, Input, Slider } from '@mui/joy';
+import { clamp } from '@/utils/math';
 
-import { Box, Grid, Input, Slider, Typography } from '@mui/joy';
-import { clamp } from '../../../utils/math';
-
-type InputSliderProps = {
+export interface InputSliderProps {
 	label: string;
 	value: number;
-	setValue: (val: number) => void;
+	onChange: (val: number) => void;
 	endDecorator?: React.ReactNode;
 	icon: React.ReactNode;
 	range: {
 		min: number;
 		max: number;
 	};
-};
+}
 
-export function InputSlider({ label, value, setValue, endDecorator, icon, range }: InputSliderProps) {
-	const handleSliderChange = (_event: Event, newValue: number | number[]) => {
-		setValue(newValue as number);
-	};
-
-	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		setValue(event.target.value === '' ? 0 : Number(event.target.value));
-	};
-
-	const handleBlur = () => {
-		setValue(clamp(value, range.min, range.max));
-	};
-
+export function InputSlider({ label, value, onChange, endDecorator, icon, range }: InputSliderProps) {
 	return (
 		<Box sx={{ width: 350 }}>
-			<Typography id={`input-slider-${label}`} gutterBottom>
-				{label}
-			</Typography>
+			<FormLabel id={`input-slider-${label}`}>{label}</FormLabel>
 			<Grid container spacing={2} alignItems="center">
 				<Grid>{icon}</Grid>
 				<Grid xs>
 					<Slider
 						value={typeof value === 'number' ? value : 0}
-						onChange={handleSliderChange}
+						onChange={(_, val) => onChange(val as number)}
 						aria-labelledby={`input-slider-${label}`}
 						min={range.min}
 						max={range.max}
@@ -48,8 +33,8 @@ export function InputSlider({ label, value, setValue, endDecorator, icon, range 
 					<Input
 						sx={{ width: '100px' }}
 						value={value}
-						onChange={handleInputChange}
-						onBlur={(_event) => handleBlur?.()}
+						onChange={(e) => onChange(e.target.value === '' ? 0 : Number(e.target.value))}
+						onBlur={(_) => onChange(clamp(value, range.min, range.max))}
 						endDecorator={endDecorator}
 						type={'number'}
 					/>

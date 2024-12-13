@@ -1,30 +1,23 @@
-import {
-	WorkspaceData,
-	EMPTY_HEADERS,
-	EndpointRequest,
-	EndpointResponse,
-	getRequestBodyCategory,
-	NetworkFetchRequest,
-	RawBodyType,
-	RawBodyTypes,
-	rawBodyTypeToMime,
-	SPHeaders,
-} from '../types/application-data/application-data';
-import { queryParamsToStringReplaceVars } from '../utils/application';
-import { environmentContextResolver } from './EnvironmentContextResolver';
-import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
-import { HeaderUtils } from '../utils/data-utils';
-import { capitalizeWord } from '../utils/string';
-import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
-import { StateAccess } from '../state/types';
-import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
-import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
-import { log } from '../utils/logging';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { CONTENT_TYPE } from '@/constants/request';
+import { StateAccess } from '@/state/types';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { RawBodyType, RawBodyTypes } from '@/types/data/shared';
+import { EndpointResponse, EndpointRequest, NetworkFetchRequest } from '@/types/data/workspace';
+import { SprocketError } from '@/types/state/state';
+import { getEnvValuesFromData, getSettingsFromState, queryParamsToString, toKeyValuePairs } from '@/utils/application';
+import { getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
+import { asyncCallWithTimeout } from '@/utils/functions';
+import { log } from '@/utils/logging';
+import { capitalizeWord } from '@/utils/string';
+import { auditLogManager } from './AuditLogManager';
+import { EnvironmentContextResolver } from './EnvironmentContextResolver';
+import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
+import { RootState } from '@/state/store';
 
-const contentType = 'Content-Type';
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -35,13 +28,14 @@ class NetworkRequestManager {
 	}
 
 	public async runPreScripts(requestId: string, stateAccess: StateAccess, auditLog: AuditLog = []) {
-		const data = stateAccess.getState();
+		const state = stateAccess.getState();
+		const data = state.active;
 		const request = data.requests[requestId];
 		const endpointId = request.endpointId;
 		const endpoint = data.endpoints[endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const preRequestScripts = data.settings.scriptRunnerStrategy.pre.map((strat) => ({
+		const preRequestScripts = getSettingsFromState(state).script.strategy.pre.map((strat) => ({
 			script: scriptObjs[strat]?.preRequestScript,
 			name: `pre${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -67,12 +61,13 @@ class NetworkRequestManager {
 		response: EndpointResponse,
 		auditLog: AuditLog = [],
 	) {
-		const data = stateAccess.getState();
+		const state = stateAccess.getState();
+		const data = state.active;
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const postRequestScripts = data.settings.scriptRunnerStrategy.post.map((strat) => ({
+		const postRequestScripts = getSettingsFromState(state).script.strategy.post.map((strat) => ({
 			script: scriptObjs[strat]?.postRequestScript,
 			name: `post${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -126,81 +121,41 @@ class NetworkRequestManager {
 		return parsedBody as string;
 	}
 
-	public async sendRequest(requestId: string, data: WorkspaceData, auditLog: AuditLog = []) {
+	public async sendRequest(requestId: string, state: RootState, auditLog: AuditLog = []) {
+		const data = state.active;
+		const envValues = getEnvValuesFromData(data, requestId);
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const unparsedUrl = `${service.baseUrl}${endpoint.url}`;
-		const url = environmentContextResolver.resolveVariablesForString(unparsedUrl, data, endpoint.serviceId, request.id);
+		const url = EnvironmentContextResolver.resolveVariablesForString(unparsedUrl, envValues);
 		let body: Record<string, unknown> | unknown[] | undefined = await this.parseRequestForEnvironmentOverrides(request);
 		if (body != undefined && typeof body != 'string') {
-			body = environmentContextResolver.resolveVariablesForMappedObject(body, {
-				data,
-				serviceId: endpoint.serviceId,
-				requestId: request.id,
-			});
+			body = EnvironmentContextResolver.resolveVariablesForMappedObject(body, envValues);
 		}
-		const headers: SPHeaders = structuredClone(EMPTY_HEADERS);
-		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders.__data)}`);
+		const headers = new OrderedKeyValuePairs();
+		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
-		endpoint.baseHeaders.__data
-			.filter((header) => header?.key != null && header?.value != null)
-			.forEach((header) => {
-				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					header.key,
-					data,
-					endpoint.serviceId,
-					request.id,
-				);
-				HeaderUtils.set(
-					headers,
-					parsedKey,
-					environmentContextResolver.resolveVariablesForString(
-						endpoint.baseHeaders[header.key],
-						data,
-						endpoint.serviceId,
-						request.id,
-					),
-				);
-			});
-		request.headers.__data
-			.filter((header) => header?.key != null && header?.value != null)
-			.forEach((header) => {
-				const parsedKey = environmentContextResolver.resolveVariablesForString(
-					header.key,
-					data,
-					endpoint.serviceId,
-					request.id,
-				);
-				HeaderUtils.set(
-					headers,
-					parsedKey,
-					environmentContextResolver.resolveVariablesForString(
-						request.headers[header.key],
-						data,
-						endpoint.serviceId,
-						request.id,
-					),
-				);
-			});
+		endpoint.baseHeaders.forEach((header) => {
+			if (header.value == null) return;
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
+			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
+		});
+		request.headers.forEach((header) => {
+			if (header.value == null) return;
+			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
+			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
+		});
 
-		const fullQueryParams = { ...endpoint.baseQueryParams, ...request.queryParams };
-		let queryParamStr = queryParamsToStringReplaceVars(fullQueryParams, (text) =>
-			environmentContextResolver.resolveVariablesForString(text, data, endpoint.serviceId, request.id),
+		const fullQueryParams = new OrderedKeyValuePairs(endpoint.baseQueryParams, request.queryParams);
+		let queryParamStr = queryParamsToString(fullQueryParams.toArray(), true, (text) =>
+			EnvironmentContextResolver.resolveVariablesForString(text, envValues),
 		);
 		if (queryParamStr) {
 			queryParamStr = `?${queryParamStr}`;
 		}
 
-		const networkRequest = {
-			url: `${url}${queryParamStr}`,
-			method: endpoint.verb,
-			body: this.parseRequestForNetworkCall(request, body) ?? '',
-			headers: headers,
-			dateTime: new Date().getTime(),
-			bodyType: request.rawType,
-		} as const satisfies NetworkFetchRequest;
-
+		const networkRequestBodyText = this.parseRequestForNetworkCall(request, body) ?? '';
 		let networkBody: Body | undefined;
 		const category = getRequestBodyCategory(request.bodyType);
 		if (category === 'table') {
@@ -210,36 +165,42 @@ class NetworkRequestManager {
 				networkBody = Body.json(body as Record<string, string>);
 			}
 		} else if (category !== 'none') {
-			networkBody = Body.text(networkRequest.body);
+			networkBody = Body.text(networkRequestBodyText);
 			// auto-set content type if not already set
-			if (request.headers[contentType] == undefined) {
-				HeaderUtils.set(headers, contentType, rawBodyTypeToMime(networkRequest.bodyType));
+			if (headers.get(CONTENT_TYPE) == undefined) {
+				headers.set(CONTENT_TYPE, rawBodyTypeToMime(request.rawType));
 			}
 		} else {
 			networkBody = undefined;
 		}
 
-		const { __data, ...headersToSend } = networkRequest.headers;
 		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+
+		const networkRequest: NetworkFetchRequest = {
+			url: `${url}${queryParamStr}`,
+			method: endpoint.verb,
+			body: networkRequestBodyText,
+			headers: headers.toObject(),
+			dateTime: new Date().getTime(),
+			bodyType: request.rawType,
+		};
 
 		const networkCall = fetch(networkRequest.url, {
 			method: networkRequest.method,
 			body: networkBody,
-			headers: headersToSend,
+			headers: networkRequest.headers,
 			responseType: ResponseType.Text,
 		});
+
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
 			networkCall,
-			data.settings.timeoutDurationMS,
+			getSettingsFromState(state).request.timeoutMS,
 		);
 		auditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
 		const responseText = res.data as string;
 		const response = {
 			statusCode: res.status,
-			headers: [...Object.entries(res.headers)].reduce<Record<string, string>>((obj, keyValuePair) => {
-				obj[keyValuePair[0]] = keyValuePair[1];
-				return obj;
-			}, {}),
+			headers: toKeyValuePairs(res.headers),
 			bodyType: this.headersContentTypeToBodyType(res.headers['content-type']),
 			body: responseText,
 			dateTime: new Date().getTime(),

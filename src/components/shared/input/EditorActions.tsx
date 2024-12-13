@@ -1,6 +1,6 @@
 import { Stack } from '@mui/joy';
 import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
-import { FormatIcon } from '../buttons/FormatIcon';
+import { FormatButton } from '../buttons/FormatButton';
 
 interface EditorActionsProps {
 	copyText?: string | null;
@@ -9,9 +9,9 @@ interface EditorActionsProps {
 
 export function EditorActions({ copyText, format }: EditorActionsProps) {
 	return (
-		<Stack direction={'row'}>
+		<Stack direction="row">
 			{copyText != null && <CopyToClipboardButton copyText={copyText} />}
-			{format != null && <FormatIcon actionFunction={format} />}
+			{format != null && <FormatButton onChange={format} />}
 		</Stack>
 	);
 }

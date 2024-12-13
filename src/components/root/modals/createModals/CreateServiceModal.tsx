@@ -12,11 +12,11 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType, Service } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
-import { useAppDispatch } from '../../../../state/store';
-import { cloneService } from '../../../../state/active/thunks/services';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { tabTypeIcon } from '@/constants/components';
+import { addNewService } from '@/state/active/thunks/services';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -27,14 +27,9 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const allFieldsValid = serviceNameValid;
 
 	const createServiceFunction = async () => {
-		const newService: Partial<Service> = { name: serviceName };
-		if (serviceDescription) {
-			newService.description = serviceDescription;
-		}
-		if (baseUrl) {
-			newService.baseUrl = baseUrl;
-		}
-		const createdServiceId = await dispatch(cloneService({ data: newService })).unwrap();
+		const createdServiceId = await dispatch(
+			addNewService({ name: serviceName, description: serviceDescription, baseUrl }),
+		).unwrap();
 		dispatch(tabsActions.addTabs({ [createdServiceId]: 'service' }));
 		dispatch(tabsActions.setSelectedTab(createdServiceId));
 	};
@@ -48,7 +43,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 		>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>
-					{iconFromTabType['service']}
+					{tabTypeIcon['service']}
 					Create New Service
 				</DialogTitle>
 				<Divider />

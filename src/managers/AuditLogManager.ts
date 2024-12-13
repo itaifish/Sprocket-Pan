@@ -1,22 +1,5 @@
 import { EventEmitter } from '@tauri-apps/api/shell';
-
-export type RequestEvent = {
-	timestamp: number;
-	chronology: 'before' | 'after';
-	eventType: `${'pre' | 'post'}${'Service' | 'Endpoint' | 'Request'}Script` | 'request' | 'root' | 'standaloneScript';
-	associatedId?: string;
-	error?: string;
-};
-
-export type AuditLog = RequestEvent[];
-
-export type AuditUpdateEvent = 'update';
-
-export type TransformedAuditLog = {
-	before: RequestEvent;
-	after: RequestEvent;
-	innerEvents: TransformedAuditLog[];
-};
+import { AuditLog, AuditUpdateEvent, RequestEvent, TransformedAuditLog } from '../types/data/audit';
 
 type AuditEventEmitterListenerType = {
 	update: (newEvent: RequestEvent) => void;

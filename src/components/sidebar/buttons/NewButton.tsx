@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
-import { useAppDispatch } from '../../../state/store';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
-import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
-import { tabsActions } from '../../../state/tabs/slice';
+import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);

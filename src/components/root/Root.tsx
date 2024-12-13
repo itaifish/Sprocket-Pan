@@ -1,13 +1,13 @@
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { useColorScheme } from '@mui/joy';
-import invoke from '../../utils/invoke';
-import { selectDefaultTheme, selectZoomLevel } from '../../state/active/selectors';
 import { WorkspaceSelector } from '../workspaces/WorkspaceSelector';
 import { Workspace } from './Workspace';
 import { ModalsWrapper } from './modals/ModalsWrapper';
 import { ListenerWrapper } from './listeners/ListenerWrapper';
-import { selectActiveWorkspace } from '../../state/global/selectors';
+import { selectZoomLevel, selectDefaultTheme } from '@/state/active/selectors';
+import { selectActiveWorkspace } from '@/state/global/selectors';
+import { invoke } from '@/utils/invoke';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -24,7 +24,7 @@ export function Root() {
 	}, [zoomLevel]);
 
 	useEffect(() => {
-		setMode(defaultTheme === 'system-default' ? 'system' : defaultTheme);
+		setMode(defaultTheme);
 	}, [defaultTheme]);
 
 	if (activeWorkspace == null) {

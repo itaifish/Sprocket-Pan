@@ -1,10 +1,10 @@
 import { v4 } from 'uuid';
-import { log } from '../../utils/logging';
 import { Request as RequestV2, Url as UrlV2 } from './parseTypes/postman2.0Types';
 import { Url as UrlV21, Request as RequestV21 } from './parseTypes/postman2.1Types';
 import { Body, Header, Item, postmanParseManager } from './postman/PostmanParseManager';
 import yaml from 'js-yaml';
 import { readTextFile } from '@tauri-apps/api/fs';
+import { log } from '@/utils/logging';
 
 type InsomniaCollection = any;
 type Url = UrlV2 | UrlV21;

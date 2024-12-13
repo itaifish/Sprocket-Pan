@@ -1,16 +1,15 @@
-import { PayloadAction } from '@reduxjs/toolkit';
-import { Update, updateEnvironment, updateRequest, updateService } from '../../state/active/slice';
-import { makeRequest } from '../../state/active/thunks/requests';
-import { StateAccess } from '../../state/types';
-import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
-import { EnvironmentUtils, HeaderUtils, QueryParamUtils } from '../../utils/data-utils';
-import { AuditLog, auditLogManager } from '../AuditLogManager';
-import { environmentContextResolver } from '../EnvironmentContextResolver';
-import { scriptRunnerManager } from './ScriptRunnerManager';
+import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { activeActions, Update } from '@/state/active/slice';
+import { StateAccess } from '@/state/types';
+import { AuditLog } from '@/types/data/audit';
+import { EndpointRequest, EndpointResponse, Script } from '@/types/data/workspace';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
-
-type KeyValuePair = { key: string; value: string };
+import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
+import { getEnvValuesFromData } from '@/utils/application';
+import { makeRequest } from '@/state/active/thunks/requests';
+import { auditLogManager } from '../AuditLogManager';
+import { scriptRunnerManager } from './ScriptRunnerManager';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -30,13 +29,13 @@ export function getScriptInjectionCode(
 		requestId: string,
 		modifications: { body?: Record<string, unknown>; queryParams?: KeyValuePair[]; headers?: KeyValuePair[] },
 	) => {
-		const state = getState();
+		const state = getState().active;
 		const request = state.requests[requestId];
 		if (request == null) {
 			return;
 		}
 
-		const update: PayloadAction<Update<EndpointRequest>>['payload'] = { id: requestId };
+		const update: Update<EndpointRequest> = { id: requestId };
 
 		if (modifications.body != undefined) {
 			update.bodyType = 'raw';
@@ -44,15 +43,13 @@ export function getScriptInjectionCode(
 			update.body = JSON.stringify(modifications.body);
 		}
 		if (modifications.queryParams != undefined) {
-			update.queryParams = QueryParamUtils.fromTableData(
-				modifications.queryParams.map((kvp, index) => ({ ...kvp, id: index })),
-			);
+			update.queryParams = new OrderedKeyValuePairs(update.queryParams, modifications.queryParams).toArray();
 		}
 		if (modifications.headers != undefined) {
-			update.headers = HeaderUtils.fromTableData(modifications.headers.map((kvp, index) => ({ ...kvp, id: index })));
+			update.headers = new OrderedKeyValuePairs(update.headers, modifications.headers).toArray();
 		}
 
-		dispatch(updateRequest(update));
+		dispatch(activeActions.updateRequest(update));
 	};
 
 	const fetch = <T = unknown>(url: string, request: HttpOptions) => {
@@ -63,69 +60,65 @@ export function getScriptInjectionCode(
 		return http.fetch<T>(url, modifiedRequest);
 	};
 
-	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
+	const getRequest = () => (requestId != null ? getState().active.requests[requestId] : null);
 
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
-		const data = getState();
+		const data = getState().active;
 		const request = getRequest();
-		if (request == null) {
-			level = 'global';
-		}
-		if (level === 'request') {
-			const newEnv = structuredClone(request!.environmentOverride);
-			EnvironmentUtils.set(newEnv, key, value);
-			dispatch(updateRequest({ id: request!.id, environmentOverride: newEnv }));
-		} else if (level === 'service') {
-			const endpoint = data.endpoints[request!.endpointId];
-			if (!endpoint) {
-				return;
-			}
-			const service = data.services[endpoint.serviceId];
-			if (!service) {
-				return;
-			}
-			const selectedEnvironment = service.selectedEnvironment;
-			if (selectedEnvironment) {
-				const newEnv = structuredClone(service.localEnvironments[selectedEnvironment]);
-				EnvironmentUtils.set(newEnv, key, value);
+		const newPairs = new OrderedKeyValuePairs();
+		switch (level) {
+			case 'request':
+				newPairs.apply(request?.environmentOverride?.pairs);
+				newPairs.set(key, value);
 				dispatch(
-					updateService({
-						id: endpoint.serviceId,
-						localEnvironments: {
-							...service.localEnvironments,
-							[selectedEnvironment]: newEnv,
-						},
+					activeActions.updateRequest({
+						id: request!.id,
+						environmentOverride: { ...request!.environmentOverride, pairs: newPairs.toArray() },
 					}),
 				);
-			}
-		} else if (level === 'global') {
-			const selectedEnvironment = data.selectedEnvironment;
-			const newEnv = structuredClone(data.environments[selectedEnvironment ?? '']);
-			if (newEnv) {
-				EnvironmentUtils.set(newEnv, key, value);
-				dispatch(updateEnvironment(newEnv));
-			}
+				break;
+			case 'service':
+				const endpoint = data.endpoints[request!.endpointId];
+				if (!endpoint) {
+					return;
+				}
+				const service = data.services[endpoint.serviceId];
+				if (!service) {
+					return;
+				}
+				if (service.selectedEnvironment) {
+					const env = service.localEnvironments[service.selectedEnvironment];
+					newPairs.apply(env.pairs);
+					newPairs.set(key, value);
+					dispatch(
+						activeActions.updateService({
+							id: endpoint.serviceId,
+							localEnvironments: {
+								...service.localEnvironments,
+								[service.selectedEnvironment]: { ...env, pairs: newPairs.toArray() },
+							},
+						}),
+					);
+				}
+				break;
+			default:
+				const env = data.environments[data.selectedEnvironment ?? ''];
+				if (env != null) {
+					newPairs.apply(env.pairs);
+					newPairs.set(key, value);
+					dispatch(activeActions.updateEnvironment({ ...env, pairs: newPairs.toArray() }));
+				}
 		}
 	};
 
-	const setQueryParam = (key: string, value: string) => {
+	const setQueryParam = (key: string, value: KeyValueValues) => {
 		const request = getRequest();
 		if (request == null) {
 			return;
 		}
-		const newQueryParams = structuredClone(request.queryParams);
-		QueryParamUtils.add(newQueryParams, key, value);
-		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
-	};
-
-	const setQueryParams = (key: string, values: string[]) => {
-		const request = getRequest();
-		if (request == null) {
-			return;
-		}
-		const newQueryParams = structuredClone(request.queryParams);
-		QueryParamUtils.set(newQueryParams, key, values);
-		dispatch(updateRequest({ id: request.id, queryParams: newQueryParams }));
+		const newQueryParams = new OrderedKeyValuePairs(request.queryParams);
+		newQueryParams.set(key, value);
+		dispatch(activeActions.updateRequest({ id: request.id, queryParams: newQueryParams.toArray() }));
 	};
 
 	const setHeader = (key: string, value: string) => {
@@ -133,38 +126,36 @@ export function getScriptInjectionCode(
 		if (request == null) {
 			return;
 		}
-		const newHeaders = structuredClone(request.headers);
-		HeaderUtils.set(newHeaders, key, value);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
+		const newHeaders = new OrderedKeyValuePairs(request.headers);
+		newHeaders.set(key, value);
+		dispatch(activeActions.updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const deleteHeader = (key: string) => {
 		const request = getRequest();
 		if (request == null) {
 			return;
 		}
-		const newHeaders = structuredClone(request.headers);
-		HeaderUtils.delete(newHeaders, key);
-		dispatch(updateRequest({ id: request.id, headers: newHeaders }));
+		const newHeaders = new OrderedKeyValuePairs(request.headers);
+		newHeaders.delete(key);
+		dispatch(activeActions.updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const getEnvironment = () => {
-		const data = getState();
+		const data = getState().active;
 		const request = getRequest();
 		if (request == null) {
-			return environmentContextResolver.buildEnvironmentVariables(data) as Record<string, string>;
+			return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data)).toObject();
 		}
-		const endpoint = data.endpoints[request.endpointId];
-		const serviceId = endpoint?.serviceId;
-		return environmentContextResolver.buildEnvironmentVariables(data, serviceId, request.id) as Record<string, string>;
+		return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data, request.id)).toObject();
 	};
 
 	const sendRequest = async (requestId: string) => {
 		await dispatch(makeRequest({ requestId, auditLog }));
-		const data = getState();
+		const data = getState().active;
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
 	const getRunnableScripts = () => {
-		const data = getState();
+		const data = getState().active;
 		return Object.values(data.scripts).reduce(
 			(previousValue: Record<string, () => Promise<unknown>>, currentValue: Script) => {
 				return {
@@ -189,7 +180,6 @@ export function getScriptInjectionCode(
 		...getRunnableScripts(),
 		setEnvironmentVariable,
 		setQueryParam,
-		setQueryParams,
 		setHeader,
 		deleteHeader,
 		getEnvironment,
@@ -200,7 +190,7 @@ export function getScriptInjectionCode(
 			return structuredClone(getState());
 		},
 		get activeRequest() {
-			return requestId != null ? structuredClone(getState().requests[requestId]) : null;
+			return requestId != null ? structuredClone(getState().active.requests[requestId]) : null;
 		},
 		get response() {
 			const request = getRequest();

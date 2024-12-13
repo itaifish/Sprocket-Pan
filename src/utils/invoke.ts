@@ -21,7 +21,7 @@ type InvokeMap = {
 
 type InvocationName = keyof InvokeMap;
 
-export default function invoke<TInvocationName extends InvocationName>(
+export function invoke<TInvocationName extends InvocationName>(
 	command: TInvocationName,
 	args: InvokeMap[TInvocationName]['args'],
 ) {

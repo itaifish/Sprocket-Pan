@@ -18,8 +18,56 @@ and not even know, especially while refactoring. By naming them, it becomes
 much more difficult to get them out of order and much easier to fix if they do.
 */
 
-import { WorkspaceData } from '../types/application-data/application-data';
+/*
+You likely DO NOT need to write a save converter to add new properties to the Settings.
+Instead, just make sure to add the new property at src\constants\defaults
+*/
+
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { MS_IN_MINUTE } from '@/constants/constants';
+import { WorkspaceData, HistoricalEndpointResponse, Environment } from '@/types/data/workspace';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
+
+/**
+ * KeyValuePairs for everyone!
+ */
+function toEight(data: WorkspaceData | any) {
+	function consolidateValues(obj: any) {
+		const pairs = new OrderedKeyValuePairs(obj.__data);
+		Object.entries(obj).forEach(([key, value]) => {
+			if (!key.startsWith('__')) {
+				pairs.set(key, value as any);
+			}
+		});
+		return pairs.toArray();
+	}
+	function convertEnv(env: any): Environment {
+		return { id: env.__id, name: env.__name, pairs: consolidateValues(env) };
+	}
+	function convertHistory({ request, response, auditLog }: HistoricalEndpointResponse): HistoricalEndpointResponse {
+		request.headers = consolidateValues(request.headers);
+		response.headers = consolidateValues(response.headers);
+		return { request, response, auditLog };
+	}
+	for (const envId in data.environments) {
+		data.environments[envId] = convertEnv(data.environments[envId]);
+	}
+	for (const servId in data.services) {
+		for (const envId in data.services[servId].localEnvironments) {
+			data.services[servId].localEnvironments[envId] = convertEnv(data.services[servId].localEnvironments[envId]);
+		}
+	}
+	for (const endId in data.endpoints) {
+		data.endpoints[endId].baseHeaders = consolidateValues(data.endpoints[endId].baseHeaders);
+		data.endpoints[endId].baseQueryParams = consolidateValues(data.endpoints[endId].baseQueryParams);
+	}
+	for (const reqId in data.requests) {
+		data.requests[reqId].headers = consolidateValues(data.requests[reqId].headers);
+		data.requests[reqId].queryParams = consolidateValues(data.requests[reqId].queryParams);
+		data.requests[reqId].environmentOverride = convertEnv(data.requests[reqId].environmentOverride);
+		data.requests[reqId].history = data.requests[reqId].history.map((history: any) => convertHistory(history));
+	}
+}
 
 /**
  * add user interface data
@@ -48,7 +96,7 @@ function toFive() {}
  */
 function toFour(data: WorkspaceData | any) {
 	if (data.settings.autoSaveIntervalMS == undefined) {
-		data.settings.autoSaveIntervalMS = 60_000 * 5;
+		data.settings.autoSaveIntervalMS = MS_IN_MINUTE * 5;
 	}
 }
 
@@ -84,21 +132,15 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight] as const;
 
-class SaveUpdateManager {
-	public static readonly INSTANCE = new SaveUpdateManager();
-
-	private constructor() {}
-
-	public getCurrentVersion(): number {
+export class SaveUpdateManager {
+	public static getCurrentVersion(): number {
 		return transformers.length;
 	}
 
-	public update(data: WorkspaceData | any) {
+	public static update(data: WorkspaceData | any) {
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
 	}
 }
-
-export const saveUpdateManager = SaveUpdateManager.INSTANCE;
