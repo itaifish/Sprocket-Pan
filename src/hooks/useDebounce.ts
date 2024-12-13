@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { EventEmitter } from '@tauri-apps/api/shell';
-import { Constants } from '../constants/constants';
+import { Constants } from '@/constants/constants';
 
 interface UseDebounceProps<T> {
 	state: T;

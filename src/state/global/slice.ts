@@ -1,7 +1,8 @@
+import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
+import { GlobalData } from '@/types/data/global';
+import { WorkspaceMetadata } from '@/types/data/workspace';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { GlobalData, WorkspaceMetadata } from '../../types/application-data/application-data';
-import { DEFAULT_SETTINGS } from '../../constants/defaults';
-import { GlobalDataManager } from '../../managers/data/GlobalDataManager';
 
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: WorkspaceMetadata;

@@ -1,7 +1,7 @@
-import { Script } from '../types/application-data/application-data';
-import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
-import { getMonacoInjectedTypeCode } from '../managers/monaco/MonacoInitManager';
+import { getMonacoInjectedTypeCode } from '@/managers/monaco/MonacoInitManager';
+import { Script } from '@/types/data/workspace';
 import { parseScript } from 'esprima';
+import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
 import { log } from './logging';
 
 /**

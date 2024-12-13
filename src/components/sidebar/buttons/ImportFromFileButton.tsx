@@ -1,21 +1,20 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
-import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { injectLoadedData } from '../../../state/active/thunks/data';
-import { useAppDispatch } from '../../../state/store';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { useEffect, useRef, useState } from 'react';
-import OpenApiIcon from '../../../assets/buttonIcons/openapi.svg';
-import PostmanIcon from '../../../assets/buttonIcons/postman.svg';
-import InsomniaIcon from '../../../assets/buttonIcons/insomnia.svg';
-import SprocketIconDark from '../../../assets/logo.svg';
-import SprocketIconLight from '../../../assets/logo-light.svg';
-
-import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
 import { readTextFile } from '@tauri-apps/api/fs';
-import { WorkspaceData } from '../../../types/application-data/application-data';
-import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
+import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
+import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
+import { injectLoadedData } from '@/state/active/thunks/data';
+import { useAppDispatch } from '@/state/store';
+import { WorkspaceData } from '@/types/data/workspace';
+import OpenApiIcon from '@/assets/buttonIcons/openapi.svg';
+import PostmanIcon from '@/assets/buttonIcons/postman.svg';
+import InsomniaIcon from '@/assets/buttonIcons/insomnia.svg';
+import SprocketIconDark from '@/assets/logo.svg';
+import SprocketIconLight from '@/assets/logo-light.svg';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();

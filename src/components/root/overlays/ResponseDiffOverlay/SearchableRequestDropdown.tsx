@@ -1,10 +1,10 @@
 import { Autocomplete, FormControl, FormLabel, IconButton, Stack } from '@mui/joy';
-import { iconFromTabType } from '../../../../types/application-data/application-data';
-import { camelCaseToTitle } from '../../../../utils/string';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import { useAppDispatch } from '../../../../state/store';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { tabTypeIcon } from '@/constants/components';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { camelCaseToTitle } from '@/utils/string';
 
 type SearchableItem = { name: string; id: string };
 
@@ -29,7 +29,7 @@ export function SearchableRequestDropdown<T extends SearchableItem>({
 			<FormLabel>{title}</FormLabel>
 			<Stack direction="row">
 				<Autocomplete
-					startDecorator={iconFromTabType[name]}
+					startDecorator={tabTypeIcon[name]}
 					autoHighlight
 					placeholder={`No ${title} Selected`}
 					value={selected?.id == null ? null : { label: selected.name, id: selected.id }}

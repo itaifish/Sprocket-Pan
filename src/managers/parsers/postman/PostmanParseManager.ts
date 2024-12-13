@@ -1,17 +1,4 @@
 import { v4 } from 'uuid';
-import {
-	Endpoint,
-	EndpointRequest,
-	Environment,
-	QueryParams,
-	RawBodyType,
-	RequestBodyType,
-	RESTfulRequestVerb,
-	RESTfulRequestVerbs,
-	Script,
-	Service,
-	SPHeaders,
-} from '../../../types/application-data/application-data';
 import type {
 	Auth as V200Auth,
 	EventList as V200EventList,
@@ -39,19 +26,29 @@ import type {
 	Description as V210Description,
 } from '../parseTypes/postman2.1Types';
 import mime from 'mime';
-import {
-	camelCaseToTitle,
-	getLongestCommonSubstringStartingAtBeginning,
-	getStringDifference,
-	toValidFunctionName,
-} from '../../../utils/string';
 import { readTextFile } from '@tauri-apps/api/fs';
-import { log } from '../../../utils/logging';
+
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';
 import { CONTENT_TYPE } from '../../../constants/request';
 import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
 import { cloneEnv } from '../../../utils/application';
+import {
+	QueryParams,
+	RawBodyType,
+	RESTfulRequestVerbs,
+	RESTfulRequestVerb,
+	SPHeaders,
+	RequestBodyType,
+} from '@/types/data/shared';
+import { Service, Endpoint, EndpointRequest, Environment, Script } from '@/types/data/workspace';
+import { log } from '@/utils/logging';
+import {
+	toValidFunctionName,
+	getLongestCommonSubstringStartingAtBeginning,
+	getStringDifference,
+	camelCaseToTitle,
+} from '@/utils/string';
 
 type PostmanCollection = V200Schema | V210Schema;
 

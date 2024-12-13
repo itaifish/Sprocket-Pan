@@ -1,20 +1,20 @@
 import { Typography, Card, Divider, Stack, IconButton, Box } from '@mui/joy';
-import { EndpointRequest } from '../../../types/application-data/application-data';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectFullRequestInfoById } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { PanelProps } from '../panels.interface';
-import { EditableText } from '../../shared/input/EditableText';
 import { RequestEditTabs } from './RequestEditTabs';
 import { RequestActions, ResponseState } from './RequestActions';
 import { defaultResponse } from './constants';
 import { ResponsePanel } from './response/ResponsePanel';
-import { activeActions } from '../../../state/active/slice';
 import EditIcon from '@mui/icons-material/Edit';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { tabsActions } from '../../../state/tabs/slice';
-import { DissolvingButton } from '../../shared/buttons/DissolvingButton';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { DissolvingButton } from '@/components/shared/buttons/DissolvingButton';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { selectFullRequestInfoById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { EndpointRequest } from '@/types/data/workspace';
+import { PanelProps } from '../panels.interface';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));

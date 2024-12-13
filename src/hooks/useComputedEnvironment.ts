@@ -1,13 +1,13 @@
-import { useSelector } from 'react-redux';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
 import {
-	selectEndpointById,
-	selectEnvironments,
-	selectRequestsById,
 	selectSecrets,
 	selectSelectedEnvironmentValue,
+	selectEnvironments,
 	selectServiceSelectedEnvironmentValue,
-} from '../state/active/selectors';
-import { EnvironmentContextResolver } from '../managers/EnvironmentContextResolver';
+	selectRequestsById,
+	selectEndpointById,
+} from '@/state/active/selectors';
+import { useSelector } from 'react-redux';
 
 function useRootEnvironmentArgs() {
 	const secrets = useSelector(selectSecrets);

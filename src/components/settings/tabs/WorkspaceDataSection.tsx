@@ -2,14 +2,14 @@ import { Button, Stack, Typography } from '@mui/joy';
 import { useState } from 'react';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import SaveIcon from '@mui/icons-material/Save';
-import { useAppDispatch } from '../../../state/store';
-import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import { useSelector } from 'react-redux';
-import { saveActiveData } from '../../../state/active/thunks/data';
-import { selectActiveState } from '../../../state/active/selectors';
-import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { activeActions } from '../../../state/active/slice';
+import { AreYouSureModal } from '@/components/shared/modals/AreYouSureModal';
+import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
+import { selectActiveState } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { saveActiveData } from '@/state/active/thunks/data';
+import { useAppDispatch } from '@/state/store';
 
 export interface WorkspaceDataSectionProps {
 	goToWorkspaceSelection: () => void;

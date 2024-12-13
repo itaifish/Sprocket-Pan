@@ -1,4 +1,4 @@
-import { HistoricalEndpointResponse } from '../../../types/application-data/application-data';
+import { HistoricalEndpointResponse } from '@/types/data/workspace';
 
 export const defaultResponse: HistoricalEndpointResponse = {
 	response: {

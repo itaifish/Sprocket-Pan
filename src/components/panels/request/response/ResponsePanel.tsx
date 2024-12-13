@@ -1,12 +1,12 @@
 import { Typography, Divider, Stack } from '@mui/joy';
-import { EndpointRequest, HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
-import { useAppDispatch } from '../../../../state/store';
 import { HistoryControl, responseStateToNumber } from './HistoryControl';
 import { ResponseInfo } from './ResponseInfo';
 import { ResponseState } from '../RequestActions';
-import { formatFullDate } from '../../../../utils/string';
 import { OpenDiffToolButton } from './OpenDiffToolButton';
-import { activeActions } from '../../../../state/active/slice';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { EndpointRequest, HistoricalEndpointResponse } from '@/types/data/workspace';
+import { formatFullDate } from '@/utils/string';
 
 function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
 	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;

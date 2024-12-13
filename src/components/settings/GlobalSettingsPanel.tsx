@@ -1,13 +1,13 @@
 import { Box } from '@mui/joy';
 import { useMemo, useState } from 'react';
-import { useAppDispatch } from '../../state/store';
 import { useSelector } from 'react-redux';
-import { globalActions } from '../../state/global/slice';
-import { mergeDeep } from '../../utils/variables';
 import { SettingsTabs } from './tabs/SettingsTabs';
 import { SettingsBar } from './SettingsBar';
 import { SettingsPanelProps } from './SettingsPanel';
-import { selectGlobalLastSaved, selectGlobalSettings } from '../../state/global/selectors';
+import { selectGlobalLastSaved, selectGlobalSettings } from '@/state/global/selectors';
+import { globalActions } from '@/state/global/slice';
+import { useAppDispatch } from '@/state/store';
+import { mergeDeep } from '@/utils/variables';
 
 export function GlobalSettingsPanel({ onClose }: SettingsPanelProps) {
 	const lastSaved = useSelector(selectGlobalLastSaved);

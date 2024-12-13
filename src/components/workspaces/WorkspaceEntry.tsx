@@ -1,16 +1,16 @@
-import { WorkspaceMetadata } from '../../types/application-data/application-data';
 import { Button, Card, Stack, Typography } from '@mui/joy';
-import { formatFullDate } from '../../utils/string';
 import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useAppDispatch } from '../../state/store';
+import { loadAndSelectWorkspace } from '@/state/global/thunks';
+import { useAppDispatch } from '@/state/store';
+import { WorkspaceMetadata } from '@/types/data/workspace';
+import { formatFullDate } from '@/utils/string';
+import { EllipsisTypography } from '../shared/EllipsisTypography';
+import { GradientBorderBoundingBox } from '../shared/GradientBorderBoundingBox';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
 import { TextAvatar } from '../shared/TextAvatar';
-import { loadAndSelectWorkspace } from '../../state/global/thunks';
-import { GradientBorderBoundingBox } from '../shared/GradientBorderBoundingBox';
-import { EllipsisTypography } from '../shared/EllipsisTypography';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;

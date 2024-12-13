@@ -1,12 +1,12 @@
 import { Box, ListItemButton } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { FileSystemDropdown, FileSystemMenuOption } from '../FileSystemDropdown';
-import { useAppDispatch } from '../../../../state/store';
-import { selectIsActiveTab } from '../../../../state/tabs/selectors';
 import { useSelector } from 'react-redux';
-import { TabType } from '../../../../types/state/state';
-import { tabsActions } from '../../../../state/tabs/slice';
-import { HoverDecorator } from '../../../shared/HoverDecorator';
+import { HoverDecorator } from '@/components/shared/HoverDecorator';
+import { useAppDispatch } from '@/state/store';
+import { selectIsActiveTab } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
+import { TabType } from '@/types/state/state';
 
 export interface FileSystemButtonProps extends PropsWithChildren {
 	id: string;

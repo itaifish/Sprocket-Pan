@@ -1,6 +1,6 @@
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 import { Box, Sheet } from '@mui/joy';
 import { PropsWithChildren } from 'react';
-import { useScrollbarTheme } from '../../hooks/useScrollbarTheme';
 
 interface SideDrawerProps extends PropsWithChildren {
 	open: boolean;

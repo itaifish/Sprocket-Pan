@@ -1,10 +1,10 @@
+import { selectUiMetadataById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
 import { List, ListItem, ListSubheader, Stack } from '@mui/joy';
 import { PropsWithChildren } from 'react';
-import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
-import { useAppDispatch } from '../../../../state/store';
 import { useSelector } from 'react-redux';
-import { selectUiMetadataById } from '../../../../state/active/selectors';
-import { activeActions } from '../../../../state/active/slice';
+import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
 
 interface FileSystemTrunkProps extends PropsWithChildren {
 	id: string;

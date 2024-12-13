@@ -1,5 +1,5 @@
+import { log } from '@/utils/logging';
 import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, writeFile } from '@tauri-apps/api/fs';
-import { log } from '../../utils/logging';
 
 export class FileSystemWorker {
 	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;

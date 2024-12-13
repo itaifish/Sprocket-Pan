@@ -1,8 +1,8 @@
 import { Box, Divider, Stack, Typography } from '@mui/joy';
-import { EditableTextArea } from '../../shared/input/EditableTextArea';
 import { InformationSection } from './InformationSection';
 import { RecentRequestsSection } from './RecentRequestsSection';
 import { SectionProps } from './sectionProps';
+import { EditableTextArea } from '@/components/shared/input/EditableTextArea';
 
 export function GeneralSection({ data, onChange }: SectionProps) {
 	return (

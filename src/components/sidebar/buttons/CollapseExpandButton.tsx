@@ -1,7 +1,7 @@
 import { IconButton } from '@mui/joy';
 import KeyboardArrowDownRoundedIcon from '@mui/icons-material/KeyboardArrowDownRounded';
 import KeyboardArrowLeftRoundedIcon from '@mui/icons-material/KeyboardArrowLeftRounded';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 
 interface CollapseExpandButtonProps {
 	collapsed: boolean;

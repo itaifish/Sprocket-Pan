@@ -1,9 +1,9 @@
+import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
+import { fileSystemEmitter, FILE_SYSTEM_CHANGE_EVENT } from '@/managers/file-system/FileSystemEmitter';
+import { FileSystemManager } from '@/managers/file-system/FileSystemManager';
+import { globalActions } from '@/state/global/slice';
+import { useAppDispatch } from '@/state/store';
 import { useEffect } from 'react';
-import { FileSystemManager } from '../managers/file-system/FileSystemManager';
-import { useAppDispatch } from '../state/store';
-import { globalActions } from '../state/global/slice';
-import { GlobalDataManager } from '../managers/data/GlobalDataManager';
-import { FILE_SYSTEM_CHANGE_EVENT, fileSystemEmitter } from '../managers/file-system/FileSystemEmitter';
 
 export function useFileSystemSynchronization() {
 	const dispatch = useAppDispatch();

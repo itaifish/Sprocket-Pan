@@ -1,17 +1,17 @@
 import { ListSubheader, Chip, ListItemContent } from '@mui/joy';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { useAppDispatch } from '../../../state/store';
-import { addNewEndpointById } from '../../../state/active/thunks/endpoints';
-import { addNewRequest } from '../../../state/active/thunks/requests';
 import { useSelector } from 'react-redux';
-import { selectEndpointById } from '../../../state/active/selectors';
-import { selectFilteredNestedIds } from '../../../state/tabs/selectors';
 import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
-import { EllipsisTypography } from '../../shared/EllipsisTypography';
 import { FileSystemBranch } from './tree/FileSystemBranch';
-import { tabsActions } from '../../../state/tabs/slice';
-import { verbColors } from '../../../constants/style';
+import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
+import { verbColors } from '@/constants/style';
+import { selectEndpointById } from '@/state/active/selectors';
+import { addNewEndpointById } from '@/state/active/thunks/endpoints';
+import { addNewRequest } from '@/state/active/thunks/requests';
+import { useAppDispatch } from '@/state/store';
+import { selectFilteredNestedIds } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
 
 interface EndpointFileSystemProps {
 	endpointId: string;

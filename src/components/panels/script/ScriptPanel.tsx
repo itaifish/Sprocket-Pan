@@ -1,6 +1,4 @@
 import { useSelector } from 'react-redux';
-import { selectScript, selectScripts, selectSettings } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
 import {
 	Button,
 	Chip,
@@ -16,30 +14,32 @@ import {
 } from '@mui/joy';
 import { Editor, Monaco } from '@monaco-editor/react';
 import { useState, useRef, useEffect } from 'react';
-import { Script } from '../../../types/application-data/application-data';
-import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { toValidFunctionName } from '../../../utils/string';
 import Code from '@mui/icons-material/Code';
 import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import { asyncCallWithTimeout, getVariablesFromCode, VariableFromCode } from '../../../utils/functions';
 import FunctionsIcon from '@mui/icons-material/Functions';
 import ClassIcon from '@mui/icons-material/Class';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { runScript } from '../../../state/active/thunks/requests';
 import { editor } from 'monaco-editor';
-import { PanelProps } from '../panels.interface';
-import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
-import { EditableText } from '../../shared/input/EditableText';
-import { sleep } from '../../../utils/misc';
 import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
-import { Constants } from '../../../constants/constants';
-import { FormatButton } from '../../shared/buttons/FormatButton';
-import { useEditorTheme } from '../../../hooks/useEditorTheme';
-import { activeActions } from '../../../state/active/slice';
+import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
+import { FormatButton } from '@/components/shared/buttons/FormatButton';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Constants } from '@/constants/constants';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useEditorTheme } from '@/hooks/useEditorTheme';
+import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
+import { selectScript, selectScripts, selectSettings } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { runScript } from '@/state/active/thunks/requests';
+import { useAppDispatch } from '@/state/store';
+import { Script } from '@/types/data/workspace';
+import { VariableFromCode, getVariablesFromCode, asyncCallWithTimeout } from '@/utils/functions';
+import { sleep } from '@/utils/misc';
+import { toValidFunctionName } from '@/utils/string';
+import { PanelProps } from '../panels.interface';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,

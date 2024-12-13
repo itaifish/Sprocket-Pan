@@ -1,8 +1,8 @@
+import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
+import { statusCodes } from '@/constants/statusCodes';
+import { EndpointResponse } from '@/types/data/workspace';
+import { getStatusCodeColor } from '@/utils/string';
 import { Typography } from '@mui/joy';
-import { EndpointResponse } from '../../../../types/application-data/application-data';
-import { getStatusCodeColor } from '../../../../utils/string';
-import { SprocketEditor } from '../../../shared/input/SprocketEditor';
-import { statusCodes } from '../../../../constants/statusCodes';
 
 export function ResponseBody({ response }: { response: EndpointResponse }) {
 	let editorType = 'text';

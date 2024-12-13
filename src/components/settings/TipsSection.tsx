@@ -1,11 +1,11 @@
 /* eslint-disable react/jsx-key */
 // disabling jsx-key because we don't need keys for single items picked from an array
+import { COMMAND } from '@/managers/ShortcutManager';
+import { TIPS_SECTION } from '@/types/data/settings';
 import { Box, Chip, Divider, Stack, Typography } from '@mui/joy';
-import { COMMAND } from '../../managers/ShortcutManager';
+import { PropsWithChildren } from 'react';
 import { Keys } from '../shared/Keys';
 import { A } from '../shared/Link';
-import { PropsWithChildren } from 'react';
-import { TIPS_SECTION } from '../../types/settings/settings';
 
 const DYK_LABEL = 'Did You Know?';
 

@@ -2,14 +2,14 @@ import { Button, FormControl, FormLabel, Stack, Typography } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
 import { invoke } from '@tauri-apps/api';
-import { log } from '../../../utils/logging';
 import TimerIcon from '@mui/icons-material/Timer';
-import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
-import { MS_IN_MINUTE } from '../../../constants/constants';
 import { SettingsTabProps } from './types';
 import { WorkspaceDataSection, WorkspaceDataSectionProps } from './WorkspaceDataSection';
 import { SettingsInput, SettingsSwitch } from './SettingsFields';
-import { toNumberOrUndefined } from '../../../utils/math';
+import { MS_IN_MINUTE } from '@/constants/constants';
+import { FileSystemWorker } from '@/managers/file-system/FileSystemWorker';
+import { log } from '@/utils/logging';
+import { toNumberOrUndefined } from '@/utils/math';
 
 export type DataTabProps = SettingsTabProps & Partial<WorkspaceDataSectionProps>;
 

@@ -12,11 +12,11 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
-import { useAppDispatch } from '../../../../state/store';
-import { addNewService } from '../../../../state/active/thunks/services';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { tabTypeIcon } from '@/constants/components';
+import { addNewService } from '@/state/active/thunks/services';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -43,7 +43,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 		>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>
-					{iconFromTabType['service']}
+					{tabTypeIcon['service']}
 					Create New Service
 				</DialogTitle>
 				<Divider />

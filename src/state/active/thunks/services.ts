@@ -1,10 +1,10 @@
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { Service } from '@/types/data/workspace';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Service } from '../../../types/application-data/application-data';
-import { RootState } from '../../store';
-import { createNewServiceObject } from './util';
+import { activeThunkName, activeActions } from '../slice';
 import { addNewEndpoint } from './endpoints';
-import { tabsActions } from '../../tabs/slice';
-import { activeActions, activeThunkName } from '../slice';
+import { createNewServiceObject } from './util';
 
 interface CloneServiceInput {
 	data?: Partial<Omit<Service, 'id'>>;

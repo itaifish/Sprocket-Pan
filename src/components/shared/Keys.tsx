@@ -1,5 +1,5 @@
+import { COMMAND, ShortcutManager } from '@/managers/ShortcutManager';
 import { Chip } from '@mui/joy';
-import { COMMAND, ShortcutManager } from '../../managers/ShortcutManager';
 
 interface KeysProps {
 	commands: COMMAND[];

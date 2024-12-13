@@ -1,14 +1,14 @@
 import { Box } from '@mui/joy';
 import { useMemo, useState } from 'react';
-import { useAppDispatch } from '../../state/store';
 import { useSelector } from 'react-redux';
-import { selectActiveState, selectWorkspaceSettings } from '../../state/active/selectors';
-import { globalActions } from '../../state/global/slice';
-import { mergeDeep } from '../../utils/variables';
 import { SettingsTabs } from './tabs/SettingsTabs';
 import { SettingsBar } from './SettingsBar';
-import { activeActions } from '../../state/active/slice';
-import { selectGlobalSettings } from '../../state/global/selectors';
+import { selectActiveState, selectWorkspaceSettings } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { selectGlobalSettings } from '@/state/global/selectors';
+import { globalActions } from '@/state/global/slice';
+import { useAppDispatch } from '@/state/store';
+import { mergeDeep } from '@/utils/variables';
 
 export interface SettingsPanelProps {
 	onClose: () => void;

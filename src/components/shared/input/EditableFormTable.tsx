@@ -1,9 +1,9 @@
 import { IconButton, Input, Sheet, Table } from '@mui/joy';
-import { useDebounce } from '../../../hooks/useDebounce';
 import { useEffect, useState } from 'react';
 import { SprocketTooltip } from '../SprocketTooltip';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import { useDebounce } from '@/hooks/useDebounce';
 
 type Table = Record<string, string>;
 

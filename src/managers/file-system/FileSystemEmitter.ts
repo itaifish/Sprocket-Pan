@@ -1,6 +1,6 @@
-import { log } from '../../utils/logging';
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { FileSystemWorker } from './FileSystemWorker';
+import { log } from '@/utils/logging';
 
 type WorkspacePaths = { metadata: string; root: string };
 export const FILE_SYSTEM_CHANGE_EVENT = 'fsChange';

@@ -12,13 +12,13 @@ import {
 	ModalDialog,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectEnvironments } from '../../../../state/active/selectors';
-import { useAppDispatch } from '../../../../state/store';
-import { addNewEnvironment } from '../../../../state/active/thunks/environments';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { tabTypeIcon } from '@/constants/components';
+import { selectEnvironments } from '@/state/active/selectors';
+import { addNewEnvironment } from '@/state/active/thunks/environments';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const [envName, setEnvName] = useState('');
@@ -44,7 +44,7 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 		<Modal open={open} onClose={closeFunc}>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>
-					{iconFromTabType['environment']}
+					{tabTypeIcon['environment']}
 					Create New Environment
 				</DialogTitle>
 				<Divider />

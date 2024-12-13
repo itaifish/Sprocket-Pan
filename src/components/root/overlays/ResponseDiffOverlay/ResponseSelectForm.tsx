@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Endpoint, EndpointRequest, Service } from '../../../../types/application-data/application-data';
 import { useSelector } from 'react-redux';
-import { selectEndpoints, selectRequests, selectServices } from '../../../../state/active/selectors';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
 import { FormControl, FormLabel, Stack, Typography } from '@mui/joy';
-import { HistoryControl, responseStateToNumber } from '../../../panels/request/response/HistoryControl';
-import { ResponseState } from '../../../panels/request/RequestActions';
-import { formatShortFullDate } from '../../../../utils/string';
-import { BREAK_ALL_TEXT } from '../../../../styles/text';
 import { SxProps } from '@mui/joy/styles/types';
+import { ResponseState } from '@/components/panels/request/RequestActions';
+import { responseStateToNumber, HistoryControl } from '@/components/panels/request/response/HistoryControl';
+import { selectServices, selectEndpoints, selectRequests } from '@/state/active/selectors';
+import { BREAK_ALL_TEXT } from '@/styles/text';
+import { EndpointRequest, Endpoint, Service } from '@/types/data/workspace';
+import { formatShortFullDate } from '@/utils/string';
 
 export type SelectedResponse = { request: EndpointRequest; index: number };
 

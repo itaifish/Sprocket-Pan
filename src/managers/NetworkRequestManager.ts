@@ -1,27 +1,22 @@
-import {
-	WorkspaceData,
-	EndpointRequest,
-	EndpointResponse,
-	getRequestBodyCategory,
-	NetworkFetchRequest,
-	RawBodyType,
-	RawBodyTypes,
-	rawBodyTypeToMime,
-} from '../types/application-data/application-data';
-import { getEnvValuesFromData, queryParamsToString, toKeyValuePairs } from '../utils/application';
-import { EnvironmentContextResolver } from './EnvironmentContextResolver';
-import { asyncCallWithTimeout } from '../utils/functions';
 import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
-import { capitalizeWord } from '../utils/string';
-import { AuditLog, RequestEvent, auditLogManager } from './AuditLogManager';
-import { StateAccess } from '../state/types';
-import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
-import { SprocketError } from '../types/state/state';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
-import { log } from '../utils/logging';
-import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
-import { CONTENT_TYPE } from '../constants/request';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { CONTENT_TYPE } from '@/constants/request';
+import { StateAccess } from '@/state/types';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { RawBodyType, RawBodyTypes } from '@/types/data/shared';
+import { EndpointResponse, EndpointRequest, NetworkFetchRequest } from '@/types/data/workspace';
+import { SprocketError } from '@/types/state/state';
+import { getEnvValuesFromData, getSettingsFromState, queryParamsToString, toKeyValuePairs } from '@/utils/application';
+import { getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
+import { asyncCallWithTimeout } from '@/utils/functions';
+import { log } from '@/utils/logging';
+import { capitalizeWord } from '@/utils/string';
+import { auditLogManager } from './AuditLogManager';
+import { EnvironmentContextResolver } from './EnvironmentContextResolver';
+import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
+import { RootState } from '@/state/store';
 
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
@@ -33,13 +28,14 @@ class NetworkRequestManager {
 	}
 
 	public async runPreScripts(requestId: string, stateAccess: StateAccess, auditLog: AuditLog = []) {
-		const data = stateAccess.getState();
+		const state = stateAccess.getState();
+		const data = state.active;
 		const request = data.requests[requestId];
 		const endpointId = request.endpointId;
 		const endpoint = data.endpoints[endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const preRequestScripts = data.settings.script.strategy.pre.map((strat) => ({
+		const preRequestScripts = getSettingsFromState(state).script.strategy.pre.map((strat) => ({
 			script: scriptObjs[strat]?.preRequestScript,
 			name: `pre${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -65,12 +61,13 @@ class NetworkRequestManager {
 		response: EndpointResponse,
 		auditLog: AuditLog = [],
 	) {
-		const data = stateAccess.getState();
+		const state = stateAccess.getState();
+		const data = state.active;
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const postRequestScripts = data.settings.script.strategy.post.map((strat) => ({
+		const postRequestScripts = getSettingsFromState(state).script.strategy.post.map((strat) => ({
 			script: scriptObjs[strat]?.postRequestScript,
 			name: `post${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
@@ -124,7 +121,8 @@ class NetworkRequestManager {
 		return parsedBody as string;
 	}
 
-	public async sendRequest(requestId: string, data: WorkspaceData, auditLog: AuditLog = []) {
+	public async sendRequest(requestId: string, state: RootState, auditLog: AuditLog = []) {
+		const data = state.active;
 		const envValues = getEnvValuesFromData(data, requestId);
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
@@ -196,7 +194,7 @@ class NetworkRequestManager {
 
 		const res: Awaited<ReturnType<typeof fetch>> = await asyncCallWithTimeout(
 			networkCall,
-			data.settings.request.timeoutMS,
+			getSettingsFromState(state).request.timeoutMS,
 		);
 		auditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
 		const responseText = res.data as string;

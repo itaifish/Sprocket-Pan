@@ -1,9 +1,9 @@
+import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
+import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
+import { HoverDecorator } from '@/components/shared/HoverDecorator';
+import { SprocketTable } from '@/components/shared/SprocketTable';
+import { toKeyValuePairs } from '@/utils/application';
 import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Box } from '@mui/joy';
-import { KeyValuePair } from '../../../../classes/OrderedKeyValuePairs';
-import { toKeyValuePairs } from '../../../../utils/application';
-import { SprocketTable } from '../../../shared/SprocketTable';
-import { CopyToClipboardButton } from '../../../shared/buttons/CopyToClipboardButton';
-import { HoverDecorator } from '../../../shared/HoverDecorator';
 
 interface HeadersDisplayTableProps {
 	headers?: KeyValuePair[] | null | Record<string, string>;

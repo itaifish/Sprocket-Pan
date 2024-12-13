@@ -1,5 +1,5 @@
-import { Settings } from '../../../types/settings/settings';
-import { RecursivePartial } from '../../../types/utils/utils';
+import { Settings } from '@/types/data/settings';
+import { RecursivePartial } from '@/types/utils/utils';
 
 export interface SettingsTabProps {
 	overlay?: RecursivePartial<Settings>;

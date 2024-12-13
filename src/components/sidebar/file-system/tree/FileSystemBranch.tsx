@@ -1,13 +1,13 @@
 import { Box, IconButton, List, ListItem, ListItemDecorator } from '@mui/joy';
 import { FileSystemLeafProps } from './FileSystemLeaf';
 import { FileSystemButton } from './FileSystemButton';
-import { selectSettings, selectUiMetadataById } from '../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../../state/store';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import { Folder, FolderOpen } from '@mui/icons-material';
-import { activeActions } from '../../../../state/active/slice';
-import { LIST_STYLES } from '../../../../styles/list';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { selectSettings, selectUiMetadataById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { LIST_STYLES } from '@/styles/list';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;

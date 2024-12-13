@@ -1,5 +1,5 @@
-import { BREAK_ALL_TEXT } from '../../styles/text';
-import { COMMAND, ShortcutManager } from '../../managers/ShortcutManager';
+import { ShortcutManager, COMMAND } from '@/managers/ShortcutManager';
+import { BREAK_ALL_TEXT } from '@/styles/text';
 import { open } from '@tauri-apps/api/shell';
 
 interface UriTypographyProps {

@@ -23,9 +23,9 @@ You likely DO NOT need to write a save converter to add new properties to the Se
 Instead, just make sure to add the new property at src\constants\defaults
 */
 
-import { OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
-import { MS_IN_MINUTE } from '../constants/constants';
-import { Environment, HistoricalEndpointResponse, WorkspaceData } from '../types/application-data/application-data';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { MS_IN_MINUTE } from '@/constants/constants';
+import { WorkspaceData, HistoricalEndpointResponse, Environment } from '@/types/data/workspace';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
 /**

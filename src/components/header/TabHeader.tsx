@@ -1,12 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { Sheet, TabPanel, Tabs } from '@mui/joy';
-
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../state/store';
-import { selectTabsState } from '../../state/tabs/selectors';
-import { TabContent } from '../panels/TabContent';
 import { TabRow } from './TabRow';
-import { tabsActions } from '../../state/tabs/slice';
+import { useAppDispatch } from '@/state/store';
+import { selectTabsState } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
+import { TabContent } from '../panels/TabContent';
 
 export function TabHeader() {
 	const { list, selected } = useSelector(selectTabsState);

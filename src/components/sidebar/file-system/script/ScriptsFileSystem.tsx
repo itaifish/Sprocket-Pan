@@ -2,11 +2,11 @@ import { Box, ListDivider } from '@mui/joy';
 import { ScriptFileSystem } from './ScriptFileSystem';
 import { useSelector } from 'react-redux';
 import { useMemo, useState } from 'react';
-import { selectScripts } from '../../../../state/active/selectors';
-import { SearchField } from '../../../shared/SearchField';
+import { SearchField } from '@/components/shared/SearchField';
+import { ELEMENT_ID } from '@/constants/uiElementIds';
+import { selectScripts } from '@/state/active/selectors';
+import { searchScripts } from '@/utils/search';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
-import { searchScripts } from '../../../../utils/search';
-import { ELEMENT_ID } from '../../../../constants/uiElementIds';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);

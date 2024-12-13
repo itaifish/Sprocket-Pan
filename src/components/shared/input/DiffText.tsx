@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { DiffEditor, DiffEditorProps } from '@monaco-editor/react';
-import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { editor } from 'monaco-editor';
-import { useEditorTheme } from '../../../hooks/useEditorTheme';
+import { useEditorTheme } from '@/hooks/useEditorTheme';
+import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
 
 const diffOptions = { ...defaultEditorOptions, readOnly: true, domReadOnly: true, originalEditable: false };
 

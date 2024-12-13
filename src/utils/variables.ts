@@ -1,5 +1,5 @@
-import { KeyValuePair } from '../classes/OrderedKeyValuePairs';
-import { RecursivePartial } from '../types/utils/utils';
+import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
+import { RecursivePartial } from '@/types/utils/utils';
 
 export function replaceValuesByKey(text: string, values: KeyValuePair<string>[] = []) {
 	let newText = text;

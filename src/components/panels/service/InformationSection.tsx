@@ -1,11 +1,11 @@
 import { Select, Stack, Typography, Option } from '@mui/joy';
-import { Service } from '../../../types/application-data/application-data';
-import { camelCaseToTitle } from '../../../utils/string';
-import { EditableText } from '../../shared/input/EditableText';
 import { SectionProps } from './sectionProps';
 import { Link } from '@mui/icons-material';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { SprocketTable } from '../../shared/SprocketTable';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { SprocketTable } from '@/components/shared/SprocketTable';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { Service } from '@/types/data/workspace';
+import { camelCaseToTitle } from '@/utils/string';
 
 const serviceDataKeys = ['version', 'baseUrl'] as const satisfies readonly (keyof Service)[];
 

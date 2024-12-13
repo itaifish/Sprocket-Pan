@@ -1,5 +1,5 @@
+import { maxAmplitude } from '@/utils/math';
 import { useEffect, useRef } from 'react';
-import { maxAmplitude } from '../utils/math';
 
 export function useSingleAxisScroll(axis: 'left' | 'top' = 'left') {
 	const scrollRef = useRef<HTMLDivElement | null>(null);

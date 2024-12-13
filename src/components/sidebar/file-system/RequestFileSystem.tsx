@@ -1,15 +1,15 @@
 import { ListItemDecorator, ListSubheader } from '@mui/joy';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { useAppDispatch } from '../../../state/store';
-import { addNewRequestFromId } from '../../../state/active/thunks/requests';
-import { selectEndpointById, selectRequestsById } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
 import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
-import { EllipsisSpan } from '../../shared/EllipsisTypography';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
-import { tabsActions } from '../../../state/tabs/slice';
 import { Add, Close } from '@mui/icons-material';
-import { activeActions } from '../../../state/active/slice';
+import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
+import { selectRequestsById, selectEndpointById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { addNewRequestFromId } from '@/state/active/thunks/requests';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 interface RequestFileSystemProps {
 	requestId: string;

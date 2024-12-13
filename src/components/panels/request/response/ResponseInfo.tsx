@@ -2,12 +2,12 @@ import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Typograp
 import { ResponseBody } from './ResponseBody';
 import { HeadersDisplayTable } from './HeadersDisplayTable';
 import { VisualEventLog } from './VisualEventLog';
-import { HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
-import { formatFullDate } from '../../../../utils/string';
-import { statusCodes } from '../../../../constants/statusCodes';
-import { UriTypography } from '../../../shared/UriTypography';
-import { toKeyValuePairs } from '../../../../utils/application';
-import { SprocketTabs } from '../../../shared/SprocketTabs';
+import { SprocketTabs } from '@/components/shared/SprocketTabs';
+import { UriTypography } from '@/components/shared/UriTypography';
+import { statusCodes } from '@/constants/statusCodes';
+import { HistoricalEndpointResponse } from '@/types/data/workspace';
+import { toKeyValuePairs } from '@/utils/application';
+import { formatFullDate } from '@/utils/string';
 
 interface ResponseInfoProps {
 	response: HistoricalEndpointResponse;
