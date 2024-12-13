@@ -1,12 +1,12 @@
 import { Card, Typography, Sheet, useTheme, Stack, Box } from '@mui/joy';
 import { useSelector } from 'react-redux';
+import { useAutosave } from './hooks/useAutosave';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
+import { selectActiveWorkspace } from '@/state/global/selectors';
 import { TabHeader } from '../header/TabHeader';
+import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
 import { SideDrawer } from '../sidebar/SideDrawer';
 import { SideDrawerActions } from '../sidebar/SideDrawerActions';
-import { NavigableServicesFileSystem } from '../sidebar/file-system/NavigableServicesFileSystem';
-import { selectActiveWorkspace } from '../../state/global/selectors';
-import { useAutosave } from './hooks/useAutosave';
-import { useScrollbarTheme } from '../../hooks/useScrollbarTheme';
 
 export function Workspace() {
 	useAutosave();

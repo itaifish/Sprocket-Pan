@@ -1,7 +1,7 @@
+import { selectSettings } from '@/state/active/selectors';
+import { SCROLLBAR_VISIBILITY } from '@/types/data/settings';
 import { useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { selectSettings } from '../state/active/selectors';
-import { SCROLLBAR_VISIBILITY } from '../types/settings/settings';
 
 export function useScrollbarTheme() {
 	const theme = useTheme();

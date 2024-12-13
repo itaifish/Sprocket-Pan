@@ -1,9 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Environment } from '../../../types/application-data/application-data';
-import { RootState } from '../../store';
-import { tabsActions } from '../../tabs/slice';
-import { cloneEnv } from '../../../utils/application';
 import { activeActions, activeThunkName, UpdateLinkedEnv } from '../slice';
+import { Environment } from '@/types/data/workspace';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { cloneEnv } from '@/utils/application';
 
 interface AddNewEnvironment {
 	data?: Partial<Omit<Environment, 'id'>> | null;

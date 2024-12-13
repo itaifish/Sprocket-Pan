@@ -3,8 +3,8 @@ import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import { TipsSection } from './TipsSection';
-import { Settings } from '../../types/settings/settings';
-import { RecursivePartial } from '../../types/utils/utils';
+import { Settings } from '@/types/data/settings';
+import { RecursivePartial } from '@/types/utils/utils';
 
 interface SettingsBarProps {
 	onClose: () => void;

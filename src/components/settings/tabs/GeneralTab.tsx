@@ -1,16 +1,16 @@
 import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
-import { TIPS_SECTION, VARIABLE_NAME_DISPLAY } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
-import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
-import { sleep } from '../../../utils/misc';
 import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
-import { Constants } from '../../../constants/constants';
 import { SettingsTabProps } from './types';
 import { SettingsSelect } from './SettingsFields';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { Constants } from '@/constants/constants';
+import { VARIABLE_NAME_DISPLAY, TIPS_SECTION } from '@/types/data/settings';
+import { log } from '@/utils/logging';
+import { sleep } from '@/utils/misc';
 
 export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);

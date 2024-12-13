@@ -1,19 +1,19 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
+import { defaultWorkspaceData } from '@/managers/data/WorkspaceDataManager';
+import { AuditLog } from '@/types/data/audit';
+import { IdSpecificUiMetadata } from '@/types/data/shared';
 import {
-	WorkspaceData,
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
-	IdSpecificUiMetadata,
 	NetworkFetchRequest,
+	RootEnvironment,
 	Script,
 	Service,
-	RootEnvironment,
-} from '../../types/application-data/application-data';
-import { AuditLog } from '../../managers/AuditLogManager';
-import { log } from '../../utils/logging';
-import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
-import { KeyValuePair } from '../../classes/OrderedKeyValuePairs';
+	WorkspaceData,
+} from '@/types/data/workspace';
+import { log } from '@/utils/logging';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export type ActiveWorkspaceMetadata = {
 	lastModified: number;
@@ -253,7 +253,7 @@ export const activeSlice = createSlice({
 				state.services[serviceId].selectedEnvironment = serviceEnvId;
 			}
 		},
-		removeLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
+		removeLinkedEnv: (state, action: PayloadAction<Omit<UpdateLinkedEnv, 'serviceEnvId'>>) => {
 			const { serviceId, envId } = action.payload;
 			if (state.environments[envId].linked != null) {
 				delete state.environments[envId].linked[serviceId];

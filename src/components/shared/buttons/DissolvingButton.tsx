@@ -1,7 +1,7 @@
+import { useParticleThemeColor } from '@/hooks/useParticleThemeColor';
 import { Box } from '@mui/joy';
 import { PropsWithChildren, useEffect, useState } from 'react';
 import ParticleEffectButton from 'react-particle-effect-button';
-import { useParticleThemeColor } from '../../../hooks/useParticleThemeColor';
 
 interface DissolvingButtonProps extends PropsWithChildren {
 	shouldAnimate: boolean;

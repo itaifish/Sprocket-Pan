@@ -1,6 +1,6 @@
+import { verbColors } from '@/constants/style';
+import { RESTfulRequestVerb } from '@/types/data/shared';
 import { Chip } from '@mui/joy';
-import { verbColors } from '../../constants/style';
-import { RESTfulRequestVerb } from '../../types/application-data/application-data';
 
 interface VerbChipProps {
 	method: RESTfulRequestVerb;

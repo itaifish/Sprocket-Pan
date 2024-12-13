@@ -1,11 +1,11 @@
 import { FormControl, FormLabel, IconButton, Stack } from '@mui/joy';
-import { SprocketSelect, SprocketSelectProps } from '../../shared/SprocketSelect';
 import { Public } from '@mui/icons-material';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { SprocketInput, SprocketInputProps } from '../../shared/input/SprocketInput';
 import { StrategyInput, StrategyInputProps } from './StrategyInput';
-import { InputSlider, InputSliderProps } from '../../shared/input/InputSlider';
-import { SprocketSwitch, SprocketSwitchProps } from '../../shared/input/SprocketSwitch';
+import { InputSliderProps, InputSlider } from '@/components/shared/input/InputSlider';
+import { SprocketInputProps, SprocketInput } from '@/components/shared/input/SprocketInput';
+import { SprocketSwitchProps, SprocketSwitch } from '@/components/shared/input/SprocketSwitch';
+import { SprocketSelectProps, SprocketSelect } from '@/components/shared/SprocketSelect';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 
 interface SettingsFieldProps<T> {
 	overlay: T | undefined;

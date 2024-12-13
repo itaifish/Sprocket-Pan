@@ -1,11 +1,11 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { selectEnvironments } from '../../../state/active/selectors';
 import { useMemo } from 'react';
-import { Service } from '../../../types/application-data/application-data';
 import { Select, Stack, Option } from '@mui/joy';
 import { Link } from '@mui/icons-material';
-import { EllipsisTypography } from '../../shared/EllipsisTypography';
-import { activeActions } from '../../../state/active/slice';
+import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
+import { selectEnvironments } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { Service } from '@/types/data/workspace';
 
 interface LinkedEnvironmentEditorProps {
 	service: Service;
@@ -29,7 +29,9 @@ export function LinkedEnvironmentEditor({ service }: LinkedEnvironmentEditorProp
 						placeholder="None"
 						value={env.linkedEnv}
 						onChange={(_, value) =>
-							dispatch(activeActions.addLinkedEnv({ serviceEnvId: value, serviceId: service.id, envId: env.id }))
+							value == null
+								? dispatch(activeActions.removeLinkedEnv({ serviceId: service.id, envId: env.id }))
+								: dispatch(activeActions.addLinkedEnv({ serviceEnvId: value, serviceId: service.id, envId: env.id }))
 						}
 					>
 						{Object.values(service.localEnvironments).map((localEnv) => (

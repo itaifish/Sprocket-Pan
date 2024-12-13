@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Box, List } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { selectRequests, selectEndpoints } from '../../../state/active/selectors';
-import { EndpointRequest, Service } from '../../../types/application-data/application-data';
 import { RecentRequestListItem } from './RecentRequestListItem';
+import { selectRequests, selectEndpoints } from '@/state/active/selectors';
+import { Service, EndpointRequest } from '@/types/data/workspace';
 
 interface RecentRequestsSectionProps {
 	data: Service;

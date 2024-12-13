@@ -1,12 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
-import { EnvironmentContextResolver } from '../../managers/EnvironmentContextResolver';
-import { queryParamsToString } from '../../utils/application';
-import { TabType, TabTypeWithData } from '../../types/state/state';
-import { WorkspaceData } from '../../types/application-data/application-data';
-import { selectGlobalSettings, selectGlobalState } from '../global/selectors';
-import { OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
-import { mergeDeep } from '../../utils/variables';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { WorkspaceData } from '@/types/data/workspace';
+import { TabTypeWithData, TabType } from '@/types/state/state';
+import { queryParamsToString } from '@/utils/application';
+import { mergeDeep } from '@/utils/variables';
+import { selectGlobalState, selectGlobalSettings } from '../global/selectors';
 
 export const selectActiveState = activeSlice.selectSlice;
 

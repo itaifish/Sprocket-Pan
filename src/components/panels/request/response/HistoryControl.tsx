@@ -3,9 +3,9 @@ import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import DeleteForever from '@mui/icons-material/DeleteForever';
 import { ResponseState } from '../RequestActions';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { EditableText } from '../../../shared/input/EditableText';
-import { clamp } from '../../../../utils/math';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { clamp } from '@/utils/math';
 
 export function responseStateToNumber(value?: ResponseState, historyLength?: number) {
 	if (value == null || historyLength == null) return 0;

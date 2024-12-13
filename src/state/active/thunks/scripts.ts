@@ -1,10 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../../store';
-import { Script } from '../../../types/application-data/application-data';
 import { v4 } from 'uuid';
-import { toValidFunctionName } from '../../../utils/string';
-import { tabsActions } from '../../tabs/slice';
 import { activeActions, activeThunkName } from '../slice';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { Script } from '@/types/data/workspace';
+import { toValidFunctionName } from '@/utils/string';
 
 export const deleteScriptById = createAsyncThunk<void, string, { state: RootState }>(
 	`${activeThunkName}/deleteScriptById`,

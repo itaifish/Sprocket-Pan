@@ -1,4 +1,4 @@
-import { Service } from '../../../types/application-data/application-data';
+import { Service } from '@/types/data/workspace';
 
 export interface SectionProps {
 	data: Service;

@@ -1,10 +1,10 @@
 import { Box } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../state/store';
-import { selectSecrets } from '../../../state/active/selectors';
 import { PanelProps } from '../panels.interface';
-import { EditableData } from '../../shared/input/EditableData';
-import { activeActions } from '../../../state/active/slice';
+import { EditableData } from '@/components/shared/input/EditableData';
+import { selectSecrets } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
 
 export function SecretsPanel({ id }: PanelProps) {
 	const secrets = useSelector(selectSecrets);

@@ -1,21 +1,22 @@
 import { Button, Select, Stack, Option, Input } from '@mui/joy';
-import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { Endpoint, RESTfulRequestVerbs } from '../../../types/application-data/application-data';
 import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
-import { selectEndpointById, selectServicesById } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../state/store';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { EditableText } from '../../shared/input/EditableText';
+import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Constants } from '@/constants/constants';
+import { verbColors } from '@/constants/style';
+import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
+import { useDebounce } from '@/hooks/useDebounce';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { selectEndpointById, selectServicesById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { RESTfulRequestVerbs } from '@/types/data/shared';
+import { Endpoint } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
-import { tabsActions } from '../../../state/tabs/slice';
-import { Constants } from '../../../constants/constants';
-import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
-import { verbColors } from '../../../constants/style';
-import { activeActions } from '../../../state/active/slice';
-import { useComputedServiceEnvironment } from '../../../hooks/useComputedEnvironment';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();

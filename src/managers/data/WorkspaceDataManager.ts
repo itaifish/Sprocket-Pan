@@ -1,23 +1,18 @@
-import { log } from '../../utils/logging';
+import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { UiMetadata } from '@/types/data/shared';
+import { WorkspaceData, EndpointRequest, WorkspaceMetadata, HistoricalEndpointResponse } from '@/types/data/workspace';
+import { nullifyProperties } from '@/utils/functions';
+import { log } from '@/utils/logging';
 import { path } from '@tauri-apps/api';
-import {
-	WorkspaceData,
-	HistoricalEndpointResponse,
-	WorkspaceMetadata,
-	UiMetadata,
-	EndpointRequest,
-} from '../../types/application-data/application-data';
-import swaggerParseManager from '../parsers/SwaggerParseManager';
-import { nullifyProperties } from '../../utils/functions';
-import { SaveUpdateManager } from '../SaveUpdateManager';
-import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
-import { insomniaParseManager } from '../parsers/InsomniaParseManager';
-import { FileSystemWorker } from '../file-system/FileSystemWorker';
-import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
-import { DEFAULT_SETTINGS } from '../../constants/defaults';
 import { FileSystemManager } from '../file-system/FileSystemManager';
+import { FileSystemWorker } from '../file-system/FileSystemWorker';
+import { insomniaParseManager } from '../parsers/InsomniaParseManager';
+import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
+import swaggerParseManager from '../parsers/SwaggerParseManager';
+import { SaveUpdateManager } from '../SaveUpdateManager';
+import { defaultWorkspaceMetadata } from './GlobalDataManager';
 
 export const defaultWorkspaceData: WorkspaceData = {
 	services: {},

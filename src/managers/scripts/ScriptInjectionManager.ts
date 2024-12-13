@@ -1,14 +1,15 @@
-import { activeActions, Update } from '../../state/active/slice';
-import { makeRequest } from '../../state/active/thunks/requests';
-import { StateAccess } from '../../state/types';
-import { EndpointRequest, EndpointResponse, Script } from '../../types/application-data/application-data';
-import { AuditLog, auditLogManager } from '../AuditLogManager';
-import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
-import { scriptRunnerManager } from './ScriptRunnerManager';
+import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { activeActions, Update } from '@/state/active/slice';
+import { StateAccess } from '@/state/types';
+import { AuditLog } from '@/types/data/audit';
+import { EndpointRequest, EndpointResponse, Script } from '@/types/data/workspace';
 import { http } from '@tauri-apps/api';
 import { Body, HttpVerb } from '@tauri-apps/api/http';
-import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '../../classes/OrderedKeyValuePairs';
-import { getEnvValuesFromData } from '../../utils/application';
+import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
+import { getEnvValuesFromData } from '@/utils/application';
+import { makeRequest } from '@/state/active/thunks/requests';
+import { auditLogManager } from '../AuditLogManager';
+import { scriptRunnerManager } from './ScriptRunnerManager';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -28,7 +29,7 @@ export function getScriptInjectionCode(
 		requestId: string,
 		modifications: { body?: Record<string, unknown>; queryParams?: KeyValuePair[]; headers?: KeyValuePair[] },
 	) => {
-		const state = getState();
+		const state = getState().active;
 		const request = state.requests[requestId];
 		if (request == null) {
 			return;
@@ -59,10 +60,10 @@ export function getScriptInjectionCode(
 		return http.fetch<T>(url, modifiedRequest);
 	};
 
-	const getRequest = () => (requestId != null ? getState().requests[requestId] : null);
+	const getRequest = () => (requestId != null ? getState().active.requests[requestId] : null);
 
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
-		const data = getState();
+		const data = getState().active;
 		const request = getRequest();
 		const newPairs = new OrderedKeyValuePairs();
 		switch (level) {
@@ -139,7 +140,7 @@ export function getScriptInjectionCode(
 		dispatch(activeActions.updateRequest({ id: request.id, headers: newHeaders.toArray() }));
 	};
 	const getEnvironment = () => {
-		const data = getState();
+		const data = getState().active;
 		const request = getRequest();
 		if (request == null) {
 			return EnvironmentContextResolver.buildEnvironmentVariables(getEnvValuesFromData(data)).toObject();
@@ -149,12 +150,12 @@ export function getScriptInjectionCode(
 
 	const sendRequest = async (requestId: string) => {
 		await dispatch(makeRequest({ requestId, auditLog }));
-		const data = getState();
+		const data = getState().active;
 		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
 	};
 
 	const getRunnableScripts = () => {
-		const data = getState();
+		const data = getState().active;
 		return Object.values(data.scripts).reduce(
 			(previousValue: Record<string, () => Promise<unknown>>, currentValue: Script) => {
 				return {
@@ -189,7 +190,7 @@ export function getScriptInjectionCode(
 			return structuredClone(getState());
 		},
 		get activeRequest() {
-			return requestId != null ? structuredClone(getState().requests[requestId]) : null;
+			return requestId != null ? structuredClone(getState().active.requests[requestId]) : null;
 		},
 		get response() {
 			const request = getRequest();

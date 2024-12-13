@@ -1,23 +1,24 @@
 import { ListSubheader } from '@mui/joy';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { useAppDispatch } from '../../../../state/store';
-import { addNewEndpoint } from '../../../../state/active/thunks/endpoints';
-import { cloneServiceFromId } from '../../../../state/active/thunks/services';
 import { useSelector } from 'react-redux';
-import { selectServicesById } from '../../../../state/active/selectors';
-import { selectFilteredNestedIds } from '../../../../state/tabs/selectors';
+
 import {
 	menuOptionDuplicate,
 	menuOptionDelete,
 	menuOptionCollapseAll,
 	menuOptionExpandAll,
 } from '../FileSystemDropdown';
-import { EllipsisSpan } from '../../../shared/EllipsisTypography';
+import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
+import { selectServicesById } from '@/state/active/selectors';
+import { addNewEndpoint } from '@/state/active/thunks/endpoints';
+import { addNewRequest } from '@/state/active/thunks/requests';
+import { cloneServiceFromId } from '@/state/active/thunks/services';
+import { useAppDispatch } from '@/state/store';
+import { selectFilteredNestedIds } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
+import { collapseAll, expandAll } from '@/state/ui/thunks';
 import { FileSystemBranch } from '../tree/FileSystemBranch';
-import { addNewRequest } from '../../../../state/active/thunks/requests';
-import { collapseAll, expandAll } from '../../../../state/ui/thunks';
-import { tabsActions } from '../../../../state/tabs/slice';
 
 interface ServiceFileSystemProps {
 	serviceId: string;

@@ -15,11 +15,11 @@ import {
 } from '@mui/joy';
 import { useState } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useAppDispatch } from '../../state/store';
-import { toValidFolderName } from '../../utils/string';
-import { createWorkspace } from '../../state/global/thunks';
 import { useSelector } from 'react-redux';
-import { selectWorkspacesList } from '../../state/global/selectors';
+import { selectWorkspacesList } from '@/state/global/selectors';
+import { createWorkspace } from '@/state/global/thunks';
+import { useAppDispatch } from '@/state/store';
+import { toValidFolderName } from '@/utils/string';
 
 interface CreateNewWorkspaceModalProps {
 	open: boolean;

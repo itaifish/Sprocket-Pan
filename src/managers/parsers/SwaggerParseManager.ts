@@ -1,18 +1,13 @@
-import {
-	Endpoint,
-	EndpointRequest,
-	RESTfulRequestVerb,
-	RESTfulRequestVerbs,
-	Service,
-} from '../../types/application-data/application-data';
-import { log } from '../../utils/logging';
 import { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import SwaggerParser from '@apidevtools/swagger-parser';
 import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
 import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { cloneEnv } from '../../utils/application';
+import { Endpoint, EndpointRequest, Service } from '@/types/data/workspace';
+import { RESTfulRequestVerbs, RESTfulRequestVerb } from '@/types/data/shared';
+import { cloneEnv } from '@/utils/application';
+import { log } from '@/utils/logging';
 
 export type ParsedServiceWorkspaceData = {
 	services: Service[];

@@ -1,6 +1,6 @@
+import { Endpoint, Service, EndpointRequest } from '@/types/data/workspace';
+import { cloneEnv } from '@/utils/application';
 import { v4 } from 'uuid';
-import { Endpoint, EndpointRequest, Service } from '../../../types/application-data/application-data';
-import { cloneEnv } from '../../../utils/application';
 
 export function createNewEndpointObject(serviceId: string): Endpoint {
 	return {

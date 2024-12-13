@@ -1,22 +1,14 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { AuditLog, RequestEvent } from '../../../managers/AuditLogManager';
-import { RootState } from '../../store';
-import { EndpointRequest, EndpointResponse, Script } from '../../../types/application-data/application-data';
-import { createNewRequestObject } from './util';
-import { log } from '../../../utils/logging';
-import { SprocketError } from '../../../types/state/state';
-import { scriptRunnerManager } from '../../../managers/scripts/ScriptRunnerManager';
-import { networkRequestManager } from '../../../managers/NetworkRequestManager';
-import { tabsActions } from '../../tabs/slice';
 import { activeActions, activeThunkName } from '../slice';
-
-/**
- * Only exists until managers can be entirely migrated.
- * @deprecated
- */
-function extractStateAccess(thunk: any) {
-	return { getState: () => thunk.getState().active, dispatch: thunk.dispatch };
-}
+import { networkRequestManager } from '@/managers/NetworkRequestManager';
+import { scriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { Script, EndpointResponse, EndpointRequest } from '@/types/data/workspace';
+import { SprocketError } from '@/types/state/state';
+import { log } from '@/utils/logging';
+import { createNewRequestObject } from './util';
 
 export const runScript = createAsyncThunk<
 	| {
@@ -35,7 +27,7 @@ export const runScript = createAsyncThunk<
 	},
 	{ state: RootState }
 >(`${activeThunkName}/runScript`, async (options, thunk) => {
-	const stateAccess = extractStateAccess(thunk);
+	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
 
 	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
 		options.script,
@@ -52,7 +44,7 @@ export const makeRequest = createAsyncThunk<
 	{ requestId: string; auditLog?: AuditLog },
 	{ state: RootState }
 >(`${activeThunkName}/makeRequest`, async ({ requestId, auditLog = [] }, thunk) => {
-	const stateAccess = extractStateAccess(thunk);
+	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
 	const localAuditLog: AuditLog = [];
 	let error = await networkRequestManager.runPreScripts(requestId, stateAccess, localAuditLog);
 	if (error) {
@@ -61,7 +53,7 @@ export const makeRequest = createAsyncThunk<
 	}
 	const { networkRequest, response } = await networkRequestManager.sendRequest(
 		requestId,
-		thunk.getState().active,
+		thunk.getState(),
 		localAuditLog,
 	);
 	error = await networkRequestManager.runPostScripts(requestId, stateAccess, response, localAuditLog);
@@ -70,8 +62,15 @@ export const makeRequest = createAsyncThunk<
 		return error;
 	}
 	auditLog.push(...localAuditLog);
+	const state = thunk.getState();
 	thunk.dispatch(
-		activeActions.addResponseToHistory({ requestId: requestId, response, networkRequest, auditLog: localAuditLog }),
+		activeActions.addResponseToHistory({
+			requestId: requestId,
+			response,
+			networkRequest,
+			auditLog: localAuditLog,
+			maxLength: state.active.settings.history?.maxLength ?? state.global.settings.history.maxLength,
+		}),
 	);
 });
 

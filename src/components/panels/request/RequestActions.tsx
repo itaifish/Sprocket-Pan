@@ -1,22 +1,18 @@
 import { Button, Stack, CircularProgress, Select, Option, Card } from '@mui/joy';
 import LabelIcon from '@mui/icons-material/Label';
-import {
-	Endpoint,
-	EndpointRequest,
-	HistoricalEndpointResponse,
-	RESTfulRequestVerbs,
-} from '../../../types/application-data/application-data';
 import { useState } from 'react';
 import SendIcon from '@mui/icons-material/Send';
-import { useAppDispatch } from '../../../state/store';
-import { makeRequest } from '../../../state/active/thunks/requests';
-import { log } from '../../../utils/logging';
-import { SprocketError } from '../../../types/state/state';
 import { defaultResponse } from './constants';
 import { useSelector } from 'react-redux';
-import { selectEnvironmentSnippets } from '../../../state/active/selectors';
-import { EnvironmentTypography } from '../../shared/EnvironmentTypography';
-import { verbColors } from '../../../constants/style';
+import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
+import { verbColors } from '@/constants/style';
+import { selectEnvironmentSnippets } from '@/state/active/selectors';
+import { makeRequest } from '@/state/active/thunks/requests';
+import { useAppDispatch } from '@/state/store';
+import { RESTfulRequestVerbs } from '@/types/data/shared';
+import { HistoricalEndpointResponse, Endpoint, EndpointRequest } from '@/types/data/workspace';
+import { SprocketError } from '@/types/state/state';
+import { log } from '@/utils/logging';
 
 const getError = (error: SprocketError): HistoricalEndpointResponse => {
 	const errorRes = structuredClone(defaultResponse);

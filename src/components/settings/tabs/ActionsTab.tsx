@@ -3,7 +3,7 @@ import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import { SettingsTabProps } from './types';
 import { SettingsInput, SettingsStrategyInput } from './SettingsFields';
-import { toNumberOrUndefined } from '../../../utils/math';
+import { toNumberOrUndefined } from '@/utils/math';
 
 function toMSOrUndefined(num: unknown) {
 	const ret = toNumberOrUndefined(num);

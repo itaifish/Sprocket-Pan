@@ -1,5 +1,4 @@
 import { Accordion, AccordionDetails, AccordionSummary } from '@mui/joy';
-
 import { RequestScript } from '../script/RequestScript';
 
 interface OnChangeArgs {

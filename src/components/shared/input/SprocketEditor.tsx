@@ -1,10 +1,10 @@
 import { ReactNode, useEffect, useRef } from 'react';
 import { Editor, EditorProps } from '@monaco-editor/react';
-import { defaultEditorOptions } from '../../../managers/monaco/MonacoInitManager';
 import { editor } from 'monaco-editor';
-import { useEditorTheme } from '../../../hooks/useEditorTheme';
 import { Box, Stack } from '@mui/joy';
 import { EditorActions } from './EditorActions';
+import { useEditorTheme } from '@/hooks/useEditorTheme';
+import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
 
 type SprocketEditorProps = Omit<EditorProps, 'onMount'> & {
 	ActionBarItems?: ReactNode;

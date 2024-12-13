@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Box, Container, Stack, Typography, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { useFileSystemSynchronization } from '../../hooks/useFileSystemSynchronization';
-import { useAppDispatch } from '../../state/store';
-import { WorkspaceMetadata } from '../../types/application-data/application-data';
+import { useFileSystemSynchronization } from '@/hooks/useFileSystemSynchronization';
+import { selectWorkspacesList } from '@/state/global/selectors';
+import { deleteWorkspace } from '@/state/global/thunks';
+import { useAppDispatch } from '@/state/store';
+import { WorkspaceMetadata } from '@/types/data/workspace';
+import { GlobalSettingsPanel } from '../settings/GlobalSettingsPanel';
+import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
 import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
 import { CreateNewWorkspaceModal } from './CreateNewWorkspaceModal';
-import { WorkspaceEntry } from './WorkspaceEntry';
-import { selectWorkspacesList } from '../../state/global/selectors';
-import { deleteWorkspace } from '../../state/global/thunks';
 import { NewWorkspaceCard } from './NewWorkspaceCard';
-import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
-import { GlobalSettingsPanel } from '../settings/GlobalSettingsPanel';
+import { WorkspaceEntry } from './WorkspaceEntry';
 
 export function WorkspaceSelector() {
 	useFileSystemSynchronization();

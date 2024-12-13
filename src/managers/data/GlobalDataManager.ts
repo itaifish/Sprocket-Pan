@@ -1,11 +1,12 @@
-import { WorkspaceDataManager } from './WorkspaceDataManager';
-import { GlobalData, WorkspaceMetadata } from '../../types/application-data/application-data';
+import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { GlobalState } from '@/state/global/slice';
+import { GlobalData } from '@/types/data/global';
+import { WorkspaceMetadata } from '@/types/data/workspace';
+import { mergeDeep } from '@/utils/variables';
+import { fileSystemEmitter } from '../file-system/FileSystemEmitter';
 import { FileSystemManager } from '../file-system/FileSystemManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
-import { mergeDeep } from '../../utils/variables';
-import { DEFAULT_SETTINGS } from '../../constants/defaults';
-import { GlobalState } from '../../state/global/slice';
-import { fileSystemEmitter } from '../file-system/FileSystemEmitter';
+import { WorkspaceDataManager } from './WorkspaceDataManager';
 
 export const defaultWorkspaceMetadata: WorkspaceMetadata = {
 	name: 'Default Workspace',

@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { IconButton, Select, Stack, Option, Box, Divider } from '@mui/joy';
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { SectionProps } from './sectionProps';
-import { Environment } from '../../../types/application-data/application-data';
-import { cloneEnv } from '../../../utils/application';
 import { EnvironmentEditor } from './EnvironmentEditor';
 import { Link, LinkOff, ModeEdit } from '@mui/icons-material';
 import { LinkedEnvironmentEditor } from './LinkedEnvironmentEditor';
-import { useComputedRootEnvironment } from '../../../hooks/useComputedEnvironment';
-import { activeActions } from '../../../state/active/slice';
-import { useAppDispatch } from '../../../state/store';
-import { selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useComputedRootEnvironment } from '@/hooks/useComputedEnvironment';
+import { selectSelectedEnvironment } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { cloneEnv } from '@/utils/application';
+import { Environment } from '@/types/data/workspace';
 
 export function EnvironmentsSection({ data, onChange }: SectionProps) {
 	const [visibleEnvId, setVisibleEnvId] = useState<string | null>(data.selectedEnvironment ?? null);

@@ -1,16 +1,16 @@
 import { IconButton, Sheet, Stack, Typography } from '@mui/joy';
 import { useState } from 'react';
-import { VisualEventLog } from '../../../panels/request/response/VisualEventLog';
-import { statusCodes } from '../../../../constants/statusCodes';
-import { DiffText } from '../../../shared/input/DiffText';
-import { SprocketTabs } from '../../../shared/SprocketTabs';
-import { UriTypography } from '../../../shared/UriTypography';
-import { VerbChip } from '../../../shared/VerbChip';
 import { ResponseSelectForm, SelectedResponse } from './ResponseSelectForm';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { headersToJson, multilineUrl } from '../../../../utils/serialization';
-import { DiffQueueEntry } from '../../../../state/tabs/slice';
+import { VisualEventLog } from '@/components/panels/request/response/VisualEventLog';
+import { DiffText } from '@/components/shared/input/DiffText';
+import { SprocketTabs } from '@/components/shared/SprocketTabs';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { UriTypography } from '@/components/shared/UriTypography';
+import { VerbChip } from '@/components/shared/VerbChip';
+import { statusCodes } from '@/constants/statusCodes';
+import { DiffQueueEntry } from '@/state/tabs/slice';
+import { headersToJson, multilineUrl } from '@/utils/serialization';
 
 interface ResponseDiffOverlayProps {
 	initialSelection: DiffQueueEntry;

@@ -1,13 +1,13 @@
 import { useSelector } from 'react-redux';
 import { ListItemDecorator, ListSubheader } from '@mui/joy';
-import { selectScript } from '../../../../state/active/selectors';
-import { useAppDispatch } from '../../../../state/store';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import CodeIcon from '@mui/icons-material/Code';
-import { createScript } from '../../../../state/active/thunks/scripts';
-import { EllipsisSpan } from '../../../shared/EllipsisTypography';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
+import { selectScript } from '@/state/active/selectors';
+import { createScript } from '@/state/active/thunks/scripts';
+import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
 
 interface ScriptFileSystemProps {
 	scriptId: string;

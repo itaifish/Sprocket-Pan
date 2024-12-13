@@ -3,7 +3,7 @@ import { Folder, FolderOpen, MoreVert } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
-import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
+import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
 
 export interface FileSystemMenuOption {
 	label: string;

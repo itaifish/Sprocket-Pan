@@ -1,12 +1,12 @@
 import {
+	Settings,
 	BASE_THEME,
 	LIST_STYLING,
-	LOG_LEVELS,
 	SCROLLBAR_VISIBILITY,
-	Settings,
-	TIPS_SECTION,
 	VARIABLE_NAME_DISPLAY,
-} from '../types/settings/settings';
+	TIPS_SECTION,
+	LOG_LEVELS,
+} from '@/types/data/settings';
 import { MS_IN_MINUTE } from './constants';
 
 export const DEFAULT_SETTINGS: Settings = {

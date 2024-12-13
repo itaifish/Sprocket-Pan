@@ -1,7 +1,11 @@
 import { v4 } from 'uuid';
-import { KeyValueValues, OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
-import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '../managers/EnvironmentContextResolver';
-import { Environment, QueryParams, WorkspaceData } from '../types/application-data/application-data';
+import { QueryParams } from '@/types/data/shared';
+import { Environment, WorkspaceData } from '@/types/data/workspace';
+import { KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { mergeDeep } from './variables';
+import { Settings } from '@/types/data/settings';
+import { RootState } from '@/state/store';
 
 export function queryParamsToString(
 	queryParams: QueryParams,
@@ -62,4 +66,8 @@ export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): B
 		values.reqEnv = request.environmentOverride;
 	}
 	return values;
+}
+
+export function getSettingsFromState({ global, active }: RootState): Settings {
+	return mergeDeep(global.settings, active.settings);
 }

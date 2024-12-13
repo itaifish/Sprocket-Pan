@@ -1,7 +1,6 @@
 import * as React from 'react';
-
 import { Box, FormLabel, Grid, Input, Slider } from '@mui/joy';
-import { clamp } from '../../../utils/math';
+import { clamp } from '@/utils/math';
 
 export interface InputSliderProps {
 	label: string;

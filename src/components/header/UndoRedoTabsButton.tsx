@@ -2,10 +2,10 @@ import UndoRoundedIcon from '@mui/icons-material/UndoRounded';
 import RedoRoundedIcon from '@mui/icons-material/RedoRounded';
 import { Stack, IconButton } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../state/store';
-import { selectPeekHistory } from '../../state/tabs/selectors';
+import { useAppDispatch } from '@/state/store';
+import { selectPeekHistory } from '@/state/tabs/selectors';
+import { tabsActions } from '@/state/tabs/slice';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
-import { tabsActions } from '../../state/tabs/slice';
 
 export function UndoRedoTabsButton() {
 	const { previous: goBackIndex, next: goForwardIndex } = useSelector(selectPeekHistory);

@@ -1,5 +1,5 @@
+import { RESTfulRequestVerb } from '@/types/data/shared';
 import { ColorPaletteProp, OptionPropsColorOverrides } from '@mui/joy';
-import { RESTfulRequestVerb } from '../types/application-data/application-data';
 import { OverridableStringUnion } from '@mui/types';
 
 export const verbColors: Record<

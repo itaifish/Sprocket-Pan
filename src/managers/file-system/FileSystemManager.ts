@@ -1,6 +1,6 @@
-import { WorkspaceDataManager } from './../data/WorkspaceDataManager';
-import { log } from '../../utils/logging';
-import { WorkspaceMetadata } from '../../types/application-data/application-data';
+import { WorkspaceMetadata } from '@/types/data/workspace';
+import { log } from '@/utils/logging';
+import { WorkspaceDataManager } from '../data/WorkspaceDataManager';
 import { FileSystemWorker } from './FileSystemWorker';
 
 export class FileSystemManager {

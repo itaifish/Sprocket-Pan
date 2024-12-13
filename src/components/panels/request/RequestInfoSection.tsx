@@ -1,12 +1,12 @@
+import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
+import { SprocketTable } from '@/components/shared/SprocketTable';
+import { selectEndpointById } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { EndpointRequest, Endpoint } from '@/types/data/workspace';
 import { Fingerprint } from '@mui/icons-material';
-import { Endpoint, EndpointRequest } from '../../../types/application-data/application-data';
-import { CopyToClipboardButton } from '../../shared/buttons/CopyToClipboardButton';
 import { Stack, Switch, Typography } from '@mui/joy';
-import { useAppDispatch } from '../../../state/store';
-import { activeActions } from '../../../state/active/slice';
 import { useSelector } from 'react-redux';
-import { selectEndpointById } from '../../../state/active/selectors';
-import { SprocketTable } from '../../shared/SprocketTable';
 
 export function RequestInfoSection({ request }: { request: EndpointRequest }) {
 	const dispatch = useAppDispatch();

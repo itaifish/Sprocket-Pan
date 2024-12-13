@@ -1,10 +1,10 @@
+import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
+import { ParsedServiceWorkspaceData } from '@/managers/parsers/SwaggerParseManager';
+import { RootState } from '@/state/store';
+import { Environment, Script } from '@/types/data/workspace';
+import { log } from '@/utils/logging';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { RootState } from '../../store';
-import { ParsedServiceWorkspaceData } from '../../../managers/parsers/SwaggerParseManager';
-import { log } from '../../../utils/logging';
-import { Environment, Script } from '../../../types/application-data/application-data';
-import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { activeActions, activeThunkName } from '../slice';
+import { activeThunkName, activeActions } from '../slice';
 
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 

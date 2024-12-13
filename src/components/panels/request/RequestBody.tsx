@@ -2,17 +2,14 @@ import { Select, Option, FormControl, FormLabel, Stack } from '@mui/joy';
 import ListIcon from '@mui/icons-material/List';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { useEffect, useRef, useState } from 'react';
-import { useAppDispatch } from '../../../state/store';
-import {
-	EndpointRequest,
-	RequestBodyTypes,
-	RawBodyTypes,
-	getRequestBodyCategory,
-} from '../../../types/application-data/application-data';
-import { SprocketEditor } from '../../shared/input/SprocketEditor';
-import { EditableFormTable } from '../../shared/input/EditableFormTable';
-import { Constants } from '../../../constants/constants';
-import { activeActions } from '../../../state/active/slice';
+import { EditableFormTable } from '@/components/shared/input/EditableFormTable';
+import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
+import { Constants } from '@/constants/constants';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { RequestBodyTypes, RawBodyTypes } from '@/types/data/shared';
+import { EndpointRequest } from '@/types/data/workspace';
+import { getRequestBodyCategory } from '@/utils/conversion';
 
 interface RequestBodyProps {
 	request: EndpointRequest;

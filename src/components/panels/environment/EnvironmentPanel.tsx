@@ -1,17 +1,17 @@
 import Checkbox from '@mui/joy/Checkbox';
-import { selectEnvironments, selectSecrets, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../state/store';
 import { Option, Select, Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
-import { EditableText } from '../../shared/input/EditableText';
-import { PanelProps } from '../panels.interface';
-import { EditableData, parseEditorJSON, toEditorJSON } from '../../shared/input/EditableData';
 import { useMemo } from 'react';
 import { AccountTree } from '@mui/icons-material';
-import { EnvironmentContextResolver } from '../../../managers/EnvironmentContextResolver';
-import { toKeyValuePairs } from '../../../utils/application';
-import { activeActions } from '../../../state/active/slice';
+import { parseEditorJSON, toEditorJSON, EditableData } from '@/components/shared/input/EditableData';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { selectSelectedEnvironment, selectEnvironments, selectSecrets } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { toKeyValuePairs } from '@/utils/application';
+import { PanelProps } from '../panels.interface';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);

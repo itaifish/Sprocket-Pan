@@ -1,12 +1,12 @@
 import { FunctionComponent } from 'react';
 import { PanelProps } from './panels.interface';
-import { TabType } from '../../types/state/state';
 import { EndpointPanel } from './endpoint/EndpointPanel';
 import { EnvironmentPanel } from './environment/EnvironmentPanel';
 import { RequestPanel } from './request/RequestPanel';
 import { ScriptPanel } from './script/ScriptPanel';
 import { ServicePanel } from './service/ServicePanel';
 import { SecretsPanel } from './secrets/SecretsPanel';
+import { TabType } from '@/types/state/state';
 
 const contentMap: Record<TabType, FunctionComponent<PanelProps>> = {
 	request: RequestPanel,

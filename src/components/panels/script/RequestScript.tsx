@@ -1,6 +1,6 @@
-import { SprocketEditor } from '../../shared/input/SprocketEditor';
-import { useDebounce } from '../../../hooks/useDebounce';
-import { Constants } from '../../../constants/constants';
+import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
+import { Constants } from '@/constants/constants';
+import { useDebounce } from '@/hooks/useDebounce';
 
 interface RequestScriptProps {
 	scriptText: string | undefined;

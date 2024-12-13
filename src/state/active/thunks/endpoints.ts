@@ -1,10 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { Endpoint } from '../../../types/application-data/application-data';
-import { RootState } from '../../store';
-import { createNewEndpointObject } from './util';
-import { addNewRequest } from './requests';
-import { tabsActions } from '../../tabs/slice';
 import { activeActions, activeThunkName } from '../slice';
+import { RootState } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { Endpoint } from '@/types/data/workspace';
+import { addNewRequest } from './requests';
+import { createNewEndpointObject } from './util';
 
 interface AddNewEndpoint {
 	data?: Partial<Omit<Endpoint, 'id' | 'serviceId'>>;
