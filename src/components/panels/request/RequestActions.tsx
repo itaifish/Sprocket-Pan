@@ -59,7 +59,7 @@ export function RequestActions({ endpoint, request, onError, onResponse, activat
 	}
 
 	return (
-		<Stack direction="row" gap={2}>
+		<Stack direction="row" gap={2} alignItems="center">
 			<Select
 				sx={{ minWidth: 150 }}
 				value={endpoint.verb}

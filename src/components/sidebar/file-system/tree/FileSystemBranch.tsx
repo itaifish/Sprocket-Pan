@@ -35,7 +35,7 @@ export function FileSystemBranch({
 			<ListItem nested>
 				<FileSystemButton tabType={tabType} id={id} menuOptions={menuOptions}>
 					<ListItemDecorator>
-						<SyncBadge id={id}>
+						<SyncBadge id={id} right={6} bottom={folderSize === 'md' ? 5 : 2}>
 							<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
 								<IconButton
 									size={folderSize}
