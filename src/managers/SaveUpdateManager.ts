@@ -28,6 +28,10 @@ import { MS_IN_MINUTE } from '@/constants/constants';
 import { WorkspaceData, HistoricalEndpointResponse, Environment } from '@/types/data/workspace';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
+function toNine(data: WorkspaceData) {
+	data.syncMetadata = { items: {} };
+}
+
 /**
  * KeyValuePairs for everyone!
  */
@@ -132,7 +136,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight, toNine] as const;
 
 export class SaveUpdateManager {
 	public static getCurrentVersion(): number {

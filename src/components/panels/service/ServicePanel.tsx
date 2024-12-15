@@ -4,12 +4,13 @@ import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { EnvironmentsSection } from './EnvironmentsSection';
 import { AccordionGroup } from '@mui/joy';
 import { GeneralSection } from './GeneralSection';
-import { EditableText } from '@/components/shared/input/EditableText';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { selectServices } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { Service } from '@/types/data/workspace';
+import { EditableHeader } from '../shared/EditableHeader';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -22,13 +23,7 @@ export function ServicePanel({ id }: PanelProps) {
 
 	return (
 		<>
-			<EditableText
-				sx={{ margin: 'auto' }}
-				text={serviceData.name}
-				setText={(newText: string) => update({ name: newText })}
-				isValidFunc={(text: string) => text.length >= 1}
-				level="h2"
-			/>
+			<EditableHeader value={serviceData.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<SprocketTabs
 				tabs={[
 					{

@@ -26,7 +26,6 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
 import { FormatButton } from '@/components/shared/buttons/FormatButton';
-import { EditableText } from '@/components/shared/input/EditableText';
 import { Constants } from '@/constants/constants';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
@@ -40,6 +39,8 @@ import { VariableFromCode, getVariablesFromCode, asyncCallWithTimeout } from '@/
 import { sleep } from '@/utils/misc';
 import { toValidFunctionName } from '@/utils/string';
 import { PanelProps } from '../panels.interface';
+import { EditableHeader } from '../shared/EditableHeader';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -136,12 +137,11 @@ export function ScriptPanel({ id }: PanelProps) {
 	}, [script.content]);
 	return (
 		<>
-			<EditableText
-				sx={{ margin: 'auto' }}
-				text={script.name}
-				setText={(newText: string) => update({ name: newText, id, scriptCallableName: toValidFunctionName(newText) })}
-				isValidFunc={(text: string) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
-				level="h2"
+			<EditableHeader
+				value={script.name}
+				onChange={(name) => update({ name, id, scriptCallableName: toValidFunctionName(name) })}
+				isValidFunc={(text) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
+				right={<SyncButton id={id} />}
 			/>
 			<Stack direction="row" spacing={2}>
 				<FormControl>

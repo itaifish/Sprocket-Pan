@@ -10,9 +10,9 @@ import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
 import { injectLoadedData } from '@/state/active/thunks/data';
 import { useAppDispatch } from '@/state/store';
 import { WorkspaceData } from '@/types/data/workspace';
-import OpenApiIcon from '@/assets/buttonIcons/openapi.svg';
-import PostmanIcon from '@/assets/buttonIcons/postman.svg';
-import InsomniaIcon from '@/assets/buttonIcons/insomnia.svg';
+import OpenApiIcon from '@/assets/icons/brands/openapi.svg';
+import PostmanIcon from '@/assets/icons/brands/postman.svg';
+import InsomniaIcon from '@/assets/icons/brands/insomnia.svg';
 import SprocketIconDark from '@/assets/logo.svg';
 import SprocketIconLight from '@/assets/logo-light.svg';
 

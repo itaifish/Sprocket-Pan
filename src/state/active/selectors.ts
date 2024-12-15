@@ -166,3 +166,5 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 		rootAncestors: Object.values(state.environments),
 	});
 });
+
+export const selectSyncMetadata = createSelector(selectActiveState, (state) => state.syncMetadata);

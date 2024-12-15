@@ -24,6 +24,10 @@ export const DEFAULT_SETTINGS: Settings = {
 			enabled: true,
 			intervalMS: MS_IN_MINUTE * 5,
 		},
+		sync: {
+			enabled: false,
+			location: null,
+		},
 	},
 	script: {
 		strategy: {

@@ -10,9 +10,12 @@ import {
 	RootEnvironment,
 	Script,
 	Service,
+	SyncMetadata,
 	WorkspaceData,
 } from '@/types/data/workspace';
+import { RecursivePartial } from '@/types/utils/utils';
 import { log } from '@/utils/logging';
+import { mergeDeep } from '@/utils/variables';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export type ActiveWorkspaceMetadata = {
@@ -261,6 +264,13 @@ export const activeSlice = createSlice({
 			if (state.selectedEnvironment === envId) {
 				state.services[serviceId].selectedEnvironment = undefined;
 			}
+		},
+		updateSyncMetadata: (state, action: PayloadAction<RecursivePartial<SyncMetadata>>) => {
+			state.syncMetadata = mergeDeep(state.syncMetadata, action.payload);
+		},
+		setSyncItem: (state, action: PayloadAction<{ id: string; value: boolean }>) => {
+			const { id, value } = action.payload;
+			state.syncMetadata.items[id] = value;
 		},
 	},
 });

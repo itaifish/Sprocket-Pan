@@ -28,6 +28,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 	},
 	settings: DEFAULT_SETTINGS,
 	version: SaveUpdateManager.getCurrentVersion(),
+	syncMetadata: { items: {} },
 };
 
 export class WorkspaceDataManager {

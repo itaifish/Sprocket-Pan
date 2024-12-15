@@ -1,8 +1,8 @@
 import { Settings } from '@/types/data/settings';
-import { RecursivePartial } from '@/types/utils/utils';
+import { WorkspaceSettings } from '@/types/data/workspace';
 
 export interface SettingsTabProps {
-	overlay?: RecursivePartial<Settings>;
+	overlay?: WorkspaceSettings;
 	settings: Settings;
-	onChange: (settings: RecursivePartial<Settings>) => void;
+	onChange: (settings: WorkspaceSettings) => void;
 }

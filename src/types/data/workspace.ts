@@ -4,24 +4,27 @@ import { AuditLog } from './audit';
 import { Settings } from './settings';
 import { QueryParams, RawBodyType, RequestBodyType, RESTfulRequestVerb, SPHeaders, UiMetadata } from './shared';
 
-export type WorkspaceMetadata = {
+export interface WorkspaceItem {
+	id: string;
+	name: string;
+}
+
+export interface WorkspaceMetadata {
 	name: string;
 	description: string;
 	fileName: string;
 	lastModified: number;
-};
+}
 
-export type EndpointResponse = {
+export interface EndpointResponse {
 	statusCode: number;
 	body: string;
 	bodyType: RawBodyType;
 	headers: SPHeaders;
 	dateTime: number;
-};
+}
 
-export type Service<TBaseUrl extends string = string> = {
-	id: string;
-	name: string;
+export interface Service<TBaseUrl extends string = string> extends WorkspaceItem {
 	description: string;
 	version: string;
 	baseUrl: TBaseUrl;
@@ -33,24 +36,20 @@ export type Service<TBaseUrl extends string = string> = {
 	preRequestScript?: string;
 	postRequestScript?: string;
 	linkedEnvMode?: boolean;
-};
+}
 
-export type Script = {
-	name: string;
+export interface Script extends WorkspaceItem {
 	scriptCallableName: string;
 	returnVariableName: string | null;
 	returnVariableType?: {
 		isClass?: boolean;
 		typeText: string;
 	};
-	id: string;
 	content: string;
-};
+}
 
-export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
-	id: string;
+export interface EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> extends WorkspaceItem {
 	endpointId: string;
-	name: string;
 	headers: SPHeaders;
 	queryParams: QueryParams;
 	bodyType: TRequestBodyType;
@@ -70,56 +69,67 @@ export type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBo
 	postRequestScript?: string;
 	environmentOverride: Environment;
 	history: HistoricalEndpointResponse[];
-};
+}
 
-export type NetworkFetchRequest = {
+export interface NetworkFetchRequest {
 	method: RESTfulRequestVerb;
 	url: string;
 	headers: Record<string, string>;
 	body: string;
 	bodyType?: RawBodyType;
 	dateTime: number;
-};
+}
 
-export type HistoricalEndpointResponse = {
+export interface HistoricalEndpointResponse {
 	request: NetworkFetchRequest;
 	response: EndpointResponse;
 	auditLog?: AuditLog;
-};
+}
 
-export type Endpoint<TUrlBase extends string = string> = {
-	id: string;
+export interface Endpoint<TUrlBase extends string = string> extends WorkspaceItem {
 	url: `${TUrlBase}${string}`;
 	verb: RESTfulRequestVerb;
 	baseHeaders: SPHeaders;
 	baseQueryParams: QueryParams;
 	preRequestScript?: string;
 	postRequestScript?: string;
-	name: string;
 	description: string;
 	serviceId: string;
 	requestIds: string[];
 	defaultRequest: string | null;
-};
+}
 
-export type Environment = {
-	name: string;
-	id: string;
+export interface Environment extends WorkspaceItem {
 	pairs: KeyValuePair[];
-};
+}
 
-export type RootEnvironment = Environment & { linked?: Record<string, string | null>; parents?: string[] };
+export interface RootEnvironment extends Environment {
+	linked?: Record<string, string | null>;
+	parents?: string[];
+}
 
-export type WorkspaceData = {
+export interface SyncMetadata {
+	items: Record<string, boolean>;
+}
+
+export type WorkspaceSettings = RecursivePartial<Settings>;
+
+export interface WorkspaceItems {
 	services: Record<string, Service>;
 	endpoints: Record<string, Endpoint>;
 	requests: Record<string, EndpointRequest>;
 	environments: Record<string, RootEnvironment>;
-	secrets: KeyValuePair[];
 	scripts: Record<string, Script>;
+}
+
+export interface WorkspaceData extends WorkspaceItems {
+	secrets: KeyValuePair[];
 	selectedEnvironment?: string;
-	settings: RecursivePartial<Settings>;
+	settings: WorkspaceSettings;
 	metadata: WorkspaceMetadata;
 	uiMetadata: UiMetadata;
 	version: number | null;
-};
+	syncMetadata: SyncMetadata;
+}
+
+export type WorkspaceItemType = keyof WorkspaceItems;
