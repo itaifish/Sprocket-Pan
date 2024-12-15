@@ -1,6 +1,6 @@
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
@@ -13,13 +13,9 @@ import { tabsActions } from '@/state/tabs/slice';
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
-	const ref = useRef(null);
-	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
-	useEffect(() => {
-		emitterForOutsideClicks.addListener('outsideClick', () => {
-			setMenuOpen(false);
-		});
-	}, [emitterForOutsideClicks]);
+	const ref = useRef<HTMLInputElement>(null);
+	useClickOutsideAlerter({ ref, onOutsideClick: () => setMenuOpen(false) });
+
 	const newEntities = [
 		{
 			name: 'Service',

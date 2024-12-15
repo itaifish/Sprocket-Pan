@@ -81,6 +81,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	useEffect(() => {
 		formatReturnEditor();
 	}, [scriptOutput]);
+
 	const handleMainEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
 		editorRef.current = editor;
 		format();
@@ -93,10 +94,12 @@ export function ScriptPanel({ id }: PanelProps) {
 	function update(values: Partial<Script>) {
 		dispatch(activeActions.updateScript({ ...values, id: script.id }));
 	}
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce({
+	const { localDataState, setLocalDataState } = useDebounce({
 		state: script.content,
 		setState: (newText: string) => update({ content: newText }),
-		debounceOverride: Constants.longEditTimeMS,
+		debounceMS: Constants.longEditTimeMS,
+		onDesync: () => setDebouncing(false),
+		onSync: () => setDebouncing(true),
 	});
 
 	const scriptCallableNameDebounce = useDebounce({
@@ -106,17 +109,6 @@ export function ScriptPanel({ id }: PanelProps) {
 
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
-
-	useEffect(() => {
-		const onDebounceSync = () => {
-			setDebouncing(false);
-		};
-		const onDebounceDeSync = () => {
-			setDebouncing(true);
-		};
-		debounceEventEmitter.on('desync', onDebounceDeSync);
-		debounceEventEmitter.on('sync', onDebounceSync);
-	}, []);
 
 	useEffect(() => {
 		let active = true;

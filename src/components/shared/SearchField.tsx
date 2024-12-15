@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { IconButton, Input } from '@mui/joy';
 import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
 import { SprocketTooltip } from './SprocketTooltip';
@@ -11,24 +11,21 @@ export interface SearchFieldProps {
 	slideout?: boolean;
 }
 
-export function SearchField({ onChange, debounce, slideout = true }: SearchFieldProps) {
+export function SearchField({
+	onChange,
+	debounce = Constants.searchDebounceTimeMS,
+	slideout = true,
+}: SearchFieldProps) {
 	const [isTyping, setTyping] = useState(false);
 	const [active, setActive] = useState(false);
 
-	const { localDataState, setLocalDataState, debounceEventEmitter } = useDebounce<string | null>({
+	const { localDataState, setLocalDataState } = useDebounce<string | null>({
 		state: null,
 		setState: (text: string | null) => onChange(text ?? ''),
-		debounceOverride: debounce ?? Constants.searchDebounceTimeMS,
+		debounceMS: debounce,
+		onSync: () => setTyping(false),
+		onDesync: () => setTyping(true),
 	});
-
-	useEffect(() => {
-		debounceEventEmitter.on('sync', () => {
-			setTyping(false);
-		});
-		debounceEventEmitter.on('desync', () => {
-			setTyping(true);
-		});
-	}, []);
 
 	function cancel() {
 		setLocalDataState('');

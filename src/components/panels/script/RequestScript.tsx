@@ -12,7 +12,7 @@ export function RequestScript(props: RequestScriptProps) {
 	const { localDataState, setLocalDataState } = useDebounce({
 		state: props.scriptText ?? '',
 		setState: (newText: string) => props.updateScript(newText),
-		debounceOverride: Constants.longEditTimeMS,
+		debounceMS: Constants.longEditTimeMS,
 	});
 
 	return (

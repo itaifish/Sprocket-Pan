@@ -34,7 +34,7 @@ export function EndpointPanel({ id }: PanelProps) {
 	const { localDataState, setLocalDataState } = useDebounce({
 		state: endpoint.url,
 		setState: (newUrl: string) => update({ url: newUrl }),
-		debounceOverride: Constants.debounceTimeMS,
+		debounceMS: Constants.debounceTimeMS,
 	});
 
 	if (endpoint == null || service == null) {

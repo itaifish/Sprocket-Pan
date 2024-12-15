@@ -1,7 +1,7 @@
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
 import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { readTextFile } from '@tauri-apps/api/fs';
 import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
@@ -19,13 +19,8 @@ import SprocketIconLight from '@/assets/logo-light.svg';
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
 	const [menuOpen, setMenuOpen] = useState(false);
-	const ref = useRef(null);
-	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
-	useEffect(() => {
-		emitterForOutsideClicks.addListener('outsideClick', () => {
-			setMenuOpen(false);
-		});
-	}, [emitterForOutsideClicks]);
+	const ref = useRef<HTMLInputElement>(null);
+	useClickOutsideAlerter({ ref, onOutsideClick: () => setMenuOpen(false) });
 	const { systemMode } = useColorScheme();
 	return (
 		<SprocketTooltip text="Import From File" disabled={menuOpen}>
