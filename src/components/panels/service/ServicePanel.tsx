@@ -28,11 +28,11 @@ export function ServicePanel({ id }: PanelProps) {
 				tabs={[
 					{
 						title: 'General',
-						content: <GeneralSection data={serviceData} onChange={update} />,
+						content: <GeneralSection service={serviceData} onChange={update} />,
 					},
 					{
 						title: 'Environments',
-						content: <EnvironmentsSection data={serviceData} onChange={update} />,
+						content: <EnvironmentsSection service={serviceData} onChange={update} />,
 					},
 					{
 						title: 'Scripts',

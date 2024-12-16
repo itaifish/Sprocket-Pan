@@ -42,7 +42,7 @@ interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
 export const relinkEnvironments = createAsyncThunk<void, RelinkEnvironmentsArgs, { state: RootState }>(
 	`${activeThunkName}/relinkEnvironments`,
 	async ({ remove, add, serviceEnvId, serviceId }, thunk) => {
-		remove.forEach((envId) => thunk.dispatch(activeActions.removeLinkedEnv({ envId, serviceEnvId, serviceId })));
+		remove.forEach((envId) => thunk.dispatch(activeActions.removeLinkedEnv({ envId, serviceId })));
 		add.forEach((envId) => thunk.dispatch(activeActions.addLinkedEnv({ envId, serviceEnvId, serviceId })));
 	},
 );

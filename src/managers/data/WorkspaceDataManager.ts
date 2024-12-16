@@ -1,6 +1,5 @@
 import { DEFAULT_SETTINGS } from '@/constants/defaults';
-import { UiMetadata } from '@/types/data/shared';
-import { WorkspaceData, EndpointRequest, WorkspaceMetadata, HistoricalEndpointResponse } from '@/types/data/workspace';
+import { WorkspaceData, EndpointRequest, WorkspaceMetadata, WorkspaceSyncedData } from '@/types/data/workspace';
 import { nullifyProperties } from '@/utils/functions';
 import { log } from '@/utils/logging';
 import { path } from '@tauri-apps/api';
@@ -13,14 +12,21 @@ import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
 import swaggerParseManager from '../parsers/SwaggerParseManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
+import { getDefinedWorkspaceItemType } from '@/utils/getters';
+import { mergeDeep } from '@/utils/variables';
 
-export const defaultWorkspaceData: WorkspaceData = {
+export const defaultWorkspaceSyncedData: WorkspaceSyncedData = {
 	services: {},
 	endpoints: {},
 	requests: {},
 	environments: {},
 	scripts: {},
 	secrets: [],
+};
+
+export const defaultWorkspaceData: WorkspaceData = {
+	...defaultWorkspaceSyncedData,
+	history: {},
 	selectedEnvironment: undefined,
 	metadata: defaultWorkspaceMetadata,
 	uiMetadata: {
@@ -29,11 +35,10 @@ export const defaultWorkspaceData: WorkspaceData = {
 	settings: DEFAULT_SETTINGS,
 	version: SaveUpdateManager.getCurrentVersion(),
 	syncMetadata: { items: {} },
+	selectedServiceEnvironments: {},
 };
 
 export class WorkspaceDataManager {
-	private static noHistoryReplacer = nullifyProperties('history');
-
 	public static loadSwaggerFile(url: string) {
 		return swaggerParseManager.parseSwaggerFile('filePath', url);
 	}
@@ -70,38 +75,31 @@ export class WorkspaceDataManager {
 		await writeTextFile(filePath, dataToWrite);
 	}
 
-	public static async saveData(data: WorkspaceData) {
+	public static async saveData(allData: WorkspaceData) {
+		const { data, sync, location } = this.splitWorkspace(allData);
 		const {
 			metadata: { fileName, ...metadata },
 			uiMetadata,
 			secrets,
+			history,
 			...strippedData
 		} = data;
 
 		const paths = this.getWorkspacePath(fileName);
 
-		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(strippedData, this.noHistoryReplacer));
-		const saveHistory = FileSystemWorker.tryUpdateFile(
-			paths.history,
-			JSON.stringify(
-				Object.values(data.requests).map((request) => {
-					return { id: request.id, history: request.history };
-				}),
-			),
-		);
-		const saveMetadata = FileSystemWorker.tryUpdateFile(
-			paths.metadata,
-			JSON.stringify(metadata == null ? null : { ...metadata, lastModified: new Date().getTime() }),
-		);
-		const saveUiMetadata = FileSystemWorker.tryUpdateFile(paths.uiMetadata, JSON.stringify(uiMetadata));
+		const promises = [
+			FileSystemWorker.upsertFile(paths.data, JSON.stringify(strippedData)),
+			FileSystemWorker.upsertFile(paths.history, JSON.stringify(history)),
+			FileSystemWorker.upsertFile(paths.metadata, JSON.stringify({ ...metadata, lastModified: new Date().getTime() })),
+			FileSystemWorker.upsertFile(paths.uiMetadata, JSON.stringify(uiMetadata)),
+			FileSystemWorker.upsertFile(paths.secrets, JSON.stringify(secrets)),
+		];
 
-		const saveSecrets = FileSystemWorker.tryUpdateFile(paths.secrets, JSON.stringify(secrets));
-
-		const results = await Promise.all([saveData, saveHistory, saveMetadata, saveUiMetadata, saveSecrets]);
-
-		if (results.includes(false)) {
-			throw new Error('could not save one or more categories of data, file(s) did not exist');
+		if (location != null) {
+			promises.push(FileSystemWorker.upsertFile(location, JSON.stringify(sync)));
 		}
+
+		await Promise.all(promises);
 	}
 
 	public static getWorkspacePath(folder: string) {
@@ -142,22 +140,45 @@ export class WorkspaceDataManager {
 			FileSystemWorker.readTextFile(paths.secrets),
 		]);
 
-		const parsedData = JSON.parse(data) as WorkspaceData;
-		const parsedHistory = JSON.parse(history) as {
-			id: string;
-			history: HistoricalEndpointResponse[];
-		}[];
-		parsedHistory.forEach((responseHistory) => {
-			parsedData.requests[responseHistory.id].history = responseHistory?.history ?? [];
-		});
+		let parsedData = JSON.parse(data) as WorkspaceData;
+		parsedData.history = JSON.parse(history);
 		parsedData.metadata = {
 			fileName: workspace.fileName,
 			...JSON.parse(metadata),
-		} as WorkspaceMetadata;
-		parsedData.uiMetadata = JSON.parse(uiMetadata) as UiMetadata;
+		};
+		parsedData.uiMetadata = JSON.parse(uiMetadata);
 		parsedData.secrets = JSON.parse(secrets);
+		const syncLocation = this.getSyncLocation(parsedData);
+		if (syncLocation != null) {
+			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation));
+			parsedData = mergeDeep(parsedSync, parsedData);
+		}
 		SaveUpdateManager.update(parsedData);
 		return parsedData;
+	}
+
+	private static splitWorkspace(data: WorkspaceData) {
+		const location = this.getSyncLocation(data);
+		if (location == null) {
+			return { data };
+		}
+		const retData: WorkspaceData = structuredClone(data);
+		const syncData: WorkspaceSyncedData = structuredClone(defaultWorkspaceSyncedData);
+		Object.entries(data.syncMetadata.items).forEach(([key, value]) => {
+			if (value) {
+				const type = getDefinedWorkspaceItemType(data, key);
+				delete retData[type][key];
+				syncData[type][key] = data[type][key];
+			}
+		});
+		return { data: retData, sync: syncData, location };
+	}
+
+	private static getSyncLocation(data: WorkspaceData) {
+		const sync = data.settings.data?.sync;
+		return sync?.enabled && sync?.location != null && sync.location !== ''
+			? `${sync.location}${path.sep}data_sync.json`
+			: null;
 	}
 
 	/**

@@ -28,8 +28,9 @@ import { MS_IN_MINUTE } from '@/constants/constants';
 import { WorkspaceData, HistoricalEndpointResponse, Environment } from '@/types/data/workspace';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 
-function toNine(data: WorkspaceData) {
+function toNine(data: WorkspaceData | any) {
 	data.syncMetadata = { items: {} };
+	data.history = Object.fromEntries(data.history.map(({ id, history }) => [id, history]));
 }
 
 /**

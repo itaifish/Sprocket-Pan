@@ -64,6 +64,11 @@ export interface UpdateLinkedEnv {
 	serviceId: string;
 }
 
+interface SetSelectedServiceEnvironment {
+	serviceEnvId: string | undefined;
+	serviceId: string;
+}
+
 export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
 
 export const activeSlice = createSlice({
@@ -141,7 +146,7 @@ export const activeSlice = createSlice({
 			log.debug(`selectEnvironment called on env ${action.payload}`);
 			for (const key in state.services) {
 				if (state.services[key].linkedEnvMode) {
-					state.services[key].selectedEnvironment = undefined;
+					state.selectedServiceEnvironments[key] = undefined;
 				}
 			}
 			state.selectedEnvironment = action.payload;
@@ -149,7 +154,7 @@ export const activeSlice = createSlice({
 				const linkedValues = Object.entries(state.environments[state.selectedEnvironment].linked ?? {});
 				for (const [key, value] of linkedValues) {
 					if (state.services[key].linkedEnvMode) {
-						state.services[key].selectedEnvironment = value ?? undefined;
+						state.selectedServiceEnvironments[key] = value ?? undefined;
 					}
 				}
 			}
@@ -203,35 +208,28 @@ export const activeSlice = createSlice({
 		deleteAllHistory: (state) => {
 			const requestIds = Object.keys(state.requests);
 			for (const requestId in requestIds) {
-				state.requests[requestId].history = [];
+				state.history[requestId] = [];
 			}
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
 			const { requestId, networkRequest, response, auditLog, maxLength } = action.payload;
-			const reqToUpdate = state.requests[requestId];
-			if (reqToUpdate == null) {
-				throw new Error('addResponseToHistory called with no associated request');
-			}
-			reqToUpdate.history.push({
+			if (state.history[requestId] == null) state.history[requestId] = [];
+			state.history[requestId].push({
 				request: networkRequest,
 				response,
 				auditLog,
 			});
-			if (maxLength > 0 && reqToUpdate.history.length > maxLength) {
-				reqToUpdate.history.shift();
+			if (maxLength > 0 && state.history[requestId].length > maxLength) {
+				state.history[requestId].shift();
 			}
-			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);
-			log.trace(`new history item:\n${JSON.stringify(reqToUpdate.history[reqToUpdate.history.length - 1])}`);
+			log.debug(`addResponseToHistory called for request ${requestId}`);
+			log.trace(`new history item:\n${JSON.stringify(state.history[requestId][state.history[requestId].length - 1])}`);
 		},
 		deleteResponseFromHistory: (state, action: PayloadAction<DeleteResponseFromHistory>) => {
 			const { requestId, historyIndex } = action.payload;
-			const reqToUpdate = state.requests[requestId];
-			if (reqToUpdate == null) {
-				throw new Error('addResponseToHistory called with no associated request');
-			}
 			log.debug(`deleteResponseFromHistory called for request ${requestId} history item index ${historyIndex}`);
-			reqToUpdate.history.splice(historyIndex, 1);
+			state.history[requestId].splice(historyIndex, 1);
 		},
 		updateScript: (state, action: PayloadAction<Update<Script>>) => {
 			const { id, ...updateFields } = action.payload;
@@ -253,7 +251,7 @@ export const activeSlice = createSlice({
 				[serviceId]: serviceEnvId,
 			};
 			if (state.selectedEnvironment === envId) {
-				state.services[serviceId].selectedEnvironment = serviceEnvId;
+				state.selectedServiceEnvironments[serviceId] = serviceEnvId;
 			}
 		},
 		removeLinkedEnv: (state, action: PayloadAction<Omit<UpdateLinkedEnv, 'serviceEnvId'>>) => {
@@ -262,7 +260,7 @@ export const activeSlice = createSlice({
 				delete state.environments[envId].linked[serviceId];
 			}
 			if (state.selectedEnvironment === envId) {
-				state.services[serviceId].selectedEnvironment = undefined;
+				state.selectedServiceEnvironments[serviceId] = undefined;
 			}
 		},
 		updateSyncMetadata: (state, action: PayloadAction<RecursivePartial<SyncMetadata>>) => {
@@ -271,6 +269,10 @@ export const activeSlice = createSlice({
 		setSyncItem: (state, action: PayloadAction<{ id: string; value: boolean }>) => {
 			const { id, value } = action.payload;
 			state.syncMetadata.items[id] = value;
+		},
+		setSelectedServiceEnvironment: (state, action: PayloadAction<SetSelectedServiceEnvironment>) => {
+			const { serviceEnvId, serviceId } = action.payload;
+			state.selectedServiceEnvironments[serviceId] = serviceEnvId;
 		},
 	},
 });

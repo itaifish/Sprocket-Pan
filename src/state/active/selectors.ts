@@ -41,12 +41,9 @@ export const selectServicesById = createSelector(
 	(services, id) => services[id],
 );
 
-export const selectServiceSelectedEnvironmentValue = createSelector(
-	[selectServices, (_, id: string) => id],
-	(services, id) => {
-		const envId = services[id].selectedEnvironment;
-		return envId == null ? null : services[id].localEnvironments[envId];
-	},
+export const selectSelectedServiceEnvironments = createSelector(
+	selectActiveState,
+	(state) => state.selectedServiceEnvironments,
 );
 
 export const selectEnvironments = createSelector(selectActiveState, (state) => {
@@ -64,9 +61,16 @@ export const selectEnvironmentsById = createSelector(
 
 export const selectRequests = createSelector(selectActiveState, (state) => state.requests);
 
+export const selectHistory = createSelector(selectActiveState, (state) => state.history);
+
 export const selectRequestsById = createSelector(
 	[selectRequests, (_, id: string) => id],
 	(requests, id) => requests[id],
+);
+
+export const selectHistoryById = createSelector(
+	[selectHistory, (_, id: string) => id],
+	(history, id) => history[id] ?? [],
 );
 
 export const selectFullRequestInfoById = createSelector(
@@ -152,6 +156,7 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 	const requestData = state.requests[id];
 	const endpointData = state.endpoints[requestData?.endpointId];
 	const serviceData = state.services[endpointData?.serviceId];
+	const servEnvId = state.selectedServiceEnvironments[serviceData.id];
 	const fullQueryParams = new OrderedKeyValuePairs(endpointData.baseQueryParams, requestData.queryParams);
 	let query = queryParamsToString(fullQueryParams.toArray());
 	if (query) {
@@ -159,8 +164,7 @@ export const selectEnvironmentSnippets = createSelector([selectActiveState, (_, 
 	}
 	return EnvironmentContextResolver.stringWithVarsToSnippet(`${serviceData.baseUrl}${endpointData.url}${query}`, {
 		secrets: state.secrets,
-		servEnv:
-			serviceData.selectedEnvironment == null ? null : serviceData.localEnvironments[serviceData.selectedEnvironment],
+		servEnv: servEnvId == null ? null : serviceData.localEnvironments[servEnvId],
 		reqEnv: requestData.environmentOverride,
 		rootEnv: state.selectedEnvironment == null ? null : state.environments[state.selectedEnvironment],
 		rootAncestors: Object.values(state.environments),

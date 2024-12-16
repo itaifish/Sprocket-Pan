@@ -31,7 +31,6 @@ export interface Service<TBaseUrl extends string = string> extends WorkspaceItem
 	localEnvironments: {
 		[environmentId: string]: Environment;
 	};
-	selectedEnvironment?: string;
 	endpointIds: string[];
 	preRequestScript?: string;
 	postRequestScript?: string;
@@ -68,7 +67,6 @@ export interface EndpointRequest<TRequestBodyType extends RequestBodyType = Requ
 	preRequestScript?: string;
 	postRequestScript?: string;
 	environmentOverride: Environment;
-	history: HistoricalEndpointResponse[];
 }
 
 export interface NetworkFetchRequest {
@@ -122,14 +120,22 @@ export interface WorkspaceItems {
 	scripts: Record<string, Script>;
 }
 
+export interface WorkspaceSyncedData extends WorkspaceItems {
+	secrets: KeyValuePair[];
+}
+
 export interface WorkspaceData extends WorkspaceItems {
 	secrets: KeyValuePair[];
 	selectedEnvironment?: string;
+	selectedServiceEnvironments: Record<string, string | undefined>;
 	settings: WorkspaceSettings;
 	metadata: WorkspaceMetadata;
 	uiMetadata: UiMetadata;
 	version: number | null;
 	syncMetadata: SyncMetadata;
+	history: Record<string, HistoricalEndpointResponse[]>;
 }
 
 export type WorkspaceItemType = keyof WorkspaceItems;
+
+export type TabType = WorkspaceItemType | 'secrets';

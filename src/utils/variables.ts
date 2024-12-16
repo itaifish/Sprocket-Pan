@@ -23,6 +23,7 @@ export function isStringRecord(test: unknown) {
 }
 
 // we don't need any of the fancy anti-looping, support for custom objects, or array merging of libraries atm
+// typescript is hard.
 export function mergeDeep<T>(obj1: T, obj2: RecursivePartial<T>, iteration = 0): T {
 	if (iteration > 50) throw new Error("mergeDeep is a-loopin'");
 	if (obj1 == null) return obj2 as T;
