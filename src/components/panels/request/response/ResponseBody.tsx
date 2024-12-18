@@ -24,7 +24,7 @@ export function ResponseBody({ response }: { response: EndpointResponse }) {
 					)}
 				</>
 			}
-			height={'45vh'}
+			height="45vh"
 			value={response.body}
 			language={editorType}
 			options={{ readOnly: true, domReadOnly: true }}

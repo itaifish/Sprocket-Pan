@@ -259,14 +259,14 @@ export function ScriptPanel({ id }: PanelProps) {
 				<CopyToClipboardButton copyText={localDataState} />
 			</Stack>
 			<Editor
-				height={'55vh'}
+				height="55vh"
 				value={localDataState}
 				onChange={(value) => {
 					if (value != null) {
 						setLocalDataState(value);
 					}
 				}}
-				language={'typescript'}
+				language="typescript"
 				theme={theme}
 				options={defaultEditorOptions}
 				onMount={handleMainEditorDidMount}
@@ -275,7 +275,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				Return Variable Output
 			</Typography>
 			<Editor
-				height={'15vh'}
+				height="15vh"
 				value={scriptOutput}
 				language={scriptOutputLang}
 				theme={theme}

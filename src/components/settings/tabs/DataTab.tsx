@@ -46,7 +46,7 @@ export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }:
 						overlay={oversave?.intervalMS == null ? undefined : oversave.intervalMS / MS_IN_MINUTE}
 						onChange={(val) => onChange({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
 						startDecorator={<TimerIcon />}
-						endDecorator={'Minutes'}
+						endDecorator="Minutes"
 					/>
 				</Stack>
 

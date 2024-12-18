@@ -23,7 +23,7 @@ export function ActionsTab({ overlay, settings, onChange }: SettingsTabProps) {
 				overlay={overlay?.request?.timeoutMS == null ? undefined : overlay.request.timeoutMS / 1000}
 				onChange={(val) => onChange({ request: { timeoutMS: toMSOrUndefined(val) } })}
 				startDecorator={<HourglassBottomIcon />}
-				endDecorator={'Seconds'}
+				endDecorator="Seconds"
 			/>
 			<SettingsInput
 				type="number"
@@ -35,7 +35,7 @@ export function ActionsTab({ overlay, settings, onChange }: SettingsTabProps) {
 				overlay={overlay?.history?.maxLength}
 				onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
 				startDecorator={<ManageHistoryIcon />}
-				endDecorator={'Records'}
+				endDecorator="Records"
 				hint="Set this value as -1 for no maximum."
 			/>
 			<Divider></Divider>
@@ -50,7 +50,7 @@ export function ActionsTab({ overlay, settings, onChange }: SettingsTabProps) {
 				overlay={overlay?.script?.timeoutMS == null ? undefined : overlay.script.timeoutMS / 1000}
 				onChange={(val) => onChange({ script: { timeoutMS: toMSOrUndefined(val) } })}
 				startDecorator={<HourglassBottomIcon />}
-				endDecorator={'Seconds'}
+				endDecorator="Seconds"
 			/>
 			<SettingsStrategyInput
 				value={settings.script.strategy}

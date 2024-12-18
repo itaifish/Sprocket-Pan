@@ -168,13 +168,13 @@ export function EditableData<T extends KeyValueValues>({
 						save();
 					}
 				}}
-				height={'100%'}
+				height="100%"
 			>
 				<Editor
 					height={fullSize ? '100%' : `${clamp((initialValues.length + 2) * 3, 10, 40)}vh`}
 					value={editorText}
 					onChange={onEditorChange}
-					language={'json'}
+					language="json"
 					theme={theme}
 					options={defaultEditorOptions}
 					onMount={(editor) => {

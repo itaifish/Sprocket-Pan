@@ -63,14 +63,12 @@ export const selectRequests = createSelector(selectActiveState, (state) => state
 
 export const selectHistory = createSelector(selectActiveState, (state) => state.history);
 
-export const selectRequestsById = createSelector(
-	[selectRequests, (_, id: string) => id],
-	(requests, id) => requests[id],
+export const selectRequestsById = createSelector([selectRequests, (_, id?: string) => id], (requests, id) =>
+	id == null ? null : requests[id],
 );
 
-export const selectHistoryById = createSelector(
-	[selectHistory, (_, id: string) => id],
-	(history, id) => history[id] ?? [],
+export const selectHistoryById = createSelector([selectHistory, (_, id?: string) => id], (history, id) =>
+	id == null ? [] : (history[id] ?? []),
 );
 
 export const selectFullRequestInfoById = createSelector(

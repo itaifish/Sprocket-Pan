@@ -4,7 +4,7 @@ import { StrategyInput, StrategyInputProps } from './StrategyInput';
 import { InputSliderProps, InputSlider } from '@/components/shared/input/InputSlider';
 import { SprocketInputProps, SprocketInput } from '@/components/shared/input/SprocketInput';
 import { SprocketSwitchProps, SprocketSwitch } from '@/components/shared/input/SprocketSwitch';
-import { SprocketSelectProps, SprocketSelect } from '@/components/shared/SprocketSelect';
+import { SprocketSelectProps, SprocketSelect } from '@/components/shared/SprocketSelect/SprocketSelect';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 
 interface SettingsFieldProps<T> {

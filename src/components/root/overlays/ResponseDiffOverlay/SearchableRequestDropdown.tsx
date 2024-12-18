@@ -40,7 +40,7 @@ export function SearchableRequestDropdown<T extends SearchableItem>({
 				<SprocketTooltip text={`Open ${title}`}>
 					<IconButton
 						disabled={!selected}
-						color={'primary'}
+						color="primary"
 						onClick={() => {
 							if (!!selected) {
 								dispatch(tabsActions.addTabs({ [selected.id]: name }));

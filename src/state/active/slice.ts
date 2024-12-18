@@ -191,7 +191,11 @@ export const activeSlice = createSlice({
 		removeRequestFromEndpoint: (state, action: PayloadAction<string>) => {
 			const requestId = action.payload;
 			const { endpointId } = state.requests[requestId];
-			state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter((id) => id !== requestId);
+			if (state.endpoints[endpointId] != null) {
+				state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter(
+					(id) => id !== requestId,
+				);
+			}
 			log.debug(`removeRequestFromEndpoint called on request ${requestId} for its endpoint ${endpointId} `);
 		},
 		addEndpointToService: (state, action: PayloadAction<AddEndpointToService>) => {
@@ -202,7 +206,9 @@ export const activeSlice = createSlice({
 		removeEndpointFromService: (state, action: PayloadAction<string>) => {
 			const endpointId = action.payload;
 			const { serviceId } = state.endpoints[endpointId];
-			state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((id) => id !== endpointId);
+			if (state.services[serviceId] != null) {
+				state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((id) => id !== endpointId);
+			}
 			log.debug(`removeEndpointFromService called on endpoint ${endpointId} for its service ${serviceId}`);
 		},
 		deleteAllHistory: (state) => {

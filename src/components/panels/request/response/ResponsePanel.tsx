@@ -10,8 +10,7 @@ import { formatFullDate } from '@/utils/string';
 import { useSelector } from 'react-redux';
 import { selectHistoryById } from '@/state/active/selectors';
 
-function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
-	const history = useSelector((state) => selectHistoryById(state, request.id));
+function extractResponseStateData(responseState: 'latest' | number, history: HistoricalEndpointResponse[]) {
 	const responseStateIndex = responseState === 'latest' ? Math.max(history.length - 1, 0) : responseState;
 	return responseStateIndex >= history.length ? null : history[responseStateIndex];
 }
@@ -25,7 +24,8 @@ interface ResponsePanelProps {
 
 export function ResponsePanel({ responseState, request, setResponseState, lastError }: ResponsePanelProps) {
 	const dispatch = useAppDispatch();
-	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, request);
+	const history = useSelector((state) => selectHistoryById(state, request.id));
+	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, history);
 
 	if (responseStateData == null) {
 		return (

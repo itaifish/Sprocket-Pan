@@ -11,6 +11,14 @@ import { VerbChip } from '@/components/shared/VerbChip';
 import { statusCodes } from '@/constants/statusCodes';
 import { DiffQueueEntry } from '@/state/tabs/slice';
 import { headersToJson, multilineUrl } from '@/utils/serialization';
+import { useSelector } from 'react-redux';
+import { selectHistoryById } from '@/state/active/selectors';
+
+function useGetResponseData(selection: SelectedResponse | null) {
+	const history = useSelector((state) => selectHistoryById(state, selection?.id));
+	if (selection == null || history == null) return null;
+	return history[selection.index];
+}
 
 interface ResponseDiffOverlayProps {
 	initialSelection: DiffQueueEntry;
@@ -19,15 +27,11 @@ interface ResponseDiffOverlayProps {
 export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayProps) {
 	const [isFormCollapsed, setIsFormCollapsed] = useState(false);
 
-	const [selectedOriginalRequest, setSelectedOriginalRequest] = useState<SelectedResponse | null>(
-		initialSelection.original,
-	);
-	const [selectedModifiedRequest, setSelectedModifiedRequest] = useState<SelectedResponse | null>(
-		initialSelection.modified,
-	);
+	const [originalSelection, setOriginalSelection] = useState<SelectedResponse | null>(initialSelection.original);
+	const [modifiedSelection, setModifiedSelection] = useState<SelectedResponse | null>(initialSelection.modified);
 
-	const original = selectedOriginalRequest?.request?.history[selectedOriginalRequest?.index];
-	const modified = selectedModifiedRequest?.request?.history[selectedModifiedRequest?.index];
+	const original = useGetResponseData(originalSelection);
+	const modified = useGetResponseData(modifiedSelection);
 
 	return (
 		<Sheet sx={{ overflowY: 'auto', px: '20px', height: '85vh', width: '85vw' }}>
@@ -35,7 +39,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 				<Stack direction="row" gap={3} justifyContent="space-between">
 					<ResponseSelectForm
 						initialValue={initialSelection.original}
-						onChange={setSelectedOriginalRequest}
+						onChange={setOriginalSelection}
 						collapsed={isFormCollapsed}
 					/>
 					<SprocketTooltip text={isFormCollapsed ? 'Expand Form' : 'Hide Form'}>
@@ -50,7 +54,7 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 					</SprocketTooltip>
 					<ResponseSelectForm
 						initialValue={initialSelection.modified}
-						onChange={setSelectedModifiedRequest}
+						onChange={setModifiedSelection}
 						collapsed={isFormCollapsed}
 						sx={{ alignItems: isFormCollapsed ? 'end' : 'start' }}
 					/>
@@ -134,8 +138,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								title: 'Event Log',
 								content: (
 									<Stack direction="row" justifyContent="space-between">
-										<VisualEventLog auditLog={original.auditLog ?? []} requestId={selectedOriginalRequest.request.id} />
-										<VisualEventLog auditLog={modified.auditLog ?? []} requestId={selectedModifiedRequest.request.id} />
+										<VisualEventLog auditLog={original.auditLog ?? []} requestId={originalSelection?.id as string} />
+										<VisualEventLog auditLog={modified.auditLog ?? []} requestId={modifiedSelection?.id as string} />
 									</Stack>
 								),
 							},

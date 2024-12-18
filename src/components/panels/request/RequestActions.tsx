@@ -78,7 +78,7 @@ export function RequestActions({ endpoint, request, onError, onResponse, activat
 
 			<Card
 				variant="outlined"
-				color={'primary'}
+				color="primary"
 				onClick={activateEditButton}
 				sx={{
 					'--Card-padding': '6px',

@@ -1,5 +1,12 @@
 import { DEFAULT_SETTINGS } from '@/constants/defaults';
-import { WorkspaceData, EndpointRequest, WorkspaceMetadata, WorkspaceSyncedData } from '@/types/data/workspace';
+import {
+	WorkspaceData,
+	EndpointRequest,
+	WorkspaceMetadata,
+	WorkspaceSyncedData,
+	Endpoint,
+	Service,
+} from '@/types/data/workspace';
 import { nullifyProperties } from '@/utils/functions';
 import { log } from '@/utils/logging';
 import { path } from '@tauri-apps/api';
@@ -37,6 +44,11 @@ export const defaultWorkspaceData: WorkspaceData = {
 	syncMetadata: { items: {} },
 	selectedServiceEnvironments: {},
 };
+
+export interface OrphanData {
+	endpoints: { orphan: Endpoint; parent?: Service }[];
+	requests: { orphan: EndpointRequest; parent?: Endpoint }[];
+}
 
 export class WorkspaceDataManager {
 	public static loadSwaggerFile(url: string) {
@@ -96,10 +108,36 @@ export class WorkspaceDataManager {
 		];
 
 		if (location != null) {
-			promises.push(FileSystemWorker.upsertFile(location, JSON.stringify(sync)));
+			const syncContent = JSON.stringify(sync);
+			promises.push(FileSystemWorker.upsertFile(location, syncContent));
+			promises.push(FileSystemWorker.upsertFile(paths.syncBackup, syncContent));
 		}
 
 		await Promise.all(promises);
+	}
+
+	public static findOrphans(data: WorkspaceData) {
+		return {
+			endpoints: Object.values(data.endpoints).filter((endpoint) => data.services[endpoint.serviceId] == null),
+			requests: Object.values(data.requests).filter((request) => data.endpoints[request.endpointId] == null),
+		};
+	}
+
+	public static async processOrphans(data: WorkspaceData): Promise<OrphanData> {
+		const list = this.findOrphans(data);
+		const endpoints: OrphanData['endpoints'] = list.endpoints.map((orphan) => ({ orphan }));
+		const requests: OrphanData['requests'] = list.requests.map((orphan) => ({ orphan }));
+		const paths = this.getWorkspacePath(data.metadata.fileName);
+		if (this.getSyncLocation(data) != null && (await FileSystemWorker.exists(paths.syncBackup))) {
+			const backup = JSON.parse(await FileSystemWorker.readTextFile(paths.syncBackup)) as WorkspaceSyncedData;
+			endpoints.forEach((endpoint) => {
+				endpoint.parent = backup.services[endpoint.orphan.serviceId];
+			});
+			requests.forEach((request) => {
+				request.parent = backup.endpoints[request.orphan.endpointId];
+			});
+		}
+		return { endpoints, requests };
 	}
 
 	public static getWorkspacePath(folder: string) {
@@ -115,18 +153,14 @@ export class WorkspaceDataManager {
 			metadata: `${base}_metadata.json`,
 			uiMetadata: `${base}_ui_metadata.json`,
 			secrets: `${base}_secrets.json`,
+			syncBackup: `${base}_sync_backup.json`,
 		};
 	}
 
 	public static async initializeWorkspace(workspace: WorkspaceMetadata) {
-		try {
-			await FileSystemManager.createDataFolderIfNotExists();
-			await this.createDataFilesIfNotExist(workspace);
-			return await this.loadDataFromFile(workspace);
-		} catch (err) {
-			log.error(err);
-			return null;
-		}
+		await FileSystemManager.createDataFolderIfNotExists();
+		await this.createDataFilesIfNotExist(workspace);
+		return await this.loadDataFromFile(workspace);
 	}
 
 	private static async loadDataFromFile(workspace: WorkspaceMetadata) {

@@ -122,7 +122,7 @@ export function RequestBody({ request }: RequestBodyProps) {
 			</Stack>
 			{editorLanguage && (
 				<SprocketEditor
-					height={'45vh'}
+					height="45vh"
 					value={editorText}
 					onChange={(value) => {
 						setEditorText(value ?? '');
