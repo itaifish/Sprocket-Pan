@@ -7,6 +7,8 @@ export enum OrphanResolution {
 	revive = 'revive',
 	create = 'create',
 	delete = 'delete',
+	assign = 'assign',
+	none = 'none',
 }
 
 interface OrphanResolutionDropdownProps {

@@ -47,7 +47,7 @@ export const defaultWorkspaceData: WorkspaceData = {
 
 export interface OrphanData {
 	endpoints: { orphan: Endpoint; parent?: Service }[];
-	requests: { orphan: EndpointRequest; parent?: Endpoint }[];
+	requests: { orphan: EndpointRequest; parent?: Endpoint; grandparent?: Service }[];
 }
 
 export class WorkspaceDataManager {
@@ -134,7 +134,9 @@ export class WorkspaceDataManager {
 				endpoint.parent = backup.services[endpoint.orphan.serviceId];
 			});
 			requests.forEach((request) => {
-				request.parent = backup.endpoints[request.orphan.endpointId];
+				const endpoint = backup.endpoints[request.orphan.endpointId];
+				request.parent = endpoint;
+				request.grandparent = endpoint == null ? undefined : backup.services[endpoint.serviceId];
 			});
 		}
 		return { endpoints, requests };
