@@ -10,6 +10,7 @@ import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
+import { SyncBadge } from '../SyncBadge';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -36,7 +37,9 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 			]}
 		>
 			<ListItemDecorator>
-				<TableChartIcon fontSize="small" />
+				<SyncBadge id={environmentId}>
+					<TableChartIcon fontSize="small" />
+				</SyncBadge>
 			</ListItemDecorator>
 			<ListSubheader sx={{ width: '100%' }}>
 				<EllipsisSpan>{environment.name}</EllipsisSpan>

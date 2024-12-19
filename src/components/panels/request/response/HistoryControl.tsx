@@ -24,7 +24,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 	const numValue = responseStateToNumber(value, historyLength);
 	return (
 		<Stack direction="row">
-			<SprocketTooltip text={'Previous Response'}>
+			<SprocketTooltip text="Previous Response">
 				<IconButton
 					aria-label="Previous Response"
 					disabled={value === 0 || historyLength === 0}
@@ -33,7 +33,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 					<ArrowLeftIcon />
 				</IconButton>
 			</SprocketTooltip>
-			<Typography sx={{ display: 'flex', alignItems: 'center' }}>
+			<Typography sx={{ display: 'flex', alignItems: 'center' }} component="div">
 				{value === 'error' ? (
 					'error'
 				) : (
@@ -54,7 +54,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 					</>
 				)}
 			</Typography>
-			<SprocketTooltip text={'Next Response'}>
+			<SprocketTooltip text="Next Response">
 				<IconButton
 					aria-label="Next Response"
 					disabled={numValue >= historyLength - 1}
@@ -65,7 +65,7 @@ export function HistoryControl({ value, onChange, historyLength, onDelete }: His
 			</SprocketTooltip>
 
 			{onDelete && (
-				<SprocketTooltip text={'Delete Response'}>
+				<SprocketTooltip text="Delete Response">
 					<IconButton
 						disabled={value === 'error' || historyLength === 0}
 						aria-label="Delete Response"

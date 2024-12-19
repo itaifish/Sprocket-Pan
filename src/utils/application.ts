@@ -61,8 +61,8 @@ export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): B
 		const request = data.requests[requestId];
 		const endpoint = data.endpoints[request.endpointId];
 		const service = data.services[endpoint.serviceId];
-		values.servEnv =
-			service.selectedEnvironment == null ? null : service.localEnvironments[service.selectedEnvironment];
+		const servEnvId = data.selectedServiceEnvironments[service.id];
+		values.servEnv = servEnvId == null ? null : service.localEnvironments[servEnvId];
 		values.reqEnv = request.environmentOverride;
 	}
 	return values;

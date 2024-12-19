@@ -47,7 +47,8 @@ export const addNewEndpointById = createAsyncThunk<void, string, { state: RootSt
 export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState }>(
 	`${activeThunkName}/deleteEndpoint`,
 	async (id, thunk) => {
-		const endpoint = thunk.getState().active.endpoints[id];
+		const state = thunk.getState().active;
+		const endpoint = state.endpoints[id];
 		if (endpoint == null) {
 			throw new Error('attempted to delete endpoint that does not exist');
 		}

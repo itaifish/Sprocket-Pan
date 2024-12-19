@@ -18,7 +18,7 @@ export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onCh
 				<AccordionDetails>
 					<RequestScript
 						scriptText={preRequestScript}
-						scriptKey={'preRequestScript'}
+						scriptKey="preRequestScript"
 						updateScript={(scriptText: string) => {
 							onChange({ preRequestScript: scriptText });
 						}}
@@ -30,7 +30,7 @@ export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onCh
 				<AccordionDetails>
 					<RequestScript
 						scriptText={postRequestScript}
-						scriptKey={'postRequestScript'}
+						scriptKey="postRequestScript"
 						updateScript={(scriptText: string) => {
 							onChange({ postRequestScript: scriptText });
 						}}

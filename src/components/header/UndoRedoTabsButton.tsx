@@ -12,7 +12,7 @@ export function UndoRedoTabsButton() {
 	const dispatch = useAppDispatch();
 
 	return (
-		<Stack direction="row" spacing={0} justifyContent={'flex-end'}>
+		<Stack direction="row" spacing={0} justifyContent="flex-end">
 			<SprocketTooltip text="Previous Tab">
 				<IconButton
 					variant="outlined"

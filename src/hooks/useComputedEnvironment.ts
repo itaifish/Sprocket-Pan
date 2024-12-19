@@ -3,9 +3,10 @@ import {
 	selectSecrets,
 	selectSelectedEnvironmentValue,
 	selectEnvironments,
-	selectServiceSelectedEnvironmentValue,
 	selectRequestsById,
 	selectEndpointById,
+	selectServicesById,
+	selectSelectedServiceEnvironments,
 } from '@/state/active/selectors';
 import { useSelector } from 'react-redux';
 
@@ -23,10 +24,11 @@ export function useComputedRootEnvironment() {
 
 export function useComputedServiceEnvironment(id: string) {
 	const args = useRootEnvironmentArgs();
-	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, id));
+	const service = useSelector((state) => selectServicesById(state, id));
+	const selectedEnvId = useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
-		servEnv,
+		servEnv: selectedEnvId == null ? null : service.localEnvironments[selectedEnvId],
 	});
 }
 
@@ -34,10 +36,11 @@ export function useComputedRequestEnvironment(id: string) {
 	const args = useRootEnvironmentArgs();
 	const request = useSelector((state) => selectRequestsById(state, id));
 	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
-	const servEnv = useSelector((state) => selectServiceSelectedEnvironmentValue(state, endpoint.serviceId));
+	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
+	const selectedEnvId = useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
 		reqEnv: request.environmentOverride,
-		servEnv,
+		servEnv: selectedEnvId == null ? null : service.localEnvironments[selectedEnvId],
 	});
 }

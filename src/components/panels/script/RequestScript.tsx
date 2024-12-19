@@ -12,19 +12,19 @@ export function RequestScript(props: RequestScriptProps) {
 	const { localDataState, setLocalDataState } = useDebounce({
 		state: props.scriptText ?? '',
 		setState: (newText: string) => props.updateScript(newText),
-		debounceOverride: Constants.longEditTimeMS,
+		debounceMS: Constants.longEditTimeMS,
 	});
 
 	return (
 		<SprocketEditor
-			height={'55vh'}
+			height="55vh"
 			value={localDataState}
 			onChange={(value) => {
 				if (value != null) {
 					setLocalDataState(value);
 				}
 			}}
-			language={'typescript'}
+			language="typescript"
 		/>
 	);
 }

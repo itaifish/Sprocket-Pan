@@ -2,6 +2,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { TabType } from '../../types/state/state';
 import { log } from '../../utils/logging';
 import { SelectedResponse } from '../../components/root/overlays/ResponseDiffOverlay/ResponseSelectForm';
+import { OrphanData } from '@/managers/data/WorkspaceDataManager';
 
 export type DiffQueueEntry = { original: SelectedResponse; modified: SelectedResponse };
 
@@ -14,6 +15,7 @@ export interface TabsState {
 	diffQueue: DiffQueueEntry[];
 	createQueue: TabType[];
 	searchText: string;
+	orphans: OrphanData | null;
 }
 
 const initialState: TabsState = {
@@ -25,6 +27,7 @@ const initialState: TabsState = {
 	createQueue: [],
 	diffQueue: [],
 	searchText: '',
+	orphans: null,
 };
 
 export const tabsSlice = createSlice({
@@ -96,6 +99,9 @@ export const tabsSlice = createSlice({
 					state.historyLocation = payload;
 				}
 			}
+		},
+		setOrphans: (state, { payload }: PayloadAction<TabsState['orphans']>) => {
+			state.orphans = payload;
 		},
 	},
 });

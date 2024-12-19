@@ -22,11 +22,10 @@ export function EllipsisSpan({ children }: PropsWithChildren) {
 export function EllipsisTypography({ sx, children, ...props }: TypographyProps) {
 	return (
 		<Typography
+			maxWidth="100%"
+			width="fit-content"
 			{...props}
 			sx={{
-				flex: 1,
-				maxWidth: '100%',
-				width: 'fit-content',
 				textOverflow: 'ellipsis',
 				textWrap: 'nowrap',
 				whiteSpace: 'nowrap',

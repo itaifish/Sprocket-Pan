@@ -2,7 +2,7 @@
 // disabling jsx-key because we don't need keys for single items picked from an array
 import { COMMAND } from '@/managers/ShortcutManager';
 import { TIPS_SECTION } from '@/types/data/settings';
-import { Box, Chip, Divider, Stack, Typography } from '@mui/joy';
+import { Box, Chip, Stack, Typography } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { Keys } from '../shared/Keys';
 import { A } from '../shared/Link';
@@ -15,10 +15,8 @@ interface TipProps extends PropsWithChildren {
 
 function Tip({ children, label = 'Tip' }: TipProps) {
 	return (
-		<Stack direction="row" gap={1} divider={<Divider orientation="vertical" />}>
-			<Stack minWidth={86} maxWidth={86} alignItems="end" justifyContent="center">
-				<Chip size="sm">{label}</Chip>
-			</Stack>
+		<Stack direction="row" gap={1}>
+			<Chip size="sm">{label}</Chip>
 			<Typography overflow="hidden" maxHeight="3em" level="body-sm">
 				{children}
 			</Typography>

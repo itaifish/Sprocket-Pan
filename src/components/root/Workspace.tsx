@@ -10,7 +10,6 @@ import { SideDrawerActions } from '../sidebar/SideDrawerActions';
 
 export function Workspace() {
 	useAutosave();
-
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const theme = useTheme();
 	const { guttered: scrollbarTheme } = useScrollbarTheme();

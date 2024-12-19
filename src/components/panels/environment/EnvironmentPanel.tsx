@@ -1,17 +1,18 @@
-import Checkbox from '@mui/joy/Checkbox';
 import { useSelector } from 'react-redux';
-import { Option, Select, Stack, Typography } from '@mui/joy';
+import { IconButton, Option, Select, Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { useMemo } from 'react';
-import { AccountTree } from '@mui/icons-material';
+import { AccountTree, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material';
 import { parseEditorJSON, toEditorJSON, EditableData } from '@/components/shared/input/EditableData';
-import { EditableText } from '@/components/shared/input/EditableText';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
 import { selectSelectedEnvironment, selectEnvironments, selectSecrets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { toKeyValuePairs } from '@/utils/application';
 import { PanelProps } from '../panels.interface';
+import { EditableHeader } from '../shared/EditableHeader';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
@@ -41,41 +42,38 @@ export function EnvironmentPanel({ id }: PanelProps) {
 
 	return (
 		<Stack gap={2}>
-			<EditableText
-				sx={{ margin: 'auto' }}
-				text={environment.name}
-				setText={(newText: string) => dispatch(activeActions.updateEnvironment({ name: newText, id }))}
-				isValidFunc={(text: string) => text.length >= 1}
-				level="h2"
+			<EditableHeader
+				left={
+					<SprocketTooltip text={selectedEnvironment === id ? 'Unselect' : 'Select'}>
+						<IconButton
+							onClick={() => dispatch(activeActions.selectEnvironment(selectedEnvironment === id ? undefined : id))}
+						>
+							{selectedEnvironment === id ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+						</IconButton>
+					</SprocketTooltip>
+				}
+				value={environment.name}
+				onChange={(name) => dispatch(activeActions.updateEnvironment({ name, id }))}
+				right={<SyncButton id={id} />}
 			/>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
 				<EditableData
 					actions={{
 						start: (
-							<>
-								<Checkbox
-									sx={{ m: 1 }}
-									label="Selected"
-									checked={selectedEnvironment === id}
-									onChange={() =>
-										dispatch(activeActions.selectEnvironment(selectedEnvironment === id ? undefined : id))
-									}
-								/>
-								<Select
-									startDecorator={<AccountTree />}
-									sx={{ minWidth: '250px' }}
-									placeholder="None"
-									multiple
-									value={environment.parents ?? []}
-									onChange={(_, parents) => dispatch(activeActions.updateEnvironment({ parents, id }))}
-								>
-									{envList.map((env) => (
-										<Option key={env.id} value={env.id}>
-											{env.name}
-										</Option>
-									))}
-								</Select>
-							</>
+							<Select
+								startDecorator={<AccountTree />}
+								sx={{ minWidth: '250px' }}
+								placeholder="None"
+								multiple
+								value={environment.parents ?? []}
+								onChange={(_, parents) => dispatch(activeActions.updateEnvironment({ parents, id }))}
+							>
+								{envList.map((env) => (
+									<Option key={env.id} value={env.id}>
+										{env.name}
+									</Option>
+								))}
+							</Select>
 						),
 					}}
 					initialValues={environment.pairs}

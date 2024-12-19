@@ -2,7 +2,6 @@ import { ListSubheader } from '@mui/joy';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useSelector } from 'react-redux';
-
 import {
 	menuOptionDuplicate,
 	menuOptionDelete,

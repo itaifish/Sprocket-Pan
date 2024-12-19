@@ -10,29 +10,36 @@ export function replaceValuesByKey(text: string, values: KeyValuePair<string>[] 
 }
 
 /**
- * Determines if the arg is a Record<string, unkonwn>
- * Returns false for normalized arrays (ones that start at 0)
- * Returns false for null and undefined
- * Returns false for strings (since their arrays start at 0)
- * Returns true for weird arrays that don't start at 0
+ * Determines if the arg is a Record<something, unknown>
+ * Returns false for null and undefined, true for objects with default constructor
  */
-export function isStringRecord(test: unknown) {
-	if (test == null) return false;
-	const keys = Object.keys(test);
-	return keys.length > 0 && keys[0] !== '0';
+export function isRecord(test: unknown) {
+	return test?.constructor === Object;
 }
 
 // we don't need any of the fancy anti-looping, support for custom objects, or array merging of libraries atm
+// typescript is hard though
 export function mergeDeep<T>(obj1: T, obj2: RecursivePartial<T>, iteration = 0): T {
-	if (iteration > 50) throw new Error("mergeDeep is a-loopin'");
+	if (iteration > 50) throw new Error("mergeDeep is a-loopin' (probably)");
 	if (obj1 == null) return obj2 as T;
 	const newObj = structuredClone(obj1);
 	for (const key in obj2) {
-		if (isStringRecord(obj2[key])) {
+		if (isRecord(obj2[key])) {
 			newObj[key] = mergeDeep(obj1[key], obj2[key] as any, iteration++);
 		} else {
 			newObj[key] = obj2[key] as any;
 		}
 	}
 	return newObj;
+}
+
+// Object.groupBy exists, but is not supported here yet (12/17/24)
+export function groupBy<T>(items: T[], func: (item: T) => string) {
+	const retObj: Record<string, T[]> = {};
+	items.forEach((item) => {
+		const key = func(item);
+		if (retObj[key] == null) retObj[key] = [];
+		retObj[key].push(item);
+	});
+	return retObj;
 }

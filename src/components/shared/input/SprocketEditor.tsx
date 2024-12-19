@@ -53,7 +53,7 @@ export function SprocketEditor({
 				<EditorActions copyText={value} format={format} />
 			</Stack>
 			<Editor
-				language={'typescript'}
+				language="typescript"
 				theme={editorTheme}
 				options={combinedOptions}
 				onMount={(editor) => {

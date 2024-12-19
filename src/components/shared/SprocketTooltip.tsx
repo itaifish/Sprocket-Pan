@@ -10,7 +10,7 @@ export function SprocketTooltip({ children, text, disabled, ...props }: Sprocket
 	return disabled ? (
 		<>{children}</>
 	) : (
-		<Tooltip variant={'outlined'} arrow {...props} title={text}>
+		<Tooltip variant="outlined" arrow {...props} title={text}>
 			{children}
 		</Tooltip>
 	);

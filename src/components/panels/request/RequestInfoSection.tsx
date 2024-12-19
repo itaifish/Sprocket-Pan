@@ -43,7 +43,7 @@ export function RequestInfoSection({ request }: { request: EndpointRequest }) {
 									defaultRequest: isDefault ? null : request.id,
 								})
 							}
-							endDecorator={'Default'}
+							endDecorator="Default"
 						/>
 					),
 				},

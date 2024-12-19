@@ -10,6 +10,7 @@ class Logger {
 
 	private attachProcess: Promise<UnlistenFn>;
 	private tauriLog = { info, warn, debug, error, trace };
+
 	private constructor() {
 		this.attachProcess = attachConsole();
 	}
@@ -17,6 +18,7 @@ class Logger {
 	public info(data: unknown, logLengthOverride?: number) {
 		this.log('info', data, logLengthOverride);
 	}
+
 	public warn(data: unknown, logLengthOverride?: number) {
 		this.log('warn', data, logLengthOverride);
 	}

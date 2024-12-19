@@ -3,6 +3,7 @@ import { DataTab, DataTabProps } from './DataTab';
 import { GeneralTab } from './GeneralTab';
 import { ActionsTab } from './ActionsTab';
 import { ThemeTab } from './ThemeTab';
+import { WorkspaceTab } from './WorkspaceTab';
 
 export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabProps) {
 	return (
@@ -12,6 +13,7 @@ export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabPro
 				<Tab>Actions</Tab>
 				<Tab>Theme</Tab>
 				<Tab>Data</Tab>
+				<Tab>Workspace</Tab>
 			</TabList>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={0}>
 				<GeneralTab {...tabProps} />
@@ -24,6 +26,9 @@ export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabPro
 			</TabPanel>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={3}>
 				<DataTab goToWorkspaceSelection={goToWorkspaceSelection} {...tabProps} />
+			</TabPanel>
+			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={4}>
+				<WorkspaceTab {...tabProps} />
 			</TabPanel>
 		</Tabs>
 	);

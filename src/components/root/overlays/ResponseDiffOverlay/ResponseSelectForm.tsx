@@ -5,12 +5,12 @@ import { FormControl, FormLabel, Stack, Typography } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
 import { ResponseState } from '@/components/panels/request/RequestActions';
 import { responseStateToNumber, HistoryControl } from '@/components/panels/request/response/HistoryControl';
-import { selectServices, selectEndpoints, selectRequests } from '@/state/active/selectors';
+import { selectServices, selectEndpoints, selectRequests, selectHistory } from '@/state/active/selectors';
 import { BREAK_ALL_TEXT } from '@/styles/text';
 import { EndpointRequest, Endpoint, Service } from '@/types/data/workspace';
 import { formatShortFullDate } from '@/utils/string';
 
-export type SelectedResponse = { request: EndpointRequest; index: number };
+export type SelectedResponse = { id: string; index: number };
 
 interface ResponseSelectFormProps {
 	onChange: (args: SelectedResponse | null) => void;
@@ -23,6 +23,7 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 	const services = useSelector(selectServices);
 	const endpoints = useSelector(selectEndpoints);
 	const requests = useSelector(selectRequests);
+	const histories = useSelector(selectHistory);
 
 	const [selectedHistoryIndex, setSelectedHistoryIndex] = useState<number>(0);
 	const [selectedRequest, setSelectedResponse] = useState<EndpointRequest | null>(null);
@@ -35,10 +36,11 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 
 	const setRequest = (value: string | null, stateIndex: ResponseState = 'latest') => {
 		const request = value == null ? null : requests[value];
-		const index = responseStateToNumber(stateIndex, request?.history.length);
+		const history = value == null ? null : histories[value];
+		const index = responseStateToNumber(stateIndex, history?.length);
 		setSelectedResponse(request);
 		setSelectedHistoryIndex(index);
-		onChange(request == null ? null : { request, index });
+		onChange(request == null ? null : { id: request.id, index });
 	};
 
 	const setEndpoint = (value: string | null) => {
@@ -58,7 +60,7 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 			setService(null);
 			return;
 		}
-		const request = initialValue.request;
+		const request = requests[initialValue.id];
 		const endpoint = endpoints[request?.endpointId];
 		const service = services[endpoint?.serviceId];
 		setSelectedHistoryIndex(initialValue.index);
@@ -67,7 +69,8 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 		setSelectedService(service);
 	}, []);
 
-	const historyDate = selectedRequest?.history[selectedHistoryIndex]?.request.dateTime;
+	const selectedHistory = selectedRequest == null ? null : histories[selectedRequest.id];
+	const historyDate = selectedHistory?.[selectedHistoryIndex]?.request.dateTime;
 
 	return (
 		<Stack gap={1} sx={sx}>
@@ -102,7 +105,7 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 				<Stack direction="row" alignItems="center">
 					<HistoryControl
 						value={selectedHistoryIndex}
-						historyLength={selectedRequest?.history.length ?? 0}
+						historyLength={selectedHistory?.length ?? 0}
 						onChange={(state) => setRequest(selectedRequest?.id ?? null, state)}
 					/>
 					{historyDate != null && formatShortFullDate(historyDate)}

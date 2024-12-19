@@ -30,7 +30,7 @@
 			},
 			"fs": {
 				"all": true,
-				"scope": ["$APPDATA/**", "$APPLOCALDATA/**", "$APPLOCALDATA", "$APPLOCALDATA"]
+				"scope": ["**"]
 			},
 			"path": {
 				"all": true

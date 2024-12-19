@@ -1,13 +1,14 @@
-import { EventEmitter } from '@tauri-apps/api/shell';
 import { useEffect } from 'react';
+
+interface UseClickOutsideAlerterArgs {
+	ref: React.MutableRefObject<HTMLInputElement | null>;
+	onOutsideClick: () => void;
+}
 
 /**
  * Hook that alerts clicks outside of the passed ref
  */
-export function useClickOutsideAlerter<T extends { contains: (input: unknown) => boolean }>(
-	ref: React.MutableRefObject<T>,
-) {
-	const emitter = new EventEmitter<'outsideClick'>();
+export function useClickOutsideAlerter({ ref, onOutsideClick }: UseClickOutsideAlerterArgs) {
 	useEffect(() => {
 		/**
 		 * Alert if clicked on outside of element
@@ -17,17 +18,15 @@ export function useClickOutsideAlerter<T extends { contains: (input: unknown) =>
 			if (event.buttons !== 1) {
 				return;
 			}
-			if (ref.current && !ref.current.contains(event.target)) {
-				emitter.emit('outsideClick');
+			if (ref.current != null && !ref.current.contains(event.target as Node)) {
+				onOutsideClick();
 			}
 		}
-		// Bind the event listener
+		// Bind the DOM event listener
 		document.addEventListener('mousedown', handleClickOutside);
 		return () => {
-			// Unbind the event listener on clean up
+			// Unbind the DOM event listener on clean up
 			document.removeEventListener('mousedown', handleClickOutside);
-			emitter.removeAllListeners();
 		};
 	}, [ref]);
-	return emitter;
 }

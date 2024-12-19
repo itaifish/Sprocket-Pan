@@ -5,6 +5,7 @@ import { Environment, Script } from '@/types/data/workspace';
 import { log } from '@/utils/logging';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeThunkName, activeActions } from '../slice';
+import { getAncestors, getDescendents } from '@/utils/getters';
 
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 
@@ -37,6 +38,22 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 		if (lastModified > lastSaved) {
 			thunk.dispatch(activeActions.setSavedNow());
 			return WorkspaceDataManager.saveData(data);
+		}
+	},
+);
+
+export const toggleSync = createAsyncThunk<void, string, { state: RootState }>(
+	`${activeThunkName}/toggleSync`,
+	(id, thunk) => {
+		const state = thunk.getState().active;
+		if (state.syncMetadata.items[id]) {
+			[id, ...getDescendents(state, id)].forEach((itemId) => {
+				thunk.dispatch(activeActions.setSyncItem({ id: itemId, value: false }));
+			});
+		} else {
+			[id, ...getAncestors(state, id)].forEach((itemId) => {
+				thunk.dispatch(activeActions.setSyncItem({ id: itemId, value: true }));
+			});
 		}
 	},
 );

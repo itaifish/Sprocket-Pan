@@ -66,6 +66,10 @@ export interface Settings {
 			enabled: boolean;
 			intervalMS: number;
 		};
+		sync: {
+			enabled: boolean;
+			location: string | null;
+		};
 	};
 	script: {
 		strategy: {

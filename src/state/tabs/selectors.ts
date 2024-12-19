@@ -46,3 +46,5 @@ export const selectIsActiveTab = createSelector(
 	[selectActiveTab, (_, id: string) => id],
 	(activeTab, id) => activeTab === id,
 );
+
+export const selectOrphans = createSelector(selectTabsState, (state) => state.orphans);

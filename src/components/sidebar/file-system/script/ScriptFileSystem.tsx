@@ -8,6 +8,7 @@ import { selectScript } from '@/state/active/selectors';
 import { createScript } from '@/state/active/thunks/scripts';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
+import { SyncBadge } from '../SyncBadge';
 
 interface ScriptFileSystemProps {
 	scriptId: string;
@@ -36,7 +37,9 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 			]}
 		>
 			<ListItemDecorator>
-				<CodeIcon fontSize="small" />
+				<SyncBadge id={scriptId}>
+					<CodeIcon fontSize="small" />
+				</SyncBadge>
 			</ListItemDecorator>
 			<ListSubheader sx={{ width: '100%' }}>
 				<EllipsisSpan>{script.name}</EllipsisSpan>

@@ -85,7 +85,7 @@ export function WorkspaceDataSection({ goToWorkspaceSelection }: WorkspaceDataSe
 				closeFunc={function (): void {
 					setDeleteHistoryModalOpen(false);
 				}}
-				action={'Delete All History'}
+				action="Delete All History"
 				actionFunc={deleteHistory}
 			/>
 		</>

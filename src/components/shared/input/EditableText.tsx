@@ -6,7 +6,7 @@ import ModeEditIcon from '@mui/icons-material/ModeEdit';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { EllipsisTypography } from '../EllipsisTypography';
 
-interface EditableTextProps extends Partial<TypographyProps> {
+export interface EditableTextProps extends Partial<TypographyProps> {
 	text: string;
 	setText: (text: string) => void;
 	isValidFunc: (text: string) => boolean;

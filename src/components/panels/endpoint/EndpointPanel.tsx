@@ -3,7 +3,6 @@ import LabelIcon from '@mui/icons-material/Label';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useSelector } from 'react-redux';
 import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
-import { EditableText } from '@/components/shared/input/EditableText';
 import { Constants } from '@/constants/constants';
 import { verbColors } from '@/constants/style';
 import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
@@ -17,6 +16,8 @@ import { RESTfulRequestVerbs } from '@/types/data/shared';
 import { Endpoint } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
+import { EditableHeader } from '../shared/EditableHeader';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -33,7 +34,7 @@ export function EndpointPanel({ id }: PanelProps) {
 	const { localDataState, setLocalDataState } = useDebounce({
 		state: endpoint.url,
 		setState: (newUrl: string) => update({ url: newUrl }),
-		debounceOverride: Constants.debounceTimeMS,
+		debounceMS: Constants.debounceTimeMS,
 	});
 
 	if (endpoint == null || service == null) {
@@ -42,13 +43,7 @@ export function EndpointPanel({ id }: PanelProps) {
 
 	return (
 		<Stack gap={2}>
-			<EditableText
-				sx={{ margin: 'auto' }}
-				text={endpoint.name}
-				setText={(newText: string) => update({ name: newText })}
-				isValidFunc={(text: string) => text.length >= 1}
-				level="h2"
-			/>
+			<EditableHeader value={endpoint.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<Stack direction="row" gap={2}>
 				<Select
 					sx={{ minWidth: 150 }}

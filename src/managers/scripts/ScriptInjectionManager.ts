@@ -62,6 +62,8 @@ export function getScriptInjectionCode(
 
 	const getRequest = () => (requestId != null ? getState().active.requests[requestId] : null);
 
+	const getHistory = () => (requestId == null ? null : getState().active.history[requestId]);
+
 	const setEnvironmentVariable = (key: string, value: string, level: 'request' | 'service' | 'global' = 'request') => {
 		const data = getState().active;
 		const request = getRequest();
@@ -86,8 +88,9 @@ export function getScriptInjectionCode(
 				if (!service) {
 					return;
 				}
-				if (service.selectedEnvironment) {
-					const env = service.localEnvironments[service.selectedEnvironment];
+				const selectedEnvId = data.selectedServiceEnvironments[service.id];
+				if (selectedEnvId) {
+					const env = service.localEnvironments[selectedEnvId];
 					newPairs.apply(env.pairs);
 					newPairs.set(key, value);
 					dispatch(
@@ -95,7 +98,7 @@ export function getScriptInjectionCode(
 							id: endpoint.serviceId,
 							localEnvironments: {
 								...service.localEnvironments,
-								[service.selectedEnvironment]: { ...env, pairs: newPairs.toArray() },
+								[selectedEnvId]: { ...env, pairs: newPairs.toArray() },
 							},
 						}),
 					);
@@ -151,7 +154,8 @@ export function getScriptInjectionCode(
 	const sendRequest = async (requestId: string) => {
 		await dispatch(makeRequest({ requestId, auditLog }));
 		const data = getState().active;
-		return data.requests[requestId].history[data.requests[requestId].history.length - 1]?.response;
+		const history = data.history[requestId];
+		return history[history.length - 1]?.response;
 	};
 
 	const getRunnableScripts = () => {
@@ -193,14 +197,11 @@ export function getScriptInjectionCode(
 			return requestId != null ? structuredClone(getState().active.requests[requestId]) : null;
 		},
 		get response() {
-			const request = getRequest();
-			if (request == null) {
+			const history = getHistory();
+			if (history == null) {
 				return null;
 			}
-			const latestResponse =
-				(response ?? (request.history && request.history.length > 0))
-					? request.history[request.history.length - 1]
-					: null;
+			const latestResponse = (response ?? (history && history.length > 0)) ? history[history.length - 1] : null;
 			return latestResponse;
 		},
 	};

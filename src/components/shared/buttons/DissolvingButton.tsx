@@ -24,15 +24,15 @@ export function DissolvingButton({ children, shouldAnimate, clearShouldAnimate }
 			<ParticleEffectButton
 				hidden={hidden}
 				canvasPadding={50}
-				type={'rectangle'}
+				type="rectangle"
 				color={particleColor}
 				oscillationCoefficient={15}
-				style={'stroke'}
+				style="stroke"
 				particlesAmountCoefficient={2}
 				duration={350}
 				speed={0.7}
-				direction={'top'}
-				easing={'easeOutSine'}
+				direction="top"
+				easing="easeOutSine"
 				onBegin={() => setIsAnimating(true)}
 				size={4}
 				onComplete={() => {

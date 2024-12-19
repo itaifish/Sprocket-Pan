@@ -7,10 +7,12 @@ import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { EndpointRequest, HistoricalEndpointResponse } from '@/types/data/workspace';
 import { formatFullDate } from '@/utils/string';
+import { useSelector } from 'react-redux';
+import { selectHistoryById } from '@/state/active/selectors';
 
-function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
-	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;
-	return responseStateIndex >= request.history.length ? null : request.history[responseStateIndex];
+function extractResponseStateData(responseState: 'latest' | number, history: HistoricalEndpointResponse[]) {
+	const responseStateIndex = responseState === 'latest' ? Math.max(history.length - 1, 0) : responseState;
+	return responseStateIndex >= history.length ? null : history[responseStateIndex];
 }
 
 interface ResponsePanelProps {
@@ -22,7 +24,8 @@ interface ResponsePanelProps {
 
 export function ResponsePanel({ responseState, request, setResponseState, lastError }: ResponsePanelProps) {
 	const dispatch = useAppDispatch();
-	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, request);
+	const history = useSelector((state) => selectHistoryById(state, request.id));
+	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, history);
 
 	if (responseStateData == null) {
 		return (
@@ -39,14 +42,11 @@ export function ResponsePanel({ responseState, request, setResponseState, lastEr
 					{formatFullDate(new Date(responseStateData?.response.dateTime))}
 				</Typography>
 				<Stack direction="row" spacing={0}>
-					<OpenDiffToolButton
-						historyIndex={responseStateToNumber(responseState, request.history.length)}
-						request={request}
-					/>
+					<OpenDiffToolButton historyIndex={responseStateToNumber(responseState, history.length)} id={request.id} />
 					<HistoryControl
 						value={responseState}
 						onChange={setResponseState}
-						historyLength={request.history.length}
+						historyLength={history.length}
 						onDelete={(index) =>
 							dispatch(activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
 						}

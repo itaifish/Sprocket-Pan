@@ -1,15 +1,26 @@
-type ClickEvent = Pick<MouseEvent, 'ctrlKey' | 'metaKey'>;
+type ClickEvent = Pick<MouseEvent, 'ctrlKey' | 'metaKey' | 'shiftKey'>;
 
 export enum COMMAND {
 	meta,
 	click,
+	shift,
 }
 
-const clickTranslations = [{ command: COMMAND.meta, matches: (event: ClickEvent) => event.ctrlKey || event.metaKey }];
+const clickTranslations = [
+	{
+		command: COMMAND.meta,
+		matches: (event: ClickEvent) => event.ctrlKey || event.metaKey,
+	},
+	{
+		command: COMMAND.shift,
+		matches: (event: ClickEvent) => event.shiftKey,
+	},
+];
 
 const commandMapping = {
 	[COMMAND.meta]: 'command',
 	[COMMAND.click]: 'click',
+	[COMMAND.shift]: 'shift',
 };
 
 export class ShortcutManager {

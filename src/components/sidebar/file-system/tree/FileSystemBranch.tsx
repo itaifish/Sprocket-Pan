@@ -8,6 +8,7 @@ import { selectSettings, selectUiMetadataById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { LIST_STYLES } from '@/styles/list';
+import { SyncBadge } from '../SyncBadge';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
@@ -34,18 +35,20 @@ export function FileSystemBranch({
 			<ListItem nested>
 				<FileSystemButton tabType={tabType} id={id} menuOptions={menuOptions}>
 					<ListItemDecorator>
-						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-							<IconButton
-								size={folderSize}
-								onClick={(e) => {
-									setCollapsed(!collapsed);
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-							>
-								{collapsed ? <Folder fontSize="small" /> : <FolderOpen fontSize="small" />}
-							</IconButton>
-						</SprocketTooltip>
+						<SyncBadge id={id} right={6} bottom={folderSize === 'md' ? 5 : 2}>
+							<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
+								<IconButton
+									size={folderSize}
+									onClick={(e) => {
+										setCollapsed(!collapsed);
+										e.preventDefault();
+										e.stopPropagation();
+									}}
+								>
+									{collapsed ? <Folder fontSize="small" /> : <FolderOpen fontSize="small" />}
+								</IconButton>
+							</SprocketTooltip>
+						</SyncBadge>
 					</ListItemDecorator>
 					{buttonContent}
 				</FileSystemButton>
