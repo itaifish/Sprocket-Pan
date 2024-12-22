@@ -9,6 +9,7 @@ import { Script, EndpointResponse, EndpointRequest } from '@/types/data/workspac
 import { SprocketError } from '@/types/state/state';
 import { log } from '@/utils/logging';
 import { createNewRequestObject } from './util';
+import { getSettingsFromState } from '@/utils/application';
 
 export const runScript = createAsyncThunk<
 	| {
@@ -39,6 +40,7 @@ export const runScript = createAsyncThunk<
 	return result;
 });
 
+// TODO: gotta figure out how to get this working without injecting getState()
 export const makeRequest = createAsyncThunk<
 	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },
@@ -62,14 +64,15 @@ export const makeRequest = createAsyncThunk<
 		return error;
 	}
 	auditLog.push(...localAuditLog);
-	const state = thunk.getState();
+	const settings = getSettingsFromState(thunk.getState());
 	thunk.dispatch(
 		activeActions.addResponseToHistory({
 			requestId: requestId,
 			response,
 			networkRequest,
 			auditLog: localAuditLog,
-			maxLength: state.active.settings.history?.maxLength ?? state.global.settings.history.maxLength,
+			maxLength: settings.history.maxLength,
+			discard: !settings.history.enabled,
 		}),
 	);
 });

@@ -1,11 +1,12 @@
 import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
-import { DataTab, DataTabProps } from './DataTab';
+import { DataTab } from './DataTab';
 import { GeneralTab } from './GeneralTab';
 import { ActionsTab } from './ActionsTab';
 import { ThemeTab } from './ThemeTab';
-import { WorkspaceTab } from './WorkspaceTab';
+import { WorkspaceTab, WorkspaceTabProps } from './WorkspaceTab';
+import { SettingsTabProps } from './types';
 
-export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabProps) {
+export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: SettingsTabProps & Partial<WorkspaceTabProps>) {
 	return (
 		<Tabs aria-label="Settings Tabs" orientation="vertical" sx={{ height: 'calc(100% - 30px)' }}>
 			<TabList>
@@ -25,11 +26,13 @@ export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: DataTabPro
 				<ThemeTab {...tabProps} />
 			</TabPanel>
 			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={3}>
-				<DataTab goToWorkspaceSelection={goToWorkspaceSelection} {...tabProps} />
+				<DataTab {...tabProps} />
 			</TabPanel>
-			<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={4}>
-				<WorkspaceTab {...tabProps} />
-			</TabPanel>
+			{goToWorkspaceSelection != null && (
+				<TabPanel sx={{ height: '100%', overflowY: 'auto' }} value={4}>
+					<WorkspaceTab goToWorkspaceSelection={goToWorkspaceSelection} {...tabProps} />
+				</TabPanel>
+			)}
 		</Tabs>
 	);
 }

@@ -18,6 +18,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	},
 	history: {
 		maxLength: 250,
+		enabled: true,
+		maxDays: -1,
 	},
 	data: {
 		autosave: {

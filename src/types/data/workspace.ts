@@ -82,6 +82,7 @@ export interface HistoricalEndpointResponse {
 	request: NetworkFetchRequest;
 	response: EndpointResponse;
 	auditLog?: AuditLog;
+	discard?: boolean;
 }
 
 export interface Endpoint<TUrlBase extends string = string> extends WorkspaceItem {

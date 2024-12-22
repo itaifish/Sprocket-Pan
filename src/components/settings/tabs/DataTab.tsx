@@ -4,27 +4,27 @@ import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
 import { invoke } from '@tauri-apps/api';
 import TimerIcon from '@mui/icons-material/Timer';
 import { SettingsTabProps } from './types';
-import { WorkspaceDataSection, WorkspaceDataSectionProps } from './WorkspaceDataSection';
 import { SettingsInput, SettingsSwitch } from './SettingsFields';
 import { MS_IN_MINUTE } from '@/constants/constants';
 import { FileSystemWorker } from '@/managers/file-system/FileSystemWorker';
 import { log } from '@/utils/logging';
 import { toNumberOrUndefined } from '@/utils/math';
-
-export type DataTabProps = SettingsTabProps & Partial<WorkspaceDataSectionProps>;
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+import { History } from '@mui/icons-material';
 
 function toMSMinuteOrUndefined(num: unknown) {
 	const ret = toNumberOrUndefined(num);
 	return ret == null ? undefined : ret * MS_IN_MINUTE;
 }
 
-export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }: DataTabProps) {
+export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 	const autosave = settings.data.autosave;
 	const oversave = overlay?.data?.autosave;
 	const autosaveEnabled = oversave?.enabled ?? autosave.enabled;
+	const historyEnabled = overlay?.history?.enabled ?? settings.history.enabled;
 	return (
 		<>
-			<Stack spacing={2}>
+			<Stack spacing={3}>
 				<Typography>Saving</Typography>
 				<Stack direction="row" gap={2}>
 					<FormControl sx={{ width: 250 }}>
@@ -49,7 +49,47 @@ export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }:
 						endDecorator="Minutes"
 					/>
 				</Stack>
-
+				<Stack direction="row" gap={2}>
+					<FormControl sx={{ width: 250 }}>
+						<FormLabel>History Tracking</FormLabel>
+						<SettingsSwitch
+							checked={settings.history.enabled}
+							onChange={(enabled) => onChange({ history: { enabled } })}
+							endDecorator={historyEnabled ? 'Enabled' : 'Disabled'}
+							overlay={overlay?.history?.enabled}
+						/>
+					</FormControl>
+					<Stack gap={2}>
+						<SettingsInput
+							type="number"
+							disabled={!historyEnabled}
+							sx={{ width: 250 }}
+							inputSx={{ width: 250 }}
+							id="maximum-history-duration"
+							label="Maximum Records Per Request"
+							value={settings.history.maxLength}
+							overlay={overlay?.history?.maxLength}
+							onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
+							startDecorator={<ManageHistoryIcon />}
+							endDecorator="Records"
+							hint="Set this value to -1 for no maximum."
+						/>
+						<SettingsInput
+							type="number"
+							disabled={!historyEnabled}
+							sx={{ width: 250 }}
+							inputSx={{ width: 250 }}
+							id="maximum-history-time"
+							label="Automatically Delete Records After"
+							value={settings.history.maxDays}
+							overlay={overlay?.history?.maxDays}
+							onChange={(val) => onChange({ history: { maxDays: toNumberOrUndefined(val) } })}
+							startDecorator={<History />}
+							endDecorator="Days"
+							hint="Set this value to -1 for no maximum."
+						/>
+					</Stack>
+				</Stack>
 				<Typography>Data</Typography>
 				<Stack direction="row" gap={2}>
 					<Button
@@ -64,7 +104,6 @@ export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }:
 					>
 						Open Data Folder
 					</Button>
-
 					<Button
 						sx={{ width: '250px' }}
 						startDecorator={<FolderOpenIcon />}
@@ -78,7 +117,6 @@ export function DataTab({ overlay, goToWorkspaceSelection, onChange, settings }:
 						Open Logs Folder
 					</Button>
 				</Stack>
-				{goToWorkspaceSelection && <WorkspaceDataSection goToWorkspaceSelection={goToWorkspaceSelection} />}
 			</Stack>
 		</>
 	);

@@ -6,6 +6,7 @@ import {
 	Endpoint,
 	EndpointRequest,
 	EndpointResponse,
+	HistoricalEndpointResponse,
 	NetworkFetchRequest,
 	RootEnvironment,
 	Script,
@@ -37,6 +38,7 @@ interface AddResponseToHistory {
 	response: EndpointResponse;
 	auditLog?: AuditLog;
 	maxLength: number;
+	discard: boolean;
 }
 
 interface DeleteResponseFromHistory {
@@ -219,13 +221,16 @@ export const activeSlice = createSlice({
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, networkRequest, response, auditLog, maxLength } = action.payload;
+			const { requestId, networkRequest, response, auditLog, maxLength, discard } = action.payload;
 			if (state.history[requestId] == null) state.history[requestId] = [];
-			state.history[requestId].push({
+			const newEntry: HistoricalEndpointResponse = {
 				request: networkRequest,
 				response,
 				auditLog,
-			});
+			};
+			// don't pollute the data with a bunch of discard: falses
+			if (discard) newEntry.discard = true;
+			state.history[requestId].push(newEntry);
 			if (maxLength > 0 && state.history[requestId].length > maxLength) {
 				state.history[requestId].shift();
 			}

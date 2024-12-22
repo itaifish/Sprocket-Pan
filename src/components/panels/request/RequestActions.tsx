@@ -14,13 +14,13 @@ import { HistoricalEndpointResponse, Endpoint, EndpointRequest } from '@/types/d
 import { SprocketError } from '@/types/state/state';
 import { log } from '@/utils/logging';
 
-const getError = (error: SprocketError): HistoricalEndpointResponse => {
+function getError(error: SprocketError): HistoricalEndpointResponse {
 	const errorRes = structuredClone(defaultResponse);
 	errorRes.response.statusCode = 400;
 	errorRes.response.body = JSON.stringify({ error });
 	errorRes.response.bodyType = 'JSON';
 	return errorRes;
-};
+}
 
 export type ResponseState = number | 'latest' | 'error';
 

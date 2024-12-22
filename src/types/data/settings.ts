@@ -60,6 +60,8 @@ export interface Settings {
 	};
 	history: {
 		maxLength: number;
+		enabled: boolean;
+		maxDays: number;
 	};
 	data: {
 		autosave: {

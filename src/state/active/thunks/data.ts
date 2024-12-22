@@ -10,7 +10,7 @@ import { getAncestors, getDescendents } from '@/utils/getters';
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 
 export const injectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { state: RootState }>(
-	`${activeThunkName}/saveData`,
+	`${activeThunkName}/injectData`,
 	(loadedData, thunk) => {
 		for (const service of loadedData.services) {
 			thunk.dispatch(activeActions.insertService(service));

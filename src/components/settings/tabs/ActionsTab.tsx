@@ -1,6 +1,6 @@
 import { Stack, Typography, Divider } from '@mui/joy';
 import HourglassBottomIcon from '@mui/icons-material/HourglassBottom';
-import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+
 import { SettingsTabProps } from './types';
 import { SettingsInput, SettingsStrategyInput } from './SettingsFields';
 import { toNumberOrUndefined } from '@/utils/math';
@@ -24,19 +24,6 @@ export function ActionsTab({ overlay, settings, onChange }: SettingsTabProps) {
 				onChange={(val) => onChange({ request: { timeoutMS: toMSOrUndefined(val) } })}
 				startDecorator={<HourglassBottomIcon />}
 				endDecorator="Seconds"
-			/>
-			<SettingsInput
-				type="number"
-				sx={{ width: 250 }}
-				inputSx={{ width: 250 }}
-				id="maximum-history"
-				label="Maximum Saved History Records"
-				value={settings.history.maxLength}
-				overlay={overlay?.history?.maxLength}
-				onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
-				startDecorator={<ManageHistoryIcon />}
-				endDecorator="Records"
-				hint="Set this value as -1 for no maximum."
 			/>
 			<Divider></Divider>
 			<Typography level="title-md">Scripts</Typography>
