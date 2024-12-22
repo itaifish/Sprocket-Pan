@@ -12,10 +12,16 @@ export function AdoptionModals() {
 	const onClose = () => dispatch(tabsActions.setOrphans(null));
 
 	return (
-		<Modal open={!!orphans} onClose={onClose}>
+		<Modal
+			open={!!orphans}
+			onClose={(_, reason) => {
+				if (reason === 'backdropClick') return;
+				onClose();
+			}}
+		>
 			<ModalDialog variant="outlined" role="adoptiondialog">
 				<ModalClose />
-				<DialogTitle>Reassign Orphaned Requests/Endpoints</DialogTitle>
+				<DialogTitle>Orphaned Items Resolution</DialogTitle>
 				<Divider />
 				<AdoptionOverlay orphans={orphans} onClose={onClose} />
 			</ModalDialog>

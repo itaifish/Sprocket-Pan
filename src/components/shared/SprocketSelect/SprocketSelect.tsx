@@ -6,6 +6,7 @@ import { SprocketTooltip } from '../SprocketTooltip';
 import { useComponentIdentifier } from '@/hooks/useComponentIdentifier';
 
 export interface SprocketSelectProps<T> {
+	placeholder?: string;
 	decorator?: React.ReactNode;
 	label?: string;
 	value: T;
@@ -26,6 +27,7 @@ export function SprocketSelect<T>({
 	value,
 	hint,
 	tooltip,
+	placeholder,
 	grouped = false,
 }: SprocketSelectProps<T>) {
 	const aria = useComponentIdentifier();
@@ -51,6 +53,7 @@ export function SprocketSelect<T>({
 						'aria-labelledby': label == null ? undefined : `select-${aria}-label select-${aria}-button`,
 					},
 				}}
+				placeholder={placeholder}
 				value={value}
 				onChange={(_, value) => {
 					if (value != null) {

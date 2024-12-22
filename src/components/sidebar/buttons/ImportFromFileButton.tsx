@@ -1,6 +1,5 @@
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
-import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
+import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import { useRef, useState } from 'react';
 import { readTextFile } from '@tauri-apps/api/fs';
 import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
@@ -10,18 +9,17 @@ import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
 import { injectLoadedData } from '@/state/active/thunks/data';
 import { useAppDispatch } from '@/state/store';
 import { WorkspaceData } from '@/types/data/workspace';
-import OpenApiIcon from '@/assets/icons/brands/openapi.svg';
-import PostmanIcon from '@/assets/icons/brands/postman.svg';
-import InsomniaIcon from '@/assets/icons/brands/insomnia.svg';
-import SprocketIconDark from '@/assets/logo.svg';
-import SprocketIconLight from '@/assets/logo-light.svg';
+import { OpenApi } from '@/assets/icons/brands/OpenApi';
+import { Postman } from '@/assets/icons/brands/Postman';
+import { Insomnia } from '@/assets/icons/brands/Insomnia';
+import { SprocketPan } from '@/assets/icons/brands/SprocketPan';
+import { FluentImport } from '@/assets/icons/fluent/FluentImport';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const ref = useRef<HTMLInputElement>(null);
 	useClickOutsideAlerter({ ref, onOutsideClick: () => setMenuOpen(false) });
-	const { systemMode } = useColorScheme();
 	return (
 		<SprocketTooltip text="Import From File" disabled={menuOpen}>
 			<Box>
@@ -30,7 +28,7 @@ export function ImportFromFileButton() {
 						slots={{ root: IconButton }}
 						slotProps={{ root: { variant: 'soft', color: 'neutral', size: 'sm' } }}
 					>
-						<CreateNewFolderIcon />
+						<FluentImport />
 					</MenuButton>
 					<Menu ref={ref}>
 						<DropdownMenuItem
@@ -57,15 +55,11 @@ export function ImportFromFileButton() {
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Sprocketpan`} size="sm" color="primary">
-									<Avatar
-										src={systemMode === 'dark' ? SprocketIconLight : SprocketIconDark}
-										size="sm"
-										color="primary"
-									/>
+								<IconButton aria-label="Import from Sprocketpan Workspace" color="primary">
+									<SprocketPan />
 								</IconButton>
-								Import from Sprocketpan Workspace
 							</ListItemDecorator>
+							Sprocketpan Workspace
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -82,11 +76,11 @@ export function ImportFromFileButton() {
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Swagger/OpenAPI`} size="sm" color="primary">
-									<Avatar src={OpenApiIcon} size="sm" />
+								<IconButton aria-label="Import from Swagger/OpenAPI" color="primary">
+									<OpenApi />
 								</IconButton>
-								Import from Swagger/OpenAPI
 							</ListItemDecorator>
+							Swagger/OpenAPI
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -103,11 +97,11 @@ export function ImportFromFileButton() {
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Postman`} size="sm" color="primary">
-									<Avatar src={PostmanIcon} size="sm" />
+								<IconButton aria-label="Import from Postman" color="primary">
+									<Postman />
 								</IconButton>
-								Import from Postman Collection
 							</ListItemDecorator>
+							Postman Collection
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -126,11 +120,11 @@ export function ImportFromFileButton() {
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Insomnia`} size="sm" color="primary">
-									<Avatar src={InsomniaIcon} size="sm" />
+								<IconButton aria-label="Import from Insomnia Collection" color="primary">
+									<Insomnia />
 								</IconButton>
-								Import from Insomnia Collection
 							</ListItemDecorator>
+							Insomnia Collection
 						</DropdownMenuItem>
 					</Menu>
 				</Dropdown>

@@ -46,8 +46,9 @@ export const defaultWorkspaceData: WorkspaceData = {
 };
 
 export interface OrphanData {
-	endpoints: { orphan: Endpoint; parent?: Service }[];
-	requests: { orphan: EndpointRequest; parent?: Endpoint; grandparent?: Service }[];
+	endpoints: { orphan: Endpoint; parent?: string }[];
+	requests: { orphan: EndpointRequest; parent?: string; grandparent?: string }[];
+	ancestors: Record<string, Service | Endpoint>;
 }
 
 export class WorkspaceDataManager {
@@ -125,21 +126,35 @@ export class WorkspaceDataManager {
 
 	public static async processOrphans(data: WorkspaceData): Promise<OrphanData> {
 		const list = this.findOrphans(data);
-		const endpoints: OrphanData['endpoints'] = list.endpoints.map((orphan) => ({ orphan }));
-		const requests: OrphanData['requests'] = list.requests.map((orphan) => ({ orphan }));
+		const orphan: OrphanData = {
+			endpoints: list.endpoints.map((orphan) => ({ orphan })),
+			requests: list.requests.map((orphan) => ({ orphan })),
+			ancestors: {},
+		};
 		const paths = this.getWorkspacePath(data.metadata.fileName);
 		if (this.getSyncLocation(data) != null && (await FileSystemWorker.exists(paths.syncBackup))) {
 			const backup = JSON.parse(await FileSystemWorker.readTextFile(paths.syncBackup)) as WorkspaceSyncedData;
-			endpoints.forEach((endpoint) => {
-				endpoint.parent = backup.services[endpoint.orphan.serviceId];
+			orphan.endpoints.forEach((endpoint) => {
+				const service = backup.services[endpoint.orphan.serviceId];
+				if (service != null) {
+					endpoint.parent = service.id;
+					orphan.ancestors[service.id] = service;
+				}
 			});
-			requests.forEach((request) => {
+			orphan.requests.forEach((request) => {
 				const endpoint = backup.endpoints[request.orphan.endpointId];
-				request.parent = endpoint;
-				request.grandparent = endpoint == null ? undefined : backup.services[endpoint.serviceId];
+				if (endpoint != null) {
+					request.parent = endpoint.id;
+					request.grandparent = endpoint.serviceId;
+					orphan.ancestors[endpoint.id] = endpoint;
+					const service = backup.services[endpoint.serviceId];
+					if (service != null) {
+						orphan.ancestors[service.id] = service;
+					}
+				}
 			});
 		}
-		return { endpoints, requests };
+		return orphan;
 	}
 
 	public static getWorkspacePath(folder: string) {

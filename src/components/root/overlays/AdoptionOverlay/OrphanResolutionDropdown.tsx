@@ -1,3 +1,4 @@
+import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
 import { SelectOption } from '@/components/shared/SprocketSelect/GroupedOptions';
 import { SprocketSelect } from '@/components/shared/SprocketSelect/SprocketSelect';
 import { WorkspaceItem } from '@/types/data/workspace';
@@ -36,9 +37,15 @@ export function OrphanResolutionDropdown({
 		options.push({ value: OrphanResolution.revive, label: `Revive ${parent.name} ${parentType}` });
 	}
 	return (
-		<Stack direction="row">
-			{name}
-			<SprocketSelect value={value} onChange={onChange} options={options}></SprocketSelect>
+		<Stack direction="row" alignItems="center">
+			<EllipsisTypography width="100%">{name}</EllipsisTypography>
+			<SprocketSelect
+				sx={{ width: '100%' }}
+				placeholder="Do Nothing"
+				value={value}
+				onChange={onChange}
+				options={options}
+			></SprocketSelect>
 		</Stack>
 	);
 }
