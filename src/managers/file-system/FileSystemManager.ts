@@ -40,16 +40,11 @@ export class FileSystemManager {
 	}
 
 	static async getDirectories(): Promise<string[]> {
-		try {
-			const directoryNames = await FileSystemWorker.readDir(FileSystemWorker.DATA_FOLDER_NAME);
-			return directoryNames
-				.filter((dirent) => dirent.children != undefined)
-				.map((dirent) => dirent.name as string) // for type inference
-				.filter((x) => x != undefined);
-		} catch (e) {
-			log.error(e);
-			return [];
-		}
+		const directoryNames = await FileSystemWorker.readDir(FileSystemWorker.DATA_FOLDER_NAME);
+		return directoryNames
+			.filter((dirent) => dirent.children != undefined)
+			.map((dirent) => dirent.name as string) // for type inference
+			.filter((x) => x != undefined);
 	}
 
 	static async getWorkspaces() {

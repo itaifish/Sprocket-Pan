@@ -8,6 +8,8 @@ import { ListenerWrapper } from './listeners/ListenerWrapper';
 import { selectZoomLevel, selectDefaultTheme } from '@/state/active/selectors';
 import { selectActiveWorkspace } from '@/state/global/selectors';
 import { invoke } from '@/utils/invoke';
+import { ErrorBoundary } from 'react-error-boundary';
+import { RootErrorFallback } from './RootErrorFallback';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -32,10 +34,10 @@ export function Root() {
 	}
 
 	return (
-		<>
+		<ErrorBoundary FallbackComponent={RootErrorFallback}>
 			<Workspace />
 			<ModalsWrapper />
 			<ListenerWrapper />
-		</>
+		</ErrorBoundary>
 	);
 }

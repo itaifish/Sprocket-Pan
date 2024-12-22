@@ -2,7 +2,7 @@ import { getMonacoInjectedTypeCode } from '@/managers/monaco/MonacoInitManager';
 import { Script } from '@/types/data/workspace';
 import { parseScript } from 'esprima';
 import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
-import { log } from './logging';
+import { timeout } from './misc';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -10,27 +10,15 @@ import { log } from './logging';
  * @param timeLimit Time limit to attempt function in milliseconds
  * @returns Resolved promise for async function call, or an error if time limit reached
  */
-export const asyncCallWithTimeout = async <T>(asyncPromise: Promise<T>, timeLimit: number) => {
-	let timeoutHandle: NodeJS.Timeout;
+export function asyncCallWithTimeout<T>(asyncPromise: Promise<T>, timeLimit: number) {
+	return Promise.race([timeout(timeLimit), asyncPromise]) as Promise<T>;
+}
 
-	const timeoutPromise = new Promise((_resolve, reject) => {
-		timeoutHandle = setTimeout(
-			() => reject(new Error(`Call Timeout Limit (${timeLimit / 1_000}s) Reached`)),
-			timeLimit,
-		);
-	});
-
-	return Promise.race([asyncPromise, timeoutPromise]).then((result) => {
-		clearTimeout(timeoutHandle);
-		return result as T;
-	});
-};
-
-export const evalAsync = async (codeToEval: string) => {
+export async function evalAsync(codeToEval: string) {
 	return Object.getPrototypeOf(async function () {}).constructor(codeToEval)();
-};
+}
 
-export const getTypesFromCode = (codeToEval: string, scripts: Script[]) => {
+export function getTypesFromCode(codeToEval: string, scripts: Script[]) {
 	const project = new Project({
 		useInMemoryFileSystem: true,
 		compilerOptions: {
@@ -67,7 +55,7 @@ export const getTypesFromCode = (codeToEval: string, scripts: Script[]) => {
 		}
 	});
 	return typeMap;
-};
+}
 
 export type VariableFromCode = {
 	name: string;
@@ -75,46 +63,39 @@ export type VariableFromCode = {
 	typescriptTypeString: string;
 };
 
-export const getVariablesFromCode = (codeToEval: string, scripts: Script[]): Promise<VariableFromCode[]> => {
-	return new Promise((resolve, _reject) => {
-		try {
-			const types = getTypesFromCode(codeToEval, scripts);
-			let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
-			javascriptCode = `async function topLevelAsync() {
+export function getVariablesFromCode(codeToEval: string, scripts: Script[]): VariableFromCode[] {
+	const types = getTypesFromCode(codeToEval, scripts);
+	let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
+	javascriptCode = `async function topLevelAsync() {
 			${javascriptCode}
 		}`;
-			const scriptProgram = parseScript(javascriptCode, { tolerant: true });
-			const variables: VariableFromCode[] = [];
-			if (scriptProgram.body[0].type === 'FunctionDeclaration') {
-				scriptProgram.body[0].body.body.forEach((bodyElement) => {
-					if (bodyElement.type === 'VariableDeclaration') {
-						bodyElement.declarations.forEach((declaration) => {
-							if (declaration.id.type == 'Identifier') {
-								const typescriptType = types.get(declaration.id.name);
-								if (typescriptType != undefined) {
-									variables.push({ name: declaration.id.name, type: 'variable', typescriptTypeString: typescriptType });
-								}
-							}
-						});
-					} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
-						const typescriptType = types.get(bodyElement?.id?.name as string);
-						if (bodyElement.id?.name != null && typescriptType != null) {
-							variables.push({
-								name: bodyElement.id.name,
-								type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
-								typescriptTypeString: typescriptType,
-							});
+	const scriptProgram = parseScript(javascriptCode, { tolerant: true });
+	const variables: VariableFromCode[] = [];
+	if (scriptProgram.body[0].type === 'FunctionDeclaration') {
+		scriptProgram.body[0].body.body.forEach((bodyElement) => {
+			if (bodyElement.type === 'VariableDeclaration') {
+				bodyElement.declarations.forEach((declaration) => {
+					if (declaration.id.type == 'Identifier') {
+						const typescriptType = types.get(declaration.id.name);
+						if (typescriptType != undefined) {
+							variables.push({ name: declaration.id.name, type: 'variable', typescriptTypeString: typescriptType });
 						}
 					}
 				});
+			} else if (bodyElement.type === 'FunctionDeclaration' || bodyElement.type === 'ClassDeclaration') {
+				const typescriptType = types.get(bodyElement?.id?.name as string);
+				if (bodyElement.id?.name != null && typescriptType != null) {
+					variables.push({
+						name: bodyElement.id.name,
+						type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
+						typescriptTypeString: typescriptType,
+					});
+				}
 			}
-			resolve(variables);
-		} catch (e) {
-			log.error(e);
-			resolve([]);
-		}
-	});
-};
+		});
+	}
+	return variables;
+}
 
 type Replacer = (key: string, value: unknown) => unknown;
 

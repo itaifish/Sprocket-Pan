@@ -18,14 +18,9 @@ class InsomniaParseManager {
 	private constructor() {}
 
 	public async parseInsomniaFile(inputType: 'fileContents' | 'filePath', inputValue: string) {
-		try {
-			const loadedFile = await this.loadInsomniaFile(inputType, inputValue);
-			const input = this.importInsomniaCollection(this.parseInsomniaInput(loadedFile));
-			return input;
-		} catch (e) {
-			log.error(e);
-			return Promise.reject(e);
-		}
+		const loadedFile = await this.loadInsomniaFile(inputType, inputValue);
+		const input = this.importInsomniaCollection(this.parseInsomniaInput(loadedFile));
+		return input;
 	}
 
 	private parseInsomniaInput(input: string) {
@@ -41,12 +36,9 @@ class InsomniaParseManager {
 
 	private importInsomniaCollection(collection: InsomniaCollection) {
 		if (collection.__export_format !== 4) {
-			log.error(
-				'Error: Version (__export_format ' +
-					collection.__export_format +
-					') not supported. Only version 4 is supported.',
+			throw new Error(
+				`Insomnia Error: Version (__export_format ${collection.__export_format}) not supported. Only version 4 is supported.`,
 			);
-			return null;
 		}
 		const outputData = {
 			info: {
@@ -77,8 +69,7 @@ class InsomniaParseManager {
 			postmanUrl.protocol = urlParts[0];
 			rawHostAndPath = urlParts[1];
 		} else {
-			console.error('Error: Unexpected number of components found in the URL string. Exiting.');
-			process.exit(3);
+			throw new Error('Error: Unexpected number of components found in the URL string.');
 		}
 		// https://stackoverflow.com/questions/4607745/split-string-only-on-first-instance-of-specified-character
 		const hostAndPath = rawHostAndPath.split(/\/(.+)/);
@@ -155,8 +146,8 @@ class InsomniaParseManager {
 		request.url = this.transformUrlToPostman(insomniaItem.url);
 		if (insomniaItem.parameters && insomniaItem.parameters.length > 0) {
 			if (request.url.raw !== undefined && request.url.raw.includes('?')) {
-				console.warn(
-					"Warning: Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.",
+				log.warn(
+					"Insomnia Warning: Query params detected in both the raw query and the 'parameters' object of Insomnia request!!! Exported Postman collection may need manual editing for erroneous '?' in url.",
 				);
 			}
 			request.url.query = [];
@@ -166,7 +157,7 @@ class InsomniaParseManager {
 		}
 		request.auth = {} as any; // todo
 		if (Object.keys(insomniaItem.authentication).length !== 0) {
-			log.warn('Warning: Auth param export not yet supported!!!');
+			log.warn('Insomnia Warning: Auth param export not yet supported!!!');
 		}
 		postmanItem.request = request;
 		postmanItem.response = [];
@@ -220,7 +211,7 @@ class InsomniaParseManager {
 				postmanItem = this.transformItemToPostman(element);
 				break;
 			default:
-				console.warn('Warning: Item type unsupported; skipped!!! ... ' + element._type);
+				log.warn('Insomnia Warning: Item type unsupported; skipped ' + element._type);
 		}
 		return postmanItem;
 	}

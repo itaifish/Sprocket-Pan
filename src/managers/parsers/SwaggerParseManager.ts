@@ -28,19 +28,14 @@ class SwaggerParseManager {
 		inputType: 'fileContents' | 'filePath',
 		inputValue: string,
 	): Promise<ParsedServiceWorkspaceData> {
-		try {
-			const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
-			const input = this.parseSwaggerInput(loadedFile);
-			const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
-			if (!api) {
-				log.warn(`parser is: ${JSON.stringify(this.parser)}`);
-				throw new Error('Waiting on parser to load');
-			}
-			return this.mapApiToWorkspaceData(api);
-		} catch (e) {
-			log.error(e);
-			return Promise.reject(e);
+		const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
+		const input = this.parseSwaggerInput(loadedFile);
+		const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
+		if (!api) {
+			log.warn(`parser is: ${JSON.stringify(this.parser)}`);
+			throw new Error('Waiting on parser to load');
 		}
+		return this.mapApiToWorkspaceData(api);
 	}
 
 	private parseSwaggerInput(input: string) {

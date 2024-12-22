@@ -89,14 +89,9 @@ class PostmanParseManager {
 	private constructor() {}
 
 	public async parsePostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string) {
-		try {
-			const loadedFile = await this.loadPostmanFile(inputType, inputValue);
-			const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile), 'Postman');
-			return input;
-		} catch (e) {
-			log.error(e);
-			return Promise.reject(e);
-		}
+		const loadedFile = await this.loadPostmanFile(inputType, inputValue);
+		const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile), 'Postman');
+		return input;
 	}
 
 	private parsePostmanInput(input: string) {

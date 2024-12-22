@@ -7,6 +7,8 @@ import { ScriptPanel } from './script/ScriptPanel';
 import { ServicePanel } from './service/ServicePanel';
 import { SecretsPanel } from './secrets/SecretsPanel';
 import { TabType } from '@/types/state/state';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorFallback } from '../shared/ErrorFallback';
 
 const contentMap: Record<TabType, FunctionComponent<PanelProps>> = {
 	request: RequestPanel,
@@ -23,5 +25,9 @@ interface TabContentProps extends PanelProps {
 
 export function TabContent({ type, id }: TabContentProps) {
 	const Tab = contentMap[type];
-	return <Tab id={id} />;
+	return (
+		<ErrorBoundary FallbackComponent={ErrorFallback}>
+			<Tab id={id} />
+		</ErrorBoundary>
+	);
 }

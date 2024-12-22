@@ -1,6 +1,5 @@
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { FileSystemWorker } from './FileSystemWorker';
-import { log } from '@/utils/logging';
 
 type WorkspacePaths = { metadata: string; root: string };
 export const FILE_SYSTEM_CHANGE_EVENT = 'fsChange';
@@ -13,16 +12,12 @@ class FileSystemEmitter extends EventEmitter<typeof FILE_SYSTEM_CHANGE_EVENT> {
 	}
 
 	async createWorkspace(paths: WorkspacePaths, content: string) {
-		try {
-			if (await FileSystemWorker.exists(paths.metadata)) {
-				return;
-			}
-			await FileSystemWorker.createDir(paths.root);
-			await FileSystemWorker.writeFile(paths.metadata, content);
-			this.emit(FILE_SYSTEM_CHANGE_EVENT);
-		} catch (e) {
-			log.error(e);
+		if (await FileSystemWorker.exists(paths.metadata)) {
+			return;
 		}
+		await FileSystemWorker.createDir(paths.root);
+		await FileSystemWorker.writeFile(paths.metadata, content);
+		this.emit(FILE_SYSTEM_CHANGE_EVENT);
 	}
 
 	async deleteWorkspace(paths: WorkspacePaths) {
