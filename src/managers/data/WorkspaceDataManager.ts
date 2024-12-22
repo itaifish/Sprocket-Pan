@@ -6,6 +6,7 @@ import {
 	WorkspaceSyncedData,
 	Endpoint,
 	Service,
+	WorkspaceItemKey,
 } from '@/types/data/workspace';
 import { nullifyProperties } from '@/utils/functions';
 import { log } from '@/utils/logging';
@@ -203,6 +204,11 @@ export class WorkspaceDataManager {
 		if (syncLocation != null) {
 			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation));
 			parsedData = mergeDeep(parsedSync, parsedData);
+			Object.values(WorkspaceItemKey).forEach((key) => {
+				Object.keys(parsedSync[key]).forEach((id) => {
+					parsedData.syncMetadata.items[id] = true;
+				});
+			});
 		}
 		SaveUpdateManager.update(parsedData);
 		return parsedData;

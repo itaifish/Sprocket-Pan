@@ -276,6 +276,12 @@ export const activeSlice = createSlice({
 			const { id, value } = action.payload;
 			state.syncMetadata.items[id] = value;
 		},
+		setSyncItems: (state, action: PayloadAction<{ ids: string[]; value: boolean }>) => {
+			const { ids, value } = action.payload;
+			ids.forEach((id) => {
+				state.syncMetadata.items[id] = value;
+			});
+		},
 		setSelectedServiceEnvironment: (state, action: PayloadAction<SetSelectedServiceEnvironment>) => {
 			const { serviceEnvId, serviceId } = action.payload;
 			state.selectedServiceEnvironments[serviceId] = serviceEnvId;

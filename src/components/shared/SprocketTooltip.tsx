@@ -6,11 +6,11 @@ interface SprocketTooltipProps extends Partial<TooltipProps> {
 	disabled?: boolean;
 }
 
-export function SprocketTooltip({ children, text, disabled, ...props }: SprocketTooltipProps) {
+export function SprocketTooltip({ children, text, disabled, sx, ...props }: SprocketTooltipProps) {
 	return disabled ? (
 		<>{children}</>
 	) : (
-		<Tooltip variant="outlined" arrow {...props} title={text}>
+		<Tooltip variant="outlined" arrow sx={{ maxWidth: '333px', ...sx }} {...props} title={text}>
 			{children}
 		</Tooltip>
 	);

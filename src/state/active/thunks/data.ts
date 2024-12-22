@@ -34,11 +34,11 @@ export const injectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { st
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	`${activeThunkName}/saveData`,
 	(_, thunk) => {
-		const { lastModified, lastSaved, ...data } = thunk.getState().active;
-		if (lastModified > lastSaved) {
-			thunk.dispatch(activeActions.setSavedNow());
-			return WorkspaceDataManager.saveData(data);
-		}
+		const { active, tabs } = thunk.getState();
+		const { lastModified, lastSaved, ...data } = active;
+		if (lastModified < lastSaved || tabs.orphans != null) return;
+		thunk.dispatch(activeActions.setSavedNow());
+		return WorkspaceDataManager.saveData(data);
 	},
 );
 

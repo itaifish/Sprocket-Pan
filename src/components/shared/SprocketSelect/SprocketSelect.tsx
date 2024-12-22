@@ -1,9 +1,14 @@
 import { FormControl, FormLabel, Select, Option, FormHelperText } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
 import { Info } from '@mui/icons-material';
-import { GroupedOptions, SelectOption } from './GroupedOptions';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useComponentIdentifier } from '@/hooks/useComponentIdentifier';
+
+export interface SelectOption<T> {
+	value: T;
+	label: string;
+	group?: string;
+}
 
 export interface SprocketSelectProps<T> {
 	placeholder?: string;
@@ -15,7 +20,6 @@ export interface SprocketSelectProps<T> {
 	sx?: SxProps;
 	hint?: string;
 	tooltip?: string;
-	grouped?: boolean;
 }
 
 export function SprocketSelect<T>({
@@ -28,7 +32,6 @@ export function SprocketSelect<T>({
 	hint,
 	tooltip,
 	placeholder,
-	grouped = false,
 }: SprocketSelectProps<T>) {
 	const aria = useComponentIdentifier();
 	return (
@@ -61,15 +64,11 @@ export function SprocketSelect<T>({
 					}
 				}}
 			>
-				{grouped ? (
-					<GroupedOptions options={options} aria={aria} />
-				) : (
-					options.map((option) => (
-						<Option key={option.label} value={option.value}>
-							{option.label}
-						</Option>
-					))
-				)}
+				{options.map((option) => (
+					<Option key={option.label} value={option.value}>
+						{option.label}
+					</Option>
+				))}
 			</Select>
 			{hint != null && <FormHelperText>{hint}</FormHelperText>}
 		</FormControl>

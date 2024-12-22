@@ -9,10 +9,10 @@ export function useAutosave() {
 	const autosave = settings.data.autosave;
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		if (!settings.data.autosave.enabled) return;
+		if (!autosave.enabled) return;
 		const interval = setInterval(() => {
 			dispatch(saveActiveData());
-		}, settings.data.autosave.intervalMS);
+		}, autosave.intervalMS);
 		return () => {
 			clearInterval(interval);
 		};

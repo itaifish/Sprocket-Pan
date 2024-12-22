@@ -40,7 +40,6 @@ export const loadAndSelectWorkspace = createAsyncThunk<void, WorkspaceMetadata, 
 		thunk.dispatch(globalActions.setSelectedWorkspace(data.metadata));
 		thunk.dispatch(activeActions.setFullState(data));
 		const orphans = await WorkspaceDataManager.processOrphans(data);
-		console.log({ orphans });
 		if (orphans.endpoints.length > 0 || orphans.requests.length > 0) {
 			thunk.dispatch(tabsActions.setOrphans(orphans));
 		}

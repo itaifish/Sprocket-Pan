@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { DialogTitle, Divider, Modal, ModalClose, ModalDialog } from '@mui/joy';
+import { DialogTitle, Divider, Modal, ModalDialog } from '@mui/joy';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
 import { selectOrphans } from '@/state/tabs/selectors';
@@ -20,10 +20,9 @@ export function AdoptionModals() {
 			}}
 		>
 			<ModalDialog variant="outlined" role="adoptiondialog">
-				<ModalClose />
 				<DialogTitle>Orphaned Items Resolution</DialogTitle>
 				<Divider />
-				<AdoptionOverlay orphans={orphans} onClose={onClose} />
+				<AdoptionOverlay orphanData={orphans} />
 			</ModalDialog>
 		</Modal>
 	);

@@ -138,4 +138,12 @@ export interface WorkspaceData extends WorkspaceItems {
 
 export type WorkspaceItemType = keyof WorkspaceItems;
 
+export enum WorkspaceItemKey {
+	SERVICES = 'services',
+	ENDPOINTS = 'endpoints',
+	REQUESTS = 'requests',
+	ENVIRONMENTS = 'environments',
+	SCRIPTS = 'scripts',
+}
+
 export type TabType = WorkspaceItemType | 'secrets';
