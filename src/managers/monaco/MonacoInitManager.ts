@@ -1,6 +1,7 @@
 import { Script } from '@/types/data/workspace';
 import { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
+import { internalCodeText } from './SprocketInternalCode';
 
 // this is hacky but how it has to be done because of
 // https://github.com/microsoft/monaco-editor/issues/2696
@@ -23,6 +24,7 @@ function updateModelDefinition(monaco: Monaco, injectedCode: string) {
 }
 
 function getSprocketPanType(scripts: Script[]) {
+	console.log('rerunning type');
 	const classes = scripts.filter((script) => script.returnVariableType?.isClass);
 	const type = `
 	${classes.reduce(
@@ -31,38 +33,7 @@ function getSprocketPanType(scripts: Script[]) {
 	${classType.returnVariableType?.typeText}`,
 		'',
 	)}
-	type SprocketPan = {
-		setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
-		setQueryParam: (key: string, value?: string | string[]) => void;
-		setHeader: (key: string, value: string) => void;
-		deleteHeader: (key: string) => void;
-		getEnvironment: () => Record<string, string>;
-		sendRequest: (requestId: string) => Promise<EndpointResponse>;
-		modifyRequest: (requestId: string, modifications: {
-							body?: Record<string, unknown> | undefined;
-							queryParams?: { key: string, value: string}[] | undefined;
-							headers?: { key: string, value: string}[] | undefined;
-						}) => void;
-		readonly data: WorkspaceData;
-		readonly response: HistoricalEndpointResponse | null;
-		readonly activeRequest: EndpointRequest<"none" | "form-data" | "x-www-form-urlencoded" | "raw">;
-		readonly fetch: <T>(
-				url: string,
-				request: {
-					method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
-					headers?: Record<string, unknown> | undefined;
-					query?: Record<string, unknown> | undefined;
-					body?: Record<string, unknown> | undefined;
-					timeout?: number | undefined;
-				},
-			) => Promise<{
-				url: string;
-				status: number;
-				ok: boolean;
-				headers: Record<string, string>;
-				rawHeaders: Record<string, string[]>;
-				data: T;
-			}>;
+	${internalCodeText.substring(0, internalCodeText.length - 3)}
 		${scripts.reduce(
 			(runningScriptOutput, script) =>
 				`${runningScriptOutput}
@@ -80,123 +51,9 @@ function getSprocketPanType(scripts: Script[]) {
 }
 
 export function getMonacoInjectedTypeCode(scripts: Script[]) {
-	const injectedCode = `
-		type RawBodyType = 'Text' | 'JSON' | 'JavaScript' | 'HTML' | 'XML' | 'Yaml';
-		type RequestBodyType = 'form-data' | 'x-www-form-urlencoded' | 'none' | 'raw';
-		type EndpointRequest<TRequestBodyType extends RequestBodyType = RequestBodyType> = {
-			id: string;
-			endpointId: string;
-			name: string;
-			headers: Record<string, string>;
-			queryParams: Record<string, string[]>;
-			bodyType: TRequestBodyType;
-			body: TRequestBodyType extends 'none'
-				? undefined
-				: TRequestBodyType extends 'raw'
-				? string
-				: TRequestBodyType extends 'form-data' | 'x-www-form-urlencoded'
-				? Map<string, string>
-				: Map<string, string> | string | undefined;
-			rawType: TRequestBodyType extends 'raw'
-				? RawBodyType
-				: TRequestBodyType extends 'none' | 'form-data' | 'x-www-form-urlencoded'
-				? undefined
-				: RawBodyType | undefined;
-			preRequestScript?: string;
-			postRequestScript?: string;
-			environmentOverride: Record<string, string>;
-			history: HistoricalEndpointResponse[];
-		};
-
-		type RESTfulRequestVerb = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS';
-
-		type NetworkFetchRequest = {
-			method: RESTfulRequestVerb;
-			url: string;
-			headers: Record<string, string>;
-			body: Record<string, unknown>;
-		};
-
-		type HistoricalEndpointResponse = {
-			request: NetworkFetchRequest;
-			response: EndpointResponse;
-			dateTime: Date;
-		};
-
-		type Endpoint<TUrlBase extends string = string> = {
-			id: string;
-			url: string;
-			verb: RESTfulRequestVerb;
-			baseHeaders: Record<string, string>;
-			baseQueryParams: Record<string, string[]>;
-			preRequestScript?: string;
-			postRequestScript?: string;
-			name: string;
-			description: string;
-			serviceId: string;
-			requestIds: string[];
-			defaultRequest: string | null;
-		};
-		type Environment = {
-			name: string;
-			id: string;
-			pairs: [{key: string, value: string}]
-		};
-		type Service<TBaseUrl extends string = string> = {
-			id: string;
-			name: string;
-			description: string;
-			version: string;
-			baseUrl: TBaseUrl;
-			localEnvironments: {
-				[environmentName: string]: Environment;
-			};
-			selectedEnvironment?: string;
-			endpointIds: string[];
-			preRequestScript?: string;
-		};
-
-		type ScriptRunnerStrategy =
-			| ['request', 'service', 'endpoint']
-			| ['request', 'endpoint', 'service']
-			| ['service', 'request', 'endpoint']
-			| ['service', 'endpoint', 'request']
-			| ['endpoint', 'request', 'service']
-			| ['endpoint', 'service', 'request'];
-
-		type Settings = {
-			debugLogs: boolean;
-			zoomLevel: number;
-			timeoutDurationMS: number;
-			defaultTheme: 'light' | 'dark' | 'system-default';
-			maxHistoryLength: number;
-			displayVariableNames: boolean;
-			scriptRunnerStrategy: {
-				pre: ScriptRunnerStrategy;
-				post: ScriptRunnerStrategy;
-			};
-		};
-
-		type WorkspaceData = {
-			services: Record<string, Service>;
-			endpoints: Record<string, Endpoint>;
-			requests: Record<string, EndpointRequest>;
-			environments: Record<string, Environment>;
-			selectedEnvironment?: string;
-			settings: Settings;
-		};
-		type EndpointResponse = {
-			statusCode: number;
-			body: string;
-			bodyType: RawBodyType;
-			headers: Record<string, string>;
-		};
-
-	${getSprocketPanType(scripts)}
+	return `${getSprocketPanType(scripts)}
 	const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketPan;
-	const sp = sprocketPan;
-			`;
-	return injectedCode;
+	const sp = sprocketPan;`;
 }
 
 export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {

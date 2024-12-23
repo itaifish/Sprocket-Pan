@@ -19,6 +19,7 @@ export function Tab({ tab }: TabProps) {
 	const name = tabData?.name;
 	return (
 		<MuiTab
+			component="div"
 			indicatorPlacement="top"
 			value={tabId}
 			id={`tab_${tabId}`}

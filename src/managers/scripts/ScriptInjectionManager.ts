@@ -10,6 +10,7 @@ import { getEnvValuesFromData } from '@/utils/application';
 import { makeRequest } from '@/state/active/thunks/requests';
 import { auditLogManager } from '../AuditLogManager';
 import { scriptRunnerManager } from './ScriptRunnerManager';
+import { SprocketInjectedScripts } from './types';
 
 type HttpOptions = {
 	method: HttpVerb;
@@ -24,7 +25,7 @@ export function getScriptInjectionCode(
 	{ getState, dispatch }: StateAccess,
 	response?: EndpointResponse,
 	auditLog?: AuditLog,
-) {
+): SprocketInjectedScripts {
 	const modifyRequest = (
 		requestId: string,
 		modifications: { body?: Record<string, unknown>; queryParams?: KeyValuePair[]; headers?: KeyValuePair[] },
@@ -114,7 +115,7 @@ export function getScriptInjectionCode(
 		}
 	};
 
-	const setQueryParam = (key: string, value: KeyValueValues) => {
+	const setQueryParam = (key: string, value: KeyValueValues | undefined) => {
 		const request = getRequest();
 		if (request == null) {
 			return;
@@ -191,7 +192,7 @@ export function getScriptInjectionCode(
 		fetch,
 		modifyRequest,
 		get data() {
-			return structuredClone(getState());
+			return structuredClone(getState().active);
 		},
 		get activeRequest() {
 			return requestId != null ? structuredClone(getState().active.requests[requestId]) : null;
