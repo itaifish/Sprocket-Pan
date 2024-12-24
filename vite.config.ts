@@ -1,5 +1,4 @@
 import { defineConfig, Plugin } from 'vite';
-import fs from 'fs/promises';
 import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
@@ -25,20 +24,6 @@ function getCustomNoNullDefaultsPlugin(): Plugin {
 	};
 }
 
-const RawLoaderPlugin: Plugin = {
-	name: 'raw-loader',
-	async load(id) {
-		const [path, query] = id.split('?', 2);
-		// use default loader
-		if (query !== 'raw') return;
-		try {
-			return `export default ${JSON.stringify(await fs.readFile(path, 'utf-8'))}`;
-		} catch (ex) {
-			return;
-		}
-	},
-};
-
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
 	plugins: [
@@ -48,7 +33,6 @@ export default defineConfig(async () => ({
 			include: ['process'],
 		}),
 		getCustomNoNullDefaultsPlugin(),
-		RawLoaderPlugin,
 	],
 	// https://github.com/vitejs/vite/issues/6828
 	resolve: {

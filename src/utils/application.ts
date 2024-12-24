@@ -1,12 +1,13 @@
 import { v4 } from 'uuid';
 import { QueryParams } from '@/types/data/shared';
 import { Environment, WorkspaceData } from '@/types/data/workspace';
-import { KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
 import { mergeDeep } from './variables';
 import { Settings } from '@/types/data/settings';
 import { MS_IN_DAY } from '@/constants/constants';
 import { GlobalData } from '@/types/data/global';
+import { KeyValueValues } from '@/types/shared/keyValues';
 
 export function queryParamsToString(
 	queryParams: QueryParams,

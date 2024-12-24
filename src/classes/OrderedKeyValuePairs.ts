@@ -1,6 +1,4 @@
-export type KeyValueValues = string | string[] | (string | string[]);
-
-export type KeyValuePair<T extends KeyValueValues = string> = { key: string; value?: T };
+import { KeyValueValues, KeyValuePair } from '@/types/shared/keyValues';
 
 type KeyValueOrOrdered<T extends KeyValueValues> = KeyValuePair<T>[] | OrderedKeyValuePairs<T>;
 

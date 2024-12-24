@@ -1,4 +1,4 @@
-import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
+import { KeyValuePair } from '../shared/keyValues';
 import { RecursivePartial } from '../utils/utils';
 import { AuditLog } from './audit';
 import { Settings } from './settings';
@@ -146,5 +146,3 @@ export enum WorkspaceItemKey {
 	ENVIRONMENTS = 'environments',
 	SCRIPTS = 'scripts',
 }
-
-export type TabType = WorkspaceItemType | 'secrets';

@@ -20,10 +20,6 @@ class ScriptRunnerManager {
 		return ranScript as TReturnType;
 	}
 
-	/**
-	 * Dont' call this function directly
-	 * Call the thunk `runScript` so you have the stateAccess context
-	 */
 	public async runTypescriptWithSprocketContext<TReturnType>(
 		script: string | Script,
 		requestId: string | null,

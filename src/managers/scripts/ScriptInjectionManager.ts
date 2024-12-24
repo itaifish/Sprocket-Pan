@@ -1,4 +1,4 @@
-import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { activeActions, Update } from '@/state/active/slice';
 import { StateAccess } from '@/state/types';
 import { AuditLog } from '@/types/data/audit';
@@ -11,6 +11,7 @@ import { makeRequest } from '@/state/active/thunks/requests';
 import { auditLogManager } from '../AuditLogManager';
 import { scriptRunnerManager } from './ScriptRunnerManager';
 import { SprocketInjectedScripts } from './types';
+import { KeyValuePair, KeyValueValues } from '@/types/shared/keyValues';
 
 type HttpOptions = {
 	method: HttpVerb;

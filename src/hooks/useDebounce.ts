@@ -19,23 +19,35 @@ export const useDebounce = <TData>({
 	onSync,
 }: UseDebounceProps<TData>) => {
 	const [localDataState, setLocalDataState] = useState<TData>(state);
+	const [isDebouncing, setIsDebouncing] = useState(false);
+
+	const onSyncInternal = () => {
+		onSync?.();
+		setIsDebouncing(false);
+	};
+
+	const onDesyncInternal = () => {
+		onDesync?.();
+		setIsDebouncing(true);
+	};
 
 	// When the state changes, set the local state to the state
 	useEffect(() => {
 		if (JSON.stringify(localDataState) !== JSON.stringify(state)) {
 			setLocalDataState(structuredClone(state));
-			onSync?.();
+			onSyncInternal();
 		}
 	}, [state]);
-	// when the local state changes, if it is different from the state, update the state
+
+	// when the local state changes, update the state
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			if (JSON.stringify(localDataState) !== JSON.stringify(state)) {
 				setState(localDataState);
-				onSync?.();
 			}
+			onSyncInternal();
 		}, debounceMS);
-		onDesync?.();
+		onDesyncInternal();
 		return () => clearTimeout(timeout);
 	}, [localDataState]);
 
@@ -48,5 +60,5 @@ export const useDebounce = <TData>({
 		};
 	}, []);
 
-	return { localDataState, setLocalDataState };
+	return { localDataState, setLocalDataState, isDebouncing };
 };

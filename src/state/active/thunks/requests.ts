@@ -29,7 +29,6 @@ export const runScript = createAsyncThunk<
 	{ state: RootState }
 >(`${activeThunkName}/runScript`, async (options, thunk) => {
 	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
-
 	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
 		options.script,
 		options.requestId,

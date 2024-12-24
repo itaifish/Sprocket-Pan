@@ -1,5 +1,6 @@
-import { KeyValuePair, KeyValueValues, OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { toKeyValuePairs } from './application';
+import { KeyValueValues, KeyValuePair } from '@/types/shared/keyValues';
 
 export function parseOrderedKeyValuePairs<T extends KeyValueValues>(value: string) {
 	return new OrderedKeyValuePairs<T>(JSON.parse(value));
