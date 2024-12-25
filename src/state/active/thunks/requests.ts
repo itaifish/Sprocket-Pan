@@ -1,11 +1,11 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName } from '../slice';
 import { networkRequestManager } from '@/managers/NetworkRequestManager';
-import { scriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
+import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
-import { AuditLog, RequestEvent } from '@/types/data/audit';
-import { Script, EndpointResponse, EndpointRequest } from '@/types/data/workspace';
+import { AuditLog } from '@/types/data/audit';
+import { EndpointRequest } from '@/types/data/workspace';
 import { SprocketError } from '@/types/state/state';
 import { log } from '@/utils/logging';
 import { createNewRequestObject } from './util';
@@ -16,26 +16,11 @@ export const runScript = createAsyncThunk<
 			error: SprocketError;
 	  }
 	| unknown,
-	{
-		script: string | Script;
-		requestId: string | null;
-		response?: EndpointResponse | undefined;
-		auditInfo?: {
-			log: AuditLog;
-			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
-			associatedId: string;
-		};
-	},
+	Omit<RunTypescriptWithFullContextArgs, 'stateAccess'>,
 	{ state: RootState }
 >(`${activeThunkName}/runScript`, async (options, thunk) => {
 	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
-	const result = await scriptRunnerManager.runTypescriptWithSprocketContext<unknown>(
-		options.script,
-		options.requestId,
-		stateAccess,
-		options.response,
-		options.auditInfo,
-	);
+	const result = await ScriptRunnerManager.runTypescriptWithFullContext<unknown>({ ...options, stateAccess });
 	return result;
 });
 

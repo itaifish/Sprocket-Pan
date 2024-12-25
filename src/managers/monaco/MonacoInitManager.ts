@@ -1,7 +1,7 @@
 import { Script } from '@/types/data/workspace';
 import { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
-import { internalCodeText } from './SprocketInternalCode';
+import { internalTypesRaw } from './internalTypes';
 
 // this is hacky but how it has to be done because of
 // https://github.com/microsoft/monaco-editor/issues/2696
@@ -24,7 +24,6 @@ function updateModelDefinition(monaco: Monaco, injectedCode: string) {
 }
 
 function getSprocketPanType(scripts: Script[]) {
-	console.log('rerunning type');
 	const classes = scripts.filter((script) => script.returnVariableType?.isClass);
 	const type = `
 	${classes.reduce(
@@ -33,7 +32,7 @@ function getSprocketPanType(scripts: Script[]) {
 	${classType.returnVariableType?.typeText}`,
 		'',
 	)}
-	${internalCodeText.substring(0, internalCodeText.length - 3)}
+	${internalTypesRaw.substring(0, internalTypesRaw.length - 3)}
 		${scripts.reduce(
 			(runningScriptOutput, script) =>
 				`${runningScriptOutput}
@@ -52,9 +51,7 @@ function getSprocketPanType(scripts: Script[]) {
 
 export function getMonacoInjectedTypeCode(scripts: Script[]) {
 	const ret = `${getSprocketPanType(scripts)}
-	const sprocketPan = getScriptInjectionCode({} as any, {} as any, {} as any) as SprocketInjectedScripts;
-	const sp = sprocketPan;`;
-	console.log(ret);
+	const {usr, sp} = {} as SprocketInjectedScripts;`;
 	return ret;
 }
 

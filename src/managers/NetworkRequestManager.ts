@@ -4,10 +4,9 @@ import yaml from 'js-yaml';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { CONTENT_TYPE } from '@/constants/request';
 import { StateAccess } from '@/state/types';
-import { AuditLog, RequestEvent } from '@/types/data/audit';
+import { AuditLog } from '@/types/data/audit';
 import { RawBodyType, RawBodyTypes } from '@/types/data/shared';
 import { EndpointResponse, EndpointRequest, NetworkFetchRequest } from '@/types/data/workspace';
-import { SprocketError } from '@/types/state/state';
 import { getEnvValuesFromData, getSettingsFromState, queryParamsToString, toKeyValuePairs } from '@/utils/application';
 import { getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
 import { asyncCallWithTimeout } from '@/utils/functions';
@@ -15,7 +14,7 @@ import { log } from '@/utils/logging';
 import { capitalizeWord } from '@/utils/string';
 import { auditLogManager } from './AuditLogManager';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
-import { scriptRunnerManager } from './scripts/ScriptRunnerManager';
+import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
 
 class NetworkRequestManager {
@@ -41,15 +40,16 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const preRequestScript of preRequestScripts) {
-			const res = (await this.runScript(preRequestScript.script, requestId, stateAccess, undefined, {
-				log: auditLog,
-				scriptType: preRequestScript.name,
+			const res = await this.runScript({
+				script: preRequestScript.script,
+				requestId,
+				stateAccess,
+				auditLog,
+				type: preRequestScript.name,
 				associatedId: preRequestScript.id,
-			})) as {
-				error: SprocketError;
-			};
+			});
 			// if an error, return it
-			if (res?.error) {
+			if ('error' in res) {
 				return res.error;
 			}
 		}
@@ -73,15 +73,17 @@ class NetworkRequestManager {
 			id: scriptObjs[strat]?.id,
 		}));
 		for (const postRequestScript of postRequestScripts) {
-			const res = (await this.runScript(postRequestScript.script, requestId, stateAccess, response, {
-				log: auditLog,
-				scriptType: postRequestScript.name,
+			const res = await this.runScript({
+				script: postRequestScript.script,
+				requestId,
+				stateAccess,
+				response,
+				auditLog,
+				type: postRequestScript.name,
 				associatedId: postRequestScript.id,
-			})) as {
-				error: SprocketError;
-			};
+			});
 			// if an error, return it
-			if (res?.error) {
+			if ('error' in res) {
 				return res.error;
 			}
 		}
@@ -208,27 +210,9 @@ class NetworkRequestManager {
 		return { response, networkRequest };
 	}
 
-	public async runScript(
-		script: string | undefined,
-		requestId: string,
-		stateAccess: StateAccess,
-		response?: EndpointResponse | undefined,
-		auditInfo?: {
-			log: AuditLog;
-			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
-			associatedId: string;
-		},
-	): Promise<unknown | { error: string }> {
-		if (script) {
-			const result = await scriptRunnerManager.runTypescriptWithSprocketContext(
-				script,
-				requestId,
-				stateAccess,
-				response,
-				auditInfo,
-			);
-			return result;
-		}
+	public async runScript(args: Partial<RunTypescriptWithFullContextArgs>) {
+		if (args.script == null) throw new Error("cannot run script that doesn't exist");
+		return ScriptRunnerManager.runTypescriptWithFullContext(args as RunTypescriptWithFullContextArgs);
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {

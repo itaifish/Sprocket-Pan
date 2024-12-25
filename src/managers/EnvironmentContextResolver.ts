@@ -1,6 +1,7 @@
 import { WorkspaceData, RootEnvironment, Environment } from '@/types/data/workspace';
-import { KeyValuePair, OrderedKeyValuePairs } from '../classes/OrderedKeyValuePairs';
 import { replaceValuesByKey } from '../utils/variables';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { KeyValuePair } from '@/types/shared/keyValues';
 
 export type Snippet = {
 	value: string;

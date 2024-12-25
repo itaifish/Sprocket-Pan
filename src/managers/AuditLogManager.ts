@@ -1,5 +1,6 @@
 import { EventEmitter } from '@tauri-apps/api/shell';
 import { AuditLog, AuditUpdateEvent, RequestEvent, TransformedAuditLog } from '../types/data/audit';
+import { OptionalScriptContext } from './scripts/types';
 
 type AuditEventEmitterListenerType = {
 	update: (newEvent: RequestEvent) => void;
@@ -12,17 +13,23 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 		super();
 	}
 
+	addToAuditLogFromContext(context: OptionalScriptContext, chronology: RequestEvent['chronology'], error?: string) {
+		if (context.auditLog) {
+			this.addToAuditLog(context.auditLog, chronology, context.type, context.associatedId, error);
+		}
+	}
+
 	addToAuditLog(
 		auditLog: AuditLog,
 		chronology: RequestEvent['chronology'],
-		eventType: RequestEvent['eventType'],
+		eventType?: RequestEvent['eventType'],
 		associatedId?: string,
 		error?: string,
 	) {
 		const newRequestEvent: RequestEvent = {
 			timestamp: new Date().getTime(),
 			chronology,
-			eventType,
+			eventType: eventType ?? 'unknown',
 			error,
 			associatedId,
 		};

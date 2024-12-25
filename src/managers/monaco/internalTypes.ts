@@ -20,8 +20,4 @@ function cleanText(text: string) {
 	return text.replaceAll(regex, '');
 }
 
-export const internalCodeText = [...standalone, ...dependent, sprocketText].map(cleanText).join('');
-
-export function getInjectedTypes(scripts: string[]) {
-	return `${internalCodeText.substring(0, internalCodeText.length - 3)}stuff here}`;
-}
+export const internalTypesRaw = [...standalone, ...dependent, sprocketText].map(cleanText).join('');

@@ -1,79 +1,72 @@
-import { StateAccess } from '@/state/types';
-import { AuditLog, RequestEvent } from '@/types/data/audit';
 import { Script, EndpointResponse } from '@/types/data/workspace';
-import { evalAsync, asyncCallWithTimeout } from '@/utils/functions';
 import { log } from '@/utils/logging';
 import ts from 'typescript';
 import { auditLogManager } from '../AuditLogManager';
-import { getScriptInjectionCode } from './ScriptInjectionManager';
 import { getSettingsFromState } from '@/utils/application';
+import { StateAccess } from '@/state/types';
+import { OptionalScriptContext, RunTypeScriptReturn } from './types';
+import { getSprocketScripts, getUserScripts } from './scripts';
 
-class ScriptRunnerManager {
-	public static readonly INSTANCE = new ScriptRunnerManager();
+function constructRunnableScript(script: string | Script, requestId?: string, response?: EndpointResponse) {
+	let name = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
+	name = (script as Script)?.name ? `Script [${(script as Script)?.name}]` : name;
+	const runnable: Script =
+		typeof script === 'string'
+			? { scriptCallableName: '_', content: script, id: '', returnVariableName: null, name: 'wrapper' }
+			: script;
+	return { runnable, name };
+}
 
-	private constructor() {}
+export interface RunTypescriptWithFullContextArgs extends Omit<OptionalScriptContext, 'name'> {
+	script: string | Script;
+	stateAccess: StateAccess;
+}
 
-	public async runTypescriptContextless<TReturnType>(script: Script) {
+export class ScriptRunnerManager {
+	public static runTypescript<T>(
+		context: OptionalScriptContext,
+		script: Script,
+		timeout?: number,
+	): RunTypeScriptReturn<T> {
+		log.info(`Running ${context.name}`);
+		auditLogManager.addToAuditLogFromContext(context, 'before');
 		const jsScript = ts.transpile(script.content);
 		const addendum = script.returnVariableName ? `\nreturn ${script.returnVariableName};` : '';
-		const ranScript = await evalAsync(`${jsScript}${addendum}`);
-		return ranScript as TReturnType;
+		const interruptable = constructInterruptableScript<T>(`${jsScript}${addendum}`, timeout);
+		const result = interruptable.run(context).then((res) => {
+			auditLogManager.addToAuditLogFromContext(context, 'after');
+			return res;
+		});
+		return { result, interrupt: interruptable.interrupt };
 	}
 
-	public async runTypescriptWithSprocketContext<TReturnType>(
-		script: string | Script,
-		requestId: string | null,
-		stateAccess: StateAccess,
-		response?: EndpointResponse | undefined,
-		auditInfo?: {
-			log: AuditLog;
-			scriptType: Exclude<RequestEvent['eventType'], 'request'>;
-			associatedId: string;
-		},
-	) {
-		let scriptName = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
-		scriptName = (script as Script)?.name ? `Script [${(script as Script)?.name}]` : scriptName;
+	public static injectScripts(stateAccess: StateAccess) {
+		const global = globalThis as any;
+		global.sprocketScripts = getSprocketScripts(stateAccess);
+		global.userScripts = getUserScripts(stateAccess);
+	}
+
+	public static async runTypescriptWithFullContext<TReturnType>({
+		script,
+		stateAccess,
+		...context
+	}: RunTypescriptWithFullContextArgs) {
+		const { runnable, name } = constructRunnableScript(script, context.requestId, context.response);
 		try {
-			log.info(`Running ${scriptName}`);
-			const runnableScript: Script =
-				typeof script === 'string'
-					? { scriptCallableName: '_', content: script, id: '', returnVariableName: null, name: 'wrapper' }
-					: script;
-			if (auditInfo) {
-				auditLogManager.addToAuditLog(auditInfo.log, 'before', auditInfo.scriptType, auditInfo.associatedId);
-			}
-			const sprocketPan = getScriptInjectionCode(requestId, stateAccess, response, auditInfo?.log);
-			const _this = globalThis as any;
-			_this.sp = sprocketPan;
-			_this.sprocketPan = sprocketPan;
-			const scriptTask = this.runTypescriptContextless<TReturnType>(runnableScript);
-			const result = await asyncCallWithTimeout<TReturnType>(
-				scriptTask,
+			return this.runTypescript<TReturnType>(
+				{ ...context, name },
+				runnable,
 				getSettingsFromState(stateAccess.getState()).request.timeoutMS,
 			);
-			if (auditInfo) {
-				auditLogManager.addToAuditLog(auditInfo.log, 'after', auditInfo.scriptType, auditInfo.associatedId);
-			}
-			return result;
 		} catch (e) {
 			const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
 			const returnError = {
 				errorStr,
-				errorType: `Invalid ${scriptName}`,
+				errorType: `Invalid ${name}`,
 			};
-			if (auditInfo) {
-				auditLogManager.addToAuditLog(
-					auditInfo.log,
-					'after',
-					auditInfo.scriptType,
-					auditInfo.associatedId,
-					JSON.stringify(returnError),
-				);
-			}
-			log.warn(`Error when calling script ${scriptName}: \n${errorStr}`, 0);
+			auditLogManager.addToAuditLogFromContext(context, 'after', JSON.stringify(returnError));
+			log.warn(`Error when calling script ${name}: \n${errorStr}`, 0);
 			return { error: returnError };
 		}
 	}
 }
-
-export const scriptRunnerManager = ScriptRunnerManager.INSTANCE;

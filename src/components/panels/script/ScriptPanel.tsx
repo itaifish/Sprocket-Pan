@@ -74,7 +74,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	const run = async () => {
 		try {
 			setRunning(true);
-			const result = dispatch(runScript({ script: { ...script, content: localDataState }, requestId: null })).unwrap();
+			const result = dispatch(runScript({ script: { ...script, content: localDataState } })).unwrap();
 			await sleep(Constants.minimumScriptRunTimeMS);
 			const output = await result;
 			if (typeof output === 'function') {
@@ -124,6 +124,7 @@ export function ScriptPanel({ id }: PanelProps) {
 						setLocalDataState(value);
 					}
 				}}
+				height="40vh"
 				language="typescript"
 				theme={theme}
 				options={defaultEditorOptions}
@@ -136,6 +137,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				value={scriptOutput}
 				language={scriptOutputLang}
 				theme={theme}
+				height="30vh"
 				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
 				onMount={handleReturnEditorDidMount}
 			/>

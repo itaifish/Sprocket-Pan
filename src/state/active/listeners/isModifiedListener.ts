@@ -1,6 +1,6 @@
 import { Action, ThunkDispatch, createListenerMiddleware, isAnyOf } from '@reduxjs/toolkit';
-import { RootState } from '../store';
-import { activeActions, activeSlice } from './slice';
+import { RootState } from '../../store';
+import { activeActions, activeSlice } from '../slice';
 
 const isModifiedListener = createListenerMiddleware<RootState, ThunkDispatch<RootState, Action, Action>>();
 
@@ -28,7 +28,5 @@ isModifiedListener.startListening({
 		dispatch(activeActions.setModifiedNow());
 	},
 });
-
-// TODO: add listener to save and then construct redo/undo functionality?
 
 export { isModifiedListener };
