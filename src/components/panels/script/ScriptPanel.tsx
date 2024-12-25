@@ -11,7 +11,6 @@ import { useEditorTheme } from '@/hooks/useEditorTheme';
 import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
 import { selectScript, selectScripts } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
-import { runScript } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
 import { Script } from '@/types/data/workspace';
 import { sleep } from '@/utils/misc';
@@ -20,8 +19,10 @@ import { PanelProps } from '../panels.interface';
 import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { ScriptActions } from './ScriptActions';
+import { ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
 
 export function ScriptPanel({ id }: PanelProps) {
+	const interruptTrigger = useRef<null | (() => void)>(null);
 	const theme = useEditorTheme();
 	const script = useSelector((state) => selectScript(state, id));
 	const scripts = useSelector(selectScripts);
@@ -74,9 +75,12 @@ export function ScriptPanel({ id }: PanelProps) {
 	const run = async () => {
 		try {
 			setRunning(true);
-			const result = dispatch(runScript({ script: { ...script, content: localDataState } })).unwrap();
+			const interruptable = ScriptRunnerManager.runTypescriptWithFullContext<unknown>({
+				script: { ...script, content: localDataState },
+			});
+			interruptTrigger.current = interruptable.interrupt;
 			await sleep(Constants.minimumScriptRunTimeMS);
-			const output = await result;
+			const output = await interruptable.result;
 			if (typeof output === 'function') {
 				setScriptOutputLang('javascript');
 				setScriptOutput(output.toString());
@@ -88,13 +92,13 @@ export function ScriptPanel({ id }: PanelProps) {
 			setScriptOutputLang('json');
 			setScriptOutput(JSON.stringify({ error: (e as any)?.message ?? 'An error occurred' }));
 		} finally {
+			interruptTrigger.current = null;
 			setRunning(false);
 		}
 	};
 
 	const interrupt = () => {
-		// TODO: do a proper interruptus
-		setRunning(false);
+		interruptTrigger.current?.();
 	};
 
 	return (

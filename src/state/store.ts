@@ -5,7 +5,7 @@ import { tabsSlice } from './tabs/slice';
 import { uiSlice } from './ui/slice';
 import { globalSlice } from './global/slice';
 import { isModifiedListener } from './active/listeners/isModifiedListener';
-import { scriptInjectionListener } from './active/listeners/scriptInjectionListener';
+import { scriptConstructionListener } from './active/listeners/scriptConstructionListener';
 
 const rootReducer = combineReducers({
 	[globalSlice.name]: globalSlice.reducer,
@@ -19,7 +19,7 @@ export function setupStore(preloadedState?: Partial<RootState>) {
 		reducer: rootReducer,
 		preloadedState,
 		middleware: (getDefaultMiddleware) =>
-			getDefaultMiddleware().concat(isModifiedListener.middleware, scriptInjectionListener.middleware),
+			getDefaultMiddleware().concat(isModifiedListener.middleware, scriptConstructionListener.middleware),
 	});
 }
 

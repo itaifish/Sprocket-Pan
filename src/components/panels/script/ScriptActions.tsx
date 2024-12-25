@@ -21,10 +21,11 @@ import HourglassTopIcon from '@mui/icons-material/HourglassTop';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Script } from '@/types/data/workspace';
-import { getVariablesFromCode } from '@/utils/functions';
-import { useMemo } from 'react';
+import { getVariablesFromCode, VariableFromCode } from '@/utils/functions';
+import { useEffect, useState } from 'react';
 import { selectScripts } from '@/state/active/selectors';
 import { useSelector } from 'react-redux';
+import { log } from '@/utils/logging';
 
 const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
 	function: <FunctionsIcon />,
@@ -42,6 +43,7 @@ interface ScriptActionsProps {
 }
 
 export function ScriptActions({ onChange, isRunning, run, isDebouncing, interrupt, script }: ScriptActionsProps) {
+	const [scriptVariables, setScriptVariables] = useState<Map<string, VariableFromCode>>(new Map());
 	const scripts = useSelector(selectScripts);
 
 	const scriptCallableNameDebounce = useDebounce({
@@ -51,15 +53,21 @@ export function ScriptActions({ onChange, isRunning, run, isDebouncing, interrup
 
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
 
-	const scriptVariables = useMemo(
-		() =>
-			new Map(
-				getVariablesFromCode(script.content, Object.values(scripts)).map(
-					(variableFromCode) => [variableFromCode.name, variableFromCode] as const,
+	useEffect(() => {
+		// since we parse this on unvalidated/unfinished user content as well, we're fine if it fails
+		// we just fallback to using the last valid variables (which means this needs to remain a useEffect)
+		try {
+			setScriptVariables(
+				new Map(
+					getVariablesFromCode(script.content, Object.values(scripts)).map(
+						(variableFromCode) => [variableFromCode.name, variableFromCode] as const,
+					),
 				),
-			),
-		[script.content],
-	);
+			);
+		} catch (e) {
+			log.debug(e);
+		}
+	}, [script.content]);
 
 	return (
 		<Stack direction="row" spacing={2}>

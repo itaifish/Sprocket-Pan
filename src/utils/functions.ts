@@ -2,7 +2,10 @@ import { getMonacoInjectedTypeCode } from '@/managers/monaco/MonacoInitManager';
 import { Script } from '@/types/data/workspace';
 import { parseScript } from 'esprima';
 import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
-import { timeout } from './misc';
+import { getClearableTimeout, interruptingTimeout } from './misc';
+import { InterruptableScriptReturn } from './types';
+import { Token } from '@/types/shared/misc';
+import { SprocketScriptContext } from '@/managers/scripts/SprocketScriptContext';
 
 /**
  * Call an async function with a maximum time limit (in milliseconds) for the timeout
@@ -11,7 +14,16 @@ import { timeout } from './misc';
  * @returns Resolved promise for async function call, or rejected if time limit reached
  */
 export function asyncCallWithTimeout<T>(asyncPromise: Promise<T>, timeLimit: number) {
-	return Promise.race([timeout(timeLimit), asyncPromise]) as Promise<T>;
+	return Promise.race([getClearableTimeout(timeLimit).promise, asyncPromise]) as Promise<T>;
+}
+
+export function runContextfulInterruptableScript<T>(
+	script: string,
+	sp: SprocketScriptContext,
+	timeout?: number,
+): InterruptableScriptReturn<T> {
+	const result = Object.getPrototypeOf(async () => {}).constructor('sp', script)(sp);
+	return { result: interruptingTimeout(result, sp.interrupt, timeout), interrupt: sp.interrupt };
 }
 
 export function getTypesFromCode(codeToEval: string, scripts: Script[]) {
@@ -119,4 +131,13 @@ export function safeJsonParse<T>(str: string) {
 	} catch (err) {
 		return [err, null] as const;
 	}
+}
+
+export function checkInterrupt<T, A extends any[]>(func: (...args: A) => T, token: Token<boolean>) {
+	return (...args: A) => {
+		if (token.current) {
+			throw new Error(`operation interrupted, reason: ${token.comment}`);
+		}
+		return func(...args);
+	};
 }

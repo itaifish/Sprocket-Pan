@@ -1,7 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName } from '../slice';
 import { networkRequestManager } from '@/managers/NetworkRequestManager';
-import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
 import { AuditLog } from '@/types/data/audit';
@@ -11,20 +10,6 @@ import { log } from '@/utils/logging';
 import { createNewRequestObject } from './util';
 import { getSettingsFromState } from '@/utils/application';
 
-export const runScript = createAsyncThunk<
-	| {
-			error: SprocketError;
-	  }
-	| unknown,
-	Omit<RunTypescriptWithFullContextArgs, 'stateAccess'>,
-	{ state: RootState }
->(`${activeThunkName}/runScript`, async (options, thunk) => {
-	const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
-	const result = await ScriptRunnerManager.runTypescriptWithFullContext<unknown>({ ...options, stateAccess });
-	return result;
-});
-
-// TODO: gotta figure out how to get this working without injecting getState()
 export const makeRequest = createAsyncThunk<
 	SprocketError | undefined,
 	{ requestId: string; auditLog?: AuditLog },

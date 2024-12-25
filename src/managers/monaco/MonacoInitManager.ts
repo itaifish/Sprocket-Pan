@@ -51,7 +51,7 @@ function getSprocketPanType(scripts: Script[]) {
 
 export function getMonacoInjectedTypeCode(scripts: Script[]) {
 	const ret = `${getSprocketPanType(scripts)}
-	const {usr, sp} = {} as SprocketInjectedScripts;`;
+	const sp = {} as SprocketInjectedScripts;`;
 	return ret;
 }
 
