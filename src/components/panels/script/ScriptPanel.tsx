@@ -17,7 +17,7 @@ import { ScriptActions } from './ScriptActions';
 import { ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
 import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 import { Panel, PanelGroup } from 'react-resizable-panels';
-import { SprocketResizeHandle } from '@/components/shared/PanelResizeHandle';
+import { SprocketResizeHandle } from '@/components/shared/SprocketResizeHandle';
 
 export function ScriptPanel({ id }: PanelProps) {
 	const interruptTrigger = useRef<null | ((message?: string) => void)>(null);
@@ -79,7 +79,7 @@ export function ScriptPanel({ id }: PanelProps) {
 				isValidFunc={(text) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
 				right={<SyncButton id={id} />}
 			/>
-			<PanelGroup autoSaveId={id} direction="vertical" style={{ height: 'calc(100vh - 130px)' }}>
+			<PanelGroup autoSaveId={id} direction="vertical" style={{ height: 'calc(100vh - 140px)' }}>
 				<Panel defaultSize={66} minSize={20}>
 					<SprocketEditor
 						ActionBarItems={
