@@ -1,4 +1,4 @@
-import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 import { Constants } from '@/constants/constants';
 import { useDebounce } from '@/hooks/useDebounce';
 

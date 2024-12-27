@@ -6,7 +6,7 @@ import { CONTENT_TYPE } from '@/constants/request';
 import { StateAccess } from '@/state/types';
 import { AuditLog } from '@/types/data/audit';
 import { RawBodyType, RawBodyTypes } from '@/types/data/shared';
-import { EndpointResponse, EndpointRequest, NetworkFetchRequest } from '@/types/data/workspace';
+import { EndpointResponse, EndpointRequest, NetworkFetchRequest, Endpoint, Service } from '@/types/data/workspace';
 import { getEnvValuesFromData, getSettingsFromState, queryParamsToString, toKeyValuePairs } from '@/utils/application';
 import { getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
 import { asyncCallWithTimeout } from '@/utils/functions';
@@ -17,6 +17,8 @@ import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
 
+type ScriptObjs = { service: Service; endpoint: Endpoint; request: EndpointRequest };
+
 class NetworkRequestManager {
 	public static readonly INSTANCE = new NetworkRequestManager();
 
@@ -26,7 +28,28 @@ class NetworkRequestManager {
 		this.xmlBuilder = new xmlParse.Builder();
 	}
 
-	public async runPreScripts(requestId: string, stateAccess: StateAccess, auditLog: AuditLog = []) {
+	private buildPreScripts(state: RootState, scriptObjs: ScriptObjs) {
+		return getSettingsFromState(state).script.strategy.pre.map((strat) => ({
+			script: scriptObjs[strat]?.preRequestScript,
+			name: `pre${capitalizeWord(strat)}Script` as const,
+			id: scriptObjs[strat]?.id,
+		}));
+	}
+
+	private buildPostScripts(state: RootState, scriptObjs: ScriptObjs) {
+		return getSettingsFromState(state).script.strategy.post.map((strat) => ({
+			script: scriptObjs[strat]?.postRequestScript,
+			name: `post${capitalizeWord(strat)}Script` as const,
+			id: scriptObjs[strat]?.id,
+		}));
+	}
+
+	public async runScripts(
+		requestId: string,
+		stateAccess: StateAccess,
+		auditLog: AuditLog = [],
+		response?: EndpointResponse,
+	) {
 		const state = stateAccess.getState();
 		const data = state.active;
 		const request = data.requests[requestId];
@@ -34,57 +57,19 @@ class NetworkRequestManager {
 		const endpoint = data.endpoints[endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const preRequestScripts = getSettingsFromState(state).script.strategy.pre.map((strat) => ({
-			script: scriptObjs[strat]?.preRequestScript,
-			name: `pre${capitalizeWord(strat)}Script` as const,
-			id: scriptObjs[strat]?.id,
-		}));
-		for (const preRequestScript of preRequestScripts) {
-			const res = await this.runScript({
-				script: preRequestScript.script,
-				requestId,
-				stateAccess,
-				auditLog,
-				type: preRequestScript.name,
-				associatedId: preRequestScript.id,
-			});
-			// if an error, return it
-			if ('error' in res) {
-				return res.error;
-			}
-		}
-	}
-
-	public async runPostScripts(
-		requestId: string,
-		stateAccess: StateAccess,
-		response: EndpointResponse,
-		auditLog: AuditLog = [],
-	) {
-		const state = stateAccess.getState();
-		const data = state.active;
-		const request = data.requests[requestId];
-		const endpoint = data.endpoints[request.endpointId];
-		const service = data.services[endpoint.serviceId];
-		const scriptObjs = { service, endpoint, request };
-		const postRequestScripts = getSettingsFromState(state).script.strategy.post.map((strat) => ({
-			script: scriptObjs[strat]?.postRequestScript,
-			name: `post${capitalizeWord(strat)}Script` as const,
-			id: scriptObjs[strat]?.id,
-		}));
-		for (const postRequestScript of postRequestScripts) {
-			const res = await this.runScript({
-				script: postRequestScript.script,
-				requestId,
-				stateAccess,
-				response,
-				auditLog,
-				type: postRequestScript.name,
-				associatedId: postRequestScript.id,
-			});
-			// if an error, return it
-			if ('error' in res) {
-				return res.error;
+		const scripts =
+			response == null ? this.buildPreScripts(state, scriptObjs) : this.buildPostScripts(state, scriptObjs);
+		for (const script of scripts) {
+			if (script.script != null) {
+				const interruptible = this.runScript({
+					script: script.script,
+					requestId,
+					response,
+					auditLog,
+					type: script.name,
+					associatedId: script.id,
+				});
+				await interruptible.result;
 			}
 		}
 	}
@@ -210,7 +195,7 @@ class NetworkRequestManager {
 		return { response, networkRequest };
 	}
 
-	public async runScript(args: Partial<RunTypescriptWithFullContextArgs>) {
+	public runScript(args: Partial<RunTypescriptWithFullContextArgs>) {
 		if (args.script == null) throw new Error("cannot run script that doesn't exist");
 		return ScriptRunnerManager.runTypescriptWithFullContext(args as RunTypescriptWithFullContextArgs);
 	}

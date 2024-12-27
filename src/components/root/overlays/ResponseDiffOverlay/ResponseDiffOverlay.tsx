@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ResponseSelectForm, SelectedResponse } from './ResponseSelectForm';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { VisualEventLog } from '@/components/panels/request/response/VisualEventLog';
-import { DiffText } from '@/components/shared/input/DiffText';
+import { DiffText } from '@/components/shared/input/monaco/DiffText';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { UriTypography } from '@/components/shared/UriTypography';

@@ -3,7 +3,6 @@ import { IconButton, Option, Select, Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
 import { useMemo } from 'react';
 import { AccountTree, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material';
-import { parseEditorJSON, toEditorJSON, EditableData } from '@/components/shared/input/EditableData';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
 import { selectSelectedEnvironment, selectEnvironments, selectSecrets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
@@ -13,6 +12,7 @@ import { PanelProps } from '../panels.interface';
 import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { parseEditorJSON, toEditorJSON, EditableData } from '@/components/shared/input/monaco/EditableData';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);

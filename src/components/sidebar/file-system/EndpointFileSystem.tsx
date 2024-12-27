@@ -19,9 +19,10 @@ interface EndpointFileSystemProps {
 
 export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 	const endpoint = useSelector((state) => selectEndpointById(state, endpointId));
-	const requestIds = useSelector((state) => selectFilteredNestedIds(state, endpoint.requestIds));
-
+	const requestIds = useSelector((state) => selectFilteredNestedIds(state, endpoint?.requestIds ?? []));
 	const dispatch = useAppDispatch();
+
+	if (endpoint == null) return null;
 
 	return (
 		<FileSystemBranch

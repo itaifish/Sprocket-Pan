@@ -1,41 +1,40 @@
-import { FormControl, FormLabel, Select, Option, FormHelperText } from '@mui/joy';
+import { FormControl, FormLabel, Select, Option, FormHelperText, SelectProps } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
 import { Info } from '@mui/icons-material';
 import { SprocketTooltip } from '../SprocketTooltip';
 import { useComponentIdentifier } from '@/hooks/useComponentIdentifier';
 
-export interface SelectOption<T> {
+export type SelectOption<T> = {
 	value: T;
-	label: string;
 	group?: string;
-}
+} & ({ label: string } | { label: React.ReactNode; key: string | number });
 
-export interface SprocketSelectProps<T> {
-	placeholder?: string;
-	decorator?: React.ReactNode;
-	label?: string;
+type SelectPropsSubset = Omit<SelectProps<any, any>, 'onChange' | 'value' | 'slotProps'>;
+
+export interface SprocketSelectProps<T> extends SelectPropsSubset {
 	value: T;
 	options: SelectOption<T>[];
 	onChange: (value: T) => void;
-	sx?: SxProps;
+	label?: string;
+	controlSx?: SxProps;
 	hint?: string;
 	tooltip?: string;
 }
 
 export function SprocketSelect<T>({
-	decorator,
 	label,
 	options,
 	onChange,
-	sx,
+	controlSx,
 	value,
 	hint,
 	tooltip,
 	placeholder,
+	...overrides
 }: SprocketSelectProps<T>) {
 	const aria = useComponentIdentifier();
 	return (
-		<FormControl sx={sx}>
+		<FormControl sx={controlSx}>
 			{label != null && (
 				<FormLabel id={`select-${aria}-label`} htmlFor={`select-${aria}-button`}>
 					{label}
@@ -47,7 +46,6 @@ export function SprocketSelect<T>({
 				</FormLabel>
 			)}
 			<Select
-				startDecorator={decorator}
 				slotProps={{
 					button: {
 						id: `select-${aria}-button`,
@@ -63,9 +61,10 @@ export function SprocketSelect<T>({
 						onChange(value as T);
 					}
 				}}
+				{...overrides}
 			>
 				{options.map((option) => (
-					<Option key={option.label} value={option.value}>
+					<Option key={'key' in option ? option.key : option.label} value={option.value}>
 						{option.label}
 					</Option>
 				))}

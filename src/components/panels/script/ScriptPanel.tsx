@@ -1,14 +1,9 @@
 import { useSelector } from 'react-redux';
-import { Stack, Typography } from '@mui/joy';
-import { Editor, Monaco } from '@monaco-editor/react';
-import { useState, useRef, useEffect } from 'react';
-import { editor } from 'monaco-editor';
-import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
-import { FormatButton } from '@/components/shared/buttons/FormatButton';
+import { Typography } from '@mui/joy';
+import { useState, useRef } from 'react';
 import { Constants } from '@/constants/constants';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
-import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
 import { selectScript, selectScripts } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
@@ -20,49 +15,22 @@ import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { ScriptActions } from './ScriptActions';
 import { ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
+import { Panel, PanelGroup } from 'react-resizable-panels';
+import { SprocketResizeHandle } from '@/components/shared/PanelResizeHandle';
 
 export function ScriptPanel({ id }: PanelProps) {
-	const interruptTrigger = useRef<null | (() => void)>(null);
-	const theme = useEditorTheme();
+	const interruptTrigger = useRef<null | ((message?: string) => void)>(null);
+	const editorTheme = useEditorTheme();
 	const script = useSelector((state) => selectScript(state, id));
 	const scripts = useSelector(selectScripts);
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
-	const [isRunning, setRunning] = useState(false);
-	const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
-	const scriptReturnEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+	const [isRunning, setIsRunning] = useState(false);
+	const [isInterrupting, setIsInterrupting] = useState(false);
 	const [scriptOutput, setScriptOutput] = useState('');
 	const [scriptOutputLang, setScriptOutputLang] = useState<'json' | 'javascript'>('json');
-	const format = () => {
-		if (editorRef.current) {
-			editorRef.current.getAction('editor.action.formatDocument')?.run();
-		}
-	};
-
-	const formatReturnEditor = () => {
-		if (scriptReturnEditorRef.current) {
-			scriptReturnEditorRef.current.updateOptions({ readOnly: false });
-			scriptReturnEditorRef.current
-				.getAction('editor.action.formatDocument')
-				?.run()
-				.then(() => {
-					scriptReturnEditorRef.current?.updateOptions({ readOnly: true });
-				});
-		}
-	};
-
-	useEffect(() => {
-		formatReturnEditor();
-	}, [scriptOutput]);
-
-	const handleMainEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
-		editorRef.current = editor;
-		format();
-	};
-	const handleReturnEditorDidMount = (editor: editor.IStandaloneCodeEditor, _monaco: Monaco) => {
-		scriptReturnEditorRef.current = editor;
-		formatReturnEditor();
-	};
 	const dispatch = useAppDispatch();
+
 	function update(values: Partial<Script>) {
 		dispatch(activeActions.updateScript({ ...values, id: script.id }));
 	}
@@ -74,13 +42,13 @@ export function ScriptPanel({ id }: PanelProps) {
 
 	const run = async () => {
 		try {
-			setRunning(true);
-			const interruptable = ScriptRunnerManager.runTypescriptWithFullContext<unknown>({
+			setIsRunning(true);
+			const interruptible = ScriptRunnerManager.runTypescriptWithFullContext<unknown>({
 				script: { ...script, content: localDataState },
 			});
-			interruptTrigger.current = interruptable.interrupt;
+			interruptTrigger.current = interruptible.interrupt;
 			await sleep(Constants.minimumScriptRunTimeMS);
-			const output = await interruptable.result;
+			const output = await interruptible.result;
 			if (typeof output === 'function') {
 				setScriptOutputLang('javascript');
 				setScriptOutput(output.toString());
@@ -90,15 +58,17 @@ export function ScriptPanel({ id }: PanelProps) {
 			}
 		} catch (e) {
 			setScriptOutputLang('json');
-			setScriptOutput(JSON.stringify({ error: (e as any)?.message ?? 'An error occurred' }));
+			setScriptOutput(JSON.stringify(e));
 		} finally {
 			interruptTrigger.current = null;
-			setRunning(false);
+			setIsRunning(false);
+			setIsInterrupting(false);
 		}
 	};
 
 	const interrupt = () => {
-		interruptTrigger.current?.();
+		setIsInterrupting(true);
+		interruptTrigger.current?.('requested by user');
 	};
 
 	return (
@@ -109,42 +79,42 @@ export function ScriptPanel({ id }: PanelProps) {
 				isValidFunc={(text) => text.length >= 1 && (!scriptNames.has(text) || text == script.name)}
 				right={<SyncButton id={id} />}
 			/>
-			<ScriptActions
-				script={script}
-				onChange={update}
-				isRunning={isRunning}
-				isDebouncing={isDebouncing}
-				run={run}
-				interrupt={interrupt}
-			/>
-			<Stack direction="row" spacing={2}>
-				<FormatButton onChange={format} />
-				<CopyToClipboardButton copyText={localDataState} />
-			</Stack>
-			<Editor
-				value={localDataState}
-				onChange={(value) => {
-					if (value != null) {
-						setLocalDataState(value);
-					}
-				}}
-				height="40vh"
-				language="typescript"
-				theme={theme}
-				options={defaultEditorOptions}
-				onMount={handleMainEditorDidMount}
-			/>
-			<Typography level="h3" sx={{ textAlign: 'center', my: '15px' }}>
-				Return Variable Output
-			</Typography>
-			<Editor
-				value={scriptOutput}
-				language={scriptOutputLang}
-				theme={theme}
-				height="30vh"
-				options={{ readOnly: true, domReadOnly: true, ...defaultEditorOptions }}
-				onMount={handleReturnEditorDidMount}
-			/>
+			<PanelGroup autoSaveId={id} direction="vertical" style={{ height: 'calc(100vh - 130px)' }}>
+				<Panel defaultSize={66} minSize={20}>
+					<SprocketEditor
+						ActionBarItems={
+							<ScriptActions
+								script={script}
+								onChange={update}
+								isRunning={isRunning}
+								isDebouncing={isDebouncing}
+								isInterrupting={isInterrupting}
+								run={run}
+								interrupt={interrupt}
+							/>
+						}
+						value={localDataState}
+						onChange={(value) => {
+							if (value != null) {
+								setLocalDataState(value);
+							}
+						}}
+						language="typescript"
+						theme={editorTheme}
+					/>
+				</Panel>
+				<SprocketResizeHandle />
+				<Panel defaultSize={33} minSize={10}>
+					<SprocketEditor
+						ActionBarItems={<Typography level="h4">Return Variable Output</Typography>}
+						value={scriptOutput}
+						language={scriptOutputLang}
+						theme={editorTheme}
+						options={{ readOnly: true, domReadOnly: true }}
+						formatOnChange
+					/>
+				</Panel>
+			</PanelGroup>
 		</>
 	);
 }

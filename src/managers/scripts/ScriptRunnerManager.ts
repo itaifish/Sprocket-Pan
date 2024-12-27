@@ -4,17 +4,18 @@ import ts from 'typescript';
 import { auditLogManager } from '../AuditLogManager';
 import { getSettingsFromState } from '@/utils/application';
 import { StateAccess } from '@/state/types';
-import { OptionalScriptContext, RunTypeScriptReturn } from './types';
+import { OptionalScriptContext } from './types';
 import { getRunnableScripts, RunnableScript } from './scripts';
-import { runContextfulInterruptableScript } from '@/utils/functions';
+import { runContextfulInterruptibleScript } from '@/utils/functions';
 import { SprocketScriptContext } from './SprocketScriptContext';
+import { errorToSprocketError } from '@/utils/conversion';
 
 function constructRunnableScript(script: string | Script, requestId?: string, response?: EndpointResponse) {
 	let name = requestId == null ? 'Script' : `${response == undefined ? 'Pre' : 'Post'}-request Script`;
 	name = (script as Script)?.name ? `Script [${(script as Script)?.name}]` : name;
 	const runnable: Script =
 		typeof script === 'string'
-			? { scriptCallableName: '_', content: script, id: '', returnVariableName: null, name: 'wrapper' }
+			? { scriptCallableName: '_', content: script, id: '', returnVariable: null, name: 'wrapper' }
 			: script;
 	return { runnable, name };
 }
@@ -27,17 +28,25 @@ export class ScriptRunnerManager {
 	public static userScripts: Record<string, RunnableScript> = {};
 	private static stateAccess: StateAccess | null = null;
 
-	public static runTypescript<T>(sp: SprocketScriptContext, script: Script, timeout?: number): RunTypeScriptReturn<T> {
+	public static runTypescript<T>(sp: SprocketScriptContext, script: Script, timeout?: number) {
 		log.info(`Running ${sp.context.name}`);
 		auditLogManager.addToAuditLogFromContext(sp.context, 'before');
 		const jsScript = ts.transpile(script.content);
-		const addendum = script.returnVariableName ? `\nreturn ${script.returnVariableName};` : '';
-		const { result, interrupt } = runContextfulInterruptableScript<T>(`${jsScript}${addendum}`, sp, timeout);
+		const addendum = script.returnVariable ? `\nreturn ${script.returnVariable.name};` : '';
+		const { result, interrupt } = runContextfulInterruptibleScript<T>(`${jsScript}${addendum}`, sp, timeout);
 		return {
-			result: result.then((res) => {
-				auditLogManager.addToAuditLogFromContext(sp.context, 'after');
-				return res;
-			}),
+			result: result
+				.catch((err) => {
+					const sprocketErr = errorToSprocketError(err, sp.context);
+					auditLogManager.addToAuditLogFromContext(sp.context, 'after', JSON.stringify(sprocketErr));
+					log.warn(`Error when calling script ${sp.context.name}: ${sprocketErr.message}`);
+					interrupt('error thrown');
+					throw sprocketErr;
+				})
+				.then((res) => {
+					auditLogManager.addToAuditLogFromContext(sp.context, 'after');
+					return res;
+				}),
 			interrupt,
 		};
 	}
@@ -51,23 +60,10 @@ export class ScriptRunnerManager {
 		const stateAccess = this.stateAccess;
 		if (stateAccess == null) throw new Error('State access not available on script run! This is a SprocketPan bug.');
 		const { runnable, name } = constructRunnableScript(script, context.requestId, context.response);
-		const { result, interrupt } = this.runTypescript<TReturnType>(
+		return this.runTypescript<TReturnType>(
 			new SprocketScriptContext(stateAccess, this.userScripts, { ...context, name }),
 			runnable,
 			getSettingsFromState(stateAccess.getState()).script.timeoutMS,
 		);
-		return {
-			result: result.catch((e) => {
-				const errorStr = JSON.stringify(e, Object.getOwnPropertyNames(e));
-				const returnError = {
-					errorStr,
-					errorType: `Invalid ${name}`,
-				};
-				auditLogManager.addToAuditLogFromContext(context, 'after', JSON.stringify(returnError));
-				log.warn(`Error when calling script ${name}: \n${errorStr}`, 0);
-				return { error: returnError };
-			}),
-			interrupt,
-		};
 	}
 }

@@ -3,10 +3,10 @@ import { Delete, FileCopy, RadioButtonChecked, RadioButtonUnchecked } from '@mui
 import { useEffect, useState } from 'react';
 import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
 import { Environment } from '@/types/data/workspace';
-import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
-import { EditableData } from '@/components/shared/input/EditableData';
 import { EditableText } from '@/components/shared/input/EditableText';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { EditableData } from '@/components/shared/input/monaco/EditableData';
+import { KeyValuePair } from '@/types/shared/keyValues';
 
 interface EnvironmentEditorProps {
 	serviceId: string;

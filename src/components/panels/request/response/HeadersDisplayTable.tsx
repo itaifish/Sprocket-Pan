@@ -1,7 +1,7 @@
-import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
 import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
 import { HoverDecorator } from '@/components/shared/HoverDecorator';
 import { SprocketTable } from '@/components/shared/SprocketTable';
+import { KeyValuePair } from '@/types/shared/keyValues';
 import { toKeyValuePairs } from '@/utils/application';
 import { AccordionGroup, Accordion, AccordionSummary, AccordionDetails, Box } from '@mui/joy';
 

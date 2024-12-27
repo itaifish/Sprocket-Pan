@@ -2,11 +2,11 @@ import { ListDivider } from '@mui/joy';
 import { EnvironmentFileSystem } from './EnvironmentFileSystem';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { SearchField } from '@/components/shared/SearchField';
 import { ELEMENT_ID } from '@/constants/uiElementIds';
 import { selectEnvironments } from '@/state/active/selectors';
 import { searchEnvironments } from '@/utils/search';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
+import { SearchField } from '@/components/shared/input/SearchField';
 
 export function EnvironmentsFileSystem() {
 	const environments = useSelector(selectEnvironments);

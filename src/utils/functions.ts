@@ -1,9 +1,9 @@
 import { getMonacoInjectedTypeCode } from '@/managers/monaco/MonacoInitManager';
-import { Script } from '@/types/data/workspace';
+import { Script, VariableFromCode } from '@/types/data/workspace';
 import { parseScript } from 'esprima';
 import { Project, ScriptTarget, TypeFormatFlags, ts } from 'ts-morph';
 import { getClearableTimeout, interruptingTimeout } from './misc';
-import { InterruptableScriptReturn } from './types';
+import { InterruptibleScriptReturn } from './types';
 import { Token } from '@/types/shared/misc';
 import { SprocketScriptContext } from '@/managers/scripts/SprocketScriptContext';
 
@@ -17,11 +17,11 @@ export function asyncCallWithTimeout<T>(asyncPromise: Promise<T>, timeLimit: num
 	return Promise.race([getClearableTimeout(timeLimit).promise, asyncPromise]) as Promise<T>;
 }
 
-export function runContextfulInterruptableScript<T>(
+export function runContextfulInterruptibleScript<T>(
 	script: string,
 	sp: SprocketScriptContext,
 	timeout?: number,
-): InterruptableScriptReturn<T> {
+): InterruptibleScriptReturn<T> {
 	const result = Object.getPrototypeOf(async () => {}).constructor('sp', script)(sp);
 	return { result: interruptingTimeout(result, sp.interrupt, timeout), interrupt: sp.interrupt };
 }
@@ -65,12 +65,6 @@ export function getTypesFromCode(codeToEval: string, scripts: Script[]) {
 	return typeMap;
 }
 
-export type VariableFromCode = {
-	name: string;
-	type: 'variable' | 'function' | 'class';
-	typescriptTypeString: string;
-};
-
 export function getVariablesFromCode(codeToEval: string, scripts: Script[]): VariableFromCode[] {
 	const types = getTypesFromCode(codeToEval, scripts);
 	let javascriptCode = ts.transpile(codeToEval, { target: ScriptTarget.ES2019 });
@@ -86,7 +80,7 @@ export function getVariablesFromCode(codeToEval: string, scripts: Script[]): Var
 					if (declaration.id.type == 'Identifier') {
 						const typescriptType = types.get(declaration.id.name);
 						if (typescriptType != undefined) {
-							variables.push({ name: declaration.id.name, type: 'variable', typescriptTypeString: typescriptType });
+							variables.push({ name: declaration.id.name, type: 'variable', typeText: typescriptType });
 						}
 					}
 				});
@@ -96,7 +90,7 @@ export function getVariablesFromCode(codeToEval: string, scripts: Script[]): Var
 					variables.push({
 						name: bodyElement.id.name,
 						type: bodyElement.type === 'ClassDeclaration' ? 'class' : 'function',
-						typescriptTypeString: typescriptType,
+						typeText: typescriptType,
 					});
 				}
 			}

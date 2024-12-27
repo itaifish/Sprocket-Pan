@@ -1,3 +1,5 @@
+import { OptionalScriptContext } from '@/managers/scripts/types';
+
 export type StateContext<TData, TDataName extends string> = Record<TDataName, TData> &
 	Record<`set${Capitalize<TDataName>}`, React.Dispatch<React.SetStateAction<TData>>>;
 
@@ -5,6 +7,9 @@ export type TabTypeWithData = 'environment' | 'service' | 'endpoint' | 'request'
 export type TabType = TabTypeWithData | 'secrets';
 
 export type SprocketError = {
-	errorType: string;
-	errorStr: string;
+	message?: string;
+	context?: OptionalScriptContext;
+	stack?: string;
+	// only populated if the error thrown is not instanceof Error
+	err?: unknown;
 };

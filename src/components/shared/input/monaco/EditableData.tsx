@@ -6,8 +6,7 @@ import { Editor } from '@monaco-editor/react';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SaveIcon from '@mui/icons-material/Save';
 import { editor } from 'monaco-editor';
-import { FormatButton } from '../buttons/FormatButton';
-import { ActionBar, ActionBarPassthroughProps } from './ActionBar';
+import { ActionBar, ActionBarPassthroughProps } from '../ActionBar';
 import { ReportProblem } from '@mui/icons-material';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
 import { defaultEditorOptions } from '@/managers/monaco/MonacoInitManager';
@@ -15,9 +14,10 @@ import { selectSelectedEnvironment, selectEnvironments } from '@/state/active/se
 import { clamp } from '@/utils/math';
 import { replaceValuesByKey } from '@/utils/variables';
 import { useSelector } from 'react-redux';
-import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
-import { SprocketTooltip } from '../SprocketTooltip';
 import { KeyValueValues, KeyValuePair } from '@/types/shared/keyValues';
+import { CopyToClipboardButton } from '../../buttons/CopyToClipboardButton';
+import { FormatButton } from '../../buttons/FormatButton';
+import { SprocketTooltip } from '../../SprocketTooltip';
 
 export function parseEditorJSON<T>(text: string): Record<string, T> {
 	if (text === '') return {};

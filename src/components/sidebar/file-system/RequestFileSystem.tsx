@@ -5,7 +5,7 @@ import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
 import { Add, Close } from '@mui/icons-material';
 import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
-import { selectRequestsById, selectEndpointById } from '@/state/active/selectors';
+import { selectRequestById, selectEndpointById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { addNewRequestFromId } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
@@ -17,17 +17,18 @@ interface RequestFileSystemProps {
 }
 
 export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
-	const request = useSelector((state) => selectRequestsById(state, requestId));
-	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
-	const isDefault = endpoint.defaultRequest === request.id;
-	const isDefaultRequest = request.id === endpoint.defaultRequest;
+	const request = useSelector((state) => selectRequestById(state, requestId));
+	const endpoint = useSelector((state) => selectEndpointById(state, request?.endpointId));
 	const dispatch = useAppDispatch();
 
+	if (request == null) return null;
+
+	const isDefault = endpoint?.defaultRequest === request.id;
 	return (
 		<FileSystemLeaf
 			id={requestId}
 			tabType="request"
-			color={isDefaultRequest ? 'primary' : 'neutral'}
+			color={isDefault ? 'primary' : 'neutral'}
 			menuOptions={[
 				{
 					Icon: isDefault ? Close : Add,

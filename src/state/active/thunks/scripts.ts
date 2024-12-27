@@ -22,7 +22,7 @@ export const createScript = createAsyncThunk<string, Partial<Omit<Script, 'id'>>
 			content: '',
 			name: 'New Script',
 			scriptCallableName: toValidFunctionName(newScriptData?.name ?? 'newScript'),
-			returnVariableName: null,
+			returnVariable: null,
 			...newScriptData,
 			id: newId,
 		};

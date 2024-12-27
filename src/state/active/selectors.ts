@@ -29,16 +29,14 @@ export const selectSecrets = createSelector(selectActiveState, (state) => state.
 
 export const selectEndpoints = createSelector(selectActiveState, (state) => state.endpoints);
 
-export const selectEndpointById = createSelector(
-	[selectEndpoints, (_, id: string) => id],
-	(endpoints, id) => endpoints[id],
+export const selectEndpointById = createSelector([selectEndpoints, (_, id?: string) => id], (endpoints, id) =>
+	id == null ? null : endpoints[id],
 );
 
 export const selectServices = createSelector(selectActiveState, (state) => state.services);
 
-export const selectServicesById = createSelector(
-	[selectServices, (_, id: string) => id],
-	(services, id) => services[id],
+export const selectServiceById = createSelector([selectServices, (_, id?: string) => id], (services, id) =>
+	id == null ? null : services[id],
 );
 
 export const selectSelectedServiceEnvironments = createSelector(
@@ -63,7 +61,7 @@ export const selectRequests = createSelector(selectActiveState, (state) => state
 
 export const selectHistory = createSelector(selectActiveState, (state) => state.history);
 
-export const selectRequestsById = createSelector([selectRequests, (_, id?: string) => id], (requests, id) =>
+export const selectRequestById = createSelector([selectRequests, (_, id?: string) => id], (requests, id) =>
 	id == null ? null : requests[id],
 );
 

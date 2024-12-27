@@ -1,4 +1,3 @@
-import { KeyValuePair } from '@/classes/OrderedKeyValuePairs';
 import { defaultWorkspaceData } from '@/managers/data/WorkspaceDataManager';
 import { AuditLog } from '@/types/data/audit';
 import { IdSpecificUiMetadata } from '@/types/data/shared';
@@ -14,6 +13,7 @@ import {
 	SyncMetadata,
 	WorkspaceData,
 } from '@/types/data/workspace';
+import { KeyValuePair } from '@/types/shared/keyValues';
 import { RecursivePartial } from '@/types/utils/utils';
 import { log } from '@/utils/logging';
 import { mergeDeep } from '@/utils/variables';

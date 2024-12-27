@@ -9,7 +9,7 @@ import {
 	menuOptionExpandAll,
 } from '../FileSystemDropdown';
 import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
-import { selectServicesById } from '@/state/active/selectors';
+import { selectServiceById } from '@/state/active/selectors';
 import { addNewEndpoint } from '@/state/active/thunks/endpoints';
 import { addNewRequest } from '@/state/active/thunks/requests';
 import { cloneServiceFromId } from '@/state/active/thunks/services';
@@ -24,10 +24,11 @@ interface ServiceFileSystemProps {
 }
 
 export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
-	const service = useSelector((state) => selectServicesById(state, serviceId));
-	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service.endpointIds));
+	const service = useSelector((state) => selectServiceById(state, serviceId));
+	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service?.endpointIds ?? []));
 
 	const dispatch = useAppDispatch();
+	if (service == null) return null;
 
 	return (
 		<FileSystemBranch

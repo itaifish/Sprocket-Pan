@@ -1,6 +1,6 @@
 import { Stack } from '@mui/joy';
-import { CopyToClipboardButton } from '../buttons/CopyToClipboardButton';
-import { FormatButton } from '../buttons/FormatButton';
+import { CopyToClipboardButton } from '../../buttons/CopyToClipboardButton';
+import { FormatButton } from '../../buttons/FormatButton';
 
 interface EditorActionsProps {
 	copyText?: string | null;

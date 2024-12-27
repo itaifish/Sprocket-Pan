@@ -1,4 +1,4 @@
-import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 import { statusCodes } from '@/constants/statusCodes';
 import { EndpointResponse } from '@/types/data/workspace';
 import { getStatusCodeColor } from '@/utils/string';

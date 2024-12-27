@@ -3,9 +3,9 @@ import {
 	selectSecrets,
 	selectSelectedEnvironmentValue,
 	selectEnvironments,
-	selectRequestsById,
+	selectRequestById,
 	selectEndpointById,
-	selectServicesById,
+	selectServiceById,
 	selectSelectedServiceEnvironments,
 } from '@/state/active/selectors';
 import { useSelector } from 'react-redux';
@@ -22,25 +22,25 @@ export function useComputedRootEnvironment() {
 	return EnvironmentContextResolver.buildEnvironmentVariables(args);
 }
 
-export function useComputedServiceEnvironment(id: string) {
+export function useComputedServiceEnvironment(id?: string) {
 	const args = useRootEnvironmentArgs();
-	const service = useSelector((state) => selectServicesById(state, id));
-	const selectedEnvId = useSelector(selectSelectedServiceEnvironments)[service.id];
+	const service = useSelector((state) => selectServiceById(state, id));
+	const selectedEnvId = service == null ? null : useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
-		servEnv: selectedEnvId == null ? null : service.localEnvironments[selectedEnvId],
+		servEnv: selectedEnvId == null ? null : service?.localEnvironments[selectedEnvId],
 	});
 }
 
-export function useComputedRequestEnvironment(id: string) {
+export function useComputedRequestEnvironment(id?: string) {
 	const args = useRootEnvironmentArgs();
-	const request = useSelector((state) => selectRequestsById(state, id));
-	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
-	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
-	const selectedEnvId = useSelector(selectSelectedServiceEnvironments)[service.id];
+	const request = useSelector((state) => selectRequestById(state, id));
+	const endpoint = useSelector((state) => selectEndpointById(state, request?.endpointId));
+	const service = useSelector((state) => selectServiceById(state, endpoint?.serviceId));
+	const selectedEnvId = service == null ? null : useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
-		reqEnv: request.environmentOverride,
-		servEnv: selectedEnvId == null ? null : service.localEnvironments[selectedEnvId],
+		reqEnv: request?.environmentOverride,
+		servEnv: selectedEnvId == null ? null : service?.localEnvironments[selectedEnvId],
 	});
 }

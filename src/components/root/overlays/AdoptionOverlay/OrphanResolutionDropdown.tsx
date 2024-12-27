@@ -1,6 +1,6 @@
 import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
-import { SelectOption } from '@/components/shared/SprocketSelect/SprocketSelect';
-import { SprocketSelect } from '@/components/shared/SprocketSelect/SprocketSelect';
+import { SelectOption } from '@/components/shared/input/SprocketSelect';
+import { SprocketSelect } from '@/components/shared/input/SprocketSelect';
 import { WorkspaceItem } from '@/types/data/workspace';
 import { Stack } from '@mui/joy';
 

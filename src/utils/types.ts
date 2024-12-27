@@ -1,6 +1,6 @@
 export type Interrupt = (comment?: string) => void;
 
-export interface InterruptableScriptReturn<T> {
+export interface InterruptibleScriptReturn<T> {
 	result: Promise<T>;
 	interrupt: Interrupt;
 }

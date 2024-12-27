@@ -8,7 +8,7 @@ import { verbColors } from '@/constants/style';
 import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
 import { useDebounce } from '@/hooks/useDebounce';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
-import { selectEndpointById, selectServicesById } from '@/state/active/selectors';
+import { selectEndpointById, selectServiceById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
@@ -22,9 +22,9 @@ import { SyncButton } from '@/components/shared/buttons/SyncButton';
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
 	const endpoint = useSelector((state) => selectEndpointById(state, id));
-	const service = useSelector((state) => selectServicesById(state, endpoint.serviceId));
+	const service = useSelector((state) => selectServiceById(state, endpoint?.serviceId));
 
-	const computedEnv = useComputedServiceEnvironment(endpoint.serviceId);
+	const computedEnv = useComputedServiceEnvironment(endpoint?.serviceId);
 	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', computedEnv);
 
 	const update = (values: Partial<Endpoint>) => {
@@ -32,7 +32,7 @@ export function EndpointPanel({ id }: PanelProps) {
 	};
 
 	const { localDataState, setLocalDataState } = useDebounce({
-		state: endpoint.url,
+		state: endpoint?.url ?? '',
 		setState: (newUrl: string) => update({ url: newUrl }),
 		debounceMS: Constants.debounceTimeMS,
 	});

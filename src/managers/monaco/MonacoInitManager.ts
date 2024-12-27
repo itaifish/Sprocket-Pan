@@ -24,12 +24,12 @@ function updateModelDefinition(monaco: Monaco, injectedCode: string) {
 }
 
 function getSprocketPanType(scripts: Script[]) {
-	const classes = scripts.filter((script) => script.returnVariableType?.isClass);
+	const classes = scripts.filter((script) => script.returnVariable?.type === 'class');
 	const type = `
 	${classes.reduce(
 		(runningClassTypeOutput, classType) => `
 		${runningClassTypeOutput}
-	${classType.returnVariableType?.typeText}`,
+	${classType.returnVariable?.typeText}`,
 		'',
 	)}
 	${internalTypesRaw.substring(0, internalTypesRaw.length - 3)}
@@ -37,10 +37,10 @@ function getSprocketPanType(scripts: Script[]) {
 			(runningScriptOutput, script) =>
 				`${runningScriptOutput}
 		${script.scriptCallableName}: () => Promise<${
-			script.returnVariableType
-				? script.returnVariableType.isClass
-					? script.returnVariableName
-					: script.returnVariableType.typeText
+			script.returnVariable
+				? script.returnVariable.type === 'class'
+					? script.returnVariable.name
+					: script.returnVariable.typeText
 				: 'void'
 		}>;`,
 			'',

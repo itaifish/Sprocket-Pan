@@ -3,13 +3,13 @@ import ListIcon from '@mui/icons-material/List';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { useEffect, useRef, useState } from 'react';
 import { EditableFormTable } from '@/components/shared/input/EditableFormTable';
-import { SprocketEditor } from '@/components/shared/input/SprocketEditor';
 import { Constants } from '@/constants/constants';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { RequestBodyTypes, RawBodyTypes } from '@/types/data/shared';
 import { EndpointRequest } from '@/types/data/workspace';
 import { getRequestBodyCategory } from '@/utils/conversion';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 
 interface RequestBodyProps {
 	request: EndpointRequest;

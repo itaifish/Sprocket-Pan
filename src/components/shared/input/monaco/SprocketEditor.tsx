@@ -16,6 +16,7 @@ export function SprocketEditor({
 	formatOnChange = false,
 	options,
 	value,
+	height = '100%',
 	...overrides
 }: SprocketEditorProps) {
 	const combinedOptions = { ...defaultEditorOptions, ...options };
@@ -25,11 +26,11 @@ export function SprocketEditor({
 	const format = async () => {
 		if (editorRef.current != null) {
 			const current = editorRef.current;
-			const action = () => current?.getAction('editor.action.formatDocument')?.run();
+			const action = () => current.getAction('editor.action.formatDocument')?.run();
 			if (options?.readOnly) {
-				editorRef.current?.updateOptions({ ...combinedOptions, readOnly: false });
+				current.updateOptions({ ...combinedOptions, readOnly: false });
 				await action();
-				editorRef.current?.updateOptions({ ...combinedOptions, readOnly: true });
+				current.updateOptions({ ...combinedOptions, readOnly: true });
 			} else {
 				await action();
 			}
@@ -47,7 +48,7 @@ export function SprocketEditor({
 	}, [value, editorRef.current, formatOnChange]);
 
 	return (
-		<Box>
+		<Box height={height}>
 			<Stack direction="row" justifyContent="space-between" alignItems="end">
 				{ActionBarItems}
 				<EditorActions copyText={value} format={format} />

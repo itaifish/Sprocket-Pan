@@ -2,12 +2,12 @@ import { Box, ListDivider } from '@mui/joy';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { useSelector } from 'react-redux';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
-import { SearchField } from '@/components/shared/SearchField';
 import { ELEMENT_ID } from '@/constants/uiElementIds';
 import { selectServices } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
 import { selectFilteredNestedIds } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
+import { SearchField } from '@/components/shared/input/SearchField';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);

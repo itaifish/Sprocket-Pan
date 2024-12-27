@@ -28,8 +28,7 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 						createScript({
 							name: `${script.name} (Copy)`,
 							content: script.content,
-							returnVariableName: script.returnVariableName,
-							returnVariableType: structuredClone(script.returnVariableType),
+							returnVariable: structuredClone(script.returnVariable),
 						}),
 					),
 				),
