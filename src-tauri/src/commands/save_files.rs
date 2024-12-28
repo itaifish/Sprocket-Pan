@@ -1,7 +1,7 @@
-use std::{fs::{self, File}, io::Error, sync::{Arc, Mutex}};
+use std::{fs::{self}, sync::{Arc, Mutex}};
 
 use serde::Deserialize;
-use rayon::prelude::*;
+use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
 #[derive(Deserialize)]
 pub struct FileData {
