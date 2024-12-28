@@ -12,7 +12,7 @@ pub struct FileData {
 #[tauri::command]
 pub async fn save_files(data: Vec<FileData>) -> bool {
 	let errors = Arc::new(Mutex::new(Vec::new()));
-    let _res: Vec<_> = data
+	let _res: Vec<_> = data
 		.par_iter()
 		.enumerate()
 		.map(|(_, file_data)| {
