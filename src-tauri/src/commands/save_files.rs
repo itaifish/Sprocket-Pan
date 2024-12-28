@@ -1,5 +1,4 @@
-use std::{fs::{self}, sync::{Arc, Mutex}};
-
+use std::fs::{self};
 use serde::Deserialize;
 use rayon::iter::{IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator};
 
