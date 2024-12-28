@@ -1,5 +1,7 @@
+import { invoke } from '@/utils/invoke';
 import { log } from '@/utils/logging';
 import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, writeFile } from '@tauri-apps/api/fs';
+import { appLocalDataDir, join } from '@tauri-apps/api/path';
 
 export class FileSystemWorker {
 	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -12,6 +14,14 @@ export class FileSystemWorker {
 
 	public static writeFile(path: string, contents: string) {
 		return writeFile({ contents, path }, { dir: this.DEFAULT_DIRECTORY });
+	}
+
+	public static async writeFiles(filesToWrite: { path: string; contents: string }[]) {
+		const pathRoot = await appLocalDataDir();
+		for (const file of filesToWrite) {
+			file.path = await join(`${pathRoot}`, file.path);
+		}
+		return invoke('save_files', { data: filesToWrite });
 	}
 
 	public static async upsertFile(path: string, contents: string) {
