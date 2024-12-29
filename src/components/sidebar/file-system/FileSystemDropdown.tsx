@@ -1,5 +1,5 @@
 import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton } from '@mui/joy';
-import { Folder, FolderOpen, MoreVert } from '@mui/icons-material';
+import { MoreVert, UnfoldLess, UnfoldMore } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
@@ -42,18 +42,18 @@ export function menuOptionDuplicate(onClick: () => void) {
 	};
 }
 
-export function menuOptionCollapseAll(onClick: () => void) {
+export function menuOptionCollapseAll(onClick: () => void, targetName = 'Endpoints') {
 	return {
-		Icon: Folder,
-		label: 'Collapse Endpoints',
+		Icon: UnfoldLess,
+		label: 'Collapse ' + targetName,
 		onClick,
 	};
 }
 
-export function menuOptionExpandAll(onClick: () => void) {
+export function menuOptionExpandAll(onClick: () => void, targetName = 'Endpoints') {
 	return {
-		Icon: FolderOpen,
-		label: 'Expand Endpoints',
+		Icon: UnfoldMore,
+		label: 'Expand ' + targetName,
 		onClick,
 	};
 }

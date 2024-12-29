@@ -6,11 +6,11 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: WorkspaceMetadata;
-	workspaces: WorkspaceMetadata[];
+	workspaces: { [key: string]: WorkspaceMetadata };
 }
 
 const initialState: GlobalState = {
-	workspaces: [],
+	workspaces: {},
 	uiMetadata: { idSpecific: {} },
 	settings: DEFAULT_SETTINGS,
 	lastSaved: 0,
@@ -20,7 +20,7 @@ export const globalSlice = createSlice({
 	name: 'global',
 	initialState,
 	reducers: {
-		setWorkspaces: (state, action: PayloadAction<WorkspaceMetadata[]>) => {
+		setWorkspaces: (state, action: PayloadAction<GlobalState['workspaces']>) => {
 			state.workspaces = action.payload;
 		},
 		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {

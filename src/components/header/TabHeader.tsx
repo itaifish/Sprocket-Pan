@@ -1,14 +1,16 @@
 import { useEffect, useMemo } from 'react';
-import { Sheet, TabPanel, Tabs } from '@mui/joy';
+import { Box, Sheet, TabPanel, Tabs } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { TabRow } from './TabRow';
 import { useAppDispatch } from '@/state/store';
 import { selectTabsState } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
 import { TabContent } from '../panels/TabContent';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 
 export function TabHeader() {
 	const { list, selected } = useSelector(selectTabsState);
+	const { guttered: scrollbarTheme } = useScrollbarTheme();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
 		document.getElementById(`tab_${selected}`)?.scrollIntoView();
@@ -19,7 +21,7 @@ export function TabHeader() {
 	const listList = useMemo(() => Object.entries(list), [list]);
 
 	return (
-		<>
+		<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
 			{listList.length !== 0 && (
 				<Tabs
 					aria-label="tabs"
@@ -41,6 +43,6 @@ export function TabHeader() {
 					))}
 				</Tabs>
 			)}
-		</>
+		</Box>
 	);
 }

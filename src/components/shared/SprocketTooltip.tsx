@@ -10,7 +10,15 @@ export function SprocketTooltip({ children, text, disabled, sx, ...props }: Spro
 	return disabled ? (
 		<>{children}</>
 	) : (
-		<Tooltip variant="outlined" arrow sx={{ maxWidth: '333px', ...sx }} {...props} title={text}>
+		<Tooltip
+			enterDelay={750}
+			enterNextDelay={100}
+			variant="outlined"
+			arrow
+			sx={{ maxWidth: '333px', textAlign: 'center', ...sx }}
+			{...props}
+			title={text}
+		>
 			{children}
 		</Tooltip>
 	);

@@ -1,3 +1,5 @@
+import { MS_IN_DAY, MS_IN_HOUR, MS_IN_MINUTE, MS_IN_WEEK } from '@/constants/constants';
+
 function getLongestCommonSubstringStartingAtBeginningIndex(string1: string, string2: string): number {
 	let i;
 	for (i = 0; i < string1.length && i < string2.length; i++) {
@@ -62,6 +64,7 @@ const dateTimeFormatters = {
 		month: 'long',
 		day: 'numeric',
 	}),
+	relative: new Intl.RelativeTimeFormat('en'),
 };
 
 export function formatShortFullDate(date: Date | string | number) {
@@ -82,4 +85,31 @@ export function formatMilliseconds(ms: number) {
 
 export function getStatusCodeColor(statusCode: number) {
 	return statusCode < 200 ? 'neutral' : statusCode < 300 ? 'success' : statusCode < 400 ? 'primary' : 'danger';
+}
+
+export function formatRelativeDate(date: Date | string | number) {
+	let value: number;
+	let units: any;
+	const then = new Date(date);
+	const now = new Date();
+	const gap = then.getTime() - now.getTime();
+	const gapAbs = Math.abs(gap);
+	if (gapAbs < MS_IN_MINUTE) {
+		value = gap / 1000;
+		units = 'seconds';
+	} else if (gapAbs < MS_IN_HOUR) {
+		value = gap / MS_IN_MINUTE;
+		units = 'minutes';
+	} else if (gapAbs < MS_IN_DAY) {
+		value = gap / MS_IN_HOUR;
+		units = 'hours';
+	} else if (gapAbs < MS_IN_WEEK) {
+		value = gap / MS_IN_DAY;
+		units = 'days';
+	} else {
+		value = gap / MS_IN_WEEK;
+		units = 'weeks';
+	}
+	value = value < 0 ? Math.ceil(value) : Math.floor(value);
+	return dateTimeFormatters.relative.format(value, units);
 }

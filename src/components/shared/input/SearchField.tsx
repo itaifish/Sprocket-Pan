@@ -1,23 +1,20 @@
 import { useState } from 'react';
 import { IconButton, Input } from '@mui/joy';
-import { ClearRounded, PendingOutlined, SearchRounded } from '@mui/icons-material';
+import { ClearRounded, PendingOutlined, Search } from '@mui/icons-material';
 import { Constants } from '@/constants/constants';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SprocketTooltip } from '../SprocketTooltip';
+import { SxProps } from '@mui/material';
 
 export interface SearchFieldProps {
 	onChange: (text: string) => void;
 	debounce?: number;
 	slideout?: boolean;
+	sx?: SxProps;
 }
 
-export function SearchField({
-	onChange,
-	debounce = Constants.searchDebounceTimeMS,
-	slideout = true,
-}: SearchFieldProps) {
+export function SearchField({ onChange, debounce = Constants.searchDebounceTimeMS, sx }: SearchFieldProps) {
 	const [isTyping, setTyping] = useState(false);
-	const [active, setActive] = useState(false);
 
 	const { localDataState, setLocalDataState } = useDebounce<string | null>({
 		state: null,
@@ -31,42 +28,29 @@ export function SearchField({
 		setLocalDataState('');
 		onChange('');
 		setTyping(false);
-		setActive(false);
-	}
-
-	if (!slideout || active) {
-		return (
-			<Input
-				size="sm"
-				variant="outlined"
-				placeholder="Search for something"
-				endDecorator={
-					isTyping ? (
-						<PendingOutlined color="secondary" />
-					) : (
-						<SprocketTooltip text="Clear search">
-							<IconButton onClick={cancel}>
-								<ClearRounded color="primary" />
-							</IconButton>
-						</SprocketTooltip>
-					)
-				}
-				sx={{
-					boxShadow: 'sm',
-					width: '50px',
-					flex: 1,
-				}}
-				value={localDataState || ''}
-				onChange={(e) => setLocalDataState(e.target.value)}
-			/>
-		);
 	}
 
 	return (
-		<SprocketTooltip text="Search">
-			<IconButton onClick={() => setActive(true)} size="sm">
-				<SearchRounded color="primary" fontSize="small" />
-			</IconButton>
-		</SprocketTooltip>
+		<Input
+			fullWidth
+			size="sm"
+			variant="outlined"
+			placeholder="Search"
+			sx={{ minWidth: '150px', flex: 1, ...sx }}
+			startDecorator={<Search />}
+			endDecorator={
+				isTyping ? (
+					<PendingOutlined color="secondary" />
+				) : (
+					<SprocketTooltip text="Clear search">
+						<IconButton onClick={cancel}>
+							<ClearRounded color="primary" />
+						</IconButton>
+					</SprocketTooltip>
+				)
+			}
+			value={localDataState || ''}
+			onChange={(e) => setLocalDataState(e.target.value)}
+		/>
 	);
 }

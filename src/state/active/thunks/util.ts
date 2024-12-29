@@ -40,5 +40,5 @@ export function createNewRequestObject(endpointId: string): EndpointRequest {
 		environmentOverride: cloneEnv(),
 		endpointId: endpointId,
 		id: v4(),
-	} satisfies EndpointRequest;
+	};
 }

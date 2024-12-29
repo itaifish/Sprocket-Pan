@@ -8,12 +8,8 @@ import { IconButton } from '@mui/joy';
 export function OpenSecretsButton() {
 	const dispatch = useAppDispatch();
 	return (
-		<SprocketTooltip text="User Secrets">
+		<SprocketTooltip text="Open User Secrets">
 			<IconButton
-				id="toggle-mode"
-				size="sm"
-				variant="soft"
-				color="neutral"
 				onClick={() => {
 					dispatch(tabsActions.addTabs({ [ELEMENT_ID.secrets]: 'secrets' }));
 					dispatch(tabsActions.setSelectedTab(ELEMENT_ID.secrets));

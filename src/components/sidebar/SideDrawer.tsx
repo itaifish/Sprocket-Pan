@@ -1,43 +1,54 @@
 import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
-import { Box, Sheet } from '@mui/joy';
-import { PropsWithChildren } from 'react';
+import { Sheet, Stack, Typography, useTheme } from '@mui/joy';
+import { useSelector } from 'react-redux';
+import { selectActiveWorkspace } from '@/state/global/selectors';
+import { SidebarTabs } from './types';
+import { SideDrawerContent } from './SideDrawerContent';
+import { UndoRedoTabsButton } from '../header/UndoRedoTabsButton';
 
-interface SideDrawerProps extends PropsWithChildren {
-	open: boolean;
+interface SideDrawerProps {
+	tab: SidebarTabs;
 }
 
-export function SideDrawer({ open, children }: SideDrawerProps) {
-	const { guttered: scrollbarTheme } = useScrollbarTheme();
-	if (!open) {
-		return null;
-	}
+export function SideDrawer({ tab }: SideDrawerProps) {
+	const { average: scrollbarTheme } = useScrollbarTheme();
+	const activeWorkspace = useSelector(selectActiveWorkspace);
+	const theme = useTheme();
+
 	return (
-		<Box>
-			<Box
-				role="button"
-				sx={{
-					position: 'absolute',
-					inset: 0,
-					bgcolor: (theme) => `rgba(${theme.vars.palette.neutral.darkChannel} / 0.8)`,
-				}}
-			/>
-			<Sheet
-				sx={{
-					minWidth: 350,
-					width: 400,
-					maxWidth: 700,
-					height: '100vh',
-					p: 2,
-					boxShadow: 'lg',
-					overflowY: 'scroll',
-					overflowX: 'hidden',
-					position: 'relative',
-					resize: 'horizontal',
-					...scrollbarTheme,
-				}}
-			>
-				{children}
-			</Sheet>
-		</Box>
+		<Sheet
+			variant="soft"
+			sx={{
+				height: '100vh',
+			}}
+		>
+			<Stack height="100%">
+				<Sheet
+					variant="soft"
+					sx={{
+						flex: 0,
+						height: '45px',
+						minHeight: '45px',
+						boxShadow: '0px 5px 20px 0px ' + theme.palette.background.surface,
+					}}
+				>
+					<Stack height="100%" px={1} direction="row" alignItems="center" justifyContent="space-between">
+						<Typography level="body-lg">{activeWorkspace?.name}</Typography>
+						<UndoRedoTabsButton />
+					</Stack>
+				</Sheet>
+				<Sheet
+					sx={{
+						flex: 1,
+						overflowY: 'scroll',
+						overflowX: 'hidden',
+						position: 'relative',
+						...scrollbarTheme,
+					}}
+				>
+					<SideDrawerContent tab={tab} />
+				</Sheet>
+			</Stack>
+		</Sheet>
 	);
 }

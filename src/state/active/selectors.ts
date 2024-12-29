@@ -10,14 +10,6 @@ import { selectGlobalState, selectGlobalSettings } from '../global/selectors';
 
 export const selectActiveState = activeSlice.selectSlice;
 
-export const selectAllItems = createSelector(selectActiveState, (state) => ({
-	environments: state.environments,
-	services: state.services,
-	requests: state.requests,
-	endpoints: state.endpoints,
-	scripts: state.scripts,
-}));
-
 export const selectSelectedEnvironment = createSelector(selectActiveState, (state) => state.selectedEnvironment);
 
 export const selectSelectedEnvironmentValue = createSelector(selectActiveState, (state) =>
@@ -86,6 +78,15 @@ export const selectFullRequestInfoById = createSelector(
 export const selectUiMetadata = createSelector([selectActiveState, selectGlobalState], (activeState, globalState) =>
 	mergeDeep(globalState.uiMetadata, activeState.uiMetadata),
 );
+
+export const selectAllItems = createSelector(selectActiveState, selectGlobalState, (active, global) => ({
+	environments: active.environments,
+	services: active.services,
+	requests: active.requests,
+	endpoints: active.endpoints,
+	scripts: active.scripts,
+	workspaces: global.workspaces,
+}));
 
 export const selectIdSpecificUiMetadata = createSelector(selectUiMetadata, (state) => state.idSpecific);
 

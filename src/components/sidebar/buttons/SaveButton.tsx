@@ -22,7 +22,7 @@ export function SaveButton() {
 	}
 
 	return (
-		<SprocketTooltip text="Save">
+		<SprocketTooltip text="Save" placement="right">
 			<Badge
 				size="sm"
 				invisible={!isModified}
@@ -32,14 +32,7 @@ export function SaveButton() {
 				}}
 				badgeInset="14%"
 			>
-				<IconButton
-					id="toggle-mode"
-					size="sm"
-					variant="soft"
-					color="neutral"
-					onClick={save}
-					disabled={!isModified || loading}
-				>
+				<IconButton variant="soft" color="neutral" onClick={save} disabled={!isModified || loading}>
 					{loading ? <CircularProgress /> : <SaveIcon />}
 				</IconButton>
 			</Badge>

@@ -10,11 +10,11 @@ import { filterOldHistoryEntries, getSettingsFromState } from '@/utils/applicati
 
 const root = 'global';
 
-export const deleteWorkspace = createAsyncThunk<void, WorkspaceMetadata, { state: RootState }>(
+export const deleteWorkspace = createAsyncThunk<void, string, { state: RootState }>(
 	`${root}/delete`,
-	async (workspace, thunk) => {
-		const path = workspace.fileName;
+	async (id, thunk) => {
 		const state = thunk.getState().global;
+		const path = state.workspaces[id]?.fileName;
 		if (path == null) {
 			throw new Error('cannot delete a workspace without a path');
 		}

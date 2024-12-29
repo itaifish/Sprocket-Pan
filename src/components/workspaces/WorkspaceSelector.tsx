@@ -3,27 +3,19 @@ import { Box, Container, Stack, Typography, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { useFileSystemSynchronization } from '@/hooks/useFileSystemSynchronization';
 import { selectWorkspacesList } from '@/state/global/selectors';
-import { deleteWorkspace } from '@/state/global/thunks';
 import { useAppDispatch } from '@/state/store';
-import { WorkspaceMetadata } from '@/types/data/workspace';
 import { GlobalSettingsPanel } from '../settings/GlobalSettingsPanel';
 import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
-import { AreYouSureModal } from '../shared/modals/AreYouSureModal';
 import { CreateNewWorkspaceModal } from './CreateNewWorkspaceModal';
 import { NewWorkspaceCard } from './NewWorkspaceCard';
 import { WorkspaceEntry } from './WorkspaceEntry';
+import { tabsActions } from '@/state/tabs/slice';
 
 export function WorkspaceSelector() {
 	useFileSystemSynchronization();
 	const workspaces = useSelector(selectWorkspacesList);
 	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
-	const [workspaceToDelete, setWorkspaceToDelete] = useState<WorkspaceMetadata | null>(null);
 	const dispatch = useAppDispatch();
-
-	function onConfirmDelete() {
-		if (workspaceToDelete != null) dispatch(deleteWorkspace(workspaceToDelete));
-	}
-
 	const theme = useTheme();
 
 	return (
@@ -39,18 +31,16 @@ export function WorkspaceSelector() {
 			<Container maxWidth="xl" sx={{ pb: 4 }}>
 				<Stack direction="row" flexWrap="wrap" gap={4} justifyContent="center" width="100%" alignItems="stretch">
 					{workspaces.map((workspace) => (
-						<WorkspaceEntry key={workspace.fileName} workspace={workspace} onDelete={setWorkspaceToDelete} />
+						<WorkspaceEntry
+							key={workspace.fileName}
+							workspace={workspace}
+							onDelete={() => dispatch(tabsActions.addToDeleteQueue(workspace.id))}
+						/>
 					))}
 					<NewWorkspaceCard onCreate={() => setCreateNewModalOpen(true)} />
 				</Stack>
 			</Container>
 			<CreateNewWorkspaceModal open={createNewModalOpen} closeFunc={() => setCreateNewModalOpen(false)} />
-			<AreYouSureModal
-				action={`Delete the "${workspaceToDelete?.name}" workspace`}
-				open={workspaceToDelete != null}
-				closeFunc={() => setWorkspaceToDelete(null)}
-				actionFunc={onConfirmDelete}
-			/>
 		</>
 	);
 }

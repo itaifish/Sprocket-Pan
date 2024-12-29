@@ -10,7 +10,7 @@ import { formatFullDate } from '@/utils/string';
 import { EllipsisTypography } from '../shared/EllipsisTypography';
 import { GradientBorderBoundingBox } from '../shared/GradientBorderBoundingBox';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
-import { TextAvatar } from '../shared/TextAvatar';
+import { TextAvatar } from '../shared/Minidenticon';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;

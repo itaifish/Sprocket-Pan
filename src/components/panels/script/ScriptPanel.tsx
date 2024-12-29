@@ -103,7 +103,7 @@ export function ScriptPanel({ id }: PanelProps) {
 						theme={editorTheme}
 					/>
 				</Panel>
-				<SprocketResizeHandle />
+				<SprocketResizeHandle horizontal />
 				<Panel defaultSize={33} minSize={10}>
 					<SprocketEditor
 						ActionBarItems={<Typography level="h4">Return Variable Output</Typography>}

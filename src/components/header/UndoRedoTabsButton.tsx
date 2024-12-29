@@ -15,7 +15,6 @@ export function UndoRedoTabsButton() {
 		<Stack direction="row" spacing={0} justifyContent="flex-end">
 			<SprocketTooltip text="Previous Tab">
 				<IconButton
-					variant="outlined"
 					disabled={goBackIndex == null}
 					onClick={() => dispatch(tabsActions.setSelectedTabFromHistory(goBackIndex))}
 				>
@@ -24,7 +23,6 @@ export function UndoRedoTabsButton() {
 			</SprocketTooltip>
 			<SprocketTooltip text="Next Tab">
 				<IconButton
-					variant="outlined"
 					disabled={goForwardIndex == null}
 					onClick={() => dispatch(tabsActions.setSelectedTabFromHistory(goForwardIndex))}
 				>

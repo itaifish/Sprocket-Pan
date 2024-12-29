@@ -1,9 +1,12 @@
-import { Avatar } from '@mui/joy';
+import { Avatar, AvatarProps } from '@mui/joy';
 import { minidenticon } from 'minidenticons';
 import { useMemo } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-interface TextAvatarProps extends Omit<React.ComponentProps<typeof Avatar>, 'src' | 'alt'> {
+interface MinidenticonProps {
+	username: string;
+}
+
+interface TextAvatarProps extends Omit<AvatarProps, 'src' | 'alt'> {
 	username: string;
 	saturation?: number | string;
 	lightness?: number | string;
@@ -15,4 +18,9 @@ export function TextAvatar({ username, saturation, lightness, ...props }: TextAv
 		[username, saturation, lightness],
 	);
 	return <Avatar src={svgURI} alt={username} {...props} />;
+}
+
+export function Minidenticon({ username }: MinidenticonProps) {
+	const svgURI = useMemo(() => 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(username, 60)), [username]);
+	return <img src={svgURI} />;
 }

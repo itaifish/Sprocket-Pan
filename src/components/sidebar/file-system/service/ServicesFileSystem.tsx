@@ -1,13 +1,18 @@
-import { Box, ListDivider } from '@mui/joy';
+import { IconButton, ListDivider, Stack, Typography } from '@mui/joy';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { useSelector } from 'react-redux';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
-import { ELEMENT_ID } from '@/constants/uiElementIds';
 import { selectServices } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
 import { selectFilteredNestedIds } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
 import { SearchField } from '@/components/shared/input/SearchField';
+import { Fragment } from 'react/jsx-runtime';
+import { SideDrawerHeader } from '../../SideDrawerHeader';
+import { menuOptionCollapseAll, menuOptionExpandAll } from '../FileSystemDropdown';
+import { collapseAll, expandAll } from '@/state/ui/thunks';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { AddBox } from '@mui/icons-material';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -16,17 +21,37 @@ export function ServicesFileSystem() {
 	const dispatch = useAppDispatch();
 
 	return (
-		<FileSystemTrunk
-			id={ELEMENT_ID.sidebar.services}
-			header="Services"
-			actions={<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />}
-		>
-			{serviceIds.map((serviceId) => (
-				<Box key={serviceId}>
-					<ServiceFileSystem serviceId={serviceId} />
-					<ListDivider />
-				</Box>
-			))}
-		</FileSystemTrunk>
+		<>
+			<SideDrawerHeader
+				content="Services"
+				menuOptions={[
+					menuOptionCollapseAll(() => dispatch(collapseAll(Object.keys(services))), 'Services'),
+					menuOptionExpandAll(() => dispatch(expandAll(Object.keys(services))), 'Services'),
+				]}
+				actions={
+					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
+						<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />
+						<SprocketTooltip text="Add New Service">
+							<IconButton onClick={() => dispatch(tabsActions.addToCreateQueue('service'))}>
+								<AddBox />
+							</IconButton>
+						</SprocketTooltip>
+					</Stack>
+				}
+			/>
+			{serviceIds.length === 0 && (
+				<Typography textAlign="center" sx={{ width: '100%', mt: 4 }}>
+					No services found.
+				</Typography>
+			)}
+			<FileSystemTrunk>
+				{serviceIds.map((serviceId) => (
+					<Fragment key={serviceId}>
+						<ServiceFileSystem serviceId={serviceId} />
+						<ListDivider />
+					</Fragment>
+				))}
+			</FileSystemTrunk>
+		</>
 	);
 }

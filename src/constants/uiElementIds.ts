@@ -4,5 +4,6 @@ export const ELEMENT_ID = {
 		services: 'element.sidebar.services',
 		environments: 'element.sidebar.environments',
 		scripts: 'element.sidebar.scripts',
+		workspaces: 'element.sidebar.workspaces',
 	},
 };
