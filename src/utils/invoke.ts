@@ -17,6 +17,15 @@ type InvokeMap = {
 			path: string;
 		};
 	};
+	save_files: {
+		returnType: boolean;
+		args: {
+			data: {
+				path: string;
+				contents: string;
+			}[];
+		};
+	};
 };
 
 type InvocationName = keyof InvokeMap;

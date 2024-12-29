@@ -6,3 +6,6 @@ pub use close_splashscreen::close_splashscreen;
 
 pub(crate) mod zoom;
 pub use zoom::zoom;
+
+pub(crate) mod save_files;
+pub use save_files::save_files;

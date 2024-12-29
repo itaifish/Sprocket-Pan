@@ -100,24 +100,22 @@ export class WorkspaceDataManager {
 		} = data;
 
 		const paths = this.getWorkspacePath(fileName);
-
 		const processedHistory = this.processHistoryForSave(history);
-
-		const promises = [
-			FileSystemWorker.upsertFile(paths.data, JSON.stringify(strippedData)),
-			FileSystemWorker.upsertFile(paths.history, JSON.stringify(processedHistory)),
-			FileSystemWorker.upsertFile(paths.metadata, JSON.stringify({ ...metadata, lastModified: new Date().getTime() })),
-			FileSystemWorker.upsertFile(paths.uiMetadata, JSON.stringify(uiMetadata)),
-			FileSystemWorker.upsertFile(paths.secrets, JSON.stringify(secrets)),
+		const filesToWrite = [
+			{ path: paths.data, contents: JSON.stringify(strippedData) },
+			{ path: paths.history, contents: JSON.stringify(processedHistory) },
+			{ path: paths.metadata, contents: JSON.stringify({ ...metadata, lastModified: new Date().getTime() }) },
+			{ path: paths.uiMetadata, contents: JSON.stringify(uiMetadata) },
+			{ path: paths.secrets, contents: JSON.stringify(secrets) },
 		];
 
 		if (location != null) {
 			const syncContent = JSON.stringify(sync);
-			promises.push(FileSystemWorker.upsertFile(location, syncContent));
-			promises.push(FileSystemWorker.upsertFile(paths.syncBackup, syncContent));
+			filesToWrite.push({ path: location, contents: syncContent });
+			filesToWrite.push({ path: paths.syncBackup, contents: syncContent });
 		}
 
-		await Promise.all(promises);
+		await FileSystemWorker.writeFiles(filesToWrite);
 	}
 
 	private static processHistoryForSave(history: WorkspaceData['history']) {
