@@ -8,7 +8,7 @@ export type TabType = TabTypeWithData | 'secrets';
 
 export type SprocketError = {
 	message?: string;
-	context?: OptionalScriptContext;
+	context?: OptionalScriptContext[];
 	stack?: string;
 	// only populated if the error thrown is not instanceof Error
 	err?: unknown;

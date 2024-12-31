@@ -36,15 +36,8 @@ export interface Service<TBaseUrl extends string = string> extends Item {
 	linkedEnvMode?: boolean;
 }
 
-export type VariableFromCode = {
-	name: string;
-	type: 'variable' | 'function' | 'class';
-	typeText: string;
-};
-
 export interface Script extends Item {
 	scriptCallableName: string;
-	returnVariable: VariableFromCode | null;
 	content: string;
 }
 

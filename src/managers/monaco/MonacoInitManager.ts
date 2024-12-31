@@ -2,6 +2,7 @@ import { Script } from '@/types/data/workspace';
 import { Monaco } from '@monaco-editor/react';
 import { editor } from 'monaco-editor';
 import { internalTypesRaw } from './internalTypes';
+import { getScriptsAsCode } from '../scripts/scripts';
 
 // this is hacky but how it has to be done because of
 // https://github.com/microsoft/monaco-editor/issues/2696
@@ -23,40 +24,15 @@ function updateModelDefinition(monaco: Monaco, injectedCode: string) {
 	monaco.editor.createModel(injectedCode, 'typescript', newUri);
 }
 
-function getSprocketPanType(scripts: Script[]) {
-	const classes = scripts.filter((script) => script.returnVariable?.type === 'class');
-	const type = `
-	${classes.reduce(
-		(runningClassTypeOutput, classType) => `
-		${runningClassTypeOutput}
-	${classType.returnVariable?.typeText}`,
-		'',
-	)}
-	${internalTypesRaw.substring(0, internalTypesRaw.length - 3)}
-		${scripts.reduce(
-			(runningScriptOutput, script) =>
-				`${runningScriptOutput}
-		${script.scriptCallableName}: () => Promise<${
-			script.returnVariable
-				? script.returnVariable.type === 'class'
-					? script.returnVariable.name
-					: script.returnVariable.typeText
-				: 'void'
-		}>;`,
-			'',
-		)}
-	}`;
-	return type;
-}
-
-export function getMonacoInjectedTypeCode(scripts: Script[]) {
-	const ret = `${getSprocketPanType(scripts)}
-	const sp = {} as SprocketInjectedScripts;`;
+export function getMonacoInjectedCode(scripts: Script[]) {
+	const ret = `${internalTypesRaw}
+	const sp = {} as SprocketInjectedScripts;
+	${getScriptsAsCode(scripts)}`;
 	return ret;
 }
 
-export function setMonacoInjectedTypeCode(monaco: Monaco, scripts: Script[] = []) {
-	updateModelDefinition(monaco, getMonacoInjectedTypeCode(scripts));
+export function setMonacoInjectedCode(monaco: Monaco, scripts: Script[] = []) {
+	updateModelDefinition(monaco, getMonacoInjectedCode(scripts));
 }
 
 export const defaultEditorOptions = {
@@ -76,6 +52,7 @@ export function initMonaco(monaco: Monaco) {
 		diagnosticCodesToIgnore: [
 			1375, //'await' expressions are only allowed at the top level of a file when that file is a module
 			1378, //Top-level 'await' expressions are only allowed when the 'module' option is set to 'esnext' or 'system', and the 'target' option is set to 'es2017' or higher
+			1108, //A 'return' statement can only be used within a function body.
 		],
 	});
 	monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
@@ -90,5 +67,5 @@ export function initMonaco(monaco: Monaco) {
 
 	monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 	monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
-	setMonacoInjectedTypeCode(monaco);
+	setMonacoInjectedCode(monaco);
 }

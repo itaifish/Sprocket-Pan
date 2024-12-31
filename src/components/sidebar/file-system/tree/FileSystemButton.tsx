@@ -1,4 +1,4 @@
-import { Box, ListItemButton } from '@mui/joy';
+import { ListItemButton } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { FileSystemDropdown, FileSystemMenuOption } from '../FileSystemDropdown';
 import { useSelector } from 'react-redux';
@@ -20,13 +20,7 @@ export function FileSystemButton({ id, children, tabType, color = 'neutral', men
 	const dispatch = useAppDispatch();
 	return (
 		<HoverDecorator
-			endDecorator={
-				menuOptions == null ? null : (
-					<Box width="10px">
-						<FileSystemDropdown options={menuOptions} />
-					</Box>
-				)
-			}
+			endDecorator={menuOptions == null ? null : <FileSystemDropdown options={menuOptions} />}
 			justifyContent="stretch"
 			alignItems="center"
 		>

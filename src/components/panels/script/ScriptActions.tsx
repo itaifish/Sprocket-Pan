@@ -1,64 +1,26 @@
-import { Button, CircularProgress, FormControl, FormLabel, Input, ListItemDecorator, Stack } from '@mui/joy';
+import { Button, CircularProgress, FormControl, FormLabel, Input, Stack } from '@mui/joy';
 import Code from '@mui/icons-material/Code';
-import AssignmentReturnedIcon from '@mui/icons-material/AssignmentReturned';
-import FunctionsIcon from '@mui/icons-material/Functions';
-import ClassIcon from '@mui/icons-material/Class';
-import InventoryIcon from '@mui/icons-material/Inventory';
 import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Script, VariableFromCode } from '@/types/data/workspace';
-import { getVariablesFromCode } from '@/utils/functions';
-import { useEffect, useState } from 'react';
-import { selectScripts } from '@/state/active/selectors';
-import { useSelector } from 'react-redux';
-import { log } from '@/utils/logging';
-import { SprocketSelect } from '@/components/shared/input/SprocketSelect';
-
-const iconMap: Record<'function' | 'variable' | 'class', JSX.Element> = {
-	function: <FunctionsIcon />,
-	class: <ClassIcon />,
-	variable: <InventoryIcon />,
-};
+import { Script } from '@/types/data/workspace';
 
 interface ScriptActionsProps {
 	script: Script;
 	onChange: (script: Partial<Script>) => void;
 	isRunning: boolean;
-	isDebouncing: boolean;
 	isInterrupting: boolean;
 	run: () => void;
 	interrupt: () => void;
 }
 
-export function ScriptActions({
-	onChange,
-	isRunning,
-	run,
-	isDebouncing,
-	isInterrupting,
-	interrupt,
-	script,
-}: ScriptActionsProps) {
-	const [scriptVariables, setScriptVariables] = useState<VariableFromCode[]>([]);
-	const scripts = useSelector(selectScripts);
-
+export function ScriptActions({ onChange, isRunning, run, isInterrupting, interrupt, script }: ScriptActionsProps) {
 	const scriptCallableNameDebounce = useDebounce({
 		state: script.scriptCallableName,
 		setState: (newName: string) => onChange({ scriptCallableName: newName }),
 	});
 
 	const isValidScriptCallableName = /^[a-zA-Z0-9_]+$/.test(scriptCallableNameDebounce.localDataState);
-
-	useEffect(() => {
-		// since we parse this on unvalidated/unfinished user content as well, we're fine if it fails
-		// we just fallback to using the last valid variables (which means this needs to remain a useEffect)
-		try {
-			setScriptVariables(getVariablesFromCode(script.content, Object.values(scripts)));
-		} catch (e) {
-			log.debug(e);
-		}
-	}, [script.content]);
 
 	return (
 		<Stack direction="row" spacing={2} justifyContent="space-between" alignItems="end">
@@ -78,28 +40,6 @@ export function ScriptActions({
 						color={isValidScriptCallableName ? 'primary' : 'danger'}
 					></Input>
 				</FormControl>
-				<SprocketSelect
-					endDecorator={<AssignmentReturnedIcon />}
-					startDecorator={script.returnVariable == null ? null : iconMap[script.returnVariable.type]}
-					size="md"
-					variant="outlined"
-					label="Script Return Variable"
-					value={script.returnVariable}
-					options={[
-						{ value: null, label: 'No Return' },
-						...scriptVariables.map((variable) => ({
-							value: variable,
-							label: (
-								<>
-									<ListItemDecorator>{iconMap[variable.type]}</ListItemDecorator>
-									{variable.name}
-								</>
-							),
-							key: variable.name,
-						})),
-					]}
-					onChange={(returnVariable) => onChange({ returnVariable })}
-				/>
 			</Stack>
 			<FormControl>
 				{isRunning ? (
@@ -118,12 +58,11 @@ export function ScriptActions({
 					<Button
 						sx={{ width: '200px' }}
 						color="success"
-						disabled={isDebouncing}
 						startDecorator={<PlayCircleIcon />}
 						variant="outlined"
 						onClick={run}
 					>
-						{isDebouncing ? 'Loading' : 'Run'}
+						Run
 					</Button>
 				)}
 			</FormControl>

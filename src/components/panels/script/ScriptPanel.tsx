@@ -2,7 +2,6 @@ import { useSelector } from 'react-redux';
 import { Typography } from '@mui/joy';
 import { useState, useRef } from 'react';
 import { Constants } from '@/constants/constants';
-import { useDebounce } from '@/hooks/useDebounce';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
 import { selectScript, selectScripts } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
@@ -18,6 +17,7 @@ import { ScriptRunnerManager } from '@/managers/scripts/ScriptRunnerManager';
 import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { SprocketResizeHandle } from '@/components/shared/SprocketResizeHandle';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function ScriptPanel({ id }: PanelProps) {
 	const interruptTrigger = useRef<null | ((message?: string) => void)>(null);
@@ -34,7 +34,8 @@ export function ScriptPanel({ id }: PanelProps) {
 	function update(values: Partial<Script>) {
 		dispatch(activeActions.updateScript({ ...values, id: script.id }));
 	}
-	const { localDataState, setLocalDataState, isDebouncing } = useDebounce({
+
+	const { localDataState, setLocalDataState } = useDebounce({
 		state: script.content,
 		setState: (newText: string) => update({ content: newText }),
 		debounceMS: Constants.longEditTimeMS,
@@ -44,7 +45,7 @@ export function ScriptPanel({ id }: PanelProps) {
 		try {
 			setIsRunning(true);
 			const interruptible = ScriptRunnerManager.runTypescriptWithFullContext<unknown>({
-				script: { ...script, content: localDataState },
+				script,
 			});
 			interruptTrigger.current = interruptible.interrupt;
 			await sleep(Constants.minimumScriptRunTimeMS);
@@ -87,7 +88,6 @@ export function ScriptPanel({ id }: PanelProps) {
 								script={script}
 								onChange={update}
 								isRunning={isRunning}
-								isDebouncing={isDebouncing}
 								isInterrupting={isInterrupting}
 								run={run}
 								interrupt={interrupt}

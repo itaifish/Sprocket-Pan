@@ -1,4 +1,3 @@
-import { StateAccess } from '@/state/types';
 import { HttpOptions, OptionalScriptContext, SprocketInjectedScripts } from './types';
 import { Token } from '@/types/shared/misc';
 import { checkInterrupt } from '@/utils/functions';
@@ -11,28 +10,20 @@ import { http } from '@tauri-apps/api';
 import { makeRequest } from '@/state/active/thunks/requests';
 import { getEnvValuesFromData } from '@/utils/application';
 import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
-import { getRunnableScripts } from './scripts';
 import { sleep } from '@/utils/misc';
 import { log } from '@/utils/logging';
+import { StateAccessManager } from '../data/StateAccessManager';
 
 export class SprocketScriptContext implements SprocketInjectedScripts {
 	private token: Token<boolean> = { current: false };
 	private dispatch;
 	private getState;
-	usr: SprocketInjectedScripts['usr'] = {};
 	context;
 
-	constructor(
-		stateAccess: StateAccess,
-		userScripts: ReturnType<typeof getRunnableScripts>,
-		context: OptionalScriptContext = {},
-	) {
+	constructor(context: OptionalScriptContext = {}) {
 		this.context = context;
-		this.dispatch = checkInterrupt(stateAccess.dispatch, this.token);
-		this.getState = checkInterrupt(stateAccess.getState, this.token);
-		for (const key in userScripts) {
-			this.usr[key] = checkInterrupt(() => userScripts[key](this), this.token);
-		}
+		this.dispatch = checkInterrupt(StateAccessManager.dispatch, this.token);
+		this.getState = checkInterrupt(StateAccessManager.getState, this.token);
 	}
 
 	interrupt = (comment: string = 'none') => {
@@ -41,9 +32,7 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 		this.token.current = true;
 	};
 
-	sleep = (timeout: number) => {
-		return sleep(timeout);
-	};
+	sleep = sleep;
 
 	getWorkspace = () => {
 		return this.getState().active;

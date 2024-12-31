@@ -27,13 +27,18 @@ export function rawBodyTypeToMime(rawType: RawBodyType | undefined) {
 }
 
 export function errorToSprocketError(err: unknown, context?: OptionalScriptContext) {
-	const sprocketErr: SprocketError = {};
+	const sprocketErr: SprocketError = { context: [] };
+	const castErr = err as SprocketError;
 	if (context != null) {
-		sprocketErr.context = { requestId: context.requestId, type: context.type, name: context.name };
+		sprocketErr.context!.push({ requestId: context.requestId, type: context.type, name: context.name });
 	}
 	if (err instanceof Error) {
 		sprocketErr.message = err.message;
 		sprocketErr.stack = err.stack;
+	} else if (castErr.context != null) {
+		sprocketErr.message = castErr.message;
+		sprocketErr.stack = castErr.stack;
+		sprocketErr.context = [...sprocketErr.context!, ...castErr.context];
 	} else {
 		sprocketErr.err = err;
 	}

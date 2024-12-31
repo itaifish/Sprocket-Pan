@@ -1,4 +1,4 @@
-import { initMonaco, setMonacoInjectedTypeCode } from '@/managers/monaco/MonacoInitManager';
+import { initMonaco, setMonacoInjectedCode } from '@/managers/monaco/MonacoInitManager';
 import { selectScripts } from '@/state/active/selectors';
 import { useMonaco } from '@monaco-editor/react';
 import { useEffect } from 'react';
@@ -16,7 +16,7 @@ export function MonacoListener() {
 
 	useEffect(() => {
 		if (monaco) {
-			setMonacoInjectedTypeCode(monaco, Object.values(scripts));
+			setMonacoInjectedCode(monaco, Object.values(scripts));
 		}
 	}, [monaco, scripts]);
 
