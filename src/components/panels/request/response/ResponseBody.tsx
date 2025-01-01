@@ -51,7 +51,7 @@ export function ResponseBody({ response, error }: ResponseBodyProps) {
 				<AccordionDetails>
 					<SprocketEditor
 						value={JSON.stringify(error)}
-						height="40vh"
+						height="45vh"
 						language="json"
 						options={{ readOnly: true, domReadOnly: true }}
 						formatOnChange
