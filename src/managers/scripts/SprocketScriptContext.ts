@@ -7,12 +7,12 @@ import { activeActions, Update } from '@/state/active/slice';
 import { KeyValuePair, KeyValueValues } from '@/types/shared/keyValues';
 import { Body } from '@tauri-apps/api/http';
 import { http } from '@tauri-apps/api';
-import { makeRequest } from '@/state/active/thunks/requests';
-import { getEnvValuesFromData } from '@/utils/application';
+import { getEnvValuesFromData, getSettingsFromState } from '@/utils/application';
 import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { sleep } from '@/utils/misc';
 import { log } from '@/utils/logging';
 import { StateAccessManager } from '../data/StateAccessManager';
+import { networkRequestManager } from '../NetworkRequestManager';
 
 export class SprocketScriptContext implements SprocketInjectedScripts {
 	private token: Token<boolean> = { current: false };
@@ -157,13 +157,18 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 	};
 
 	sendRequest = async (requestId: string) => {
-		const request = this.getRequestById(requestId);
-		// TODO: fix typing here
-		await (
-			this.dispatch(makeRequest({ requestId: request.id, auditLog: this.context.auditLog }) as any) as any
-		).unwrap();
+		const res = await networkRequestManager.makeRequestWithScripts(requestId);
+		const settings = getSettingsFromState(this.getState());
+		this.dispatch(
+			activeActions.addResponseToHistory({
+				requestId,
+				...res,
+				maxLength: settings.history.maxLength,
+				discard: !settings.history.enabled,
+			}),
+		);
 		const history = this.getHistoryById(requestId);
-		return history[history.length - 1]?.response;
+		return history[history.length - 1].response;
 	};
 
 	deleteHeader = (key: string) => {

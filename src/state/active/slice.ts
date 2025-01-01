@@ -1,12 +1,9 @@
 import { defaultWorkspaceData } from '@/managers/data/WorkspaceDataManager';
-import { AuditLog } from '@/types/data/audit';
 import { IdSpecificUiMetadata } from '@/types/data/shared';
 import {
 	Endpoint,
 	EndpointRequest,
-	EndpointResponse,
 	HistoricalEndpointResponse,
-	NetworkFetchRequest,
 	RootEnvironment,
 	Script,
 	Service,
@@ -32,13 +29,10 @@ const initialState: ActiveWorkspaceSlice = {
 	lastSaved: 0,
 };
 
-interface AddResponseToHistory {
+interface AddResponseToHistory extends HistoricalEndpointResponse {
 	requestId: string;
-	networkRequest: NetworkFetchRequest;
-	response: EndpointResponse;
-	auditLog?: AuditLog;
 	maxLength: number;
-	discard: boolean;
+	discard?: boolean;
 }
 
 interface DeleteResponseFromHistory {
@@ -221,16 +215,12 @@ export const activeSlice = createSlice({
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, networkRequest, response, auditLog, maxLength, discard } = action.payload;
-			if (state.history[requestId] == null) state.history[requestId] = [];
-			const newEntry: HistoricalEndpointResponse = {
-				request: networkRequest,
-				response,
-				auditLog,
-			};
+			const { requestId, maxLength, ...entry } = action.payload;
+			// eliminate any errors in history (we only want the latest error) also instantiate empty histories
+			state.history[requestId] = (state.history[requestId] ?? []).filter((entry) => entry.error != null);
 			// don't pollute the data with a bunch of discard: falses
-			if (discard) newEntry.discard = true;
-			state.history[requestId].push(newEntry);
+			if (!entry.discard) delete entry.discard;
+			state.history[requestId].push(entry);
 			if (maxLength > 0 && state.history[requestId].length > maxLength) {
 				state.history[requestId].shift();
 			}

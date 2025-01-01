@@ -1,4 +1,5 @@
 import { KeyValuePair } from '../shared/keyValues';
+import { SprocketError } from '../state/state';
 import { RecursivePartial } from '../utils/utils';
 import { AuditLog } from './audit';
 import { Settings } from './settings';
@@ -73,10 +74,11 @@ export interface NetworkFetchRequest {
 }
 
 export interface HistoricalEndpointResponse {
-	request: NetworkFetchRequest;
-	response: EndpointResponse;
+	request?: NetworkFetchRequest;
+	response?: EndpointResponse;
 	auditLog?: AuditLog;
 	discard?: boolean;
+	error?: SprocketError;
 }
 
 export interface Endpoint<TUrlBase extends string = string> extends Item {

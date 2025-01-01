@@ -1,39 +1,9 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName } from '../slice';
-import { networkRequestManager } from '@/managers/NetworkRequestManager';
 import { RootState } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
-import { AuditLog } from '@/types/data/audit';
 import { EndpointRequest } from '@/types/data/workspace';
 import { createNewRequestObject } from './util';
-import { getSettingsFromState } from '@/utils/application';
-
-export const makeRequest = createAsyncThunk<void, { requestId: string; auditLog?: AuditLog }, { state: RootState }>(
-	`${activeThunkName}/makeRequest`,
-	async ({ requestId, auditLog = [] }, thunk) => {
-		const stateAccess = { getState: () => thunk.getState(), dispatch: thunk.dispatch as any };
-		const localAuditLog: AuditLog = [];
-		await networkRequestManager.runScripts(requestId, stateAccess, localAuditLog);
-		const { networkRequest, response } = await networkRequestManager.sendRequest(
-			requestId,
-			thunk.getState(),
-			localAuditLog,
-		);
-		await networkRequestManager.runScripts(requestId, stateAccess, localAuditLog, response);
-		auditLog.push(...localAuditLog);
-		const settings = getSettingsFromState(thunk.getState());
-		thunk.dispatch(
-			activeActions.addResponseToHistory({
-				requestId: requestId,
-				response,
-				networkRequest,
-				auditLog: localAuditLog,
-				maxLength: settings.history.maxLength,
-				discard: settings.history.enabled,
-			}),
-		);
-	},
-);
 
 interface AddNewRequest {
 	data?: Partial<Omit<EndpointRequest, 'id' | 'endpointId'>>;

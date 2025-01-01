@@ -2,8 +2,7 @@ import { Typography, Card, Divider, Stack, IconButton } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RequestEditTabs } from './RequestEditTabs';
-import { RequestActions, ResponseState } from './RequestActions';
-import { defaultResponse } from './constants';
+import { RequestActions } from './RequestActions';
 import { ResponsePanel } from './response/ResponsePanel';
 import EditIcon from '@mui/icons-material/Edit';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
@@ -20,8 +19,6 @@ import { SyncButton } from '@/components/shared/buttons/SyncButton';
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
 
-	const [responseState, setResponseState] = useState<ResponseState>('latest');
-	const [lastError, setLastError] = useState(defaultResponse);
 	const [shouldDissolvingAnimate, setShouldDissolvingAnimate] = useState(false);
 
 	const triggerDissolve = () => setShouldDissolvingAnimate(true);
@@ -60,13 +57,7 @@ export function RequestPanel({ id }: PanelProps) {
 				onChange={(name) => update({ name })}
 				right={<SyncButton id={id} />}
 			/>
-			<RequestActions
-				activateEditButton={triggerDissolve}
-				endpoint={endpoint}
-				request={request}
-				onError={setLastError}
-				onResponse={setResponseState}
-			/>
+			<RequestActions activateEditButton={triggerDissolve} endpoint={endpoint} request={request} />
 			<Stack direction="row" gap={2}>
 				<Card sx={{ width: '1px', flexGrow: 1, height: 'fit-content' }}>
 					<Typography level="h3" sx={{ textAlign: 'center' }}>
@@ -80,12 +71,7 @@ export function RequestPanel({ id }: PanelProps) {
 						Response
 					</Typography>
 					<Divider />
-					<ResponsePanel
-						responseState={responseState}
-						setResponseState={setResponseState}
-						lastError={lastError}
-						request={request}
-					/>
+					<ResponsePanel request={request} />
 				</Card>
 			</Stack>
 		</Stack>

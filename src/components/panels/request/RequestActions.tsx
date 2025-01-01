@@ -2,59 +2,44 @@ import { Button, Stack, CircularProgress, Select, Option, Card } from '@mui/joy'
 import LabelIcon from '@mui/icons-material/Label';
 import { useState } from 'react';
 import SendIcon from '@mui/icons-material/Send';
-import { defaultResponse } from './constants';
 import { useSelector } from 'react-redux';
 import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
 import { verbColors } from '@/constants/style';
-import { selectEnvironmentSnippets } from '@/state/active/selectors';
-import { makeRequest } from '@/state/active/thunks/requests';
-import { useAppDispatch } from '@/state/store';
+import { selectEnvironmentSnippets, selectSettings } from '@/state/active/selectors';
 import { RESTfulRequestVerbs } from '@/types/data/shared';
-import { HistoricalEndpointResponse, Endpoint, EndpointRequest } from '@/types/data/workspace';
-import { SprocketError } from '@/types/state/state';
-import { log } from '@/utils/logging';
-
-function getError(error: SprocketError): HistoricalEndpointResponse {
-	const errorRes = structuredClone(defaultResponse);
-	errorRes.response.statusCode = 400;
-	errorRes.response.body = JSON.stringify({ error });
-	errorRes.response.bodyType = 'JSON';
-	return errorRes;
-}
+import { Endpoint, EndpointRequest } from '@/types/data/workspace';
+import { networkRequestManager } from '@/managers/NetworkRequestManager';
+import { useAppDispatch } from '@/state/store';
+import { activeActions } from '@/state/active/slice';
 
 export type ResponseState = number | 'latest' | 'error';
 
 interface RequestActionsProps {
 	endpoint: Endpoint;
 	request: EndpointRequest;
-	onError: (err: HistoricalEndpointResponse) => void;
-	onResponse: (res: ResponseState) => void;
 	activateEditButton: () => void;
 }
 
-export function RequestActions({ endpoint, request, onError, onResponse, activateEditButton }: RequestActionsProps) {
+export function RequestActions({ endpoint, request, activateEditButton }: RequestActionsProps) {
 	const envSnippets = useSelector((state) => selectEnvironmentSnippets(state, request.id));
-	const dispatch = useAppDispatch();
+	const settings = useSelector(selectSettings);
 	const [isLoading, setLoading] = useState(false);
+	const dispatch = useAppDispatch();
 
 	async function sendRequest() {
 		if (isLoading) {
 			return;
 		}
 		setLoading(true);
-		try {
-			const result = await dispatch(makeRequest({ requestId: request.id })).unwrap();
-			if (result != undefined) {
-				onError(getError(result));
-				onResponse('error');
-			} else {
-				onResponse('latest');
-			}
-		} catch (err) {
-			onError(getError((err as any)?.message ?? 'An unknown error occured'));
-			log.error(err);
-			onResponse('error');
-		}
+		const result = await networkRequestManager.makeRequestWithScripts(request.id);
+		dispatch(
+			activeActions.addResponseToHistory({
+				requestId: request.id,
+				...result,
+				maxLength: settings.history.maxLength,
+				discard: settings.history.enabled,
+			}),
+		);
 		setLoading(false);
 	}
 

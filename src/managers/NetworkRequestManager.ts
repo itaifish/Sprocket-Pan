@@ -3,12 +3,11 @@ import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { CONTENT_TYPE } from '@/constants/request';
-import { StateAccess } from '@/state/types';
 import { AuditLog } from '@/types/data/audit';
 import { RawBodyType, RawBodyTypes } from '@/types/data/shared';
 import { EndpointResponse, EndpointRequest, NetworkFetchRequest, Endpoint, Service } from '@/types/data/workspace';
 import { getEnvValuesFromData, getSettingsFromState, queryParamsToString, toKeyValuePairs } from '@/utils/application';
-import { getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
+import { errorToSprocketError, getRequestBodyCategory, rawBodyTypeToMime } from '@/utils/conversion';
 import { asyncCallWithTimeout } from '@/utils/functions';
 import { log } from '@/utils/logging';
 import { capitalizeWord } from '@/utils/string';
@@ -16,6 +15,7 @@ import { auditLogManager } from './AuditLogManager';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
+import { StateAccessManager } from './data/StateAccessManager';
 
 type ScriptObjs = { service: Service; endpoint: Endpoint; request: EndpointRequest };
 
@@ -44,13 +44,21 @@ class NetworkRequestManager {
 		}));
 	}
 
-	public async runScripts(
-		requestId: string,
-		stateAccess: StateAccess,
-		auditLog: AuditLog = [],
-		response?: EndpointResponse,
-	) {
-		const state = stateAccess.getState();
+	public async makeRequestWithScripts(requestId: string, auditLog: AuditLog = []) {
+		let ret;
+		try {
+			const state = StateAccessManager.getState();
+			await this.runScripts(requestId, auditLog);
+			ret = await this.sendRequest(requestId, state, auditLog);
+			await this.runScripts(requestId, auditLog, ret.response);
+			return { ...ret, auditLog };
+		} catch (err) {
+			return { ...ret, auditLog, error: errorToSprocketError(err) };
+		}
+	}
+
+	public async runScripts(requestId: string, auditLog: AuditLog = [], response?: EndpointResponse) {
+		const state = StateAccessManager.getState();
 		const data = state.active;
 		const request = data.requests[requestId];
 		const endpointId = request.endpointId;
@@ -69,7 +77,9 @@ class NetworkRequestManager {
 					type: script.name,
 					associatedId: script.id,
 				});
-				await interruptible.result;
+				console.log('awaiting now..., the result', interruptible);
+				const res = await interruptible.result;
+				console.log('awaiting successful!', res);
 			}
 		}
 	}
@@ -192,7 +202,7 @@ class NetworkRequestManager {
 			body: responseText,
 			dateTime: new Date().getTime(),
 		};
-		return { response, networkRequest };
+		return { response, request: networkRequest };
 	}
 
 	public runScript(args: Partial<RunTypescriptWithFullContextArgs>) {

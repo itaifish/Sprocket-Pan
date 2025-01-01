@@ -14,7 +14,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 	}
 
 	addToAuditLogFromContext(context: OptionalScriptContext, chronology: RequestEvent['chronology'], error?: string) {
-		if (context.auditLog) {
+		if (context.auditLog != null) {
 			this.addToAuditLog(context.auditLog, chronology, context.type, context.associatedId, error);
 		}
 	}
@@ -33,6 +33,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 			error,
 			associatedId,
 		};
+		console.log({ newRequestEvent });
 		auditLog.push(newRequestEvent);
 		this.emit('update', newRequestEvent);
 	}

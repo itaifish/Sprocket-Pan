@@ -41,7 +41,7 @@ export interface SprocketInjectedScripts {
 	setQueryParam: (key: string, value?: string | string[]) => void;
 	setHeader: (key: string, value: string) => void;
 	deleteHeader: (key: string) => void;
-	sendRequest: (requestId: string) => Promise<EndpointResponse>;
+	sendRequest: (requestId: string) => Promise<EndpointResponse | undefined>;
 	modifyRequest: (
 		requestId: string,
 		modifications: {

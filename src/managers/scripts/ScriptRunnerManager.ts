@@ -24,6 +24,7 @@ export class ScriptRunnerManager {
 			result: result
 				.catch((err) => {
 					const sprocketErr = errorToSprocketError(err, sp.context);
+					console.log({ err, sprocketErr });
 					auditLogManager.addToAuditLogFromContext(sp.context, 'after', JSON.stringify(sprocketErr));
 					log.warn(`Error when calling script ${sp.context.name}: ${sprocketErr.message}`);
 					interrupt('error thrown');

@@ -1,18 +1,18 @@
-import { HistoricalEndpointResponse } from '@/types/data/workspace';
+import { EndpointResponse, NetworkFetchRequest } from '@/types/data/workspace';
 
-export const defaultResponse: HistoricalEndpointResponse = {
+export const defaultResponse: { response: EndpointResponse; request: NetworkFetchRequest } = {
 	response: {
-		statusCode: 200,
-		body: 'View the response here',
+		statusCode: 0,
+		body: 'Empty',
 		bodyType: 'Text',
 		headers: [],
-		dateTime: new Date().getTime(),
+		dateTime: new Date(0).getTime(),
 	},
 	request: {
 		method: 'GET',
 		url: '',
 		headers: {},
 		body: '',
-		dateTime: new Date().getTime(),
+		dateTime: new Date(0).getTime(),
 	},
 };

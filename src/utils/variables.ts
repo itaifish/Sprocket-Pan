@@ -19,15 +19,15 @@ export function isRecord(test: unknown) {
 
 // we don't need any of the fancy anti-looping, support for custom objects, or array merging of libraries atm
 // typescript is hard though
-export function mergeDeep<T>(obj1: T, obj2: RecursivePartial<T>, iteration = 0): T {
+export function mergeDeep<T, J extends RecursivePartial<T>>(obj1: T, obj2: J, iteration = 0): J & T {
 	if (iteration > 50) throw new Error("mergeDeep is a-loopin' (probably)");
-	if (obj1 == null) return obj2 as T;
+	if (obj1 == null) return obj2;
 	const newObj = structuredClone(obj1);
 	for (const key in obj2) {
 		if (isRecord(obj2[key])) {
-			newObj[key] = mergeDeep(obj1[key], obj2[key] as any, iteration++);
+			newObj[key] = mergeDeep(obj1[key], obj2[key], iteration++);
 		} else {
-			newObj[key] = obj2[key] as any;
+			newObj[key] = obj2[key];
 		}
 	}
 	return newObj;

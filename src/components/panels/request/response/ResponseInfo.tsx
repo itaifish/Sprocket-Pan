@@ -8,34 +8,41 @@ import { statusCodes } from '@/constants/statusCodes';
 import { HistoricalEndpointResponse } from '@/types/data/workspace';
 import { toKeyValuePairs } from '@/utils/application';
 import { formatFullDate } from '@/utils/string';
+import { defaultResponse } from '../constants';
+import { mergeDeep } from '@/utils/variables';
+
+function autofillDefaults(entry: HistoricalEndpointResponse) {
+	return mergeDeep(defaultResponse, entry);
+}
 
 interface ResponseInfoProps {
-	response: HistoricalEndpointResponse;
+	data: HistoricalEndpointResponse;
 	requestId: string;
 }
 
-export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
-	const timeDifference = (response.response.dateTime - response.request.dateTime) / 1000;
+export function ResponseInfo({ data, requestId }: ResponseInfoProps) {
+	const { response, request, auditLog, error } = autofillDefaults(data);
+	const timeDifference = (response.dateTime - request.dateTime) / 1000;
 	return (
 		<SprocketTabs
 			tabs={[
 				{
 					title: 'Body',
-					content: <ResponseBody response={response.response} />,
+					content: <ResponseBody response={response} error={error} />,
 				},
 				{
 					title: 'Details',
 					content: (
 						<>
 							<Typography left="p" sx={{ mb: 2 }}>
-								At <u>{formatFullDate(response.response.dateTime)}</u>, {timeDifference} seconds after initializing the
-								request, a{' '}
+								At <u>{formatFullDate(response.dateTime)}</u>, {timeDifference} seconds after initializing the request,
+								a{' '}
 								<u>
-									{response.response.statusCode} ({statusCodes[response.response.statusCode]})
+									{response.statusCode} ({statusCodes[response.statusCode]})
 								</u>{' '}
 								response was received.
 							</Typography>
-							<HeadersDisplayTable headers={response.response.headers} label="response" />
+							<HeadersDisplayTable headers={response.headers} label="response" />
 						</>
 					),
 				},
@@ -44,11 +51,11 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 					content: (
 						<>
 							<Typography left="p" sx={{ mb: 2 }}>
-								At <u>{formatFullDate(new Date(response.request.dateTime))}</u>, a <u>{response.request.method}</u>{' '}
-								request was sent to <UriTypography>{response.request.url}</UriTypography>.
+								At <u>{formatFullDate(request.dateTime)}</u>, a <u>{request.method}</u> request was sent to{' '}
+								<UriTypography>{request.url}</UriTypography>.
 							</Typography>
-							<HeadersDisplayTable headers={response.request.headers} label="request" />
-							{Object.keys(response.request.body).length > 0 && (
+							<HeadersDisplayTable headers={request.headers} label="request" />
+							{Object.keys(request.body).length > 0 && (
 								<>
 									<AccordionGroup>
 										<Accordion defaultExpanded>
@@ -56,11 +63,11 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 											<AccordionDetails>
 												<ResponseBody
 													response={{
-														...response.request,
-														headers: toKeyValuePairs(response.request.headers),
-														bodyType: response.request.bodyType ?? 'JSON',
+														...request,
+														headers: toKeyValuePairs(request.headers),
+														bodyType: request.bodyType ?? 'JSON',
 														statusCode: 0,
-														body: response.request.body,
+														body: request.body,
 													}}
 												/>
 											</AccordionDetails>
@@ -73,11 +80,7 @@ export function ResponseInfo({ response, requestId }: ResponseInfoProps) {
 				},
 				{
 					title: 'Event Log',
-					content: response.auditLog ? (
-						<VisualEventLog auditLog={response.auditLog} requestId={requestId} />
-					) : (
-						'No Events Found'
-					),
+					content: auditLog ? <VisualEventLog auditLog={auditLog} requestId={requestId} /> : 'No Events Found',
 				},
 			]}
 		/>
