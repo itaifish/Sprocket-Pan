@@ -77,9 +77,7 @@ class NetworkRequestManager {
 					type: script.name,
 					associatedId: script.id,
 				});
-				console.log('awaiting now..., the result', interruptible);
-				const res = await interruptible.result;
-				console.log('awaiting successful!', res);
+				await interruptible.result;
 			}
 		}
 	}

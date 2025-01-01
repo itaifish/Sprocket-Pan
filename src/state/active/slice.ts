@@ -32,7 +32,7 @@ const initialState: ActiveWorkspaceSlice = {
 interface AddResponseToHistory extends HistoricalEndpointResponse {
 	requestId: string;
 	maxLength: number;
-	discard?: boolean;
+	discard: boolean;
 }
 
 interface DeleteResponseFromHistory {
@@ -215,11 +215,11 @@ export const activeSlice = createSlice({
 			log.debug(`deleteAllHistory called`);
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, maxLength, ...entry } = action.payload;
+			const { requestId, maxLength, discard, ...entry } = action.payload;
 			// eliminate any errors in history (we only want the latest error) also instantiate empty histories
-			state.history[requestId] = (state.history[requestId] ?? []).filter((entry) => entry.error != null);
+			state.history[requestId] = (state.history[requestId] ?? []).filter((entry) => entry.error == null);
 			// don't pollute the data with a bunch of discard: falses
-			if (!entry.discard) delete entry.discard;
+			if (discard) (entry as HistoricalEndpointResponse).discard = true;
 			state.history[requestId].push(entry);
 			if (maxLength > 0 && state.history[requestId].length > maxLength) {
 				state.history[requestId].shift();

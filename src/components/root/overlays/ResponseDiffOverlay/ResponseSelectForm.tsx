@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux';
 import { SearchableRequestDropdown } from './SearchableRequestDropdown';
 import { FormControl, FormLabel, Stack, Typography } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
-import { ResponseState } from '@/components/panels/request/RequestActions';
-import { responseStateToNumber, HistoryControl } from '@/components/panels/request/response/HistoryControl';
+import { HistoryControl } from '@/components/panels/request/response/HistoryControl';
 import { selectServices, selectEndpoints, selectRequests, selectHistory } from '@/state/active/selectors';
 import { BREAK_ALL_TEXT } from '@/styles/text';
 import { EndpointRequest, Endpoint, Service } from '@/types/data/workspace';
@@ -34,10 +33,8 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 	const selectableEndpoints = selectedService?.endpointIds.map((endpointId) => endpoints[endpointId]) ?? [];
 	const selectableRequests = selectedEndpoint?.requestIds.map((requestId) => requests[requestId]) ?? [];
 
-	const setRequest = (value: string | null, stateIndex: ResponseState = 'latest') => {
+	const setRequest = (value: string | null, index: number = 0) => {
 		const request = value == null ? null : requests[value];
-		const history = value == null ? null : histories[value];
-		const index = responseStateToNumber(stateIndex, history?.length);
 		setSelectedResponse(request);
 		setSelectedHistoryIndex(index);
 		onChange(request == null ? null : { id: request.id, index });
@@ -70,7 +67,7 @@ export function ResponseSelectForm({ onChange, initialValue, collapsed = false, 
 	}, []);
 
 	const selectedHistory = selectedRequest == null ? null : histories[selectedRequest.id];
-	const historyDate = selectedHistory?.[selectedHistoryIndex]?.request.dateTime;
+	const historyDate = selectedHistory?.[selectedHistoryIndex]?.request?.dateTime;
 
 	return (
 		<Stack gap={1} sx={sx}>

@@ -1,20 +1,14 @@
 import { Typography, Divider, Stack } from '@mui/joy';
-import { HistoryControl, responseStateToNumber } from './HistoryControl';
+import { HistoryControl } from './HistoryControl';
 import { ResponseInfo } from './ResponseInfo';
 import { OpenDiffToolButton } from './OpenDiffToolButton';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
-import { EndpointRequest, HistoricalEndpointResponse } from '@/types/data/workspace';
+import { EndpointRequest } from '@/types/data/workspace';
 import { formatFullDate } from '@/utils/string';
 import { useSelector } from 'react-redux';
 import { selectHistoryById } from '@/state/active/selectors';
-import { ResponseState } from '../RequestActions';
-import { useState } from 'react';
-
-function extractResponseStateData(responseState: ResponseState, history: HistoricalEndpointResponse[]) {
-	const responseStateIndex = typeof responseState === 'string' ? Math.max(history.length - 1, 0) : responseState;
-	return responseStateIndex >= history.length ? null : history[responseStateIndex];
-}
+import { useEffect, useState } from 'react';
 
 interface ResponsePanelProps {
 	request: EndpointRequest;
@@ -22,11 +16,15 @@ interface ResponsePanelProps {
 
 export function ResponsePanel({ request }: ResponsePanelProps) {
 	const dispatch = useAppDispatch();
-	const [responseState, setResponseState] = useState<ResponseState>('latest');
 	const history = useSelector((state) => selectHistoryById(state, request.id));
-	const response = extractResponseStateData(responseState, history);
+	const [index, setIndex] = useState(history.length - 1);
+	const data = history[index];
 
-	if (response == null) {
+	useEffect(() => {
+		if (index === history.length - 2) setIndex(history.length - 1);
+	}, [history]);
+
+	if (data == null) {
 		return (
 			<Stack justifyContent="center" alignItems="center" height="100%" width="100%">
 				<Typography level="title-md">No Response Data Available</Typography>
@@ -39,13 +37,13 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 		<>
 			<Stack direction="row" justifyContent="space-between" alignItems="center">
 				<Typography level="title-md" textAlign="center">
-					{response.response == null ? 'No Response Found' : formatFullDate(response.response.dateTime)}
+					{data.response == null ? 'No Response Found' : formatFullDate(data.response.dateTime)}
 				</Typography>
 				<Stack direction="row" spacing={0}>
-					<OpenDiffToolButton historyIndex={responseStateToNumber(responseState, history.length)} id={request.id} />
+					<OpenDiffToolButton historyIndex={index} id={request.id} />
 					<HistoryControl
-						value={responseState}
-						onChange={setResponseState}
+						value={index}
+						onChange={setIndex}
 						historyLength={history.length}
 						onDelete={(index) =>
 							dispatch(activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
@@ -54,7 +52,7 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 				</Stack>
 			</Stack>
 			<Divider />
-			<ResponseInfo response={response} requestId={request.id} />
+			<ResponseInfo data={data} requestId={request.id} />
 		</>
 	);
 }

@@ -12,8 +12,6 @@ import { networkRequestManager } from '@/managers/NetworkRequestManager';
 import { useAppDispatch } from '@/state/store';
 import { activeActions } from '@/state/active/slice';
 
-export type ResponseState = number | 'latest' | 'error';
-
 interface RequestActionsProps {
 	endpoint: Endpoint;
 	request: EndpointRequest;

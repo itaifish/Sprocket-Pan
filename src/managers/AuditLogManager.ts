@@ -33,7 +33,6 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 			error,
 			associatedId,
 		};
-		console.log({ newRequestEvent });
 		auditLog.push(newRequestEvent);
 		this.emit('update', newRequestEvent);
 	}
