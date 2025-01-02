@@ -9,13 +9,7 @@ interface EditableHeaderProps {
 	isValidFunc?: (text: string) => boolean;
 }
 
-export function EditableHeader({
-	onChange,
-	value,
-	left,
-	right,
-	isValidFunc = (text) => text.length >= 1,
-}: EditableHeaderProps) {
+export function EditableHeader({ onChange, value, left, right, isValidFunc }: EditableHeaderProps) {
 	return (
 		<Stack direction="row" alignItems="center" justifyContent="stretch" maxWidth="100%">
 			<Box minWidth="fit-content" width="25%">

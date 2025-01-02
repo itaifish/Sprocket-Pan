@@ -46,14 +46,15 @@ class NetworkRequestManager {
 
 	public async makeRequestWithScripts(requestId: string, auditLog: AuditLog = []) {
 		let ret;
+		const timestamp = new Date().getTime();
 		try {
 			const state = StateAccessManager.getState();
 			await this.runScripts(requestId, auditLog);
 			ret = await this.sendRequest(requestId, state, auditLog);
 			await this.runScripts(requestId, auditLog, ret.response);
-			return { ...ret, auditLog };
+			return { ...ret, timestamp, auditLog };
 		} catch (err) {
-			return { ...ret, auditLog, error: errorToSprocketError(err) };
+			return { ...ret, timestamp, auditLog, error: errorToSprocketError(err) };
 		}
 	}
 

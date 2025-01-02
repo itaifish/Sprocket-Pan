@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { Box, Sheet, TabPanel, Tabs } from '@mui/joy';
+import { TabPanel, Tabs } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { TabRow } from './TabRow';
 import { useAppDispatch } from '@/state/store';
@@ -21,28 +21,21 @@ export function TabHeader() {
 	const listList = useMemo(() => Object.entries(list), [list]);
 
 	return (
-		<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
-			{listList.length !== 0 && (
-				<Tabs
-					aria-label="tabs"
-					size="lg"
-					value={selected}
-					onChange={(_event, newValue) => {
-						const newTabId = newValue as string;
-						dispatch(tabsActions.setSelectedTab(newTabId));
-					}}
-					sx={{ minHeight: '100%' }}
+		<Tabs
+			size="lg"
+			value={selected}
+			onChange={(_, newValue) => dispatch(tabsActions.setSelectedTab(newValue as string))}
+		>
+			<TabRow list={list} />
+			{listList.map(([tabId, tabType], index) => (
+				<TabPanel
+					value={tabId}
+					key={index}
+					sx={{ padding: 0, height: 'calc(100vh - 45px)', overflow: 'auto', ...scrollbarTheme }}
 				>
-					<TabRow list={list} />
-					{listList.map(([tabId, tabType], index) => (
-						<TabPanel value={tabId} key={index}>
-							<Sheet>
-								<TabContent id={tabId} type={tabType} />
-							</Sheet>
-						</TabPanel>
-					))}
-				</Tabs>
-			)}
-		</Box>
+					<TabContent id={tabId} type={tabType} />
+				</TabPanel>
+			))}
+		</Tabs>
 	);
 }

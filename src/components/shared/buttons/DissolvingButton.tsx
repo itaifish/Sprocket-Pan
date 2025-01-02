@@ -6,9 +6,10 @@ import ParticleEffectButton from 'react-particle-effect-button';
 interface DissolvingButtonProps extends PropsWithChildren {
 	shouldAnimate: boolean;
 	clearShouldAnimate: () => void;
+	height: string;
 }
 
-export function DissolvingButton({ children, shouldAnimate, clearShouldAnimate }: DissolvingButtonProps) {
+export function DissolvingButton({ children, shouldAnimate, clearShouldAnimate, height }: DissolvingButtonProps) {
 	const particleColor = useParticleThemeColor();
 	const [hidden, setHidden] = useState(false);
 	const [isAnimating, setIsAnimating] = useState(false);
@@ -20,7 +21,7 @@ export function DissolvingButton({ children, shouldAnimate, clearShouldAnimate }
 	}, [isAnimating, shouldAnimate]);
 
 	return (
-		<Box>
+		<Box height={height}>
 			<ParticleEffectButton
 				hidden={hidden}
 				canvasPadding={50}

@@ -8,15 +8,15 @@ interface HoverDecoratorProps extends PropsWithChildren, StackProps {
 
 export function HoverDecorator({ startDecorator, children, endDecorator, sx, ...props }: HoverDecoratorProps) {
 	return (
-		<Stack direction="row" sx={{ ...sx, ':hover': { '& .on-hover': { display: 'block' } } }} {...props}>
+		<Stack direction="row" sx={{ ...sx, ':hover': { '& .on-hover': { opacity: 1 } } }} {...props}>
 			{startDecorator != null && (
-				<Box className="on-hover" sx={{ opacity: 0 }}>
+				<Box className="on-hover" sx={{ opacity: 0, width: 0 }}>
 					{startDecorator}
 				</Box>
 			)}
 			{children}
 			{endDecorator != null && (
-				<Box className="on-hover" sx={{ display: 'none' }}>
+				<Box className="on-hover" sx={{ opacity: 0, width: 0 }}>
 					{endDecorator}
 				</Box>
 			)}

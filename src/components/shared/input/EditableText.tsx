@@ -9,11 +9,18 @@ import { EllipsisTypography } from '../EllipsisTypography';
 export interface EditableTextProps extends Partial<TypographyProps> {
 	text: string;
 	setText: (text: string) => void;
-	isValidFunc: (text: string) => boolean;
+	isValidFunc?: (text: string) => boolean;
 	narrow?: boolean;
 }
 
-export function EditableText({ text, setText, isValidFunc, sx, narrow = false, ...props }: EditableTextProps) {
+export function EditableText({
+	text,
+	setText,
+	isValidFunc = (text) => text.length >= 1,
+	sx,
+	narrow = false,
+	...props
+}: EditableTextProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [typingText, setTypingText] = useState(text);
 

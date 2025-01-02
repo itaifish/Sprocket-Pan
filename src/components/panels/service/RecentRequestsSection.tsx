@@ -30,8 +30,8 @@ export function RecentRequestsSection({ service }: RecentRequestsSectionProps) {
 					if (history2.length == 0) {
 						return -1;
 					}
-					const req1MostRecent = history1[history1.length - 1].request.dateTime;
-					const req2MostRecent = history2[history2.length - 1].request.dateTime;
+					const req1MostRecent = history1[history1.length - 1].timestamp;
+					const req2MostRecent = history2[history2.length - 1].timestamp;
 					const difference = req2MostRecent - req1MostRecent;
 					if (difference != 0) {
 						return difference;

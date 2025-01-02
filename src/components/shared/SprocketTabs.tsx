@@ -1,6 +1,6 @@
 import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 import { useSingleAxisScroll } from '@/hooks/useSingleAxisScroll';
-import { Tab, TabList, TabPanel, Tabs } from '@mui/joy';
+import { Tab, TabList, TabPanel, Tabs, useTheme } from '@mui/joy';
 import { SxProps } from '@mui/joy/styles/types';
 import { useState } from 'react';
 
@@ -17,6 +17,7 @@ interface SprocketTabsProps {
 export function SprocketTabs({ tabs, sx }: SprocketTabsProps) {
 	const [tab, setTab] = useState(0);
 	const { minimal: scrollbarTheme } = useScrollbarTheme();
+	const theme = useTheme();
 	const ref = useSingleAxisScroll();
 	return (
 		<Tabs
@@ -30,6 +31,7 @@ export function SprocketTabs({ tabs, sx }: SprocketTabsProps) {
 				ref={ref}
 				color="primary"
 				sx={{
+					borderTop: '1px solid ' + theme.palette.background.level1,
 					overflowX: 'auto',
 					overflowY: 'hidden',
 					maxWidth: '100%',

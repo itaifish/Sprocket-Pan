@@ -79,6 +79,7 @@ export interface HistoricalEndpointResponse {
 	auditLog?: AuditLog;
 	discard?: boolean;
 	error?: SprocketError;
+	timestamp: number;
 }
 
 export interface Endpoint<TUrlBase extends string = string> extends Item {

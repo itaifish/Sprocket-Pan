@@ -1,4 +1,4 @@
-import { Typography, Divider, Stack } from '@mui/joy';
+import { Typography, Stack } from '@mui/joy';
 import { HistoryControl } from './HistoryControl';
 import { ResponseInfo } from './ResponseInfo';
 import { OpenDiffToolButton } from './OpenDiffToolButton';
@@ -26,7 +26,7 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 
 	if (data == null) {
 		return (
-			<Stack justifyContent="center" alignItems="center" height="100%" width="100%">
+			<Stack justifyContent="center" alignItems="center" pt={8} height="100%" width="100%">
 				<Typography level="title-md">No Response Data Available</Typography>
 				<Typography>Make a request to see the response here!</Typography>
 			</Stack>
@@ -37,7 +37,7 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 		<>
 			<Stack direction="row" justifyContent="space-between" alignItems="center">
 				<Typography level="title-md" textAlign="center">
-					{data.response == null ? 'No Response Found' : formatFullDate(data.response.dateTime)}
+					{data.response?.dateTime == null ? 'N/A' : formatFullDate(data.response.dateTime)}
 				</Typography>
 				<Stack direction="row" spacing={0}>
 					<OpenDiffToolButton historyIndex={index} id={request.id} />
@@ -51,7 +51,6 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 					/>
 				</Stack>
 			</Stack>
-			<Divider />
 			<ResponseInfo data={data} requestId={request.id} />
 		</>
 	);

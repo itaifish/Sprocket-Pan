@@ -1,28 +1,26 @@
-import { Typography, Card, Divider, Stack, IconButton } from '@mui/joy';
+import { Stack, CircularProgress, Button, Box } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RequestEditTabs } from './RequestEditTabs';
-import { RequestActions } from './RequestActions';
 import { ResponsePanel } from './response/ResponsePanel';
-import EditIcon from '@mui/icons-material/Edit';
-import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { DissolvingButton } from '@/components/shared/buttons/DissolvingButton';
-import { selectFullRequestInfoById } from '@/state/active/selectors';
+import { selectFullRequestInfoById, selectSettings } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
 import { EndpointRequest } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
-import { EditableHeader } from '../shared/EditableHeader';
-import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { networkRequestManager } from '@/managers/NetworkRequestManager';
+import { Send } from '@mui/icons-material';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Panel, PanelGroup } from 'react-resizable-panels';
+import { SprocketResizeHandle } from '@/components/shared/SprocketResizeHandle';
+import { TrapezoidalHeader } from '@/components/shared/flair/TrapezoidalHeader';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
-
-	const [shouldDissolvingAnimate, setShouldDissolvingAnimate] = useState(false);
-
-	const triggerDissolve = () => setShouldDissolvingAnimate(true);
-	const endDissolve = () => setShouldDissolvingAnimate(false);
+	const settings = useSelector(selectSettings);
+	const [isLoading, setLoading] = useState(false);
+	const { guttered: scrollbarTheme } = useScrollbarTheme();
 
 	const dispatch = useAppDispatch();
 
@@ -30,50 +28,57 @@ export function RequestPanel({ id }: PanelProps) {
 		return <>Request data not found</>;
 	}
 
+	async function sendRequest() {
+		if (isLoading) {
+			return;
+		}
+		setLoading(true);
+		const result = await networkRequestManager.makeRequestWithScripts(request.id);
+		dispatch(
+			activeActions.addResponseToHistory({
+				requestId: request.id,
+				...result,
+				maxLength: settings.history.maxLength,
+				discard: settings.history.enabled,
+			}),
+		);
+		setLoading(false);
+	}
+
 	function update(values: Partial<EndpointRequest>) {
 		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 
 	return (
-		<Stack gap={2}>
-			<EditableHeader
-				left={
-					<DissolvingButton shouldAnimate={shouldDissolvingAnimate} clearShouldAnimate={endDissolve}>
-						<SprocketTooltip text="Edit Parent Endpoint">
-							<IconButton
-								variant="outlined"
-								color="primary"
-								onClick={() => {
-									dispatch(tabsActions.addTabs({ [request.endpointId]: 'endpoint' }));
-									dispatch(tabsActions.setSelectedTab(request.endpointId));
-								}}
+		<PanelGroup direction="horizontal" style={{ height: '100%' }}>
+			<Panel defaultSize={50} minSize={33}>
+				<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
+					<TrapezoidalHeader>Request</TrapezoidalHeader>
+					<Stack gap={1} p={2}>
+						<Stack direction="row" justifyContent="space-between">
+							<EditableText level="title-lg" text={request.name} setText={(name) => update({ name })} />
+							<Button
+								color={isLoading ? 'warning' : 'primary'}
+								startDecorator={isLoading ? <CircularProgress /> : <Send />}
+								onClick={sendRequest}
+								sx={{ minWidth: 150 }}
 							>
-								<EditIcon />
-							</IconButton>
-						</SprocketTooltip>
-					</DissolvingButton>
-				}
-				value={request.name}
-				onChange={(name) => update({ name })}
-				right={<SyncButton id={id} />}
-			/>
-			<RequestActions activateEditButton={triggerDissolve} endpoint={endpoint} request={request} />
-			<Stack direction="row" gap={2}>
-				<Card sx={{ width: '1px', flexGrow: 1, height: 'fit-content' }}>
-					<Typography level="h3" sx={{ textAlign: 'center' }}>
-						Request
-					</Typography>
-					<Divider />
-					<RequestEditTabs request={request} />
-				</Card>
-				<Card sx={{ width: '1px', flexGrow: 1, height: 'fit-content' }}>
-					<Typography level="h3" sx={{ textAlign: 'center' }}>
-						Response
-					</Typography>
-					<Divider />
-					<ResponsePanel request={request} />
-				</Card>
-			</Stack>
-		</Stack>
+								Send{isLoading ? 'ing' : ''}
+							</Button>
+						</Stack>
+						<RequestEditTabs request={request} />
+					</Stack>
+				</Box>
+			</Panel>
+			<SprocketResizeHandle sx={{ my: 7 }} />
+			<Panel defaultSize={50} minSize={33}>
+				<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
+					<TrapezoidalHeader reverse>Response</TrapezoidalHeader>
+					<Stack gap={1} p={2}>
+						<ResponsePanel request={request} />
+					</Stack>
+				</Box>
+			</Panel>
+		</PanelGroup>
 	);
 }

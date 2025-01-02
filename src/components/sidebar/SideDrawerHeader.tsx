@@ -1,5 +1,6 @@
-import { Box, Card, Sheet, Typography, useTheme } from '@mui/joy';
+import { Box, Card, useTheme } from '@mui/joy';
 import { FileSystemDropdown, FileSystemMenuOption } from './file-system/FileSystemDropdown';
+import { TrapezoidalHeader } from '../shared/flair/TrapezoidalHeader';
 
 export interface SideDrawerHeaderProps {
 	content: string | React.ReactNode;
@@ -20,19 +21,9 @@ export function SideDrawerHeader({ content, actions, menuOptions }: SideDrawerHe
 					mb: 1,
 				}}
 			>
-				<Sheet
-					color="primary"
-					variant="soft"
-					sx={{
-						maxWidth: '225px',
-						p: 1,
-						// 110% and 33px to allow the box shadow to show while still preserving the angle
-						clipPath: 'polygon(0 0, 100% 0, calc(100% - 33px) 110%, 0 110%)',
-						boxShadow: '0px 5px 20px 0px ' + theme.palette.background.surface,
-					}}
-				>
-					<Typography ml={2}>{content}</Typography>
-				</Sheet>
+				<TrapezoidalHeader sx={{ boxShadow: '0px 5px 20px 0px ' + theme.palette.background.surface }}>
+					{content}
+				</TrapezoidalHeader>
 				{menuOptions != null && (
 					<Box position="absolute" top="5px" right="2px">
 						<FileSystemDropdown options={menuOptions} />

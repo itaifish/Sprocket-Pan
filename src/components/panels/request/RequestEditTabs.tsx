@@ -1,7 +1,7 @@
 import { AccordionGroup } from '@mui/joy';
 import { RequestBody } from './RequestBody';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
-import { RequestInfoSection } from './RequestInfoSection';
+import { RequestInfoSection, RequestInfoSectionProps } from './RequestInfoSection';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { useComputedRequestEnvironment } from '@/hooks/useComputedEnvironment';
 import { activeActions } from '@/state/active/slice';
@@ -9,7 +9,7 @@ import { useAppDispatch } from '@/state/store';
 import { EndpointRequest } from '@/types/data/workspace';
 import { EditableData } from '@/components/shared/input/monaco/EditableData';
 
-export function RequestEditTabs({ request }: { request: EndpointRequest }) {
+export function RequestEditTabs({ request }: RequestInfoSectionProps) {
 	const envPairs = useComputedRequestEnvironment(request.id).toArray();
 	const dispatch = useAppDispatch();
 	function update(values: Partial<EndpointRequest>) {
@@ -19,6 +19,10 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 	return (
 		<SprocketTabs
 			tabs={[
+				{
+					title: 'Info',
+					content: <RequestInfoSection request={request} />,
+				},
 				{ title: 'Body', content: <RequestBody request={request} /> },
 				{
 					title: 'Headers',
@@ -61,10 +65,6 @@ export function RequestEditTabs({ request }: { request: EndpointRequest }) {
 							envPairs={envPairs}
 						/>
 					),
-				},
-				{
-					title: 'Info',
-					content: <RequestInfoSection request={request} />,
 				},
 			]}
 		/>

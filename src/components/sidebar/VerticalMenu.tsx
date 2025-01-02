@@ -7,6 +7,7 @@ import { SidebarTabButton, SidebarTabButtonProps } from './buttons/SidebarTabBut
 import { FluentCode } from '@/assets/icons/fluent/FluentCode';
 import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
 import { SettingsPanel } from '../settings/SettingsPanel';
+import { TrapezoidalSheet } from '../shared/flair/TrapezoidalSheet';
 
 type VerticalMenuProps = Pick<SidebarTabButtonProps, 'tab' | 'setTab' | 'showActive'>;
 
@@ -17,13 +18,13 @@ export function VerticalMenu(args: VerticalMenuProps) {
 				<Stack alignItems="center" justifyContent="center" width="100%" height="45px">
 					<SaveButton />
 				</Stack>
-				<Sheet
+				<TrapezoidalSheet
 					color="primary"
 					variant="soft"
 					sx={{
-						py: 5,
-						clipPath: 'polygon(0 30px, 100% 0, 100% 100%, 0 calc(100% - 30px))',
+						py: '45px',
 					}}
+					vertical
 				>
 					<SidebarTabButton {...args} value={SidebarTabs.Workspaces}>
 						<Workspaces />
@@ -37,7 +38,7 @@ export function VerticalMenu(args: VerticalMenuProps) {
 					<SidebarTabButton {...args} value={SidebarTabs.Services}>
 						<FluentList />
 					</SidebarTabButton>
-				</Sheet>
+				</TrapezoidalSheet>
 				<Box flex={1} minHeight="100px" />
 				<IconButton>
 					<OpenSettingsButton Content={SettingsPanel} />

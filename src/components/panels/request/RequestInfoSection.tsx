@@ -1,53 +1,125 @@
+import { FluentSelectAllOff } from '@/assets/icons/fluent/FluentSelectAllOff';
+import { FluentSelectAllOn } from '@/assets/icons/fluent/FluentSelectAllOn';
 import { CopyToClipboardButton } from '@/components/shared/buttons/CopyToClipboardButton';
+import { DissolvingButton } from '@/components/shared/buttons/DissolvingButton';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
 import { SprocketTable } from '@/components/shared/SprocketTable';
-import { selectEndpointById } from '@/state/active/selectors';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { verbColors } from '@/constants/style';
+import { selectEndpointById, selectEnvironmentSnippets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
+import { tabsActions } from '@/state/tabs/slice';
+import { RESTfulRequestVerbs } from '@/types/data/shared';
 import { EndpointRequest, Endpoint } from '@/types/data/workspace';
-import { Fingerprint } from '@mui/icons-material';
-import { Stack, Switch, Typography } from '@mui/joy';
+import { Edit, Fingerprint, Label } from '@mui/icons-material';
+import { Option, Card, Select, Stack, Typography, IconButton } from '@mui/joy';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-export function RequestInfoSection({ request }: { request: EndpointRequest }) {
+export interface RequestInfoSectionProps {
+	request: EndpointRequest;
+}
+
+export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 	const dispatch = useAppDispatch();
 	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const envSnippets = useSelector((state) => selectEnvironmentSnippets(state, request.id));
+	const [shouldDissolvingAnimate, setShouldDissolvingAnimate] = useState(false);
+
+	const triggerDissolve = () => setShouldDissolvingAnimate(true);
+	const endDissolve = () => setShouldDissolvingAnimate(false);
+
+	if (endpoint == null) throw new Error('endpoint is null in the requestInfoSection');
+
 	const isDefault = endpoint.defaultRequest === request.id;
 	function updateAssociatedEndpoint(values: Partial<Endpoint>) {
 		dispatch(activeActions.updateEndpoint({ ...values, id: request.endpointId }));
 	}
 
 	return (
-		<SprocketTable
-			columns={[{ key: 'title', style: { width: 200 } }, { key: 'value' }]}
-			data={[
-				{
-					key: 'id',
-					title: 'SprocketPan Request ID',
-					value: (
-						<Stack direction="row" alignItems="center" gap={1}>
-							<CopyToClipboardButton tooltipText="Copy Request ID" copyText={request.id}>
-								<Fingerprint />
-							</CopyToClipboardButton>
-							<Typography>{request.id}</Typography>
-						</Stack>
-					),
-				},
-				{
-					key: 'default',
-					title: 'Default Endpoint Request',
-					value: (
-						<Switch
-							checked={isDefault}
-							onChange={(_event: React.ChangeEvent<HTMLInputElement>) =>
+		<Stack gap={2} sx={{ overflowX: 'hidden' }}>
+			<Stack direction="row" gap={2} width="100%" alignItems="center" justifyContent="space-between">
+				<Select
+					sx={{ minWidth: 150 }}
+					value={endpoint.verb}
+					startDecorator={<Label />}
+					color={verbColors[endpoint.verb]}
+					variant="soft"
+					listboxOpen={false}
+					onListboxOpenChange={triggerDissolve}
+				>
+					{RESTfulRequestVerbs.map((verb, index) => (
+						<Option key={index} value={verb} color={verbColors[verb]}>
+							{verb}
+						</Option>
+					))}
+				</Select>
+				<Stack direction="row" gap={1}>
+					<SprocketTooltip text={isDefault ? 'Unset as Default Request' : 'Set As Default Request'}>
+						<IconButton
+							color={isDefault ? 'primary' : 'neutral'}
+							variant="soft"
+							onClick={() =>
 								updateAssociatedEndpoint({
 									defaultRequest: isDefault ? null : request.id,
 								})
 							}
-							endDecorator="Default"
-						/>
-					),
-				},
-			]}
-		/>
+						>
+							{isDefault ? <FluentSelectAllOn /> : <FluentSelectAllOff />}
+						</IconButton>
+					</SprocketTooltip>
+					<SyncButton placement="bottom" variant="soft" id={request.id} />
+					<DissolvingButton height="30px" shouldAnimate={shouldDissolvingAnimate} clearShouldAnimate={endDissolve}>
+						<SprocketTooltip text="Edit Parent Endpoint">
+							<IconButton
+								variant="outlined"
+								color="primary"
+								onClick={() => {
+									dispatch(tabsActions.addTabs({ [request.endpointId]: 'endpoint' }));
+									dispatch(tabsActions.setSelectedTab(request.endpointId));
+								}}
+							>
+								<Edit />
+							</IconButton>
+						</SprocketTooltip>
+					</DissolvingButton>
+				</Stack>
+			</Stack>
+			<Card
+				variant="outlined"
+				color="primary"
+				onClick={triggerDissolve}
+				sx={{
+					'--Card-padding': '6px',
+					overflowWrap: 'anywhere',
+					wordBreak: 'break-all',
+					flexGrow: 1,
+				}}
+			>
+				<EnvironmentTypography snippets={envSnippets} />
+			</Card>
+			<SprocketTable
+				columns={[{ key: 'title', style: { width: 200 } }, { key: 'value' }]}
+				data={[
+					{
+						key: 'id',
+						title: 'SprocketPan Request ID',
+						value: (
+							<Typography
+								startDecorator={
+									<CopyToClipboardButton tooltipText="Copy Request ID" copyText={request.id}>
+										<Fingerprint />
+									</CopyToClipboardButton>
+								}
+							>
+								{request.id}
+							</Typography>
+						),
+					},
+				]}
+			/>
+		</Stack>
 	);
 }

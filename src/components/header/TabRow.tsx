@@ -26,6 +26,8 @@ export function TabRow({ list }: TabRowProps) {
 				overflowX: 'auto',
 				overflowY: 'hidden',
 				scrollSnapType: 'x mandatory',
+				maxHeight: '45px',
+				boxSizing: 'border-box',
 				[`& .${tabClasses.root}`]: {
 					'&[aria-selected="true"]': {
 						color: `secondary.500`,
