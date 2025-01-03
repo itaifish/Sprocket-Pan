@@ -1,4 +1,4 @@
-import { IconButton, ListDivider, Stack, Typography } from '@mui/joy';
+import { IconButton, Stack, Typography } from '@mui/joy';
 import { ServiceFileSystem } from './ServiceFileSystem';
 import { useSelector } from 'react-redux';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
@@ -7,12 +7,11 @@ import { useAppDispatch } from '@/state/store';
 import { selectFilteredNestedIds } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
 import { SearchField } from '@/components/shared/input/SearchField';
-import { Fragment } from 'react/jsx-runtime';
 import { SideDrawerHeader } from '../../SideDrawerHeader';
-import { menuOptionCollapseAll, menuOptionExpandAll } from '../FileSystemDropdown';
 import { collapseAll, expandAll } from '@/state/ui/thunks';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { AddBox } from '@mui/icons-material';
+import { menuOptionCollapseAll, menuOptionExpandAll } from '../tree/FileSystemDropdown';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -46,10 +45,7 @@ export function ServicesFileSystem() {
 			)}
 			<FileSystemTrunk>
 				{serviceIds.map((serviceId) => (
-					<Fragment key={serviceId}>
-						<ServiceFileSystem serviceId={serviceId} />
-						<ListDivider />
-					</Fragment>
+					<ServiceFileSystem key={serviceId} serviceId={serviceId} />
 				))}
 			</FileSystemTrunk>
 		</>

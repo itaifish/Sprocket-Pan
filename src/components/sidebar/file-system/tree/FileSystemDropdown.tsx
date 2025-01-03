@@ -1,5 +1,5 @@
 import { IconButton, ListItemDecorator, Menu, Dropdown, MenuButton } from '@mui/joy';
-import { MoreVert, UnfoldLess, UnfoldMore } from '@mui/icons-material';
+import { UnfoldLess, UnfoldMore } from '@mui/icons-material';
 import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
@@ -77,7 +77,12 @@ export function FileSystemDropdown({ options }: FileSystemDropdownProps) {
 	return (
 		<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
 			<MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'plain', color: 'neutral' } }}>
-				<MoreVert />
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+					<path
+						fill="currentColor"
+						d="M12 8a2 2 0 1 1 0-4a2 2 0 0 1 0 4m0 6a2 2 0 1 1 0-4a2 2 0 0 1 0 4m-2 4a2 2 0 1 0 4 0a2 2 0 0 0-4 0"
+					/>
+				</svg>
 			</MenuButton>
 			<Menu sx={{ zIndex: 1201 }}>
 				{options.map((option) => (

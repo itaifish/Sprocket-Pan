@@ -1,22 +1,23 @@
-import { ListItemDecorator, ListSubheader } from '@mui/joy';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import { useSelector } from 'react-redux';
-import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
+import { menuOptionDuplicate, menuOptionDelete } from './tree/FileSystemDropdown';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
 import { Add, Close } from '@mui/icons-material';
-import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
 import { selectRequestById, selectEndpointById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { addNewRequestFromId } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
-import { SyncBadge } from './SyncBadge';
+import { EllipsesP } from './components/EllipsesP';
+import { FluentSnippetSvg } from '@/assets/icons/fluent/FluentSnippet';
+import { FluentSnippetLinkSvg } from '@/assets/icons/fluent/FluentSnippetLink';
+import { useShowSync } from '@/hooks/useShowSync';
 
 interface RequestFileSystemProps {
 	requestId: string;
 }
 
 export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
+	const showSync = useShowSync(requestId);
 	const request = useSelector((state) => selectRequestById(state, requestId));
 	const endpoint = useSelector((state) => selectEndpointById(state, request?.endpointId));
 	const dispatch = useAppDispatch();
@@ -28,7 +29,6 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 		<FileSystemLeaf
 			id={requestId}
 			tabType="request"
-			color={isDefault ? 'primary' : 'neutral'}
 			menuOptions={[
 				{
 					Icon: isDefault ? Close : Add,
@@ -42,14 +42,8 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
 			]}
 		>
-			<ListItemDecorator>
-				<SyncBadge id={requestId}>
-					<TextSnippetIcon fontSize="small" />
-				</SyncBadge>
-			</ListItemDecorator>
-			<ListSubheader sx={{ width: '100%' }}>
-				<EllipsisSpan>{request.name}</EllipsisSpan>
-			</ListSubheader>
+			{showSync ? <FluentSnippetLinkSvg /> : <FluentSnippetSvg />}
+			<EllipsesP>{request.name}</EllipsesP>
 		</FileSystemLeaf>
 	);
 }

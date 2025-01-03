@@ -1,17 +1,16 @@
-import { ListSubheader, Chip, ListItemContent } from '@mui/joy';
 import { RequestFileSystem } from './RequestFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useSelector } from 'react-redux';
-import { menuOptionDelete, menuOptionDuplicate } from './FileSystemDropdown';
+import { menuOptionDelete, menuOptionDuplicate } from './tree/FileSystemDropdown';
 import { FileSystemBranch } from './tree/FileSystemBranch';
-import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
-import { verbColors } from '@/constants/style';
 import { selectEndpointById } from '@/state/active/selectors';
 import { addNewEndpointById } from '@/state/active/thunks/endpoints';
 import { addNewRequest } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
 import { selectFilteredNestedIds } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
+import { VerbDiv } from './components/VerbDiv';
+import { EllipsesP } from './components/EllipsesP';
 
 interface EndpointFileSystemProps {
 	endpointId: string;
@@ -40,14 +39,8 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 			folderSize="sm"
 			buttonContent={
 				<>
-					<ListSubheader>
-						<Chip size="sm" variant="outlined" color={verbColors[endpoint.verb]}>
-							{endpoint.verb}
-						</Chip>
-					</ListSubheader>
-					<ListItemContent>
-						<EllipsisTypography fontSize="sm">{endpoint.name}</EllipsisTypography>
-					</ListItemContent>
+					<VerbDiv verb={endpoint.verb} />
+					<EllipsesP>{endpoint.name}</EllipsesP>
 				</>
 			}
 		>

@@ -1,6 +1,6 @@
 import { Box, Card, useTheme } from '@mui/joy';
-import { FileSystemDropdown, FileSystemMenuOption } from './file-system/FileSystemDropdown';
 import { TrapezoidalHeader } from '../shared/flair/TrapezoidalHeader';
+import { FileSystemDropdown, FileSystemMenuOption } from './file-system/tree/FileSystemDropdown';
 
 export interface SideDrawerHeaderProps {
 	content: string | React.ReactNode;

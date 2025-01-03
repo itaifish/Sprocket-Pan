@@ -1,14 +1,6 @@
-import { ListSubheader } from '@mui/joy';
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useSelector } from 'react-redux';
-import {
-	menuOptionDuplicate,
-	menuOptionDelete,
-	menuOptionCollapseAll,
-	menuOptionExpandAll,
-} from '../FileSystemDropdown';
-import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
 import { selectServiceById } from '@/state/active/selectors';
 import { addNewEndpoint } from '@/state/active/thunks/endpoints';
 import { addNewRequest } from '@/state/active/thunks/requests';
@@ -18,6 +10,13 @@ import { selectFilteredNestedIds } from '@/state/tabs/selectors';
 import { tabsActions } from '@/state/tabs/slice';
 import { collapseAll, expandAll } from '@/state/ui/thunks';
 import { FileSystemBranch } from '../tree/FileSystemBranch';
+import {
+	menuOptionDuplicate,
+	menuOptionCollapseAll,
+	menuOptionExpandAll,
+	menuOptionDelete,
+} from '../tree/FileSystemDropdown';
+import { EllipsesP } from '../components/EllipsesP';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
@@ -50,11 +49,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 				menuOptionExpandAll(() => dispatch(expandAll([service.id, ...service.endpointIds]))),
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(service.id))),
 			]}
-			buttonContent={
-				<ListSubheader sx={{ ml: '1px', width: '100%' }}>
-					<EllipsisSpan>{service.name}</EllipsisSpan>
-				</ListSubheader>
-			}
+			buttonContent={<EllipsesP>{service.name}</EllipsesP>}
 		>
 			{endpointIds.map((endpointId) => (
 				<EndpointFileSystem endpointId={endpointId} key={endpointId} />

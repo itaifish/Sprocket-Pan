@@ -5,9 +5,9 @@ import { formatShortFullDate, formatRelativeDate } from '@/utils/string';
 import { EditCalendar } from '@mui/icons-material';
 import { Box, Card, Chip, Stack } from '@mui/joy';
 import { Minidenticon } from '@/components/shared/Minidenticon';
-import { FileSystemDropdown, menuOptionDelete } from '../FileSystemDropdown';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
+import { FileSystemDropdown, menuOptionDelete } from '../tree/FileSystemDropdown';
 
 export interface WorkspaceFileCardProps {
 	workspace: WorkspaceMetadata;

@@ -1,24 +1,45 @@
-import { selectSettings } from '@/state/active/selectors';
-import { List } from '@mui/joy';
+import { Box, useTheme } from '@mui/joy';
 import { PropsWithChildren } from 'react';
-import { useSelector } from 'react-redux';
-import { LIST_STYLES } from '@/styles/list';
 
 export function FileSystemTrunk({ children }: PropsWithChildren) {
-	const style = LIST_STYLES[useSelector(selectSettings).theme.list];
+	const theme = useTheme();
 	return (
-		<List
-			size={style.size}
-			aria-labelledby="nav-list-browse"
+		<Box
+			component="ul"
 			sx={{
-				p: 1,
-				'--ListItem-radius': '8px',
-				'--List-gap': style.gap,
-				'--List-nestedInsetStart': style.inset,
-				'& .JoyListItemButton-root': { p: '8px' },
+				'& button': {
+					':hover': { backgroundColor: 'transparent' },
+					border: 'none',
+					backgroundColor: 'transparent',
+					cursor: 'pointer',
+					color: theme.palette.text.secondary,
+				},
+				'& li': {
+					display: 'flex',
+					width: '100%',
+					justifyContent: 'stretch',
+					alignItems: 'center',
+					listStyle: 'none',
+					m: 0,
+					p: 0,
+					':hover': { backgroundColor: theme.palette.background.level2 },
+					':active': { backgroundColor: theme.palette.background.level3 },
+				},
+				'& .selected': {
+					backgroundColor: theme.palette.background.level1,
+				},
+				'& ul': {
+					ml: 1,
+					pl: 1,
+					transition: 'all 0.1s',
+					borderLeft: '1px solid transparent',
+					':hover': { borderLeft: '1px solid ' + theme.palette.background.level2 },
+				},
+				p: 0,
+				pl: 1,
 			}}
 		>
 			{children}
-		</List>
+		</Box>
 	);
 }
