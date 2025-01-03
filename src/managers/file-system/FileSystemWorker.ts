@@ -16,6 +16,11 @@ export class FileSystemWorker {
 		return writeFile({ contents, path }, { dir: this.DEFAULT_DIRECTORY });
 	}
 
+	/**
+	 *
+	 * @param filesToWrite A list of files to write
+	 * @returns a list of errors when writing files
+	 */
 	public static async writeFiles(filesToWrite: { path: string; contents: string }[]) {
 		const pathRoot = await appLocalDataDir();
 		for (const file of filesToWrite) {

@@ -18,7 +18,7 @@ type InvokeMap = {
 		};
 	};
 	save_files: {
-		returnType: boolean;
+		returnType: { path: string; error: string }[];
 		args: {
 			data: {
 				path: string;
