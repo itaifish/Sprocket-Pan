@@ -6,17 +6,16 @@ import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
 import { SprocketTable } from '@/components/shared/SprocketTable';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { verbColors } from '@/constants/style';
 import { selectEndpointById, selectEnvironmentSnippets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
-import { RESTfulRequestVerbs } from '@/types/data/shared';
 import { EndpointRequest, Endpoint } from '@/types/data/workspace';
-import { Edit, Fingerprint, Label } from '@mui/icons-material';
-import { Option, Card, Select, Stack, Typography, IconButton } from '@mui/joy';
+import { Edit, Fingerprint } from '@mui/icons-material';
+import { Card, Stack, Typography, IconButton } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { VerbSelect } from '../shared/VerbSelect';
 
 export interface RequestInfoSectionProps {
 	request: EndpointRequest;
@@ -41,21 +40,7 @@ export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 	return (
 		<Stack gap={2} sx={{ overflowX: 'hidden' }}>
 			<Stack direction="row" gap={2} width="100%" alignItems="center" justifyContent="space-between">
-				<Select
-					sx={{ minWidth: 150 }}
-					value={endpoint.verb}
-					startDecorator={<Label />}
-					color={verbColors[endpoint.verb]}
-					variant="soft"
-					listboxOpen={false}
-					onListboxOpenChange={triggerDissolve}
-				>
-					{RESTfulRequestVerbs.map((verb, index) => (
-						<Option key={index} value={verb} color={verbColors[verb]}>
-							{verb}
-						</Option>
-					))}
-				</Select>
+				<VerbSelect value={endpoint.verb} open={false} onClick={triggerDissolve} />
 				<Stack direction="row" gap={1}>
 					<SprocketTooltip text={isDefault ? 'Unset as Default Request' : 'Set As Default Request'}>
 						<IconButton

@@ -1,4 +1,4 @@
-import { Box, Card, useTheme } from '@mui/joy';
+import { Box, Card, Sheet, useTheme } from '@mui/joy';
 import { TrapezoidalHeader } from '../shared/flair/TrapezoidalHeader';
 import { FileSystemDropdown, FileSystemMenuOption } from './file-system/tree/FileSystemDropdown';
 
@@ -12,7 +12,7 @@ export function SideDrawerHeader({ content, actions, menuOptions }: SideDrawerHe
 	const theme = useTheme();
 	return (
 		<>
-			<Box
+			<Sheet
 				sx={{
 					position: 'sticky',
 					top: 0,
@@ -25,11 +25,11 @@ export function SideDrawerHeader({ content, actions, menuOptions }: SideDrawerHe
 					{content}
 				</TrapezoidalHeader>
 				{menuOptions != null && (
-					<Box position="absolute" top="5px" right="2px">
+					<Box position="absolute" top="5px" right="1px">
 						<FileSystemDropdown options={menuOptions} />
 					</Box>
 				)}
-			</Box>
+			</Sheet>
 			{actions != null && (
 				<Card sx={{ m: 1, mr: 0, p: 1.5 }} variant="soft">
 					{actions}

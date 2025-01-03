@@ -42,7 +42,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
 			]}
 		>
-			{showSync ? <FluentSnippetLinkSvg /> : <FluentSnippetSvg />}
+			<div style={{ flex: 0 }}>{showSync ? <FluentSnippetLinkSvg /> : <FluentSnippetSvg />}</div>
 			<EllipsesP>{request.name}</EllipsesP>
 		</FileSystemLeaf>
 	);

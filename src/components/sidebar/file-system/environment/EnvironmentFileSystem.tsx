@@ -1,7 +1,5 @@
-import TableChartIcon from '@mui/icons-material/TableChart';
 import { useSelector } from 'react-redux';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import { EllipsisSpan } from '@/components/shared/EllipsisTypography';
 import { selectSelectedEnvironment, selectEnvironmentsById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { addNewEnvironmentById } from '@/state/active/thunks/environments';
@@ -9,7 +7,10 @@ import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
-import { SyncBadge } from '../components/SyncBadge';
+import { useShowSync } from '@/hooks/useShowSync';
+import { FluentCubeLinkSvg } from '@/assets/icons/fluent/FluentCubeLink';
+import { FluentCubeSvg } from '@/assets/icons/fluent/FluentCube';
+import { EllipsesP } from '../components/EllipsesP';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -20,6 +21,7 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 	const envSelected = selectedEnvironment === environmentId;
 	const environment = useSelector((state) => selectEnvironmentsById(state, environmentId));
 	const dispatch = useAppDispatch();
+	const showSync = useShowSync(environmentId);
 	return (
 		<FileSystemLeaf
 			id={environmentId}
@@ -34,10 +36,8 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.id))),
 			]}
 		>
-			<SyncBadge id={environmentId}>
-				<TableChartIcon fontSize="small" />
-			</SyncBadge>
-			<EllipsisSpan>{environment.name}</EllipsisSpan>
+			<div style={{ flex: 0 }}>{showSync ? <FluentCubeLinkSvg /> : <FluentCubeSvg />}</div>
+			<EllipsesP>{environment.name}</EllipsesP>
 		</FileSystemLeaf>
 	);
 }

@@ -1,10 +1,8 @@
-import { Button, Select, Stack, Option, Input } from '@mui/joy';
-import LabelIcon from '@mui/icons-material/Label';
+import { Button, Stack, Input } from '@mui/joy';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useSelector } from 'react-redux';
 import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
 import { Constants } from '@/constants/constants';
-import { verbColors } from '@/constants/style';
 import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
 import { useDebounce } from '@/hooks/useDebounce';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
@@ -12,12 +10,12 @@ import { selectEndpointById, selectServiceById } from '@/state/active/selectors'
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { tabsActions } from '@/state/tabs/slice';
-import { RESTfulRequestVerbs } from '@/types/data/shared';
 import { Endpoint } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
 import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { VerbSelect } from '../shared/VerbSelect';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
@@ -45,24 +43,7 @@ export function EndpointPanel({ id }: PanelProps) {
 		<Stack gap={2}>
 			<EditableHeader value={endpoint.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<Stack direction="row" gap={2}>
-				<Select
-					sx={{ minWidth: 150 }}
-					value={endpoint.verb}
-					startDecorator={<LabelIcon />}
-					color={verbColors[endpoint.verb]}
-					variant="soft"
-					onChange={(_e, newVerb) => {
-						if (newVerb) {
-							update({ verb: newVerb });
-						}
-					}}
-				>
-					{RESTfulRequestVerbs.map((verb, index) => (
-						<Option key={index} value={verb} color={verbColors[verb]}>
-							{verb}
-						</Option>
-					))}
-				</Select>
+				<VerbSelect value={endpoint.verb} onChange={(verb) => update({ verb })} />
 				<Input
 					sx={{ flexGrow: 1 }}
 					startDecorator={

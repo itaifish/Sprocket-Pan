@@ -36,7 +36,6 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 				},
 				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(endpoint.id))),
 			]}
-			folderSize="sm"
 			buttonContent={
 				<>
 					<VerbDiv verb={endpoint.verb} />

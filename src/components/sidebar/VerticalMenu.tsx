@@ -1,5 +1,5 @@
 import { FluentList } from '@/assets/icons/fluent/FluentList';
-import { TableChart, Workspaces } from '@mui/icons-material';
+import { Workspaces } from '@mui/icons-material';
 import { Box, IconButton, Sheet, Stack } from '@mui/joy';
 import { SaveButton } from './buttons/SaveButton';
 import { SidebarTabs } from './types';
@@ -8,6 +8,7 @@ import { FluentCode } from '@/assets/icons/fluent/FluentCode';
 import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
 import { SettingsPanel } from '../settings/SettingsPanel';
 import { TrapezoidalSheet } from '../shared/flair/TrapezoidalSheet';
+import { FluentCube } from '@/assets/icons/fluent/FluentCube';
 
 type VerticalMenuProps = Pick<SidebarTabButtonProps, 'tab' | 'setTab' | 'showActive'>;
 
@@ -30,7 +31,7 @@ export function VerticalMenu(args: VerticalMenuProps) {
 						<Workspaces />
 					</SidebarTabButton>
 					<SidebarTabButton {...args} value={SidebarTabs.Environments}>
-						<TableChart />
+						<FluentCube />
 					</SidebarTabButton>
 					<SidebarTabButton {...args} value={SidebarTabs.Scripts}>
 						<FluentCode />
