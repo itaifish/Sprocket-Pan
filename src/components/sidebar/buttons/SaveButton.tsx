@@ -13,9 +13,8 @@ export function SaveButton() {
 	const isModified = useSelector(selectHasBeenModifiedSinceLastSave);
 	const dispatch = useAppDispatch();
 
-	async function save() {
+	function save() {
 		setLoading(true);
-
 		dispatch(saveActiveData())
 			.unwrap()
 			.then(() => setTimeout(() => setLoading(false), 500));

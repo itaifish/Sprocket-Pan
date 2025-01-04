@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName, UpdateLinkedEnv } from '../slice';
 import { Environment } from '@/types/data/workspace';
 import { RootState } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { cloneEnv } from '@/utils/application';
 
 interface AddNewEnvironment {
@@ -29,7 +29,7 @@ export const addNewEnvironmentById = createAsyncThunk<string, string, { state: R
 export const deleteEnvironmentById = createAsyncThunk<void, string, { state: RootState }>(
 	`${activeThunkName}/deleteEnvironmentById`,
 	async (id, thunk) => {
-		thunk.dispatch(tabsActions.closeTab(id));
+		thunk.dispatch(uiActions.closeTab(id));
 		thunk.dispatch(activeActions.deleteEnvironmentFromState(id));
 	},
 );

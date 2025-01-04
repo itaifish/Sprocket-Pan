@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName } from '../slice';
 import { RootState } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { Endpoint } from '@/types/data/workspace';
 import { addNewRequest } from './requests';
 import { createNewEndpointObject } from './util';
@@ -53,10 +53,10 @@ export const deleteEndpoint = createAsyncThunk<void, string, { state: RootState 
 			throw new Error('attempted to delete endpoint that does not exist');
 		}
 		for (const requestId in endpoint.requestIds) {
-			thunk.dispatch(tabsActions.closeTab(requestId));
+			thunk.dispatch(uiActions.closeTab(requestId));
 			thunk.dispatch(activeActions.deleteRequestFromState(requestId));
 		}
-		thunk.dispatch(tabsActions.closeTab(endpoint.id));
+		thunk.dispatch(uiActions.closeTab(endpoint.id));
 		thunk.dispatch(activeActions.removeEndpointFromService(endpoint.id));
 		thunk.dispatch(activeActions.deleteEndpointFromState(endpoint.id));
 	},

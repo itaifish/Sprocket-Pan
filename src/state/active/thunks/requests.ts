@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeActions, activeThunkName } from '../slice';
 import { RootState } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { EndpointRequest } from '@/types/data/workspace';
 import { createNewRequestObject } from './util';
 
@@ -33,7 +33,7 @@ export const addNewRequestFromId = createAsyncThunk<void, string, { state: RootS
 export const deleteRequest = createAsyncThunk<void, string, { state: RootState }>(
 	`${activeThunkName}/deleteRequest`,
 	async (id, thunk) => {
-		thunk.dispatch(tabsActions.closeTab(id));
+		thunk.dispatch(uiActions.closeTab(id));
 		thunk.dispatch(activeActions.removeRequestFromEndpoint(id));
 		thunk.dispatch(activeActions.deleteRequestFromState(id));
 	},

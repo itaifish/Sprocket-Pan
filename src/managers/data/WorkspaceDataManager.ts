@@ -21,6 +21,7 @@ import swaggerParseManager from '../parsers/SwaggerParseManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { getWorkspaceItemType } from '@/utils/getters';
+import { InvokerFileUpdate } from '../RustInvoker';
 
 export const defaultWorkspaceSyncedData: WorkspaceSyncedData = {
 	services: {},
@@ -100,7 +101,7 @@ export class WorkspaceDataManager {
 
 		const paths = this.getWorkspacePath(fileName);
 		const processedHistory = this.processHistoryForSave(history);
-		const filesToWrite = [
+		const filesToWrite: InvokerFileUpdate[] = [
 			{ path: paths.data, contents: JSON.stringify(strippedData) },
 			{ path: paths.history, contents: JSON.stringify(processedHistory) },
 			{ path: paths.metadata, contents: JSON.stringify({ ...metadata, lastModified: new Date().getTime() }) },
@@ -110,20 +111,10 @@ export class WorkspaceDataManager {
 
 		if (location != null) {
 			const syncContent = JSON.stringify(sync);
-			filesToWrite.push({ path: location, contents: syncContent });
+			filesToWrite.push({ path: location, contents: syncContent, absolute: true });
 			filesToWrite.push({ path: paths.syncBackup, contents: syncContent });
 		}
-		try {
-			const errors = await FileSystemWorker.writeFiles(filesToWrite);
-			if (errors.length > 0) {
-				log.warn(`There were errors saving files: \n${JSON.stringify(errors)}`);
-			} else {
-				log.info('Files saved successfully');
-			}
-		} catch (e) {
-			log.error('There was an error saving files');
-			log.error(e);
-		}
+		await FileSystemWorker.writeFiles(filesToWrite);
 	}
 
 	private static processHistoryForSave(history: WorkspaceData['history']) {

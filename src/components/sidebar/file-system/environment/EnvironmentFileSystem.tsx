@@ -4,7 +4,7 @@ import { selectSelectedEnvironment, selectEnvironmentsById } from '@/state/activ
 import { activeActions } from '@/state/active/slice';
 import { addNewEnvironmentById } from '@/state/active/thunks/environments';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
 import { useShowSync } from '@/hooks/useShowSync';
@@ -33,7 +33,7 @@ export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemPr
 					label: envSelected ? 'Deselect' : 'Select',
 				},
 				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.id))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.id))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(environment.id))),
 			]}
 		>
 			<div style={{ flex: 0 }}>{showSync ? <FluentCubeLinkSvg /> : <FluentCubeSvg />}</div>

@@ -7,9 +7,10 @@ import { ModalsWrapper } from './modals/ModalsWrapper';
 import { ListenerWrapper } from './listeners/ListenerWrapper';
 import { selectZoomLevel, selectDefaultTheme } from '@/state/active/selectors';
 import { selectActiveWorkspace } from '@/state/global/selectors';
-import { invoke } from '@/utils/invoke';
 import { ErrorBoundary } from 'react-error-boundary';
 import { RootErrorFallback } from './RootErrorFallback';
+import { RustInvoker } from '@/managers/RustInvoker';
+import { Toasts } from './Toasts';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -18,11 +19,11 @@ export function Root() {
 	const { setMode } = useColorScheme();
 
 	useEffect(() => {
-		invoke('close_splashscreen', undefined);
+		RustInvoker.close_splashscreen();
 	}, []);
 
 	useEffect(() => {
-		invoke('zoom', { amount: zoomLevel / 100 });
+		RustInvoker.zoom(zoomLevel / 100);
 	}, [zoomLevel]);
 
 	useEffect(() => {
@@ -38,6 +39,7 @@ export function Root() {
 			<Workspace />
 			<ModalsWrapper />
 			<ListenerWrapper />
+			<Toasts />
 		</ErrorBoundary>
 	);
 }

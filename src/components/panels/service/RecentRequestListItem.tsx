@@ -4,7 +4,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { tabTypeIcon } from '@/constants/components';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { EndpointRequest } from '@/types/data/workspace';
 import { formatFullDate } from '@/utils/string';
 import { useSelector } from 'react-redux';
@@ -40,8 +40,8 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 								<IconButton
 									color="primary"
 									onClick={() => {
-										dispatch(tabsActions.addTabs({ [request.id]: 'request' }));
-										dispatch(tabsActions.setSelectedTab(request.id));
+										dispatch(uiActions.addTabs({ [request.id]: 'request' }));
+										dispatch(uiActions.setSelectedTab(request.id));
 									}}
 								>
 									<OpenInNewIcon />

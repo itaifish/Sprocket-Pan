@@ -16,7 +16,7 @@ import { useState } from 'react';
 import { tabTypeIcon } from '@/constants/components';
 import { addNewService } from '@/state/active/thunks/services';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -30,8 +30,8 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 		const createdServiceId = await dispatch(
 			addNewService({ name: serviceName, description: serviceDescription, baseUrl }),
 		).unwrap();
-		dispatch(tabsActions.addTabs({ [createdServiceId]: 'service' }));
-		dispatch(tabsActions.setSelectedTab(createdServiceId));
+		dispatch(uiActions.addTabs({ [createdServiceId]: 'service' }));
+		dispatch(uiActions.setSelectedTab(createdServiceId));
 	};
 
 	return (

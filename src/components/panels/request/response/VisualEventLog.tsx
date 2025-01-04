@@ -34,7 +34,7 @@ import {
 	selectScripts,
 } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { TransformedAuditLog, AuditLog } from '@/types/data/audit';
 import { camelCaseToTitle, formatMilliseconds } from '@/utils/string';
 
@@ -138,8 +138,8 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 												onClick={() => {
 													if (associatedItem != null) {
 														const id = requestEvent.associatedId as string;
-														dispatch(tabsActions.addTabs({ [id]: dataType }));
-														dispatch(tabsActions.setSelectedTab(id));
+														dispatch(uiActions.addTabs({ [id]: dataType }));
+														dispatch(uiActions.setSelectedTab(id));
 													}
 												}}
 											>

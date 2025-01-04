@@ -9,7 +9,7 @@ import { OrphanResolutionSummary } from './OrphanResolutionSummary';
 import { useAppDispatch } from '@/state/store';
 import { activeActions } from '@/state/active/slice';
 import { addNewService } from '@/state/active/thunks/services';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { addNewEndpoint, deleteEndpoint } from '@/state/active/thunks/endpoints';
 import { groupBy } from '@/utils/variables';
 import { deleteRequest } from '@/state/active/thunks/requests';
@@ -119,7 +119,7 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 
 		dispatch(activeActions.setSyncItems({ ids, value: false }));
 
-		dispatch(tabsActions.setOrphans(null));
+		dispatch(uiActions.setOrphans(null));
 	};
 
 	const orphanKinds = [

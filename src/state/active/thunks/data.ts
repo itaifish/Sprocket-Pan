@@ -6,6 +6,8 @@ import { log } from '@/utils/logging';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeThunkName, activeActions } from '../slice';
 import { getAncestors, getDescendents } from '@/utils/getters';
+import { uiActions } from '@/state/ui/slice';
+import { errorToSprocketError } from '@/utils/conversion';
 
 type ParsedWorkspaceData = ParsedServiceWorkspaceData & { environments?: Environment[]; scripts?: Script[] };
 
@@ -33,12 +35,21 @@ export const injectLoadedData = createAsyncThunk<void, ParsedWorkspaceData, { st
 
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	`${activeThunkName}/saveData`,
-	(_, thunk) => {
-		const { active, tabs } = thunk.getState();
+	async (_, thunk) => {
+		const { active, ui } = thunk.getState();
 		const { lastModified, lastSaved, ...data } = active;
-		if (lastModified < lastSaved || tabs.orphans != null) return;
-		thunk.dispatch(activeActions.setSavedNow());
-		return WorkspaceDataManager.saveData(data);
+		if (lastModified < lastSaved || ui.orphans != null) return;
+		try {
+			await WorkspaceDataManager.saveData(data);
+			thunk.dispatch(activeActions.setSavedNow());
+		} catch (err) {
+			thunk.dispatch(
+				uiActions.toast({
+					message: `Failed to save all files! Error: ${errorToSprocketError(err).message}`,
+					color: 'danger',
+				}),
+			);
+		}
 	},
 );
 

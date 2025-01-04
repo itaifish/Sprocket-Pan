@@ -17,7 +17,7 @@ import { InfoOutlined } from '@mui/icons-material';
 import { tabTypeIcon } from '@/constants/components';
 import { createScript } from '@/state/active/thunks/scripts';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { Script } from '@/types/data/workspace';
 import { toValidFunctionName } from '@/utils/string';
 
@@ -29,8 +29,8 @@ export function CreateScriptModal({ open, closeFunc }: CreateModalsProps) {
 		const newScript: Partial<Script> = { name: scriptName, scriptCallableName: scriptCallingName, content: '' };
 
 		const createdScriptId = await dispatch(createScript(newScript)).unwrap();
-		dispatch(tabsActions.addTabs({ [createdScriptId]: 'script' }));
-		dispatch(tabsActions.setSelectedTab(createdScriptId));
+		dispatch(uiActions.addTabs({ [createdScriptId]: 'script' }));
+		dispatch(uiActions.setSelectedTab(createdScriptId));
 	};
 	const scriptCallingNameValid =
 		scriptCallingName.length > 0 && toValidFunctionName(scriptCallingName) === scriptCallingName;

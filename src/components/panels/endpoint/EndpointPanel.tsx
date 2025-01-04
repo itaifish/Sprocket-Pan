@@ -9,7 +9,7 @@ import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolve
 import { selectEndpointById, selectServiceById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { Endpoint } from '@/types/data/workspace';
 import { PanelProps } from '../panels.interface';
 import { EndpointEditTabs } from './EndpointEditTabs';
@@ -62,8 +62,8 @@ export function EndpointPanel({ id }: PanelProps) {
 					disabled={!endpoint.defaultRequest}
 					onClick={() => {
 						if (endpoint.defaultRequest) {
-							dispatch(tabsActions.addTabs({ [endpoint.defaultRequest]: 'request' }));
-							dispatch(tabsActions.setSelectedTab(endpoint.defaultRequest));
+							dispatch(uiActions.addTabs({ [endpoint.defaultRequest]: 'request' }));
+							dispatch(uiActions.setSelectedTab(endpoint.defaultRequest));
 						}
 					}}
 				>

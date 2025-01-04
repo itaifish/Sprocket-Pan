@@ -10,7 +10,7 @@ import { OpenSecretsButton } from '../../buttons/OpenSecretsButton';
 import { SideDrawerHeader } from '../../SideDrawerHeader';
 import { AddBox } from '@mui/icons-material';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { useAppDispatch } from '@/state/store';
 
 export function EnvironmentsFileSystem() {
@@ -33,7 +33,7 @@ export function EnvironmentsFileSystem() {
 						<Stack direction="row">
 							<OpenSecretsButton />
 							<SprocketTooltip text="Add New Environment">
-								<IconButton onClick={() => dispatch(tabsActions.addToCreateQueue('environment'))}>
+								<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('environment'))}>
 									<AddBox />
 								</IconButton>
 							</SprocketTooltip>

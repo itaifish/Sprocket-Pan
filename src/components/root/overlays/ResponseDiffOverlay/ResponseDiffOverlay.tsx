@@ -9,7 +9,7 @@ import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { UriTypography } from '@/components/shared/UriTypography';
 import { VerbChip } from '@/components/shared/VerbChip';
 import { statusCodes } from '@/constants/statusCodes';
-import { DiffQueueEntry } from '@/state/tabs/slice';
+import { DiffQueueEntry } from '@/state/ui/slice';
 import { headersToJson, multilineUrl } from '@/utils/serialization';
 import { useSelector } from 'react-redux';
 import { selectHistoryById } from '@/state/active/selectors';

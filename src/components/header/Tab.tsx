@@ -4,7 +4,7 @@ import { Close } from '@mui/icons-material';
 import { tabTypeIcon } from '@/constants/components';
 import { selectTabInfoById } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { TabType } from '@/types/state/state';
 import { EllipsisTypography } from '../shared/EllipsisTypography';
 
@@ -36,7 +36,7 @@ export function Tab({ tab }: TabProps) {
 					<IconButton
 						color="danger"
 						onClick={(e) => {
-							dispatch(tabsActions.closeTab(tabId));
+							dispatch(uiActions.closeTab(tabId));
 							e.stopPropagation();
 						}}
 						size="sm"

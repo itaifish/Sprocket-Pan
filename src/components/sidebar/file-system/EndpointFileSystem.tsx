@@ -7,8 +7,8 @@ import { selectEndpointById } from '@/state/active/selectors';
 import { addNewEndpointById } from '@/state/active/thunks/endpoints';
 import { addNewRequest } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
-import { selectFilteredNestedIds } from '@/state/tabs/selectors';
-import { tabsActions } from '@/state/tabs/slice';
+import { selectFilteredNestedIds } from '@/state/ui/selectors';
+import { uiActions } from '@/state/ui/slice';
 import { VerbDiv } from './components/VerbDiv';
 import { EllipsesP } from './components/EllipsesP';
 
@@ -34,7 +34,7 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 					label: 'Add Request',
 					Icon: AddBoxIcon,
 				},
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(endpoint.id))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(endpoint.id))),
 			]}
 			buttonContent={
 				<>

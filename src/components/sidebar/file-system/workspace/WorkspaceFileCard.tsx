@@ -6,7 +6,7 @@ import { EditCalendar } from '@mui/icons-material';
 import { Box, Card, Chip, Stack } from '@mui/joy';
 import { Minidenticon } from '@/components/shared/Minidenticon';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { FileSystemDropdown, menuOptionDelete } from '../tree/FileSystemDropdown';
 
 export interface WorkspaceFileCardProps {
@@ -36,7 +36,7 @@ export function WorkspaceFileCard({ workspace }: WorkspaceFileCardProps) {
 	return (
 		<Card variant="soft">
 			<Box position="absolute" top={10} right={5}>
-				<FileSystemDropdown options={[menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(workspace.id)))]} />
+				<FileSystemDropdown options={[menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(workspace.id)))]} />
 			</Box>
 			<WorkspaceFileCardContent workspace={workspace} />
 		</Card>

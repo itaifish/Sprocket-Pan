@@ -18,7 +18,7 @@ import { tabTypeIcon } from '@/constants/components';
 import { selectEnvironments } from '@/state/active/selectors';
 import { addNewEnvironment } from '@/state/active/thunks/environments';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 
 export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const [envName, setEnvName] = useState('');
@@ -28,8 +28,8 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
 	const createEnvironmentFunction = async () => {
 		const createdEnvironmentId = await dispatch(addNewEnvironment({ data: cloneEnv })).unwrap();
-		dispatch(tabsActions.addTabs({ [createdEnvironmentId]: 'environment' }));
-		dispatch(tabsActions.setSelectedTab(createdEnvironmentId));
+		dispatch(uiActions.addTabs({ [createdEnvironmentId]: 'environment' }));
+		dispatch(uiActions.setSelectedTab(createdEnvironmentId));
 	};
 	const envNameValid = envName.length > 0;
 	const allFieldsValid = envNameValid;

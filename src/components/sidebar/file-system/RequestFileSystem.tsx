@@ -6,7 +6,7 @@ import { selectRequestById, selectEndpointById } from '@/state/active/selectors'
 import { activeActions } from '@/state/active/slice';
 import { addNewRequestFromId } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { EllipsesP } from './components/EllipsesP';
 import { FluentSnippetSvg } from '@/assets/icons/fluent/FluentSnippet';
 import { FluentSnippetLinkSvg } from '@/assets/icons/fluent/FluentSnippetLink';
@@ -39,7 +39,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 						),
 				},
 				menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(request.id))),
 			]}
 		>
 			<div style={{ flex: 0 }}>{showSync ? <FluentSnippetLinkSvg /> : <FluentSnippetSvg />}</div>

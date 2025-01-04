@@ -9,7 +9,7 @@ import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { selectEndpointById, selectEnvironmentSnippets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { EndpointRequest, Endpoint } from '@/types/data/workspace';
 import { Edit, Fingerprint } from '@mui/icons-material';
 import { Card, Stack, Typography, IconButton } from '@mui/joy';
@@ -62,8 +62,8 @@ export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 								variant="outlined"
 								color="primary"
 								onClick={() => {
-									dispatch(tabsActions.addTabs({ [request.endpointId]: 'endpoint' }));
-									dispatch(tabsActions.setSelectedTab(request.endpointId));
+									dispatch(uiActions.addTabs({ [request.endpointId]: 'endpoint' }));
+									dispatch(uiActions.setSelectedTab(request.endpointId));
 								}}
 							>
 								<Edit />

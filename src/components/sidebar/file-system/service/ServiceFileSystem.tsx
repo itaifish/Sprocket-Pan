@@ -6,8 +6,8 @@ import { addNewEndpoint } from '@/state/active/thunks/endpoints';
 import { addNewRequest } from '@/state/active/thunks/requests';
 import { cloneServiceFromId } from '@/state/active/thunks/services';
 import { useAppDispatch } from '@/state/store';
-import { selectFilteredNestedIds } from '@/state/tabs/selectors';
-import { tabsActions } from '@/state/tabs/slice';
+import { selectFilteredNestedIds } from '@/state/ui/selectors';
+import { uiActions } from '@/state/ui/slice';
 import { collapseAll, expandAll } from '@/state/ui/thunks';
 import { FileSystemBranch } from '../tree/FileSystemBranch';
 import {
@@ -47,7 +47,7 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 				},
 				menuOptionCollapseAll(() => dispatch(collapseAll(service.endpointIds))),
 				menuOptionExpandAll(() => dispatch(expandAll([service.id, ...service.endpointIds]))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(service.id))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(service.id))),
 			]}
 			buttonContent={<EllipsesP>{service.name}</EllipsesP>}
 		>

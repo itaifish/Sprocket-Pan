@@ -1,5 +1,5 @@
 import { RootState } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { Service } from '@/types/data/workspace';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { activeThunkName, activeActions } from '../slice';
@@ -56,10 +56,10 @@ export const deleteService = createAsyncThunk<void, string, { state: RootState }
 			throw new Error('attempted to delete service that does not exist');
 		}
 		for (const endpointId in service.endpointIds) {
-			thunk.dispatch(tabsActions.closeTab(endpointId));
+			thunk.dispatch(uiActions.closeTab(endpointId));
 			thunk.dispatch(activeActions.deleteEndpointFromState(endpointId));
 		}
-		thunk.dispatch(tabsActions.closeTab(service.id));
+		thunk.dispatch(uiActions.closeTab(service.id));
 		thunk.dispatch(activeActions.deleteServiceFromState(service.id));
 	},
 );

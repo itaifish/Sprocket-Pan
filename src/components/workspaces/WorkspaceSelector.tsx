@@ -9,7 +9,7 @@ import { OpenSettingsButton } from '../shared/buttons/OpenSettingsButton';
 import { CreateNewWorkspaceModal } from './CreateNewWorkspaceModal';
 import { NewWorkspaceCard } from './NewWorkspaceCard';
 import { WorkspaceEntry } from './WorkspaceEntry';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 
 export function WorkspaceSelector() {
 	useFileSystemSynchronization();
@@ -34,7 +34,7 @@ export function WorkspaceSelector() {
 						<WorkspaceEntry
 							key={workspace.fileName}
 							workspace={workspace}
-							onDelete={() => dispatch(tabsActions.addToDeleteQueue(workspace.id))}
+							onDelete={() => dispatch(uiActions.addToDeleteQueue(workspace.id))}
 						/>
 					))}
 					<NewWorkspaceCard onCreate={() => setCreateNewModalOpen(true)} />

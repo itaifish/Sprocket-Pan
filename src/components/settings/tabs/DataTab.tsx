@@ -1,7 +1,6 @@
 import { Button, FormControl, FormLabel, Stack, Typography } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
-import { invoke } from '@tauri-apps/api';
+import { appLogDir } from '@tauri-apps/api/path';
 import TimerIcon from '@mui/icons-material/Timer';
 import { SettingsTabProps } from './types';
 import { SettingsInput, SettingsSwitch } from './SettingsFields';
@@ -11,6 +10,7 @@ import { log } from '@/utils/logging';
 import { toNumberOrUndefined } from '@/utils/math';
 import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
 import { History } from '@mui/icons-material';
+import { RustInvoker } from '@/managers/RustInvoker';
 
 function toMSMinuteOrUndefined(num: unknown) {
 	const ret = toNumberOrUndefined(num);
@@ -95,11 +95,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 					<Button
 						sx={{ width: '250px' }}
 						startDecorator={<FolderOpenIcon />}
-						onClick={async () => {
-							const localDir = await appLocalDataDir();
-							const data = `${localDir}${FileSystemWorker.DATA_FOLDER_NAME}`;
-							invoke('show_in_explorer', { path: data });
-						}}
+						onClick={() => RustInvoker.show_in_explorer({ path: FileSystemWorker.DATA_FOLDER_NAME })}
 						variant="outlined"
 					>
 						Open Data Folder
@@ -109,8 +105,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 						startDecorator={<FolderOpenIcon />}
 						onClick={async () => {
 							const logDir = await appLogDir();
-							const data = `${logDir}${log.LOG_FILE_NAME}`;
-							invoke('show_in_explorer', { path: data });
+							RustInvoker.show_in_explorer({ path: `${logDir}${log.LOG_FILE_NAME}`, absolute: true });
 						}}
 						variant="outlined"
 					>

@@ -9,7 +9,7 @@ import { SearchField } from '@/components/shared/input/SearchField';
 import { SideDrawerHeader } from '../../SideDrawerHeader';
 import { useAppDispatch } from '@/state/store';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { AddBox } from '@mui/icons-material';
 
 export function ScriptsFileSystem() {
@@ -27,7 +27,7 @@ export function ScriptsFileSystem() {
 					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
 						<SearchField onChange={setSearchText} />
 						<SprocketTooltip text="Add New Script">
-							<IconButton onClick={() => dispatch(tabsActions.addToCreateQueue('script'))}>
+							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('script'))}>
 								<AddBox />
 							</IconButton>
 						</SprocketTooltip>

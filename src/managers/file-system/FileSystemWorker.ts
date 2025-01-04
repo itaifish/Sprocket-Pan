@@ -1,7 +1,6 @@
-import { invoke } from '@/utils/invoke';
 import { log } from '@/utils/logging';
-import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir, writeFile } from '@tauri-apps/api/fs';
-import { appLocalDataDir, join } from '@tauri-apps/api/path';
+import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir } from '@tauri-apps/api/fs';
+import { InvokerFileUpdate, RustInvoker } from '../RustInvoker';
 
 export class FileSystemWorker {
 	public static readonly DEFAULT_DIRECTORY = BaseDirectory.AppLocalData;
@@ -12,44 +11,35 @@ export class FileSystemWorker {
 		return exists(path, { dir: this.DEFAULT_DIRECTORY });
 	}
 
-	public static writeFile(path: string, contents: string) {
-		return writeFile({ contents, path }, { dir: this.DEFAULT_DIRECTORY });
+	public static writeFiles(files: InvokerFileUpdate[]) {
+		return RustInvoker.save_files(files);
 	}
 
-	/**
-	 *
-	 * @param filesToWrite A list of files to write
-	 * @returns a list of errors when writing files
-	 */
-	public static async writeFiles(filesToWrite: { path: string; contents: string }[]) {
-		const pathRoot = await appLocalDataDir();
-		for (const file of filesToWrite) {
-			file.path = await join(`${pathRoot}`, file.path);
-		}
-		return invoke('save_files', { data: filesToWrite });
+	public static writeFile(file: InvokerFileUpdate) {
+		return this.writeFiles([file]);
 	}
 
-	public static async upsertFile(path: string, contents: string) {
-		const doesExist = await this.exists(path);
+	public static async upsertFile(file: InvokerFileUpdate) {
+		const doesExist = await this.exists(file.path);
 		if (doesExist) {
-			log.trace(`${path} already exists, no need to create.`);
-			return this.writeFile(path, contents);
+			log.trace(`${file.path} already exists, no need to create.`);
+			return this.writeFile(file);
 		} else {
-			log.debug(`${path} does not exist, creating...`);
-			return this.writeFile(path, contents);
+			log.debug(`${file.path} does not exist, creating...`);
+			return this.writeFile(file);
 		}
 	}
 
 	/**
 	 * @returns true if the file was updated and written to, false if not
 	 */
-	public static async tryUpdateFile(path: string, contents: string) {
-		if (await this.exists(path)) {
-			log.trace(`${path} already exists, updating...`);
-			await this.writeFile(path, contents);
+	public static async tryUpdateFile(file: InvokerFileUpdate) {
+		if (await this.exists(file.path)) {
+			log.trace(`${file.path} already exists, updating...`);
+			await this.writeFile(file);
 			return true;
 		} else {
-			log.warn(`${path} does not exist, returning.`);
+			log.warn(`${file.path} does not exist, returning.`);
 			return false;
 		}
 	}

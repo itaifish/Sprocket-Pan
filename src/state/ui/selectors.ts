@@ -1,15 +1,15 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { tabsSlice } from './slice';
+import { uiSlice } from './slice';
 import { getValidIdsFromSearchTerm } from '@/utils/search';
 import { selectServices, selectEndpoints, selectRequests } from '../active/selectors';
 
-export const selectTabsState = tabsSlice.selectSlice;
+export const selectUiState = uiSlice.selectSlice;
 
-export const selectTabsList = createSelector(selectTabsState, (state) => state.list);
+export const selectUiList = createSelector(selectUiState, (state) => state.list);
 
-export const selectActiveTab = createSelector(selectTabsState, (state) => state.selected);
+export const selectActiveTab = createSelector(selectUiState, (state) => state.selected);
 
-export const selectPeekHistory = createSelector(selectTabsState, ({ historyLocation, history }) => {
+export const selectPeekHistory = createSelector(selectUiState, ({ historyLocation, history }) => {
 	const length = history.length;
 	return {
 		next: historyLocation === length - 1 ? null : historyLocation + 1,
@@ -17,19 +17,19 @@ export const selectPeekHistory = createSelector(selectTabsState, ({ historyLocat
 	};
 });
 
-export const selectNextForDeletion = createSelector(selectTabsState, ({ deleteQueue }) => {
+export const selectNextForDeletion = createSelector(selectUiState, ({ deleteQueue }) => {
 	return deleteQueue[0];
 });
 
-export const selectNextForCreation = createSelector(selectTabsState, ({ createQueue }) => {
+export const selectNextForCreation = createSelector(selectUiState, ({ createQueue }) => {
 	return createQueue[0];
 });
 
-export const selectNextForDiff = createSelector(selectTabsState, ({ diffQueue }) => {
+export const selectNextForDiff = createSelector(selectUiState, ({ diffQueue }) => {
 	return diffQueue[0];
 });
 
-export const selectSearchText = createSelector(selectTabsState, (state) => state.searchText);
+export const selectSearchText = createSelector(selectUiState, (state) => state.searchText);
 
 export const selectFilteredIds = createSelector(
 	[selectSearchText, selectServices, selectEndpoints, selectRequests],
@@ -47,4 +47,6 @@ export const selectIsActiveTab = createSelector(
 	(activeTab, id) => activeTab === id,
 );
 
-export const selectOrphans = createSelector(selectTabsState, (state) => state.orphans);
+export const selectOrphans = createSelector(selectUiState, (state) => state.orphans);
+
+export const selectToast = createSelector(selectUiState, (state) => state.toast);

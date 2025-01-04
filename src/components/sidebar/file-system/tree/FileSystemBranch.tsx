@@ -3,8 +3,8 @@ import { useSelector } from 'react-redux';
 import { selectUiMetadataById } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
 import { FileSystemDropdown } from './FileSystemDropdown';
-import { tabsActions } from '@/state/tabs/slice';
-import { selectIsActiveTab } from '@/state/tabs/selectors';
+import { uiActions } from '@/state/ui/slice';
+import { selectIsActiveTab } from '@/state/ui/selectors';
 import { CollapsibleFolder } from '../components/CollapsibleFolder';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
@@ -22,8 +22,8 @@ export function FileSystemBranch({ buttonContent, children, menuOptions, tabType
 				<button
 					style={{ gap: '7px', display: 'flex', alignItems: 'center', flex: 1, minWidth: '50px' }}
 					onClick={() => {
-						dispatch(tabsActions.addTabs({ [id]: tabType }));
-						dispatch(tabsActions.setSelectedTab(id));
+						dispatch(uiActions.addTabs({ [id]: tabType }));
+						dispatch(uiActions.setSelectedTab(id));
 					}}
 				>
 					{buttonContent}

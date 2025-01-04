@@ -2,14 +2,14 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { v4 } from 'uuid';
 import { activeActions, activeThunkName } from '../slice';
 import { RootState } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { Script } from '@/types/data/workspace';
 import { toValidFunctionName } from '@/utils/string';
 
 export const deleteScriptById = createAsyncThunk<void, string, { state: RootState }>(
 	`${activeThunkName}/deleteScriptById`,
 	async (id, thunk) => {
-		thunk.dispatch(tabsActions.closeTab(id));
+		thunk.dispatch(uiActions.closeTab(id));
 		thunk.dispatch(activeActions.deleteScript({ scriptId: id }));
 	},
 );

@@ -4,7 +4,7 @@ import { FileSystemLeaf } from '../tree/FileSystemLeaf';
 import { selectScript } from '@/state/active/selectors';
 import { createScript } from '@/state/active/thunks/scripts';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { useShowSync } from '@/hooks/useShowSync';
 import { FluentLinkSvg } from '@/assets/icons/fluent/FluentLink';
 import { FluentCodeSvg } from '@/assets/icons/fluent/FluentCode';
@@ -32,7 +32,7 @@ export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
 						}),
 					),
 				),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(script.id))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(script.id))),
 			]}
 		>
 			<div style={{ flex: 0 }}>{showSync ? <FluentLinkSvg /> : <FluentCodeSvg />}</div>

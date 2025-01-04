@@ -3,13 +3,13 @@ import { TabPanel, Tabs } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { TabRow } from './TabRow';
 import { useAppDispatch } from '@/state/store';
-import { selectTabsState } from '@/state/tabs/selectors';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { TabContent } from '../panels/TabContent';
 import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
+import { selectUiState } from '@/state/ui/selectors';
 
 export function TabHeader() {
-	const { list, selected } = useSelector(selectTabsState);
+	const { list, selected } = useSelector(selectUiState);
 	const { guttered: scrollbarTheme } = useScrollbarTheme();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
@@ -21,11 +21,7 @@ export function TabHeader() {
 	const listList = useMemo(() => Object.entries(list), [list]);
 
 	return (
-		<Tabs
-			size="lg"
-			value={selected}
-			onChange={(_, newValue) => dispatch(tabsActions.setSelectedTab(newValue as string))}
-		>
+		<Tabs size="lg" value={selected} onChange={(_, newValue) => dispatch(uiActions.setSelectedTab(newValue as string))}>
 			<TabRow list={list} />
 			{listList.map(([tabId, tabType], index) => (
 				<TabPanel

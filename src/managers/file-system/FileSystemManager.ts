@@ -34,7 +34,7 @@ export class FileSystemManager {
 			return false;
 		} else {
 			log.debug(`File does not exist, creating...`);
-			await FileSystemWorker.writeFile(path, JSON.stringify(content));
+			await FileSystemWorker.writeFile({ path, contents: JSON.stringify(content) });
 			return true;
 		}
 	}

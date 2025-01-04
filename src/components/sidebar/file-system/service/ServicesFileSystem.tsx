@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
 import { selectServices } from '@/state/active/selectors';
 import { useAppDispatch } from '@/state/store';
-import { selectFilteredNestedIds } from '@/state/tabs/selectors';
-import { tabsActions } from '@/state/tabs/slice';
+import { selectFilteredNestedIds } from '@/state/ui/selectors';
+import { uiActions } from '@/state/ui/slice';
 import { SearchField } from '@/components/shared/input/SearchField';
 import { SideDrawerHeader } from '../../SideDrawerHeader';
 import { collapseAll, expandAll } from '@/state/ui/thunks';
@@ -29,9 +29,9 @@ export function ServicesFileSystem() {
 				]}
 				actions={
 					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
-						<SearchField onChange={(text) => dispatch(tabsActions.setSearchText(text))} />
+						<SearchField onChange={(text) => dispatch(uiActions.setSearchText(text))} />
 						<SprocketTooltip text="Add New Service">
-							<IconButton onClick={() => dispatch(tabsActions.addToCreateQueue('service'))}>
+							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('service'))}>
 								<AddBox />
 							</IconButton>
 						</SprocketTooltip>

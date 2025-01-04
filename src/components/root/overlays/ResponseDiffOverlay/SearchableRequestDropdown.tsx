@@ -3,7 +3,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { tabTypeIcon } from '@/constants/components';
 import { useAppDispatch } from '@/state/store';
-import { tabsActions } from '@/state/tabs/slice';
+import { uiActions } from '@/state/ui/slice';
 import { camelCaseToTitle } from '@/utils/string';
 
 type SearchableItem = { name: string; id: string };
@@ -43,9 +43,9 @@ export function SearchableRequestDropdown<T extends SearchableItem>({
 						color="primary"
 						onClick={() => {
 							if (!!selected) {
-								dispatch(tabsActions.addTabs({ [selected.id]: name }));
-								dispatch(tabsActions.setSelectedTab(selected.id));
-								dispatch(tabsActions.popDiffQueue());
+								dispatch(uiActions.addTabs({ [selected.id]: name }));
+								dispatch(uiActions.setSelectedTab(selected.id));
+								dispatch(uiActions.popDiffQueue());
 							}
 						}}
 					>

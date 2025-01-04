@@ -4,8 +4,8 @@ import { CreateServiceModal } from './createModals/CreateServiceModal';
 import { CreateEnvironmentModal } from './createModals/CreateEnvironmentModal';
 import { CreateScriptModal } from './createModals/CreateScriptModal';
 import { useAppDispatch } from '@/state/store';
-import { selectNextForCreation } from '@/state/tabs/selectors';
-import { tabsActions } from '@/state/tabs/slice';
+import { selectNextForCreation } from '@/state/ui/selectors';
+import { uiActions } from '@/state/ui/slice';
 import { TabType } from '@/types/state/state';
 
 const modalFromType: Partial<Record<TabType, (props: CreateModalsProps) => JSX.Element>> = {
@@ -23,7 +23,7 @@ export function CreateQueueModals() {
 		<CreateModal
 			open={!!nextForCreation}
 			closeFunc={() => {
-				dispatch(tabsActions.removeFromCreateQueue(nextForCreation));
+				dispatch(uiActions.removeFromCreateQueue(nextForCreation));
 			}}
 		/>
 	);
