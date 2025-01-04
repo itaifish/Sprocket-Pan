@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux';
-import { Typography } from '@mui/joy';
+import { Stack, Typography } from '@mui/joy';
 import { useState, useRef } from 'react';
 import { Constants } from '@/constants/constants';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
@@ -73,7 +73,7 @@ export function ScriptPanel({ id }: PanelProps) {
 	};
 
 	return (
-		<>
+		<Stack gap={2} p={2}>
 			<EditableHeader
 				value={script.name}
 				onChange={(name) => update({ name, id, scriptCallableName: toValidFunctionName(name) })}
@@ -115,6 +115,6 @@ export function ScriptPanel({ id }: PanelProps) {
 					/>
 				</Panel>
 			</PanelGroup>
-		</>
+		</Stack>
 	);
 }

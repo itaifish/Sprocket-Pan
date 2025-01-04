@@ -4,7 +4,7 @@ import { ClearRounded, PendingOutlined, Search } from '@mui/icons-material';
 import { Constants } from '@/constants/constants';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SprocketTooltip } from '../SprocketTooltip';
-import { SxProps } from '@mui/material';
+import { SxProps } from '@mui/joy/styles/types';
 
 export interface SearchFieldProps {
 	onChange: (text: string) => void;

@@ -40,7 +40,7 @@ export function EndpointPanel({ id }: PanelProps) {
 	}
 
 	return (
-		<Stack gap={2}>
+		<Stack gap={2} p={2}>
 			<EditableHeader value={endpoint.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<Stack direction="row" gap={2}>
 				<VerbSelect value={endpoint.verb} onChange={(verb) => update({ verb })} />

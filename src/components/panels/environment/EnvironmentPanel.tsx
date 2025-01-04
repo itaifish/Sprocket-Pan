@@ -41,7 +41,7 @@ export function EnvironmentPanel({ id }: PanelProps) {
 	}
 
 	return (
-		<Stack gap={2}>
+		<Stack gap={2} p={2}>
 			<EditableHeader
 				left={
 					<SprocketTooltip text={selectedEnvironment === id ? 'Unselect' : 'Select'}>

@@ -2,7 +2,7 @@ import { useSelector } from 'react-redux';
 import { PanelProps } from '../panels.interface';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { EnvironmentsSection } from './EnvironmentsSection';
-import { AccordionGroup } from '@mui/joy';
+import { AccordionGroup, Stack } from '@mui/joy';
 import { GeneralSection } from './GeneralSection';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { selectServices } from '@/state/active/selectors';
@@ -22,7 +22,7 @@ export function ServicePanel({ id }: PanelProps) {
 	}
 
 	return (
-		<>
+		<Stack gap={2} p={2}>
 			<EditableHeader value={serviceData.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<SprocketTabs
 				tabs={[
@@ -48,6 +48,6 @@ export function ServicePanel({ id }: PanelProps) {
 					},
 				]}
 			/>
-		</>
+		</Stack>
 	);
 }
