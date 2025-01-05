@@ -50,11 +50,11 @@ export function RequestPanel({ id }: PanelProps) {
 	}
 
 	return (
-		<PanelGroup direction="horizontal" style={{ height: '100%' }}>
+		<PanelGroup direction="horizontal">
 			<Panel defaultSize={50} minSize={33}>
-				<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
+				<Box height="100%" sx={{ overflow: 'auto', ...scrollbarTheme }}>
 					<TrapezoidalHeader>Request</TrapezoidalHeader>
-					<Stack gap={1} p={2}>
+					<Stack gap={1} p={2} minWidth="400px">
 						<Stack direction="row" justifyContent="space-between">
 							<EditableText level="title-lg" text={request.name} setText={(name) => update({ name })} />
 							<Button
@@ -74,7 +74,7 @@ export function RequestPanel({ id }: PanelProps) {
 			<Panel defaultSize={50} minSize={33}>
 				<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
 					<TrapezoidalHeader reverse>Response</TrapezoidalHeader>
-					<Stack gap={1} p={2}>
+					<Stack gap={1} p={2} minWidth="400px">
 						<ResponsePanel request={request} />
 					</Stack>
 				</Box>

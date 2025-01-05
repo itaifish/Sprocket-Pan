@@ -19,7 +19,7 @@ export function Root() {
 	const { setMode } = useColorScheme();
 
 	useEffect(() => {
-		RustInvoker.close_splashscreen();
+		RustInvoker.closeSplashscreen();
 	}, []);
 
 	useEffect(() => {

@@ -95,7 +95,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 					<Button
 						sx={{ width: '250px' }}
 						startDecorator={<FolderOpenIcon />}
-						onClick={() => RustInvoker.show_in_explorer({ path: FileSystemWorker.DATA_FOLDER_NAME })}
+						onClick={() => RustInvoker.showInExplorer({ path: FileSystemWorker.DATA_FOLDER_NAME })}
 						variant="outlined"
 					>
 						Open Data Folder
@@ -105,7 +105,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 						startDecorator={<FolderOpenIcon />}
 						onClick={async () => {
 							const logDir = await appLogDir();
-							RustInvoker.show_in_explorer({ path: `${logDir}${log.LOG_FILE_NAME}`, absolute: true });
+							RustInvoker.showInExplorer({ path: `${logDir}${log.LOG_FILE_NAME}`, absolute: true });
 						}}
 						variant="outlined"
 					>

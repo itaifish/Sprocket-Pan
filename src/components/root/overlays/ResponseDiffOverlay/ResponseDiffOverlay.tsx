@@ -7,12 +7,12 @@ import { DiffText } from '@/components/shared/input/monaco/DiffText';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { UriTypography } from '@/components/shared/UriTypography';
-import { VerbChip } from '@/components/shared/VerbChip';
-import { statusCodes } from '@/constants/statusCodes';
 import { DiffQueueEntry } from '@/state/ui/slice';
 import { headersToJson, multilineUrl } from '@/utils/serialization';
 import { useSelector } from 'react-redux';
 import { selectHistoryById } from '@/state/active/selectors';
+import { statusText } from '@/utils/misc';
+import { VerbDiv } from '@/components/sidebar/file-system/components/VerbDiv';
 
 function useGetResponseData(selection: SelectedResponse | null) {
 	const history = useSelector((state) => selectHistoryById(state, selection?.id));
@@ -67,10 +67,10 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								title: 'Response Body',
 								content: (
 									<DiffText
-										original={original.response.body}
-										modified={modified.response.body}
-										originalLanguage={original.response.bodyType?.toLocaleLowerCase()}
-										modifiedLanguage={modified.response.bodyType?.toLocaleLowerCase()}
+										original={original.response?.body}
+										modified={modified.response?.body}
+										originalLanguage={original.response?.bodyType?.toLocaleLowerCase()}
+										modifiedLanguage={modified.response?.bodyType?.toLocaleLowerCase()}
 									/>
 								),
 							},
@@ -79,16 +79,12 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								content: (
 									<Stack height="100%">
 										<Stack direction="row" justifyContent="space-between">
-											<Typography>
-												{original.response.statusCode}: {statusCodes[original.response.statusCode]}
-											</Typography>
-											<Typography>
-												{modified.response.statusCode}: {statusCodes[modified.response.statusCode]}
-											</Typography>
+											<Typography>{statusText(original.response?.statusCode)}</Typography>
+											<Typography>{statusText(modified.response?.statusCode)}</Typography>
 										</Stack>
 										<DiffText
-											original={headersToJson(original.response.headers)}
-											modified={headersToJson(modified.response.headers)}
+											original={headersToJson(original.response?.headers)}
+											modified={headersToJson(modified.response?.headers)}
 										/>
 									</Stack>
 								),
@@ -99,19 +95,19 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 									<Stack height="100%">
 										<Stack direction="row" justifyContent="space-between" textAlign="center" gap={3}>
 											<Stack direction="row" gap={1}>
-												<VerbChip method={original.request.method} />
-												<UriTypography>{original.request.url.split('?')[0]}</UriTypography>
+												<VerbDiv verb={original.request?.method} />
+												<UriTypography>{original.request?.url.split('?')[0]}</UriTypography>
 											</Stack>
 											<Stack direction="row" gap={1}>
-												<UriTypography>{modified.request.url.split('?')[0]}</UriTypography>
-												<VerbChip method={modified.request.method} />
+												<UriTypography>{modified.request?.url.split('?')[0]}</UriTypography>
+												<VerbDiv verb={modified.request?.method} />
 											</Stack>
 										</Stack>
 										<DiffText
-											original={original.request.body}
-											modified={modified.request.body}
-											originalLanguage={original.request.bodyType?.toLocaleLowerCase()}
-											modifiedLanguage={modified.request.bodyType?.toLocaleLowerCase()}
+											original={original.request?.body}
+											modified={modified.request?.body}
+											originalLanguage={original.request?.bodyType?.toLocaleLowerCase()}
+											modifiedLanguage={modified.request?.bodyType?.toLocaleLowerCase()}
 										/>
 									</Stack>
 								),
@@ -120,8 +116,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								title: 'Request Headers',
 								content: (
 									<DiffText
-										original={headersToJson(original.request.headers)}
-										modified={headersToJson(modified.request.headers)}
+										original={headersToJson(original.request?.headers)}
+										modified={headersToJson(modified.request?.headers)}
 									/>
 								),
 							},
@@ -129,8 +125,8 @@ export function ResponseDiffOverlay({ initialSelection }: ResponseDiffOverlayPro
 								title: 'Request Url',
 								content: (
 									<DiffText
-										original={multilineUrl(original.request.url)}
-										modified={multilineUrl(modified.request.url)}
+										original={multilineUrl(original.request?.url)}
+										modified={multilineUrl(modified.request?.url)}
 									/>
 								),
 							},

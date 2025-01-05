@@ -3,10 +3,10 @@ import { BREAK_ALL_TEXT } from '@/styles/text';
 import { open } from '@tauri-apps/api/shell';
 
 interface UriTypographyProps {
-	children: string;
+	children?: string;
 }
 
-export function UriTypography({ children }: UriTypographyProps) {
+export function UriTypography({ children = '' }: UriTypographyProps) {
 	return (
 		<u>
 			<span

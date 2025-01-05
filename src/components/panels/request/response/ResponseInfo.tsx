@@ -1,15 +1,15 @@
 import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Typography } from '@mui/joy';
-import { ResponseBody } from './ResponseBody';
+import { getEditorLanguage, ResponseBody } from './ResponseBody';
 import { HeadersDisplayTable } from './HeadersDisplayTable';
 import { VisualEventLog } from './VisualEventLog';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
 import { UriTypography } from '@/components/shared/UriTypography';
 import { statusCodes } from '@/constants/statusCodes';
 import { HistoricalEndpointResponse } from '@/types/data/workspace';
-import { toKeyValuePairs } from '@/utils/application';
 import { formatFullDate } from '@/utils/string';
 import { defaultResponse } from '../constants';
 import { mergeDeep } from '@/utils/variables';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 
 function autofillDefaults(entry: HistoricalEndpointResponse) {
 	return mergeDeep(defaultResponse, entry);
@@ -61,14 +61,13 @@ export function ResponseInfo({ data, requestId }: ResponseInfoProps) {
 										<Accordion defaultExpanded>
 											<AccordionSummary>Request Body</AccordionSummary>
 											<AccordionDetails>
-												<ResponseBody
-													response={{
-														...request,
-														headers: toKeyValuePairs(request.headers),
-														bodyType: request.bodyType ?? 'JSON',
-														statusCode: 0,
-														body: request.body,
-													}}
+												<SprocketEditor
+													// https://github.com/itaifish/Sprocket-Pan/issues/138
+													height="calc(100vh - 350px)"
+													value={response.body}
+													language={getEditorLanguage(response.bodyType)}
+													options={{ readOnly: true, domReadOnly: true }}
+													formatOnChange
 												/>
 											</AccordionDetails>
 										</Accordion>

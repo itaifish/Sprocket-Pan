@@ -2,7 +2,6 @@ import { verbColors } from '@/constants/style';
 import { RESTfulRequestVerb, RESTfulRequestVerbs } from '@/types/data/shared';
 import { Label } from '@mui/icons-material';
 import { Select, Option } from '@mui/joy';
-import chroma from 'chroma-js';
 
 interface VerbSelectProps {
 	value: RESTfulRequestVerb;
@@ -12,14 +11,12 @@ interface VerbSelectProps {
 }
 
 export function VerbSelect({ value, onChange, open, onClick }: VerbSelectProps) {
-	const color = verbColors[value];
-	const backgroundColor = chroma(color).alpha(0.1).hex();
+	const { color } = verbColors[value];
 	return (
 		<Select
 			sx={{
 				minWidth: 150,
-				backgroundColor,
-				color: color,
+				color,
 			}}
 			listboxOpen={open}
 			onListboxOpenChange={onClick}
@@ -32,22 +29,11 @@ export function VerbSelect({ value, onChange, open, onClick }: VerbSelectProps) 
 				}
 			}}
 		>
-			{RESTfulRequestVerbs.map((verb, index) => {
-				const color = chroma(verbColors[verb]);
-				return (
-					<Option
-						key={index}
-						value={verb}
-						sx={{
-							backgroundColor: color.alpha(0.1).hex(),
-							color: color.hex(),
-							':hover': { backgroundColor: color.alpha(0.2).hex() + '!important' },
-						}}
-					>
-						{verb}
-					</Option>
-				);
-			})}
+			{RESTfulRequestVerbs.map((verb, index) => (
+				<Option key={index} value={verb} sx={{ color: verbColors[verb].color }}>
+					{verb}
+				</Option>
+			))}
 		</Select>
 	);
 }

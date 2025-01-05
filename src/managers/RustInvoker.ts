@@ -15,7 +15,7 @@ export class RustInvoker {
 	 * Saves files. Relative paths are from SprocketPan's base directory (eg \AppData\Local\com.sprocketpan.dev\ on Windows)
 	 * @data file contents and paths to save
 	 */
-	static async save_files(data: InvokerFileUpdate[]) {
+	static async saveFiles(data: InvokerFileUpdate[]) {
 		for (const file of data) {
 			file.path = await this.absolutify(file);
 		}
@@ -23,13 +23,13 @@ export class RustInvoker {
 		const errors = await invoke<InvokerFileError[]>('save_files', { data });
 		if (errors.length > 0) throw new Error(errors.map(({ path, error }) => `${error} at path ${path}`).join(', '));
 	}
-	static async show_in_explorer(path: InvokerPath) {
+	static async showInExplorer(path: InvokerPath) {
 		return await invoke<void>('show_in_explorer', { path: await this.absolutify(path) });
 	}
 	static zoom(amount: number) {
 		return invoke<boolean>('zoom', { amount });
 	}
-	static close_splashscreen() {
+	static closeSplashscreen() {
 		return invoke<void>('close_splashscreen');
 	}
 }

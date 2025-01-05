@@ -1,5 +1,7 @@
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/joy';
-import { RequestScript } from '../script/RequestScript';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
+import { useDebounce } from '@/hooks/useDebounce';
+import { Button, Stack } from '@mui/joy';
+import { useState } from 'react';
 
 interface OnChangeArgs {
 	preRequestScript?: string;
@@ -10,33 +12,57 @@ interface PrePostScriptDisplayProps extends OnChangeArgs {
 	onChange: (args: OnChangeArgs) => void;
 }
 
+const rhomboid = {
+	clipPath: 'polygon(30px 0, 100% 0, 100% 100%, 0 100%)',
+	height: '30px',
+	width: '100%',
+	borderRadius: 0,
+};
+
 export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onChange }: PrePostScriptDisplayProps) {
+	const [isPostActive, setIsPostActive] = useState(false);
+
+	const { localDataState, setLocalDataState } = useDebounce({
+		state: isPostActive ? postRequestScript : preRequestScript,
+		setState: (text) => onChange(isPostActive ? { postRequestScript: text } : { preRequestScript: text }),
+	});
+
 	return (
-		<>
-			<Accordion defaultExpanded>
-				<AccordionSummary>Pre-Request Script</AccordionSummary>
-				<AccordionDetails>
-					<RequestScript
-						scriptText={preRequestScript}
-						scriptKey="preRequestScript"
-						updateScript={(scriptText: string) => {
-							onChange({ preRequestScript: scriptText });
+		<SprocketEditor
+			height="55vh"
+			ActionBarItems={
+				<Stack direction="row" minWidth="250px" width="400px">
+					<Button
+						sx={{ ...rhomboid, clipPath: '' }}
+						variant="soft"
+						color={isPostActive ? 'neutral' : 'primary'}
+						onClick={() => {
+							setIsPostActive(false);
+							setLocalDataState(preRequestScript ?? '');
 						}}
-					/>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion defaultExpanded>
-				<AccordionSummary>Post-Request Script</AccordionSummary>
-				<AccordionDetails>
-					<RequestScript
-						scriptText={postRequestScript}
-						scriptKey="postRequestScript"
-						updateScript={(scriptText: string) => {
-							onChange({ postRequestScript: scriptText });
+					>
+						Pre-Request
+					</Button>
+					<Button
+						sx={{ ...rhomboid, ml: '-30px' }}
+						variant="soft"
+						color={isPostActive ? 'primary' : 'neutral'}
+						onClick={() => {
+							setIsPostActive(true);
+							setLocalDataState(postRequestScript ?? '');
 						}}
-					/>
-				</AccordionDetails>
-			</Accordion>
-		</>
+					>
+						Post-Request
+					</Button>
+				</Stack>
+			}
+			value={localDataState}
+			onChange={(value) => {
+				if (value != null) {
+					setLocalDataState(value);
+				}
+			}}
+			language="typescript"
+		/>
 	);
 }

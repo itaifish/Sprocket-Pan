@@ -1,5 +1,4 @@
 import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
-import { statusCodes } from '@/constants/statusCodes';
 import { EndpointResponse } from '@/types/data/workspace';
 import { SprocketError } from '@/types/state/state';
 import { getStatusCodeColor } from '@/utils/string';
@@ -7,10 +6,11 @@ import { Warning } from '@mui/icons-material';
 import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Typography } from '@mui/joy';
 import { useState } from 'react';
 import { defaultResponse } from '../constants';
+import { statusText } from '@/utils/misc';
 
 const editorLanguageOptions = ['json', 'html', 'xml', 'yaml'];
 
-function getEditorLanguage(type?: EndpointResponse['bodyType']) {
+export function getEditorLanguage(type?: EndpointResponse['bodyType']) {
 	return editorLanguageOptions.find((lang) => type?.toLowerCase().includes(lang)) ?? 'text';
 }
 
@@ -23,9 +23,10 @@ function ResponseDisplay({ response }: ResponseDisplayProps) {
 		<SprocketEditor
 			ActionBarItems={
 				<Typography color={getStatusCodeColor(response.statusCode)} level="body-lg">
-					{response.statusCode}: {statusCodes[response.statusCode]}
+					{statusText(response.statusCode)}
 				</Typography>
 			}
+			// https://github.com/itaifish/Sprocket-Pan/issues/138
 			height="calc(100vh - 350px)"
 			value={response.body}
 			language={getEditorLanguage(response.bodyType)}
@@ -54,8 +55,7 @@ export function ResponseBody({ response, error }: ResponseBodyProps) {
 					<SprocketEditor
 						value={JSON.stringify(error)}
 						language="json"
-						// there's a weird interaction between joy's Accordion behavior and monaco's auto-resize
-						// editors inside accordions must have a defined height that is not percentage-based
+						// weird bug https://github.com/itaifish/Sprocket-Pan/issues/138
 						height="calc(100vh - 350px)"
 						options={{ readOnly: true, domReadOnly: true }}
 						formatOnChange

@@ -12,7 +12,7 @@ export class FileSystemWorker {
 	}
 
 	public static writeFiles(files: InvokerFileUpdate[]) {
-		return RustInvoker.save_files(files);
+		return RustInvoker.saveFiles(files);
 	}
 
 	public static writeFile(file: InvokerFileUpdate) {

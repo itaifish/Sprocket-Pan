@@ -1,4 +1,3 @@
-import { AccordionGroup } from '@mui/joy';
 import { RequestBody } from './RequestBody';
 import { PrePostScriptDisplay } from '../shared/PrePostScriptDisplay';
 import { RequestInfoSection, RequestInfoSectionProps } from './RequestInfoSection';
@@ -18,6 +17,7 @@ export function RequestEditTabs({ request }: RequestInfoSectionProps) {
 
 	return (
 		<SprocketTabs
+			sx={{ height: '100%' }}
 			tabs={[
 				{
 					title: 'Info',
@@ -47,13 +47,11 @@ export function RequestEditTabs({ request }: RequestInfoSectionProps) {
 				{
 					title: 'Scripts',
 					content: (
-						<AccordionGroup>
-							<PrePostScriptDisplay
-								onChange={update}
-								preRequestScript={request.preRequestScript}
-								postRequestScript={request.postRequestScript}
-							/>
-						</AccordionGroup>
+						<PrePostScriptDisplay
+							onChange={update}
+							preRequestScript={request.preRequestScript}
+							postRequestScript={request.postRequestScript}
+						/>
 					),
 				},
 				{
