@@ -5,34 +5,35 @@ import { EnvironmentsSection } from './EnvironmentsSection';
 import { AccordionGroup, Stack } from '@mui/joy';
 import { GeneralSection } from './GeneralSection';
 import { SprocketTabs } from '@/components/shared/SprocketTabs';
-import { selectServices } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { Service } from '@/types/data/workspace';
 import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { itemActions } from '@/state/items';
 
 export function ServicePanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
-	const services = useSelector(selectServices);
-	const serviceData = services[id];
+	const service = useSelector((state) => itemActions.service.select(state, id));
 
 	function update(values: Partial<Service>) {
 		dispatch(activeActions.updateService({ ...values, id }));
 	}
 
+	if (service == null) throw new Error(`Service Panel could not find associated Service, id ${id}`);
+
 	return (
 		<Stack gap={2} p={2}>
-			<EditableHeader value={serviceData.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
+			<EditableHeader value={service.name} onChange={(name) => update({ name })} right={<SyncButton id={id} />} />
 			<SprocketTabs
 				tabs={[
 					{
 						title: 'General',
-						content: <GeneralSection service={serviceData} onChange={update} />,
+						content: <GeneralSection service={service} onChange={update} />,
 					},
 					{
 						title: 'Environments',
-						content: <EnvironmentsSection service={serviceData} onChange={update} />,
+						content: <EnvironmentsSection service={service} onChange={update} />,
 					},
 					{
 						title: 'Scripts',
@@ -40,8 +41,8 @@ export function ServicePanel({ id }: PanelProps) {
 							<AccordionGroup transition="0.2s ease">
 								<PrePostScriptDisplay
 									onChange={update}
-									preRequestScript={serviceData.preRequestScript}
-									postRequestScript={serviceData.postRequestScript}
+									preRequestScript={service.preRequestScript}
+									postRequestScript={service.postRequestScript}
 								/>
 							</AccordionGroup>
 						),

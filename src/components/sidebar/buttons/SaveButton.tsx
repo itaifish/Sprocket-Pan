@@ -5,8 +5,8 @@ import Badge from '@mui/joy/Badge';
 import { useSelector } from 'react-redux';
 import { selectHasBeenModifiedSinceLastSave } from '@/state/active/selectors';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { saveActiveData } from '@/state/active/thunks/data';
 import { useAppDispatch } from '@/state/store';
+import { saveActiveData } from '@/state/active/thunks';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);

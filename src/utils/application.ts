@@ -1,6 +1,5 @@
-import { v4 } from 'uuid';
 import { QueryParams } from '@/types/data/shared';
-import { Environment, WorkspaceData } from '@/types/data/workspace';
+import { WorkspaceData } from '@/types/data/workspace';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
 import { mergeDeep } from './variables';
@@ -23,18 +22,6 @@ export function queryParamsToString(
 		}
 	});
 	return encoded ? searchParams.toString() : decodeURIComponent(searchParams.toString());
-}
-
-export function cloneEnv(env?: Partial<Environment>, nameMod?: string): Environment {
-	const newEnv = {
-		name: env?.name ?? '',
-		id: v4(),
-		pairs: env?.pairs ?? [],
-	};
-	if (nameMod != null) {
-		newEnv.name = newEnv.name + nameMod;
-	}
-	return newEnv;
 }
 
 export function toKeyValuePairs<T>(object: Record<string, T>) {
@@ -80,7 +67,7 @@ export function filterOldHistoryEntries(history: WorkspaceData['history'], days:
 	if (days >= 0) {
 		const earliestTime = new Date().getTime() - days * MS_IN_DAY;
 		for (const key in history) {
-			history[key] = history[key].filter((entry) => entry.request.dateTime >= earliestTime);
+			history[key] = history[key].filter((entry) => entry.timestamp >= earliestTime);
 		}
 	}
 	return history;

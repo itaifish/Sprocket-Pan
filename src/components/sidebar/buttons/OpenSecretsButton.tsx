@@ -11,7 +11,7 @@ export function OpenSecretsButton() {
 		<SprocketTooltip text="Open User Secrets">
 			<IconButton
 				onClick={() => {
-					dispatch(uiActions.addTabs({ [ELEMENT_ID.secrets]: 'secrets' }));
+					dispatch(uiActions.addTab('secrets'));
 					dispatch(uiActions.setSelectedTab(ELEMENT_ID.secrets));
 				}}
 			>

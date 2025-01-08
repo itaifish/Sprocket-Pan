@@ -2,13 +2,9 @@ import { KeyValuePair } from '../shared/keyValues';
 import { SprocketError } from '../state/state';
 import { RecursivePartial } from '../utils/utils';
 import { AuditLog } from './audit';
+import { Item } from './item';
 import { Settings } from './settings';
 import { QueryParams, RawBodyType, RequestBodyType, RESTfulRequestVerb, SPHeaders, UiMetadata } from './shared';
-
-export interface Item {
-	id: string;
-	name: string;
-}
 
 export interface WorkspaceMetadata extends Item {
 	description: string;
@@ -135,11 +131,3 @@ export interface WorkspaceData extends WorkspaceItems {
 }
 
 export type WorkspaceItemType = keyof WorkspaceItems;
-
-export enum WorkspaceItemKey {
-	SERVICES = 'services',
-	ENDPOINTS = 'endpoints',
-	REQUESTS = 'requests',
-	ENVIRONMENTS = 'environments',
-	SCRIPTS = 'scripts',
-}

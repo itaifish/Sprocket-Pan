@@ -12,10 +12,10 @@ import { AreYouSureModal } from '@/components/shared/modals/AreYouSureModal';
 import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
 import { selectActiveState } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
-import { saveActiveData } from '@/state/active/thunks/data';
 import { useAppDispatch } from '@/state/store';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { saveActiveData } from '@/state/active/thunks';
 
 export interface WorkspaceTabProps extends SettingsTabProps {
 	goToWorkspaceSelection: () => void;

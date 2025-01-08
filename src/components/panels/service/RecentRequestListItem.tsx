@@ -8,8 +8,9 @@ import { uiActions } from '@/state/ui/slice';
 import { EndpointRequest } from '@/types/data/workspace';
 import { formatFullDate } from '@/utils/string';
 import { useSelector } from 'react-redux';
-import { selectEndpointById, selectHistoryById } from '@/state/active/selectors';
+import { selectHistoryById } from '@/state/active/selectors';
 import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
+import { itemActions } from '@/state/items';
 
 interface RecentRequestListItemProps {
 	request: EndpointRequest;
@@ -17,7 +18,7 @@ interface RecentRequestListItemProps {
 
 export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 	const history = useSelector((state) => selectHistoryById(state, request.id));
-	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, request.endpointId));
 	const dispatch = useAppDispatch();
 
 	return (
@@ -40,7 +41,7 @@ export function RecentRequestListItem({ request }: RecentRequestListItemProps) {
 								<IconButton
 									color="primary"
 									onClick={() => {
-										dispatch(uiActions.addTabs({ [request.id]: 'request' }));
+										dispatch(uiActions.addTab(request.id));
 										dispatch(uiActions.setSelectedTab(request.id));
 									}}
 								>

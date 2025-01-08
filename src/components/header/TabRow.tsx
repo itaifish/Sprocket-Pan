@@ -2,10 +2,9 @@ import { TabList, tabClasses } from '@mui/joy';
 import { Tab } from './Tab';
 import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 import { useSingleAxisScroll } from '@/hooks/useSingleAxisScroll';
-import { TabType } from '@/types/state/state';
 
 interface TabRowProps {
-	list: Record<string, TabType>;
+	list: string[];
 }
 
 export function TabRow({ list }: TabRowProps) {
@@ -47,8 +46,8 @@ export function TabRow({ list }: TabRowProps) {
 				},
 			}}
 		>
-			{Object.entries(list).map((tab, index) => (
-				<Tab tab={tab} key={index} />
+			{list.map((id) => (
+				<Tab key={id} id={id} />
 			))}
 		</TabList>
 	);

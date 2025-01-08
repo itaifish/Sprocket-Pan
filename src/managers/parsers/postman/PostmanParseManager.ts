@@ -118,7 +118,6 @@ class PostmanParseManager {
 				scripts.push({
 					name,
 					scriptCallableName: toValidFunctionName(name),
-					returnVariableName: null,
 					id: v4(),
 					content: script,
 				});

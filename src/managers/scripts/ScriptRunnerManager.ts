@@ -1,7 +1,7 @@
 import { Script } from '@/types/data/workspace';
 import { log } from '@/utils/logging';
 import ts from 'typescript';
-import { auditLogManager } from '../AuditLogManager';
+import { AuditLogManager } from '../AuditLogManager';
 import { getSettingsFromState } from '@/utils/application';
 import { OptionalScriptContext } from './types';
 import { runContextfulInterruptibleScript } from '@/utils/functions';
@@ -17,20 +17,20 @@ export interface RunTypescriptWithFullContextArgs extends Omit<OptionalScriptCon
 export class ScriptRunnerManager {
 	public static runTypescript<T>(sp: SprocketScriptContext, script: string, timeout?: number) {
 		log.info(`Running ${sp.context.name}`);
-		auditLogManager.addToAuditLogFromContext(sp.context, 'before');
+		AuditLogManager.addToAuditLogFromContext(sp.context, 'before');
 		const transpiled = ts.transpile(script);
 		const { result, interrupt } = runContextfulInterruptibleScript<T>(transpiled, sp, timeout);
 		return {
 			result: result
 				.catch((err) => {
 					const sprocketErr = errorToSprocketError(err, sp.context);
-					auditLogManager.addToAuditLogFromContext(sp.context, 'after', JSON.stringify(sprocketErr));
+					AuditLogManager.addToAuditLogFromContext(sp.context, 'after', JSON.stringify(sprocketErr));
 					log.warn(`Error when calling script ${sp.context.name}: ${sprocketErr.message}`);
 					interrupt('error thrown');
 					throw sprocketErr;
 				})
 				.then((res) => {
-					auditLogManager.addToAuditLogFromContext(sp.context, 'after');
+					AuditLogManager.addToAuditLogFromContext(sp.context, 'after');
 					return res;
 				}),
 			interrupt,

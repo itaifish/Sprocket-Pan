@@ -25,7 +25,7 @@ import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { CollapseExpandButton } from '@/components/sidebar/buttons/CollapseExpandButton';
 import { tabTypeIcon } from '@/constants/components';
-import { auditLogManager } from '@/managers/AuditLogManager';
+import { AuditLogManager } from '@/managers/AuditLogManager';
 import {
 	selectRequests,
 	selectEnvironments,
@@ -102,7 +102,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 			}
 		</>
 	);
-	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
+	const dataType = requestEvent.eventType === 'root' ? null : AuditLogManager.getEventDataType(requestEvent);
 	const associatedItem = dataType && requestEvent.associatedId ? data[`${dataType}s`][requestEvent.associatedId] : null;
 	return (
 		<>
@@ -138,7 +138,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 												onClick={() => {
 													if (associatedItem != null) {
 														const id = requestEvent.associatedId as string;
-														dispatch(uiActions.addTabs({ [id]: dataType }));
+														dispatch(uiActions.addTab(id));
 														dispatch(uiActions.setSelectedTab(id));
 													}
 												}}
@@ -184,7 +184,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 }
 
 export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
-	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
+	const transformedLog = AuditLogManager.transformAuditLog(props.auditLog);
 	return (
 		<List sx={{ '--List-nestedInsetStart': '10rem' }}>
 			{transformedLog && (

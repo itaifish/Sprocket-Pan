@@ -11,8 +11,8 @@ import { useComputedRootEnvironment } from '@/hooks/useComputedEnvironment';
 import { selectSelectedEnvironment, selectSelectedServiceEnvironments } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
-import { cloneEnv } from '@/utils/application';
 import { Environment } from '@/types/data/workspace';
+import { ItemFactory } from '@/managers/data/ItemFactory';
 
 export function EnvironmentsSection({ service, onChange }: SectionProps) {
 	const selectedEnvironment = useSelector(selectSelectedServiceEnvironments)[service.id];
@@ -29,7 +29,8 @@ export function EnvironmentsSection({ service, onChange }: SectionProps) {
 		env: Partial<Environment> = { name: `${service.name}.env.${Object.keys(service.localEnvironments).length}` },
 		nameMod?: string,
 	) {
-		const newEnv = cloneEnv(env, nameMod);
+		if (nameMod != null) env.name = `${env.name} ${nameMod}`;
+		const newEnv = ItemFactory.environment(env);
 		onChange({
 			localEnvironments: {
 				...localEnvs,

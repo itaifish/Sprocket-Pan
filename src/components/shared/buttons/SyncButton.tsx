@@ -4,7 +4,7 @@ import { Sync, SyncDisabled } from '@mui/icons-material';
 import { IconButton, TooltipProps } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { SprocketTooltip } from '../SprocketTooltip';
-import { toggleSync } from '@/state/active/thunks/data';
+import { toggleSync } from '@/state/active/thunks';
 
 interface SyncButtonProps extends Pick<TooltipProps, 'placement' | 'variant'> {
 	id: string;

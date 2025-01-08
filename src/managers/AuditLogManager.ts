@@ -1,25 +1,18 @@
-import { EventEmitter } from '@tauri-apps/api/shell';
-import { AuditLog, AuditUpdateEvent, RequestEvent, TransformedAuditLog } from '../types/data/audit';
+import { AuditLog, RequestEvent, TransformedAuditLog } from '../types/data/audit';
 import { OptionalScriptContext } from './scripts/types';
 
-type AuditEventEmitterListenerType = {
-	update: (newEvent: RequestEvent) => void;
-};
-
-export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
-	public static INSTANCE = new AuditLogManager();
-
-	private constructor() {
-		super();
-	}
-
-	addToAuditLogFromContext(context: OptionalScriptContext, chronology: RequestEvent['chronology'], error?: string) {
+export class AuditLogManager {
+	static addToAuditLogFromContext(
+		context: OptionalScriptContext,
+		chronology: RequestEvent['chronology'],
+		error?: string,
+	) {
 		if (context.auditLog != null) {
 			this.addToAuditLog(context.auditLog, chronology, context.type, context.associatedId, error);
 		}
 	}
 
-	addToAuditLog(
+	static addToAuditLog(
 		auditLog: AuditLog,
 		chronology: RequestEvent['chronology'],
 		eventType?: RequestEvent['eventType'],
@@ -34,10 +27,9 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 			associatedId,
 		};
 		auditLog.push(newRequestEvent);
-		this.emit('update', newRequestEvent);
 	}
 
-	getEventDataType(event: RequestEvent) {
+	static getEventDataType(event: RequestEvent) {
 		const dataTypes = ['Service', 'Endpoint', 'Request', 'request'] as const;
 		if (event.eventType === 'standaloneScript') {
 			return 'script';
@@ -50,7 +42,7 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 		return null;
 	}
 
-	transformAuditLog(auditLog: AuditLog): TransformedAuditLog | null {
+	static transformAuditLog(auditLog: AuditLog): TransformedAuditLog | null {
 		if (auditLog.length == 0) {
 			return null;
 		}
@@ -73,18 +65,4 @@ export class AuditLogManager extends EventEmitter<AuditUpdateEvent> {
 		}
 		return resRoot;
 	}
-
-	public on<T extends AuditUpdateEvent>(eventName: T, listener: AuditEventEmitterListenerType[T]): this {
-		return super.on(eventName, listener);
-	}
-
-	public once<T extends AuditUpdateEvent>(eventName: T, listener: AuditEventEmitterListenerType[T]): this {
-		return super.once(eventName, listener);
-	}
-
-	public off<T extends AuditUpdateEvent>(eventName: T, listener: AuditEventEmitterListenerType[T]): this {
-		return super.off(eventName, listener);
-	}
 }
-
-export const auditLogManager = AuditLogManager.INSTANCE;

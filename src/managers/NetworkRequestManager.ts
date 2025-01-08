@@ -11,7 +11,7 @@ import { errorToSprocketError, getRequestBodyCategory, rawBodyTypeToMime } from 
 import { asyncCallWithTimeout } from '@/utils/functions';
 import { log } from '@/utils/logging';
 import { capitalizeWord } from '@/utils/string';
-import { auditLogManager } from './AuditLogManager';
+import { AuditLogManager } from './AuditLogManager';
 import { EnvironmentContextResolver } from './EnvironmentContextResolver';
 import { RunTypescriptWithFullContextArgs, ScriptRunnerManager } from './scripts/ScriptRunnerManager';
 import { RootState } from '@/state/store';
@@ -170,7 +170,7 @@ class NetworkRequestManager {
 			networkBody = undefined;
 		}
 
-		auditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
+		AuditLogManager.addToAuditLog(auditLog, 'before', 'request', request?.id);
 
 		const networkRequest: NetworkFetchRequest = {
 			url: `${url}${queryParamStr}`,
@@ -192,7 +192,7 @@ class NetworkRequestManager {
 			networkCall,
 			getSettingsFromState(state).request.timeoutMS,
 		);
-		auditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
+		AuditLogManager.addToAuditLog(auditLog, 'after', 'request', request?.id);
 		const responseText = res.data as string;
 		const response = {
 			statusCode: res.status,

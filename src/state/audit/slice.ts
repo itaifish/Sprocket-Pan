@@ -1,4 +1,4 @@
-import { auditLogManager } from '@/managers/AuditLogManager';
+import { AuditLogManager } from '@/managers/AuditLogManager';
 import { AuditLog, RequestEvent } from '@/types/data/audit';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
@@ -21,7 +21,7 @@ export const auditLogSlice = createSlice({
 				auditLog = [];
 				state.set(action.payload.eventId, auditLog);
 			}
-			auditLogManager.addToAuditLog(
+			AuditLogManager.addToAuditLog(
 				auditLog,
 				action.payload.chronology,
 				action.payload.eventType,

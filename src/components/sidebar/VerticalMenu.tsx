@@ -1,6 +1,6 @@
 import { FluentList } from '@/assets/icons/fluent/FluentList';
 import { Workspaces } from '@mui/icons-material';
-import { Box, IconButton, Sheet, Stack } from '@mui/joy';
+import { Box, Sheet, Stack } from '@mui/joy';
 import { SaveButton } from './buttons/SaveButton';
 import { SidebarTabs } from './types';
 import { SidebarTabButton, SidebarTabButtonProps } from './buttons/SidebarTabButton';
@@ -41,9 +41,7 @@ export function VerticalMenu(args: VerticalMenuProps) {
 					</SidebarTabButton>
 				</TrapezoidalSheet>
 				<Box flex={1} minHeight="100px" />
-				<IconButton>
-					<OpenSettingsButton Content={SettingsPanel} />
-				</IconButton>
+				<OpenSettingsButton Content={SettingsPanel} />
 			</Stack>
 		</Sheet>
 	);

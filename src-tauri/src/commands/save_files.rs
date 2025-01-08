@@ -6,7 +6,7 @@ use tauri::async_runtime::spawn_blocking;
 #[derive(Deserialize)]
 pub struct FileData {
 	path: String,
-	contents: String
+	content: String
 }
 
 #[derive(Serialize)]
@@ -22,7 +22,7 @@ pub async fn save_files(data: Vec<FileData>) -> Vec<FileWriteError> {
 				.par_iter()
 				.enumerate()
 				.map(|(_, file_data)| {
-					(fs::write(&file_data.path, &file_data.contents), file_data.path.clone())
+					(fs::write(&file_data.path, &file_data.content), file_data.path.clone())
 				})
 				.collect();
 			res

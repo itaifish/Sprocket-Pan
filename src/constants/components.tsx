@@ -5,6 +5,7 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import CodeIcon from '@mui/icons-material/Code';
 import KeyIcon from '@mui/icons-material/Key';
 import { TabType } from '@/types/state/state';
+import { Workspaces } from '@mui/icons-material';
 
 export const tabTypeIcon: Record<TabType, JSX.Element> = {
 	endpoint: <FolderOpenIcon />,
@@ -13,4 +14,5 @@ export const tabTypeIcon: Record<TabType, JSX.Element> = {
 	service: <FolderOpenSharpIcon />,
 	script: <CodeIcon />,
 	secrets: <KeyIcon />,
+	workspace: <Workspaces />,
 };

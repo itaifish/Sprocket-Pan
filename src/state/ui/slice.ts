@@ -8,10 +8,10 @@ import { ToastProps } from '@/components/root/Toasts';
 export type DiffQueueEntry = { original: SelectedResponse; modified: SelectedResponse };
 
 export interface UiState {
-	selected: string | null;
-	list: Record<string, TabType>;
-	history: { type: TabType; id: string }[];
-	historyLocation: number;
+	selectedTab: string | null;
+	tabs: string[];
+	tabsHistory: string[];
+	tabsHistoryPosition: number;
 	deleteQueue: string[];
 	diffQueue: DiffQueueEntry[];
 	createQueue: TabType[];
@@ -21,10 +21,10 @@ export interface UiState {
 }
 
 const initialState: UiState = {
-	list: {},
-	history: [],
-	historyLocation: 0,
-	selected: null,
+	tabs: [],
+	tabsHistory: [],
+	tabsHistoryPosition: 0,
+	selectedTab: null,
 	deleteQueue: [],
 	createQueue: [],
 	diffQueue: [],
@@ -32,10 +32,16 @@ const initialState: UiState = {
 	orphans: null,
 };
 
+function closeTab(state: UiState, { payload }: PayloadAction<string>) {
+	state.tabs = state.tabs.filter((id) => id !== payload);
+	if (payload === state.selectedTab) state.selectedTab = state.tabs.at(-1) ?? null;
+}
+
 export const uiSlice = createSlice({
 	name: 'ui',
 	initialState,
 	reducers: {
+		closeTab,
 		addToDiffQueue: (state, { payload }: PayloadAction<SelectedResponse | DiffQueueEntry>) => {
 			if ('original' in payload) {
 				state.diffQueue.push(payload);
@@ -67,38 +73,32 @@ export const uiSlice = createSlice({
 		setSearchText: (state, { payload }: PayloadAction<string>) => {
 			state.searchText = payload;
 		},
-		addTabs: (state, action: PayloadAction<UiState['list']>) => {
-			state.list = { ...state.list, ...action.payload };
+		addTabs: (state, action: PayloadAction<UiState['tabs']>) => {
+			state.tabs = { ...state.tabs, ...action.payload };
 		},
-		closeTab: (state, action: PayloadAction<string>) => {
-			delete state.list[action.payload];
-			if (action.payload === state.selected) {
-				state.selected = Object.keys(state.list).at(-1) ?? null;
-			}
+		addTab: (state, { payload }: PayloadAction<string>) => {
+			state.tabs.push(payload);
 		},
 		setSelectedTab: (state, { payload }: PayloadAction<string>) => {
-			state.selected = payload;
-			if (payload !== state.history[state.historyLocation]?.id) {
-				state.history.splice(state.historyLocation + 1, Infinity, {
-					type: state.list[payload],
-					id: payload,
-				});
-				log.trace(`Selecting ${state.list[payload]} tab`, 1);
-				state.historyLocation = state.history.length - 1;
+			state.selectedTab = payload;
+			if (payload !== state.tabsHistory[state.tabsHistoryPosition]) {
+				state.tabsHistory.splice(state.tabsHistoryPosition + 1, Infinity, payload);
+				log.trace(`Selecting ${payload} tab`, 1);
+				state.tabsHistoryPosition = state.tabsHistory.length - 1;
 			}
 		},
 		clearTabs: (state) => {
-			state.list = {};
-			state.history = [];
-			state.historyLocation = 0;
+			state.tabs = [];
+			state.tabsHistory = [];
+			state.tabsHistoryPosition = 0;
 		},
 		setSelectedTabFromHistory: (state, { payload }: PayloadAction<number | null>) => {
 			if (payload != null) {
-				const tabData = state.history[payload];
-				if (tabData != undefined) {
-					state.list = { ...state.list, [tabData.id]: tabData.type };
-					state.selected = tabData.id;
-					state.historyLocation = payload;
+				const id = state.tabsHistory[payload];
+				if (id != undefined) {
+					state.tabs.push(id);
+					state.selectedTab = id;
+					state.tabsHistoryPosition = payload;
 				}
 			}
 		},

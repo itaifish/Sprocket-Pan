@@ -6,7 +6,6 @@ import { Constants } from '@/constants/constants';
 import { useComputedServiceEnvironment } from '@/hooks/useComputedEnvironment';
 import { useDebounce } from '@/hooks/useDebounce';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
-import { selectEndpointById, selectServiceById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
@@ -16,11 +15,12 @@ import { EndpointEditTabs } from './EndpointEditTabs';
 import { EditableHeader } from '../shared/EditableHeader';
 import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { VerbSelect } from '../shared/VerbSelect';
+import { itemActions } from '@/state/items';
 
 export function EndpointPanel({ id }: PanelProps) {
 	const dispatch = useAppDispatch();
-	const endpoint = useSelector((state) => selectEndpointById(state, id));
-	const service = useSelector((state) => selectServiceById(state, endpoint?.serviceId));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, id));
+	const service = useSelector((state) => itemActions.service.select(state, endpoint?.serviceId));
 
 	const computedEnv = useComputedServiceEnvironment(endpoint?.serviceId);
 	const envSnippets = EnvironmentContextResolver.stringWithVarsToSnippet(service?.baseUrl || 'unknown', computedEnv);
@@ -62,7 +62,7 @@ export function EndpointPanel({ id }: PanelProps) {
 					disabled={!endpoint.defaultRequest}
 					onClick={() => {
 						if (endpoint.defaultRequest) {
-							dispatch(uiActions.addTabs({ [endpoint.defaultRequest]: 'request' }));
+							dispatch(uiActions.addTab(endpoint.defaultRequest));
 							dispatch(uiActions.setSelectedTab(endpoint.defaultRequest));
 						}
 					}}

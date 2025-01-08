@@ -13,7 +13,7 @@ export function SecretsPanel({ id }: PanelProps) {
 		<Box sx={{ height: '70vh', pb: '5vh' }}>
 			<EditableData
 				initialValues={secrets}
-				onChange={(values) => dispatch(activeActions.updateSecrets(values))}
+				onChange={(values) => dispatch(activeActions.setSecrets(values))}
 				fullSize
 			/>
 		</Box>

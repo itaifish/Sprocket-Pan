@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/joy';
 import { useState, useRef } from 'react';
 import { Constants } from '@/constants/constants';
 import { useEditorTheme } from '@/hooks/useEditorTheme';
-import { selectScript, selectScripts } from '@/state/active/selectors';
+import { selectScripts } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { Script } from '@/types/data/workspace';
@@ -18,11 +18,12 @@ import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor'
 import { Panel, PanelGroup } from 'react-resizable-panels';
 import { SprocketResizeHandle } from '@/components/shared/SprocketResizeHandle';
 import { useDebounce } from '@/hooks/useDebounce';
+import { itemActions } from '@/state/items';
 
 export function ScriptPanel({ id }: PanelProps) {
 	const interruptTrigger = useRef<null | ((message?: string) => void)>(null);
 	const editorTheme = useEditorTheme();
-	const script = useSelector((state) => selectScript(state, id));
+	const script = useSelector((state) => itemActions.script.select(state, id));
 	const scripts = useSelector(selectScripts);
 	const scriptNames = new Set(Object.values(scripts).map((script) => script.name));
 	const [isRunning, setIsRunning] = useState(false);

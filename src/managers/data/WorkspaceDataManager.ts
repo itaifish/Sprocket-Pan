@@ -6,7 +6,7 @@ import {
 	WorkspaceSyncedData,
 	Endpoint,
 	Service,
-	WorkspaceItemKey,
+	WorkspaceItems,
 } from '@/types/data/workspace';
 import { nullifyProperties } from '@/utils/functions';
 import { log } from '@/utils/logging';
@@ -22,6 +22,7 @@ import { SaveUpdateManager } from '../SaveUpdateManager';
 import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { getWorkspaceItemType } from '@/utils/getters';
 import { InvokerFileUpdate } from '../RustInvoker';
+import { mergeDeep } from '@/utils/variables';
 
 export const defaultWorkspaceSyncedData: WorkspaceSyncedData = {
 	services: {},
@@ -53,15 +54,18 @@ export interface OrphanData {
 }
 
 export class WorkspaceDataManager {
-	public static loadSwaggerFile(url: string) {
+	public static loadSprocketFile(url: string): Partial<WorkspaceData> {
+		return {};
+	}
+	public static loadSwaggerFile(url: string): Partial<WorkspaceData> {
 		return swaggerParseManager.parseSwaggerFile('filePath', url);
 	}
 
-	public static loadPostmanFile(url: string) {
+	public static loadPostmanFile(url: string): Partial<WorkspaceData> {
 		return postmanParseManager.parsePostmanFile('filePath', url);
 	}
 
-	public static loadInsomniaFile(url: string) {
+	public static loadInsomniaFile(url: string): Partial<WorkspaceData> {
 		return insomniaParseManager.parseInsomniaFile('filePath', url);
 	}
 
@@ -102,17 +106,17 @@ export class WorkspaceDataManager {
 		const paths = this.getWorkspacePath(fileName);
 		const processedHistory = this.processHistoryForSave(history);
 		const filesToWrite: InvokerFileUpdate[] = [
-			{ path: paths.data, contents: JSON.stringify(strippedData) },
-			{ path: paths.history, contents: JSON.stringify(processedHistory) },
-			{ path: paths.metadata, contents: JSON.stringify({ ...metadata, lastModified: new Date().getTime() }) },
-			{ path: paths.uiMetadata, contents: JSON.stringify(uiMetadata) },
-			{ path: paths.secrets, contents: JSON.stringify(secrets) },
+			{ path: paths.data, content: JSON.stringify(strippedData) },
+			{ path: paths.history, content: JSON.stringify(processedHistory) },
+			{ path: paths.metadata, content: JSON.stringify({ ...metadata, lastModified: new Date().getTime() }) },
+			{ path: paths.uiMetadata, content: JSON.stringify(uiMetadata) },
+			{ path: paths.secrets, content: JSON.stringify(secrets) },
 		];
 
 		if (location != null) {
 			const syncContent = JSON.stringify(sync);
-			filesToWrite.push({ path: location, contents: syncContent, absolute: true });
-			filesToWrite.push({ path: paths.syncBackup, contents: syncContent });
+			filesToWrite.push({ path: location, content: syncContent, absolute: true });
+			filesToWrite.push({ path: paths.syncBackup, content: syncContent });
 		}
 		await FileSystemWorker.writeFiles(filesToWrite);
 	}
@@ -199,7 +203,7 @@ export class WorkspaceDataManager {
 			FileSystemWorker.readTextFile(paths.secrets),
 		]);
 
-		const parsedData = JSON.parse(data) as WorkspaceData;
+		let parsedData = JSON.parse(data) as WorkspaceData;
 		parsedData.history = JSON.parse(history);
 		parsedData.metadata = {
 			fileName: workspace.fileName,
@@ -209,13 +213,8 @@ export class WorkspaceDataManager {
 		parsedData.secrets = JSON.parse(secrets);
 		const syncLocation = this.getSyncLocation(parsedData);
 		if (syncLocation != null) {
-			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation));
-			Object.values(WorkspaceItemKey).forEach((key) => {
-				parsedData[key] = { ...parsedData[key], ...parsedSync[key] };
-				Object.keys(parsedSync[key]).forEach((id) => {
-					parsedData.syncMetadata.items[id] = true;
-				});
-			});
+			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation)) as WorkspaceItems;
+			parsedData = mergeDeep(parsedData, parsedSync, 1);
 		}
 		SaveUpdateManager.update(parsedData);
 		return parsedData;

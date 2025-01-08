@@ -15,23 +15,14 @@ import { CreateModalsProps } from './createModalsProps';
 import { useEffect, useState } from 'react';
 import { InfoOutlined } from '@mui/icons-material';
 import { tabTypeIcon } from '@/constants/components';
-import { createScript } from '@/state/active/thunks/scripts';
 import { useAppDispatch } from '@/state/store';
-import { uiActions } from '@/state/ui/slice';
-import { Script } from '@/types/data/workspace';
 import { toValidFunctionName } from '@/utils/string';
+import { itemActions } from '@/state/items';
 
 export function CreateScriptModal({ open, closeFunc }: CreateModalsProps) {
 	const [scriptName, setScriptName] = useState('');
 	const [scriptCallingName, setScriptCallingName] = useState('');
 	const dispatch = useAppDispatch();
-	const createScriptFunction = async () => {
-		const newScript: Partial<Script> = { name: scriptName, scriptCallableName: scriptCallingName, content: '' };
-
-		const createdScriptId = await dispatch(createScript(newScript)).unwrap();
-		dispatch(uiActions.addTabs({ [createdScriptId]: 'script' }));
-		dispatch(uiActions.setSelectedTab(createdScriptId));
-	};
 	const scriptCallingNameValid =
 		scriptCallingName.length > 0 && toValidFunctionName(scriptCallingName) === scriptCallingName;
 	const scriptNameValid = scriptName.length > 0;
@@ -84,7 +75,7 @@ export function CreateScriptModal({ open, closeFunc }: CreateModalsProps) {
 						color="success"
 						disabled={!allFieldsValid}
 						onClick={() => {
-							createScriptFunction();
+							dispatch(itemActions.script.create({ name: scriptName, scriptCallableName: scriptCallingName }));
 							closeFunc();
 						}}
 					>

@@ -2,8 +2,6 @@ import { createSelector } from '@reduxjs/toolkit';
 import { activeSlice } from './slice';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
-import { WorkspaceData } from '@/types/data/workspace';
-import { TabTypeWithData, TabType } from '@/types/state/state';
 import { queryParamsToString } from '@/utils/application';
 import { mergeDeep } from '@/utils/variables';
 import { selectGlobalState, selectGlobalSettings } from '../global/selectors';
@@ -21,15 +19,7 @@ export const selectSecrets = createSelector(selectActiveState, (state) => state.
 
 export const selectEndpoints = createSelector(selectActiveState, (state) => state.endpoints);
 
-export const selectEndpointById = createSelector([selectEndpoints, (_, id?: string) => id], (endpoints, id) =>
-	id == null ? null : endpoints[id],
-);
-
 export const selectServices = createSelector(selectActiveState, (state) => state.services);
-
-export const selectServiceById = createSelector([selectServices, (_, id?: string) => id], (services, id) =>
-	id == null ? null : services[id],
-);
 
 export const selectSelectedServiceEnvironments = createSelector(
 	selectActiveState,
@@ -44,18 +34,9 @@ export const selectEnvironmentIds = createSelector(selectEnvironments, (environm
 	return Object.values(environments).map((env) => env.id);
 });
 
-export const selectEnvironmentsById = createSelector(
-	[selectEnvironments, (_, id: string) => id],
-	(environments, id) => environments[id],
-);
-
 export const selectRequests = createSelector(selectActiveState, (state) => state.requests);
 
 export const selectHistory = createSelector(selectActiveState, (state) => state.history);
-
-export const selectRequestById = createSelector([selectRequests, (_, id?: string) => id], (requests, id) =>
-	id == null ? null : requests[id],
-);
 
 export const selectHistoryById = createSelector([selectHistory, (_, id?: string) => id], (history, id) =>
 	id == null ? [] : (history[id] ?? []),
@@ -111,38 +92,6 @@ export const selectSaveStateTimestamps = createSelector(selectActiveState, (stat
 }));
 
 export const selectScripts = createSelector(selectActiveState, (state) => state.scripts);
-export const selectScript = createSelector(
-	[selectScripts, (_, scriptName: string) => scriptName],
-	(scripts, scriptName) => scripts[scriptName],
-);
-
-export const selectPossibleTabInfo = createSelector(
-	[selectEnvironments, selectServices, selectRequests, selectEndpoints, selectScripts],
-	(environments, services, requests, endpoints, scripts) => {
-		return { environments, requests, services, endpoints, scripts };
-	},
-);
-
-function getMapFromTabType<TTabType extends TabTypeWithData>(
-	data: Pick<WorkspaceData, `${TTabType}s`>,
-	tabType: TTabType,
-) {
-	return data[`${tabType}s`];
-}
-
-function getStaticTabTypeInfo(tabType: TabType) {
-	switch (tabType) {
-		case 'secrets':
-			return { name: 'User Secrets' };
-	}
-}
-
-export const selectTabInfoById = createSelector(
-	[selectPossibleTabInfo, (_, tab: [string, TabType]) => tab],
-	(data, [tabId, tabType]) => {
-		return getStaticTabTypeInfo(tabType) ?? getMapFromTabType(data, tabType as TabTypeWithData)[tabId];
-	},
-);
 
 export const selectHasBeenModifiedSinceLastSave = createSelector(
 	selectSaveStateTimestamps,

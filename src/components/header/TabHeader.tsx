@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { TabPanel, Tabs } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { TabRow } from './TabRow';
@@ -9,27 +9,29 @@ import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 import { selectUiState } from '@/state/ui/selectors';
 
 export function TabHeader() {
-	const { list, selected } = useSelector(selectUiState);
+	const { tabs, selectedTab } = useSelector(selectUiState);
 	const { guttered: scrollbarTheme } = useScrollbarTheme();
 	const dispatch = useAppDispatch();
 	useEffect(() => {
-		document.getElementById(`tab_${selected}`)?.scrollIntoView();
-		const fileToScrollTo = document.getElementById(`file_${selected}`);
+		document.getElementById(`tab_${selectedTab}`)?.scrollIntoView();
+		const fileToScrollTo = document.getElementById(`file_${selectedTab}`);
 		fileToScrollTo?.scrollIntoView({ block: 'center' });
-	}, [selected]);
-
-	const listList = useMemo(() => Object.entries(list), [list]);
+	}, [selectedTab]);
 
 	return (
-		<Tabs size="lg" value={selected} onChange={(_, newValue) => dispatch(uiActions.setSelectedTab(newValue as string))}>
-			<TabRow list={list} />
-			{listList.map(([tabId, tabType], index) => (
+		<Tabs
+			size="lg"
+			value={selectedTab}
+			onChange={(_, newValue) => dispatch(uiActions.setSelectedTab(newValue as string))}
+		>
+			<TabRow list={tabs} />
+			{tabs.map((id, index) => (
 				<TabPanel
-					value={tabId}
+					value={id}
 					key={index}
 					sx={{ padding: 0, height: 'calc(100vh - 45px)', overflow: 'auto', ...scrollbarTheme }}
 				>
-					<TabContent id={tabId} type={tabType} />
+					<TabContent id={id} />
 				</TabPanel>
 			))}
 		</Tabs>

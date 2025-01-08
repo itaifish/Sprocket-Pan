@@ -5,15 +5,13 @@ import { selectServices, selectEndpoints, selectRequests } from '../active/selec
 
 export const selectUiState = uiSlice.selectSlice;
 
-export const selectUiList = createSelector(selectUiState, (state) => state.list);
+export const selectActiveTab = createSelector(selectUiState, (state) => state.selectedTab);
 
-export const selectActiveTab = createSelector(selectUiState, (state) => state.selected);
-
-export const selectPeekHistory = createSelector(selectUiState, ({ historyLocation, history }) => {
-	const length = history.length;
+export const selectPeekHistory = createSelector(selectUiState, ({ tabsHistoryPosition, tabsHistory }) => {
+	const length = tabsHistory.length;
 	return {
-		next: historyLocation === length - 1 ? null : historyLocation + 1,
-		previous: historyLocation <= 0 ? null : historyLocation - 1,
+		next: tabsHistoryPosition === length - 1 ? null : tabsHistoryPosition + 1,
+		previous: tabsHistoryPosition <= 0 ? null : tabsHistoryPosition - 1,
 	};
 });
 

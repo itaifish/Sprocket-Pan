@@ -1,10 +1,11 @@
 import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
-import { Sheet, Stack, Typography, useTheme } from '@mui/joy';
+import { Sheet, Stack, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
 import { selectActiveWorkspace } from '@/state/global/selectors';
 import { SidebarTabs } from './types';
 import { SideDrawerContent } from './SideDrawerContent';
 import { UndoRedoTabsButton } from '../header/UndoRedoTabsButton';
+import { EllipsisTypography } from '../shared/EllipsisTypography';
 
 interface SideDrawerProps {
 	tab: SidebarTabs;
@@ -33,7 +34,7 @@ export function SideDrawer({ tab }: SideDrawerProps) {
 					}}
 				>
 					<Stack height="100%" px={1} direction="row" alignItems="center" justifyContent="space-between">
-						<Typography level="body-lg">{activeWorkspace?.name}</Typography>
+						<EllipsisTypography level="body-lg">{activeWorkspace?.name}</EllipsisTypography>
 						<UndoRedoTabsButton />
 					</Stack>
 				</Sheet>

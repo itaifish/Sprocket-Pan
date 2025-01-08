@@ -14,9 +14,8 @@ import {
 import { CreateModalsProps } from './createModalsProps';
 import { useState } from 'react';
 import { tabTypeIcon } from '@/constants/components';
-import { addNewService } from '@/state/active/thunks/services';
 import { useAppDispatch } from '@/state/store';
-import { uiActions } from '@/state/ui/slice';
+import { itemActions } from '@/state/items';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -25,14 +24,6 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const [baseUrl, setBaseUrl] = useState('');
 	const serviceNameValid = serviceName.length > 0;
 	const allFieldsValid = serviceNameValid;
-
-	const createServiceFunction = async () => {
-		const createdServiceId = await dispatch(
-			addNewService({ name: serviceName, description: serviceDescription, baseUrl }),
-		).unwrap();
-		dispatch(uiActions.addTabs({ [createdServiceId]: 'service' }));
-		dispatch(uiActions.setSelectedTab(createdServiceId));
-	};
 
 	return (
 		<Modal
@@ -78,7 +69,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 						color="success"
 						disabled={!allFieldsValid}
 						onClick={() => {
-							createServiceFunction();
+							dispatch(itemActions.service.create({ name: serviceName, description: serviceDescription, baseUrl }));
 							closeFunc();
 						}}
 					>

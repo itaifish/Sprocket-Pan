@@ -1,5 +1,5 @@
 import { selectSettings } from '@/state/active/selectors';
-import { saveActiveData } from '@/state/active/thunks/data';
+import { saveActiveData } from '@/state/active/thunks';
 import { useAppDispatch } from '@/state/store';
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';

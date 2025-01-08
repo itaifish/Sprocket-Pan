@@ -7,7 +7,6 @@ import { fileSystemEmitter } from '../file-system/FileSystemEmitter';
 import { FileSystemManager } from '../file-system/FileSystemManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { WorkspaceDataManager } from './WorkspaceDataManager';
-import { v4 } from 'uuid';
 
 export const defaultWorkspaceMetadata: WorkspaceMetadata = {
 	name: 'Default Workspace',
@@ -22,7 +21,6 @@ export class GlobalDataManager {
 
 	static async createWorkspace({ fileName, ...workspace }: WorkspaceMetadata) {
 		const paths = WorkspaceDataManager.getWorkspacePath(fileName);
-		if (workspace.id == null) workspace.id = v4();
 		return fileSystemEmitter.createWorkspace(paths, JSON.stringify(workspace));
 	}
 
@@ -30,7 +28,6 @@ export class GlobalDataManager {
 		const ret: Record<string, WorkspaceMetadata> = {};
 		const list = await FileSystemManager.getWorkspaces();
 		list.forEach((workspace) => {
-			workspace.id = workspace.id ?? v4();
 			ret[workspace.id] = workspace;
 		});
 		return ret;

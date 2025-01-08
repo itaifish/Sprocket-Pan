@@ -16,21 +16,15 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { tabTypeIcon } from '@/constants/components';
 import { selectEnvironments } from '@/state/active/selectors';
-import { addNewEnvironment } from '@/state/active/thunks/environments';
 import { useAppDispatch } from '@/state/store';
-import { uiActions } from '@/state/ui/slice';
+import { itemActions } from '@/state/items';
 
 export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 	const [envName, setEnvName] = useState('');
 	const [cloneFrom, setCloneFrom] = useState<string | null>(null);
 	const allEnvironments = useSelector(selectEnvironments);
-	const cloneEnv = cloneFrom == null || allEnvironments[cloneFrom] == null ? null : allEnvironments[cloneFrom];
+	const cloneEnv = cloneFrom == null || allEnvironments[cloneFrom] == null ? undefined : allEnvironments[cloneFrom];
 	const dispatch = useAppDispatch();
-	const createEnvironmentFunction = async () => {
-		const createdEnvironmentId = await dispatch(addNewEnvironment({ data: cloneEnv })).unwrap();
-		dispatch(uiActions.addTabs({ [createdEnvironmentId]: 'environment' }));
-		dispatch(uiActions.setSelectedTab(createdEnvironmentId));
-	};
 	const envNameValid = envName.length > 0;
 	const allFieldsValid = envNameValid;
 	const autoOptions = [
@@ -68,7 +62,7 @@ export function CreateEnvironmentModal({ open, closeFunc }: CreateModalsProps) {
 						color="success"
 						disabled={!allFieldsValid}
 						onClick={() => {
-							createEnvironmentFunction();
+							dispatch(itemActions.environment.create(cloneEnv));
 							closeFunc();
 						}}
 					>

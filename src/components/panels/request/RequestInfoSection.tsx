@@ -6,7 +6,7 @@ import { SyncButton } from '@/components/shared/buttons/SyncButton';
 import { EnvironmentTypography } from '@/components/shared/EnvironmentTypography';
 import { SprocketTable } from '@/components/shared/SprocketTable';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { selectEndpointById, selectEnvironmentSnippets } from '@/state/active/selectors';
+import { selectEnvironmentSnippets } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
@@ -16,6 +16,7 @@ import { Card, Stack, Typography, IconButton } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { VerbSelect } from '../shared/VerbSelect';
+import { itemActions } from '@/state/items';
 
 export interface RequestInfoSectionProps {
 	request: EndpointRequest;
@@ -23,7 +24,7 @@ export interface RequestInfoSectionProps {
 
 export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 	const dispatch = useAppDispatch();
-	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, request.endpointId));
 	const envSnippets = useSelector((state) => selectEnvironmentSnippets(state, request.id));
 	const [shouldDissolvingAnimate, setShouldDissolvingAnimate] = useState(false);
 
@@ -62,7 +63,7 @@ export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 								variant="outlined"
 								color="primary"
 								onClick={() => {
-									dispatch(uiActions.addTabs({ [request.endpointId]: 'endpoint' }));
+									dispatch(uiActions.addTab(request.endpointId));
 									dispatch(uiActions.setSelectedTab(request.endpointId));
 								}}
 							>

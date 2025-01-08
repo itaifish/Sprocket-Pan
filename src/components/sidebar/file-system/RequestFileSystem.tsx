@@ -2,15 +2,14 @@ import { useSelector } from 'react-redux';
 import { menuOptionDuplicate, menuOptionDelete } from './tree/FileSystemDropdown';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
 import { Add, Close } from '@mui/icons-material';
-import { selectRequestById, selectEndpointById } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
-import { addNewRequestFromId } from '@/state/active/thunks/requests';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
 import { EllipsesP } from './components/EllipsesP';
 import { FluentSnippetSvg } from '@/assets/icons/fluent/FluentSnippet';
 import { FluentSnippetLinkSvg } from '@/assets/icons/fluent/FluentSnippetLink';
 import { useShowSync } from '@/hooks/useShowSync';
+import { itemActions } from '@/state/items';
 
 interface RequestFileSystemProps {
 	requestId: string;
@@ -18,8 +17,8 @@ interface RequestFileSystemProps {
 
 export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 	const showSync = useShowSync(requestId);
-	const request = useSelector((state) => selectRequestById(state, requestId));
-	const endpoint = useSelector((state) => selectEndpointById(state, request?.endpointId));
+	const request = useSelector((state) => itemActions.request.select(state, requestId));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, request?.endpointId));
 	const dispatch = useAppDispatch();
 
 	if (request == null) return null;
@@ -38,7 +37,7 @@ export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
 							activeActions.updateEndpoint({ defaultRequest: isDefault ? null : request.id, id: request.endpointId }),
 						),
 				},
-				menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
+				menuOptionDuplicate(() => dispatch(itemActions.request.create(request))),
 				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(request.id))),
 			]}
 		>

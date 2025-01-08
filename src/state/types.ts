@@ -1,3 +1,4 @@
+import { PayloadAction } from '@reduxjs/toolkit';
 import { AppDispatch, RootState } from './store';
 
 /**
@@ -10,3 +11,9 @@ export interface StateAccess {
 	getState: () => RootState;
 	dispatch: AppDispatch;
 }
+
+export type Update<T extends { id: string }> = Partial<T> & { id: string };
+export type Create<T> = Partial<T> | undefined;
+
+export type PayloadUpdate<T extends { id: string }> = PayloadAction<Update<T>>;
+export type PayloadCreate<T> = PayloadAction<Create<T>>;

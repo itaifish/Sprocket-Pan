@@ -8,12 +8,10 @@ import { Check, Warning } from '@mui/icons-material';
 import { OrphanResolutionSummary } from './OrphanResolutionSummary';
 import { useAppDispatch } from '@/state/store';
 import { activeActions } from '@/state/active/slice';
-import { addNewService } from '@/state/active/thunks/services';
 import { uiActions } from '@/state/ui/slice';
-import { addNewEndpoint, deleteEndpoint } from '@/state/active/thunks/endpoints';
 import { groupBy } from '@/utils/variables';
-import { deleteRequest } from '@/state/active/thunks/requests';
-import { Endpoint, Service } from '@/types/data/workspace';
+import { Endpoint, Service, WorkspaceData } from '@/types/data/workspace';
+import { itemActions } from '@/state/items';
 
 interface AdoptionOverlayProps {
 	orphanData: OrphanData | null;
@@ -49,42 +47,39 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 
 	const onApply = async () => {
 		const {
-			[OrphanResolution.delete]: deleteEndpoints,
-			[OrphanResolution.create]: createEndpoints,
-			[OrphanResolution.revive]: reviveEndpoints,
-			[OrphanResolution.assign]: assignEndpoints,
+			delete: deleteEndpoints,
+			create: createEndpoints,
+			revive: reviveEndpoints,
+			assign: assignEndpoints,
 		} = groupBy(orphanData.endpoints, (item) => getGroup(strategy[item.orphan.id]));
 		const {
-			[OrphanResolution.delete]: deleteRequests,
-			[OrphanResolution.create]: createRequests,
-			[OrphanResolution.revive]: reviveRequests,
-			[OrphanResolution.assign]: assignRequests,
+			delete: deleteRequests,
+			create: createRequests,
+			revive: reviveRequests,
+			assign: assignRequests,
 		} = groupBy(orphanData.requests, (item) => getGroup(strategy[item.orphan.id]));
 
-		const revivedIds = new Set<string>();
+		if (reviveEndpoints?.length || reviveRequests?.length) {
+			const revivingData: Pick<WorkspaceData, 'services' | 'endpoints'> = { services: {}, endpoints: {} };
 
-		reviveEndpoints?.forEach(({ parent }) => {
-			if (parent == null) throw new Error('trying to revive a non-existent parent');
-			if (!revivedIds.has(parent)) {
-				dispatch(activeActions.insertService(orphanData.ancestors[parent] as Service));
-				revivedIds.add(parent);
-			}
-		});
-		reviveRequests?.forEach(({ parent, grandparent }) => {
-			if (parent == null || grandparent == null)
-				throw new Error('trying to revive a non-existent parent or grandparent');
-			if (!revivedIds.has(grandparent) && services[grandparent] == null) {
-				dispatch(activeActions.insertService(orphanData.ancestors[grandparent] as Service));
-				revivedIds.add(grandparent);
-			}
-			if (!revivedIds.has(parent)) {
-				dispatch(activeActions.insertEndpoint(orphanData.ancestors[parent] as Endpoint));
-				revivedIds.add(parent);
-			}
-		});
+			reviveEndpoints?.forEach(({ parent }) => {
+				if (parent == null) throw new Error('trying to revive a non-existent parent');
+				revivingData.services[parent] = orphanData.ancestors[parent] as Service;
+			});
+			reviveRequests?.forEach(({ parent, grandparent }) => {
+				if (parent == null || grandparent == null)
+					throw new Error('trying to revive a non-existent parent or grandparent');
+				if (services[grandparent] == null) {
+					revivingData.services[grandparent] = orphanData.ancestors[grandparent] as Service;
+				}
+				revivingData.endpoints[parent] = orphanData.ancestors[parent] as Endpoint;
+			});
 
-		deleteRequests?.forEach(({ orphan }) => dispatch(deleteRequest(orphan.id)));
-		deleteEndpoints?.forEach(({ orphan }) => dispatch(deleteEndpoint(orphan.id)));
+			dispatch(activeActions.injectState(revivingData));
+		}
+
+		deleteRequests?.forEach(({ orphan }) => dispatch(itemActions.request.delete(orphan.id)));
+		deleteEndpoints?.forEach(({ orphan }) => dispatch(itemActions.endpoint.delete(orphan.id)));
 
 		assignEndpoints?.forEach(({ orphan }) =>
 			activeActions.addEndpointToService({ endpointId: orphan.id, serviceId: strategy[orphan.id] }),

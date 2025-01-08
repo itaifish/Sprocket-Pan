@@ -3,7 +3,7 @@ import { appLocalDataDir, join } from '@tauri-apps/api/path';
 import { invoke } from '@tauri-apps/api/tauri';
 
 export type InvokerPath = { path: string; absolute?: boolean };
-export type InvokerFileUpdate = InvokerPath & { contents: string };
+export type InvokerFileUpdate = InvokerPath & { content: string };
 export type InvokerFileError = { path: string; error: string };
 
 export class RustInvoker {

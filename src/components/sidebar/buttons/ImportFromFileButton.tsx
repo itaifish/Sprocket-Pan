@@ -1,19 +1,17 @@
 import { open } from '@tauri-apps/api/dialog';
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import { useRef, useState } from 'react';
-import { readTextFile } from '@tauri-apps/api/fs';
 import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
 import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
-import { injectLoadedData } from '@/state/active/thunks/data';
 import { useAppDispatch } from '@/state/store';
-import { WorkspaceData } from '@/types/data/workspace';
 import { OpenApi } from '@/assets/icons/brands/OpenApi';
 import { Postman } from '@/assets/icons/brands/Postman';
 import { Insomnia } from '@/assets/icons/brands/Insomnia';
 import { SprocketPan } from '@/assets/icons/brands/SprocketPan';
 import { FluentImport } from '@/assets/icons/fluent/FluentImport';
+import { activeActions } from '@/state/active/slice';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
@@ -40,17 +38,8 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedDataString = await readTextFile(selectedUrl);
-									const asData: Partial<WorkspaceData> = JSON.parse(loadedDataString);
-									const toInject = {
-										services: Object.values(asData.services ?? {}),
-										endpoints: Object.values(asData.endpoints ?? {}),
-										requests: Object.values(asData.requests ?? {}),
-										environments: Object.values(asData.environments ?? {}),
-										scripts: Object.values(asData.scripts ?? {}),
-										secrets: Object.values(asData.secrets ?? []),
-									};
-									dispatch(injectLoadedData(toInject));
+									const data = WorkspaceDataManager.loadSprocketFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
@@ -70,8 +59,8 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadSwaggerFile(selectedUrl);
-									dispatch(injectLoadedData(loadedData));
+									const data = WorkspaceDataManager.loadSwaggerFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
@@ -91,8 +80,8 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadPostmanFile(selectedUrl);
-									dispatch(injectLoadedData(loadedData));
+									const data = WorkspaceDataManager.loadPostmanFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
@@ -112,10 +101,8 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadInsomniaFile(selectedUrl);
-									if (loadedData) {
-										dispatch(injectLoadedData(loadedData));
-									}
+									const data = WorkspaceDataManager.loadInsomniaFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>

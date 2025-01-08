@@ -1,22 +1,24 @@
 import { EllipsisTypography } from '@/components/shared/EllipsisTypography';
 import { SelectOption } from '@/components/shared/input/SprocketSelect';
 import { SprocketSelect } from '@/components/shared/input/SprocketSelect';
-import { WorkspaceItem } from '@/types/data/workspace';
+import { Item } from '@/types/data/item';
 import { Stack } from '@mui/joy';
 
-export enum OrphanResolution {
-	revive = 'revive',
-	create = 'create',
-	delete = 'delete',
-	assign = 'assign',
-	none = 'none',
-}
+export const OrphanResolution = {
+	revive: 'revive',
+	create: 'create',
+	delete: 'delete',
+	assign: 'assign',
+	none: 'none',
+};
+
+export type OrphanResolution = keyof typeof OrphanResolution;
 
 interface OrphanResolutionDropdownProps {
 	name: string;
 	parentName?: string;
 	parentType: string;
-	adoptors: WorkspaceItem[];
+	adoptors: Item[];
 	onChange: (id: string) => void;
 	value: string;
 }
