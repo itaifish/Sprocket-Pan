@@ -3,6 +3,7 @@ import { IdSpecificUiMetadata } from '@/types/data/shared';
 import {
 	Endpoint,
 	EndpointRequest,
+	Environment,
 	HistoricalEndpointResponse,
 	RootEnvironment,
 	Script,
@@ -14,8 +15,7 @@ import { KeyValuePair } from '@/types/shared/keyValues';
 import { RecursivePartial } from '@/types/utils/utils';
 import { assignDeep, mergeDeep } from '@/utils/variables';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { Create, PayloadCreate, PayloadUpdate, Update } from '../types';
-import { ItemFactory } from '@/managers/data/ItemFactory';
+import { Create, PayloadUpdate, Update } from '../types';
 import { Item } from '@/types/data/item';
 
 const initialState = {
@@ -48,28 +48,10 @@ interface SetSelectedServiceEnvironment {
 	serviceId: string;
 }
 
-function createRequest(state: State, data: Create<EndpointRequest>) {
-	const newRequest = ItemFactory.request(data);
-	state.requests[newRequest.id] = newRequest;
-	state.endpoints[newRequest.endpointId].requestIds.push(newRequest.id);
-	if (state.endpoints[newRequest.endpointId].defaultRequest == null) {
-		state.endpoints[newRequest.endpointId].defaultRequest = newRequest.id;
-	}
-}
-
 function deleteRequest(state: State, id: string) {
 	const { endpointId } = state.requests[id];
 	delete state.requests[id];
 	state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter((reqId) => reqId !== id);
-}
-
-function createEndpoint(state: State, { requestIds = [], ...data }: Create<Endpoint> = {}) {
-	const newEndpoint = ItemFactory.endpoint(data);
-	state.endpoints[newEndpoint.id] = newEndpoint;
-	state.services[newEndpoint.serviceId].endpointIds.push(newEndpoint.id);
-	for (const requestId of requestIds) {
-		createRequest(state, { ...state.requests[requestId], endpointId: newEndpoint.id });
-	}
 }
 
 function deleteEndpoint(state: State, id: string) {
@@ -77,14 +59,6 @@ function deleteEndpoint(state: State, id: string) {
 	delete state.endpoints[id];
 	state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((endId) => endId !== id);
 	requestIds.forEach((reqId) => deleteRequest(state, reqId));
-}
-
-function createService(state: State, { endpointIds = [], ...data }: Create<Service> = {}) {
-	const newService = ItemFactory.service(data);
-	state.services[newService.id] = newService;
-	for (const endpointId of endpointIds) {
-		createEndpoint(state, { ...state.endpoints[endpointId], serviceId: newService.id });
-	}
 }
 
 function deleteService(state: State, id: string) {
@@ -105,7 +79,7 @@ export const activeSlice = createSlice({
 		setFullState: (state, { payload }: PayloadAction<WorkspaceData>) => {
 			Object.assign(state, { ...initialState, ...payload });
 		},
-		injectState: (state, { payload }: PayloadCreate<WorkspaceData>) => {
+		injectState: (state, { payload }: PayloadAction<Create<WorkspaceData>>) => {
 			assignDeep(state, payload, 1);
 		},
 		setSavedNow: (state) => {
@@ -114,27 +88,33 @@ export const activeSlice = createSlice({
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
 		},
-		createService: (state, { payload }: PayloadCreate<Service>) => createService(state, payload),
+		insertService: (state, { payload }: PayloadAction<Service>) => {
+			state.services[payload.id] = payload;
+		},
+		insertEndpoint: (state, { payload }: PayloadAction<Endpoint>) => {
+			state.endpoints[payload.id] = payload;
+			state.services[payload.serviceId].endpointIds.push(payload.id);
+		},
+		insertRequest: (state, { payload }: PayloadAction<EndpointRequest>) => {
+			state.requests[payload.id] = payload;
+			state.endpoints[payload.endpointId].requestIds.push(payload.id);
+		},
+		insertScript: (state, { payload }: PayloadAction<Script>) => {
+			state.scripts[payload.id] = payload;
+		},
+		insertEnvironment: (state, { payload }: PayloadAction<Environment>) => {
+			state.environments[payload.id] = payload;
+		},
 		updateService: (state, { payload }: PayloadUpdate<Service>) => update(state.services, payload),
-		createEndpoint: (state, { payload }: PayloadCreate<Endpoint>) => createEndpoint(state, payload),
 		updateEndpoint: (state, { payload }: PayloadUpdate<Endpoint>) => update(state.endpoints, payload),
-		createRequest: (state, { payload }: PayloadCreate<EndpointRequest>) => createRequest(state, payload),
 		updateRequest: (state, { payload }: PayloadUpdate<EndpointRequest>) => update(state.requests, payload),
 		deleteService: (state, { payload }: PayloadAction<string>) => deleteService(state, payload),
 		deleteEndpoint: (state, { payload }: PayloadAction<string>) => deleteEndpoint(state, payload),
 		deleteRequest: (state, { payload }: PayloadAction<string>) => deleteRequest(state, payload),
 		updateScript: (state, { payload }: PayloadUpdate<Script>) => update(state.scripts, payload),
 		updateEnvironment: (state, { payload }: PayloadUpdate<RootEnvironment>) => update(state.environments, payload),
-		createScript: (state, { payload }: PayloadCreate<Script>) => {
-			const newScript = ItemFactory.script(payload);
-			state.scripts[newScript.id] = newScript;
-		},
 		deleteScript: (state, action: PayloadAction<string>) => {
 			delete state.scripts[action.payload];
-		},
-		createEnvironment: (state, { payload }: PayloadCreate<RootEnvironment>) => {
-			const newEnv = ItemFactory.environment(payload);
-			state.environments[newEnv.id] = newEnv;
 		},
 		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
 			state.settings = action.payload;
@@ -222,6 +202,21 @@ export const activeSlice = createSlice({
 			const { serviceEnvId, serviceId } = action.payload;
 			state.selectedServiceEnvironments[serviceId] = serviceEnvId;
 		},
+		addEndpointToService: (
+			state,
+			{ payload: { serviceId, id } }: PayloadAction<Pick<Endpoint, 'id' | 'serviceId'>>,
+		) => {
+			state.services[serviceId].endpointIds.push(id);
+			state.endpoints[id].serviceId = serviceId;
+		},
+		addRequestToEndpoint: (
+			state,
+			{ payload: { endpointId, id } }: PayloadAction<Pick<EndpointRequest, 'id' | 'endpointId'>>,
+		) => {
+			state.endpoints[endpointId].requestIds.push(id);
+			state.requests[id].endpointId = endpointId;
+		},
+		reset: () => initialState,
 	},
 });
 

@@ -10,7 +10,7 @@ import { useAppDispatch } from '@/state/store';
 import { activeActions } from '@/state/active/slice';
 import { uiActions } from '@/state/ui/slice';
 import { groupBy } from '@/utils/variables';
-import { Endpoint, Service, WorkspaceData } from '@/types/data/workspace';
+import { Endpoint, Service } from '@/types/data/workspace';
 import { itemActions } from '@/state/items';
 
 interface AdoptionOverlayProps {
@@ -59,49 +59,47 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 			assign: assignRequests,
 		} = groupBy(orphanData.requests, (item) => getGroup(strategy[item.orphan.id]));
 
+		const revivedIds = new Set();
 		if (reviveEndpoints?.length || reviveRequests?.length) {
-			const revivingData: Pick<WorkspaceData, 'services' | 'endpoints'> = { services: {}, endpoints: {} };
-
 			reviveEndpoints?.forEach(({ parent }) => {
 				if (parent == null) throw new Error('trying to revive a non-existent parent');
-				revivingData.services[parent] = orphanData.ancestors[parent] as Service;
+				if (!revivedIds.has(parent)) {
+					activeActions.insertService(orphanData.ancestors[parent] as Service);
+					revivedIds.add(parent);
+				}
 			});
 			reviveRequests?.forEach(({ parent, grandparent }) => {
 				if (parent == null || grandparent == null)
 					throw new Error('trying to revive a non-existent parent or grandparent');
-				if (services[grandparent] == null) {
-					revivingData.services[grandparent] = orphanData.ancestors[grandparent] as Service;
+				if (services[grandparent] == null && !revivedIds.has(grandparent)) {
+					activeActions.insertService(orphanData.ancestors[grandparent] as Service);
+					revivedIds.add(grandparent);
 				}
-				revivingData.endpoints[parent] = orphanData.ancestors[parent] as Endpoint;
+				if (!revivedIds.has(parent)) {
+					activeActions.insertEndpoint(orphanData.ancestors[parent] as Endpoint);
+				}
 			});
-
-			dispatch(activeActions.injectState(revivingData));
 		}
 
 		deleteRequests?.forEach(({ orphan }) => dispatch(itemActions.request.delete(orphan.id)));
 		deleteEndpoints?.forEach(({ orphan }) => dispatch(itemActions.endpoint.delete(orphan.id)));
 
 		assignEndpoints?.forEach(({ orphan }) =>
-			activeActions.addEndpointToService({ endpointId: orphan.id, serviceId: strategy[orphan.id] }),
+			activeActions.addEndpointToService({ id: orphan.id, serviceId: strategy[orphan.id] }),
 		);
 		assignRequests?.forEach(({ orphan }) =>
-			activeActions.addRequestToEndpoint({ requestId: orphan.id, endpointId: strategy[orphan.id] }),
+			activeActions.addRequestToEndpoint({ id: orphan.id, endpointId: strategy[orphan.id] }),
 		);
 
 		if (createEndpoints?.length || createRequests?.length) {
-			const serviceId = await dispatch(addNewService(autogenService)).unwrap();
+			const serviceId = await dispatch(itemActions.service.create(autogenService)).unwrap();
 			createEndpoints?.forEach(({ orphan }) =>
-				dispatch(activeActions.addEndpointToService({ endpointId: orphan.id, serviceId })),
+				dispatch(activeActions.addEndpointToService({ id: orphan.id, serviceId })),
 			);
 			if (createRequests?.length) {
-				const endpointId = await dispatch(
-					addNewEndpoint({
-						serviceId,
-						data: autogenEndpoint,
-					}),
-				).unwrap();
+				const endpointId = await dispatch(itemActions.endpoint.create({ ...autogenEndpoint, serviceId })).unwrap();
 				createRequests?.forEach(({ orphan }) =>
-					dispatch(activeActions.addRequestToEndpoint({ requestId: orphan.id, endpointId })),
+					dispatch(activeActions.addRequestToEndpoint({ id: orphan.id, endpointId })),
 				);
 			}
 		}

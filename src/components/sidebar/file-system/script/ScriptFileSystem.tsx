@@ -1,37 +1,28 @@
 import { useSelector } from 'react-redux';
 import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
-import { selectScript } from '@/state/active/selectors';
-import { createScript } from '@/state/active/thunks/scripts';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
 import { useShowSync } from '@/hooks/useShowSync';
 import { FluentLinkSvg } from '@/assets/icons/fluent/FluentLink';
 import { FluentCodeSvg } from '@/assets/icons/fluent/FluentCode';
 import { EllipsesP } from '../components/EllipsesP';
+import { itemActions } from '@/state/items';
 
 interface ScriptFileSystemProps {
 	scriptId: string;
 }
 
 export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
-	const script = useSelector((state) => selectScript(state, scriptId));
+	const script = useSelector((state) => itemActions.script.select(state, scriptId));
 	const dispatch = useAppDispatch();
 	const showSync = useShowSync(scriptId);
 
 	return (
 		<FileSystemLeaf
 			id={scriptId}
-			tabType="script"
 			menuOptions={[
-				menuOptionDuplicate(() =>
-					dispatch(
-						createScript({
-							name: `${script.name} (Copy)`,
-							content: script.content,
-						}),
-					),
-				),
+				menuOptionDuplicate(() => dispatch(itemActions.script.duplicate(script))),
 				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(script.id))),
 			]}
 		>

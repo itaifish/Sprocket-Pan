@@ -17,7 +17,7 @@ export function CopyToClipboardButton({
 }: CopyToClipboardButtonProps) {
 	const [copied, setCopied] = useState(false);
 	return (
-		<Box position="relative">
+		<Box component="span" position="relative">
 			<SprocketTooltip text={tooltipText}>
 				<IconButton
 					color={copied ? 'success' : 'neutral'}

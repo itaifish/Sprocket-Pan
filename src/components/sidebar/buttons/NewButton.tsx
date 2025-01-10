@@ -9,6 +9,7 @@ import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
+import { ItemType } from '@/types/data/item';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -19,17 +20,17 @@ export function NewButton() {
 	const newEntities = [
 		{
 			name: 'Service',
-			createFunc: () => uiActions.addToCreateQueue('service'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.service),
 			icon: <CreateNewFolderSharpIcon fontSize="small" />,
 		},
 		{
 			name: 'Environment',
-			createFunc: () => uiActions.addToCreateQueue('environment'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.environment),
 			icon: <TableChartIcon fontSize="small" />,
 		},
 		{
 			name: 'Script',
-			createFunc: () => uiActions.addToCreateQueue('script'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.script),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];

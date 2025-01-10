@@ -1,10 +1,6 @@
 import { EndpointFileSystem } from '../EndpointFileSystem';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import { useSelector } from 'react-redux';
-import { selectServiceById } from '@/state/active/selectors';
-import { addNewEndpoint } from '@/state/active/thunks/endpoints';
-import { addNewRequest } from '@/state/active/thunks/requests';
-import { cloneServiceFromId } from '@/state/active/thunks/services';
 import { useAppDispatch } from '@/state/store';
 import { selectFilteredNestedIds } from '@/state/ui/selectors';
 import { uiActions } from '@/state/ui/slice';
@@ -17,13 +13,14 @@ import {
 	menuOptionDelete,
 } from '../tree/FileSystemDropdown';
 import { EllipsesP } from '../components/EllipsesP';
+import { itemActions } from '@/state/items';
 
 interface ServiceFileSystemProps {
 	serviceId: string;
 }
 
 export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
-	const service = useSelector((state) => selectServiceById(state, serviceId));
+	const service = useSelector((state) => itemActions.service.select(state, serviceId));
 	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service?.endpointIds ?? []));
 
 	const dispatch = useAppDispatch();
@@ -32,16 +29,10 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	return (
 		<FileSystemBranch
 			id={serviceId}
-			tabType="service"
 			menuOptions={[
-				menuOptionDuplicate(() => dispatch(cloneServiceFromId(service.id))),
+				menuOptionDuplicate(() => dispatch(itemActions.service.duplicate(service))),
 				{
-					onClick: async () => {
-						const newEndpoint = await dispatch(addNewEndpoint({ serviceId: service.id }));
-						if (typeof newEndpoint.payload === 'string') {
-							await dispatch(addNewRequest({ endpointId: newEndpoint.payload }));
-						}
-					},
+					onClick: () => dispatch(itemActions.endpoint.create({ serviceId: service.id })),
 					label: 'Add Endpoint',
 					Icon: AddBoxIcon,
 				},

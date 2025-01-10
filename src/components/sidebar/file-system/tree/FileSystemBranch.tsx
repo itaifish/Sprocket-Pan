@@ -11,7 +11,7 @@ interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
 }
 
-export function FileSystemBranch({ buttonContent, children, menuOptions, tabType, id }: FileSystemBranchProps) {
+export function FileSystemBranch({ buttonContent, children, menuOptions, id }: FileSystemBranchProps) {
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
 	const isSelected = useSelector((state) => selectIsActiveTab(state, id));
@@ -22,7 +22,7 @@ export function FileSystemBranch({ buttonContent, children, menuOptions, tabType
 				<button
 					style={{ gap: '7px', display: 'flex', alignItems: 'center', flex: 1, minWidth: '50px' }}
 					onClick={() => {
-						dispatch(uiActions.addTabs({ [id]: tabType }));
+						dispatch(uiActions.addTab(id));
 						dispatch(uiActions.setSelectedTab(id));
 					}}
 				>

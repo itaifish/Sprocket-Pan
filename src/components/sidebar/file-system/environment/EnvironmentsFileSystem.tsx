@@ -12,6 +12,7 @@ import { AddBox } from '@mui/icons-material';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { uiActions } from '@/state/ui/slice';
 import { useAppDispatch } from '@/state/store';
+import { ItemType } from '@/types/data/item';
 
 export function EnvironmentsFileSystem() {
 	const environments = useSelector(selectEnvironments);
@@ -33,7 +34,7 @@ export function EnvironmentsFileSystem() {
 						<Stack direction="row">
 							<OpenSecretsButton />
 							<SprocketTooltip text="Add New Environment">
-								<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('environment'))}>
+								<IconButton onClick={() => dispatch(uiActions.addToCreateQueue(ItemType.environment))}>
 									<AddBox />
 								</IconButton>
 							</SprocketTooltip>

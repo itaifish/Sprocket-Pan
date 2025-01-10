@@ -37,7 +37,7 @@ export function Workspace() {
 			</Box>
 			<PanelGroup direction="horizontal">
 				<Panel
-					defaultSize={24}
+					defaultSize={25}
 					minSize={10}
 					ref={ref}
 					collapsible

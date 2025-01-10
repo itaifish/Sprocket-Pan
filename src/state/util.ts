@@ -1,16 +1,15 @@
-import { ItemType } from '@/types/data/item';
+import { ItemType, ShortItemType } from '@/types/data/item';
 import { itemActions } from './items';
 
-export const itemTypes = Object.values(ItemType);
+const shortItemTypes = Object.entries(ShortItemType);
 
 /**
  * Extracts the Item Type from the given id, returns undefined if invalid.
  * @param id The item id (format string:uuid) to parse
  */
 export function extractItemType(id: string) {
-	const str = id.split(':');
-	for (const type of itemTypes) {
-		if (str[0] === type) return type;
+	for (const [key, type] of shortItemTypes) {
+		if (id.startsWith(type)) return key as ItemType;
 	}
 }
 

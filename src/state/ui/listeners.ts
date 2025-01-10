@@ -9,13 +9,12 @@ const openTabsListener = createListenerMiddleware<RootState, ThunkDispatch<RootS
 
 const allActions = Object.values(itemActions);
 const isDeleteAction = isAnyOf(...allActions.map((action) => action.delete));
-const isCreateAction = isAnyOf(...allActions.map((action) => action.create));
+const isCreateAction = isAnyOf(...allActions.map((action) => action.create.fulfilled));
 
 closeTabsListener.startListening({
 	matcher: isDeleteAction,
 	effect: ({ payload }, { dispatch, getState }) => {
 		const state = getState();
-		// TODO: rewrite this to be one dispatch later.
 		getDescendents({ ...state.active, ...state.global }, payload).forEach((id) => dispatch(uiActions.closeTab(id)));
 	},
 });
@@ -23,8 +22,8 @@ closeTabsListener.startListening({
 openTabsListener.startListening({
 	matcher: isCreateAction,
 	effect: ({ payload }, { dispatch }) => {
-		dispatch(uiActions.addTab(payload.id));
-		dispatch(uiActions.setSelectedTab(payload.id));
+		dispatch(uiActions.addTab(payload));
+		dispatch(uiActions.setSelectedTab(payload));
 	},
 });
 

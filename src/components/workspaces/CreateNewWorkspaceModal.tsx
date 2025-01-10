@@ -17,9 +17,9 @@ import { useState } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useSelector } from 'react-redux';
 import { selectWorkspacesList } from '@/state/global/selectors';
-import { createWorkspace } from '@/state/global/thunks';
 import { useAppDispatch } from '@/state/store';
 import { toValidFolderName } from '@/utils/string';
+import { itemActions } from '@/state/items';
 
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
@@ -28,17 +28,17 @@ interface CreateNewWorkspaceModalProps {
 
 export function CreateNewWorkspaceModal({ open, closeFunc }: CreateNewWorkspaceModalProps) {
 	const workspaces = useSelector(selectWorkspacesList);
-	const [workspaceName, setWorkspaceName] = useState('');
-	const [workspaceDescription, setWorkspaceDescription] = useState('');
+	const [name, setName] = useState('');
+	const [description, setDescription] = useState('');
 	const [loading, setLoading] = useState(false);
 	const dispatch = useAppDispatch();
-	const workspaceFileName = toValidFolderName(workspaceName).substring(0, 25);
-	const isEmpty = workspaceFileName === '';
-	const alreadyExists = workspaces.some((workspace) => workspace.fileName === workspaceFileName);
+	const fileName = toValidFolderName(name).substring(0, 25);
+	const isEmpty = fileName === '';
+	const alreadyExists = workspaces.some((workspace) => workspace.fileName === fileName);
 
 	const reset = () => {
-		setWorkspaceDescription('');
-		setWorkspaceName('');
+		setDescription('');
+		setName('');
 		setLoading(false);
 	};
 
@@ -47,16 +47,16 @@ export function CreateNewWorkspaceModal({ open, closeFunc }: CreateNewWorkspaceM
 		closeFunc();
 	};
 
-	async function onCreate() {
+	function onCreate() {
 		setLoading(true);
-		await dispatch(
-			createWorkspace({
-				name: workspaceName,
-				description: workspaceDescription,
+		dispatch(
+			itemActions.workspace.create({
+				name,
+				description,
 				lastModified: new Date().getTime(),
-				fileName: workspaceFileName,
+				fileName,
 			}),
-		).unwrap();
+		);
 		onClose();
 	}
 
@@ -71,13 +71,13 @@ export function CreateNewWorkspaceModal({ open, closeFunc }: CreateNewWorkspaceM
 							<FormLabel>Name</FormLabel>
 							<Input
 								placeholder="New Workspace Name"
-								value={workspaceName}
-								onChange={(e) => setWorkspaceName(e.target.value)}
+								value={name}
+								onChange={(e) => setName(e.target.value)}
 								error={alreadyExists}
 							/>
 							{!isEmpty && (
 								<FormHelperText>
-									This will be saved in the <code>{workspaceFileName}</code> folder.
+									This will be saved in the <code>{fileName}</code> folder.
 								</FormHelperText>
 							)}
 							{alreadyExists && <FormHelperText>A workspace this folder name already exists.</FormHelperText>}
@@ -86,8 +86,8 @@ export function CreateNewWorkspaceModal({ open, closeFunc }: CreateNewWorkspaceM
 							<FormLabel>Short Description</FormLabel>
 							<Input
 								placeholder="New Workspace Description"
-								value={workspaceDescription}
-								onChange={(e) => setWorkspaceDescription(e.target.value)}
+								value={description}
+								onChange={(e) => setDescription(e.target.value)}
 							/>
 						</FormControl>
 					</Stack>

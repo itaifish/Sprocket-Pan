@@ -1,8 +1,7 @@
 import { useSelector } from 'react-redux';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import { selectSelectedEnvironment, selectEnvironmentsById } from '@/state/active/selectors';
+import { selectSelectedEnvironment } from '@/state/active/selectors';
 import { activeActions } from '@/state/active/slice';
-import { addNewEnvironmentById } from '@/state/active/thunks/environments';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
 import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
@@ -11,6 +10,7 @@ import { useShowSync } from '@/hooks/useShowSync';
 import { FluentCubeLinkSvg } from '@/assets/icons/fluent/FluentCubeLink';
 import { FluentCubeSvg } from '@/assets/icons/fluent/FluentCube';
 import { EllipsesP } from '../components/EllipsesP';
+import { itemActions } from '@/state/items';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -19,20 +19,19 @@ interface EnvironmentFileSystemProps {
 export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const envSelected = selectedEnvironment === environmentId;
-	const environment = useSelector((state) => selectEnvironmentsById(state, environmentId));
+	const environment = useSelector((state) => itemActions.environment.select(state, environmentId));
 	const dispatch = useAppDispatch();
 	const showSync = useShowSync(environmentId);
 	return (
 		<FileSystemLeaf
 			id={environmentId}
-			tabType="environment"
 			menuOptions={[
 				{
 					onClick: () => dispatch(activeActions.selectEnvironment(envSelected ? undefined : environment.id)),
 					Icon: CheckCircleOutlinedIcon,
 					label: envSelected ? 'Deselect' : 'Select',
 				},
-				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.id))),
+				menuOptionDuplicate(() => dispatch(itemActions.environment.duplicate(environment))),
 				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(environment.id))),
 			]}
 		>

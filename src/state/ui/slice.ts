@@ -108,6 +108,7 @@ export const uiSlice = createSlice({
 		toast: (state, { payload }: PayloadAction<ToastProps>) => {
 			state.toast = payload;
 		},
+		reset: () => initialState,
 	},
 });
 

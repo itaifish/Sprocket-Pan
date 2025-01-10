@@ -1,5 +1,4 @@
 import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
-import { fileSystemEmitter, FILE_SYSTEM_CHANGE_EVENT } from '@/managers/file-system/FileSystemEmitter';
 import { globalActions } from '@/state/global/slice';
 import { useAppDispatch } from '@/state/store';
 import { useEffect } from 'react';
@@ -14,9 +13,5 @@ export function useFileSystemSynchronization() {
 	}
 	useEffect(() => {
 		updateWorkspaceSlice();
-		fileSystemEmitter.on(FILE_SYSTEM_CHANGE_EVENT, updateWorkspaceSlice);
-		return () => {
-			fileSystemEmitter.removeListener(FILE_SYSTEM_CHANGE_EVENT, updateWorkspaceSlice);
-		};
 	}, []);
 }

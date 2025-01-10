@@ -9,7 +9,7 @@ import { extractActions } from '@/state/util';
 
 function useTabInfo(id: string) {
 	const actions = extractActions(id);
-	const item = useSelector((state) => actions?.select(state, id));
+	const item = useSelector((state) => actions?.select?.(state, id));
 	if (actions == null || item == null) {
 		switch (id) {
 			case 'secrets':

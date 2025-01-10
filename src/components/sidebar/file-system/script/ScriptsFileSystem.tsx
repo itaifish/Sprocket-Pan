@@ -11,6 +11,7 @@ import { useAppDispatch } from '@/state/store';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { uiActions } from '@/state/ui/slice';
 import { AddBox } from '@mui/icons-material';
+import { ItemType } from '@/types/data/item';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);
@@ -27,7 +28,7 @@ export function ScriptsFileSystem() {
 					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
 						<SearchField onChange={setSearchText} />
 						<SprocketTooltip text="Add New Script">
-							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('script'))}>
+							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue(ItemType.script))}>
 								<AddBox />
 							</IconButton>
 						</SprocketTooltip>

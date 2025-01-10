@@ -3,11 +3,9 @@ import {
 	selectSecrets,
 	selectSelectedEnvironmentValue,
 	selectEnvironments,
-	selectRequestById,
-	selectEndpointById,
-	selectServiceById,
 	selectSelectedServiceEnvironments,
 } from '@/state/active/selectors';
+import { itemActions } from '@/state/items';
 import { useSelector } from 'react-redux';
 
 function useRootEnvironmentArgs() {
@@ -24,7 +22,7 @@ export function useComputedRootEnvironment() {
 
 export function useComputedServiceEnvironment(id?: string) {
 	const args = useRootEnvironmentArgs();
-	const service = useSelector((state) => selectServiceById(state, id));
+	const service = useSelector((state) => itemActions.service.select(state, id));
 	const selectedEnvId = service == null ? null : useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,
@@ -34,9 +32,9 @@ export function useComputedServiceEnvironment(id?: string) {
 
 export function useComputedRequestEnvironment(id?: string) {
 	const args = useRootEnvironmentArgs();
-	const request = useSelector((state) => selectRequestById(state, id));
-	const endpoint = useSelector((state) => selectEndpointById(state, request?.endpointId));
-	const service = useSelector((state) => selectServiceById(state, endpoint?.serviceId));
+	const request = useSelector((state) => itemActions.request.select(state, id));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, request?.endpointId));
+	const service = useSelector((state) => itemActions.service.select(state, endpoint?.serviceId));
 	const selectedEnvId = service == null ? null : useSelector(selectSelectedServiceEnvironments)[service.id];
 	return EnvironmentContextResolver.buildEnvironmentVariables({
 		...args,

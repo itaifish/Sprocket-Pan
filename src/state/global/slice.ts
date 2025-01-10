@@ -4,7 +4,6 @@ import { GlobalData } from '@/types/data/global';
 import { WorkspaceMetadata } from '@/types/data/workspace';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { PayloadUpdate } from '../types';
-import { ItemFactory } from '@/managers/data/ItemFactory';
 
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: WorkspaceMetadata;
@@ -25,10 +24,9 @@ export const globalSlice = createSlice({
 		setWorkspaces: (state, action: PayloadAction<GlobalState['workspaces']>) => {
 			state.workspaces = action.payload;
 		},
-		createWorkspace: (state, { payload }: PayloadUpdate<WorkspaceMetadata>) => {
-			const newWorkspace = ItemFactory.workspace(payload);
-			GlobalDataManager.createWorkspace(newWorkspace);
-			state.workspaces[newWorkspace.id] = newWorkspace;
+		insertWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata>) => {
+			GlobalDataManager.createWorkspace(payload);
+			state.workspaces[payload.id] = payload;
 		},
 		deleteWorkspace: (state, { payload }: PayloadAction<string>) => {
 			const path = state.workspaces[payload]?.fileName;

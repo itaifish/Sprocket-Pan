@@ -25,8 +25,38 @@ Instead, just make sure to add the new property at src\constants\defaults
 
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { MS_IN_MINUTE } from '@/constants/constants';
-import { WorkspaceData, HistoricalEndpointResponse, Environment } from '@/types/data/workspace';
+import {
+	WorkspaceData,
+	HistoricalEndpointResponse,
+	Environment,
+	WorkspaceMetadata,
+	WorkspaceItems,
+} from '@/types/data/workspace';
 import { defaultWorkspaceData } from './data/WorkspaceDataManager';
+import { ItemFactory } from './data/ItemFactory';
+import { ShortItemType } from '@/types/data/item';
+
+function toTen(data: WorkspaceData) {
+	const transformedIds = new Set<string>();
+	const collectIds = (key: keyof WorkspaceItems, prefix: ItemType) => {
+		Object.keys(data[key]).forEach((id) => {
+			if (!id.startsWith(prefix)) {
+				transformedIds.add(`${prefix}:${id}`);
+			}
+		});
+	};
+	collectIds('endpoints', ShortItemType.endpoint);
+	collectIds('scripts', ShortItemType.script);
+	collectIds('environments', ShortItemType.environment);
+	collectIds('requests', ShortItemType.request);
+	collectIds('services', ShortItemType.service);
+	// this is dumb but holy hell is it effective
+	let stringData = JSON.stringify(data);
+	transformedIds.forEach((id) => {
+		stringData = stringData.replaceAll(id.split(':')[1], id);
+	});
+	Object.assign(data, JSON.parse(stringData));
+}
 
 function toNine(data: WorkspaceData | any) {
 	data.syncMetadata = { items: {} };
@@ -137,7 +167,7 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight, toNine] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight, toNine, toTen] as const;
 
 export class SaveUpdateManager {
 	public static getCurrentVersion(): number {
@@ -147,5 +177,12 @@ export class SaveUpdateManager {
 	public static update(data: WorkspaceData | any) {
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
+	}
+
+	public static updateWorkspaces(workspaces: WorkspaceMetadata[]) {
+		return workspaces.map((workspace) => {
+			if (workspace.id == null) return ItemFactory.workspace(workspace);
+			return workspace;
+		});
 	}
 }

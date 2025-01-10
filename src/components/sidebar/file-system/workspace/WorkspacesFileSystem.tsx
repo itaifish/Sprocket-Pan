@@ -13,7 +13,7 @@ export function WorkspacesFileSystem() {
 	const dispatch = useAppDispatch();
 	const inactiveWorkspaces = workspaces.filter((workspace) => workspace.fileName !== activeWorkspace?.fileName);
 	const onOpenTab = (id: string) => {
-		dispatch(uiActions.addTabs({ [id]: 'workspace' }));
+		dispatch(uiActions.addTab(id));
 		dispatch(uiActions.setSelectedTab(id));
 	};
 	const onSwitchTo = () => {};

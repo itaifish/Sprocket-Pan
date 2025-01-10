@@ -9,15 +9,16 @@ import { SecretsPanel } from './secrets/SecretsPanel';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorFallback } from '../shared/ErrorFallback';
 import { WorkspacePanel } from './workspace/WorkspacePanel';
+import { ShortItemType } from '@/types/data/item';
 
-const contentMap: Record<string, FunctionComponent<PanelProps>> = {
-	request: RequestPanel,
-	environment: EnvironmentPanel,
-	service: ServicePanel,
-	endpoint: EndpointPanel,
-	script: ScriptPanel,
+const contentMap: Record<string | 'secrets', FunctionComponent<PanelProps>> = {
+	[ShortItemType.request]: RequestPanel,
+	[ShortItemType.environment]: EnvironmentPanel,
+	[ShortItemType.service]: ServicePanel,
+	[ShortItemType.endpoint]: EndpointPanel,
+	[ShortItemType.script]: ScriptPanel,
+	[ShortItemType.workspace]: WorkspacePanel,
 	secrets: SecretsPanel,
-	workspace: WorkspacePanel,
 };
 
 function extractTabContent(id: string) {

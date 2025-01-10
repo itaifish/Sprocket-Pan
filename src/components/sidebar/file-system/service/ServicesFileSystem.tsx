@@ -12,6 +12,7 @@ import { collapseAll, expandAll } from '@/state/ui/thunks';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { AddBox } from '@mui/icons-material';
 import { menuOptionCollapseAll, menuOptionExpandAll } from '../tree/FileSystemDropdown';
+import { ItemType } from '@/types/data/item';
 
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
@@ -31,7 +32,7 @@ export function ServicesFileSystem() {
 					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
 						<SearchField onChange={(text) => dispatch(uiActions.setSearchText(text))} />
 						<SprocketTooltip text="Add New Service">
-							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue('service'))}>
+							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue(ItemType.service))}>
 								<AddBox />
 							</IconButton>
 						</SprocketTooltip>

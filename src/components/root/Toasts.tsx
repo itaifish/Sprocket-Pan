@@ -15,7 +15,6 @@ export interface ToastProps {
 export function Toasts() {
 	const [open, setOpen] = useState(false);
 	const toast = useSelector(selectToast);
-	console.log(toast);
 	useEffect(() => {
 		if (toast == null) {
 			setOpen(false);

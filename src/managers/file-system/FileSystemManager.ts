@@ -6,7 +6,7 @@ import { FileSystemWorker } from './FileSystemWorker';
 type WorkspacePaths = { metadata: string; root: string };
 
 export class FileSystemManager {
-	async createWorkspace(paths: WorkspacePaths, content: string) {
+	static async createWorkspace(paths: WorkspacePaths, content: string) {
 		if (await FileSystemWorker.exists(paths.metadata)) {
 			return;
 		}
@@ -14,7 +14,7 @@ export class FileSystemManager {
 		await FileSystemWorker.writeFile({ path: paths.metadata, content });
 	}
 
-	async deleteWorkspace(paths: WorkspacePaths) {
+	static async deleteWorkspace(paths: WorkspacePaths) {
 		const doesExist = await FileSystemWorker.exists(paths.metadata);
 		if (!doesExist) {
 			return null;

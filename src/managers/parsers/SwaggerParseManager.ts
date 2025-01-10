@@ -6,8 +6,8 @@ import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
 import { Endpoint, EndpointRequest, Service } from '@/types/data/workspace';
 import { RESTfulRequestVerbs, RESTfulRequestVerb } from '@/types/data/shared';
-import { cloneEnv } from '@/utils/application';
 import { log } from '@/utils/logging';
+import { ItemFactory } from '../data/ItemFactory';
 
 export type ParsedServiceWorkspaceData = {
 	services: Service[];
@@ -139,7 +139,7 @@ class SwaggerParseManager {
 						bodyType: 'none',
 						rawType: undefined,
 						history: [],
-						environmentOverride: cloneEnv(),
+						environmentOverride: ItemFactory.environment(),
 					};
 					const newRequests: EndpointRequest[] = [];
 					parameters.forEach((param) => {
@@ -269,7 +269,7 @@ class SwaggerParseManager {
 					bodyType: 'none',
 					rawType: undefined,
 					history: [],
-					environmentOverride: cloneEnv(),
+					environmentOverride: ItemFactory.environment(),
 				};
 				const newRequests: EndpointRequest[] = [];
 				parameters.forEach((param) => {
