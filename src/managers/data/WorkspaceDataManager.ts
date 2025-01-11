@@ -101,7 +101,7 @@ export class WorkspaceDataManager {
 			secrets,
 			history,
 			...strippedData
-		} = data;
+		} = structuredClone(data);
 
 		const paths = this.getWorkspacePath(fileName);
 		const processedHistory = this.processHistoryForSave(history);

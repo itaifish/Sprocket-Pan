@@ -5,6 +5,7 @@ import { errorToSprocketError } from '@/utils/conversion';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '@/state/store';
 import { activeActions, activeThunkName, UpdateLinkedEnv } from './slice';
+import { log } from '@/utils/logging';
 
 interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
 	remove: string[];
@@ -35,6 +36,7 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 					color: 'danger',
 				}),
 			);
+			log.error(err);
 		}
 	},
 );

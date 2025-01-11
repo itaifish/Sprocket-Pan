@@ -38,7 +38,8 @@ import { ShortItemType } from '@/types/data/item';
 
 function toTen(data: WorkspaceData) {
 	const transformedIds = new Set<string>();
-	const collectIds = (key: keyof WorkspaceItems, prefix: ItemType) => {
+	const collectIds = (key: keyof WorkspaceItems, prefix: ShortItemType) => {
+		if (data[key] == null) return;
 		Object.keys(data[key]).forEach((id) => {
 			if (!id.startsWith(prefix)) {
 				transformedIds.add(`${prefix}:${id}`);
