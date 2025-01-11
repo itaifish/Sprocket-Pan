@@ -19,7 +19,6 @@ import { insomniaParseManager } from '../parsers/InsomniaParseManager';
 import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
 import swaggerParseManager from '../parsers/SwaggerParseManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
-import { defaultWorkspaceMetadata } from './GlobalDataManager';
 import { getWorkspaceItemType } from '@/utils/getters';
 import { InvokerFileUpdate } from '../RustInvoker';
 import { mergeDeep } from '@/utils/variables';
@@ -37,7 +36,6 @@ export const defaultWorkspaceData: WorkspaceData = {
 	...defaultWorkspaceSyncedData,
 	history: {},
 	selectedEnvironment: undefined,
-	metadata: defaultWorkspaceMetadata,
 	uiMetadata: {
 		idSpecific: {},
 	},
@@ -69,12 +67,9 @@ export class WorkspaceDataManager {
 		return insomniaParseManager.parseInsomniaFile('filePath', url);
 	}
 
-	public static async exportData(data?: WorkspaceData) {
-		if (data == null) {
-			throw new Error('export data called with no data');
-		}
+	public static async exportData(data: WorkspaceData, metadata: WorkspaceMetadata) {
 		const filePath = await save({
-			title: `Save ${data.metadata?.name} Workspace`,
+			title: `Save ${metadata.name} Workspace`,
 			filters: [
 				{ name: 'Sprocketpan Workspace', extensions: ['json'] },
 				{ name: 'All Files', extensions: ['*'] },
@@ -87,21 +82,15 @@ export class WorkspaceDataManager {
 
 		const dataToWrite = JSON.stringify(
 			{ ...data, secrets: data.secrets.map(({ key }) => ({ key, value: '' })) },
-			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'metadata', 'uiMetadata'),
+			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'uiMetadata'),
 		);
 
 		await writeTextFile(filePath, dataToWrite);
 	}
 
-	public static async saveData(allData: WorkspaceData) {
+	public static async saveData(allData: WorkspaceData, { fileName, ...metadata }: WorkspaceMetadata) {
 		const { data, sync, location } = this.splitWorkspace(allData);
-		const {
-			metadata: { fileName, ...metadata },
-			uiMetadata,
-			secrets,
-			history,
-			...strippedData
-		} = structuredClone(data);
+		const { uiMetadata, secrets, history, ...strippedData } = structuredClone(data);
 
 		const paths = this.getWorkspacePath(fileName);
 		const processedHistory = this.processHistoryForSave(history);
@@ -137,14 +126,14 @@ export class WorkspaceDataManager {
 		};
 	}
 
-	public static async processOrphans(data: WorkspaceData): Promise<OrphanData> {
+	public static async processOrphans(data: WorkspaceData, metadata: WorkspaceMetadata): Promise<OrphanData> {
 		const list = this.findOrphans(data);
 		const orphan: OrphanData = {
 			endpoints: list.endpoints.map((orphan) => ({ orphan })),
 			requests: list.requests.map((orphan) => ({ orphan })),
 			ancestors: {},
 		};
-		const paths = this.getWorkspacePath(data.metadata.fileName);
+		const paths = this.getWorkspacePath(metadata.fileName);
 		if (this.getSyncLocation(data) != null && (await FileSystemWorker.exists(paths.syncBackup))) {
 			const backup = JSON.parse(await FileSystemWorker.readTextFile(paths.syncBackup)) as WorkspaceSyncedData;
 			orphan.endpoints.forEach((endpoint) => {
@@ -195,20 +184,14 @@ export class WorkspaceDataManager {
 
 	private static async loadDataFromFile(workspace: WorkspaceMetadata) {
 		const paths = this.getWorkspacePath(workspace.fileName);
-		const [data, metadata, history, uiMetadata, secrets] = await Promise.all([
+		const [data, history, uiMetadata, secrets] = await Promise.all([
 			FileSystemWorker.readTextFile(paths.data),
-			FileSystemWorker.readTextFile(paths.metadata),
 			FileSystemWorker.readTextFile(paths.history),
 			FileSystemWorker.readTextFile(paths.uiMetadata),
 			FileSystemWorker.readTextFile(paths.secrets),
 		]);
-
 		let parsedData = JSON.parse(data) as WorkspaceData;
 		parsedData.history = JSON.parse(history);
-		parsedData.metadata = {
-			fileName: workspace.fileName,
-			...JSON.parse(metadata),
-		};
 		parsedData.uiMetadata = JSON.parse(uiMetadata);
 		parsedData.secrets = JSON.parse(secrets);
 		const syncLocation = this.getSyncLocation(parsedData);
@@ -252,7 +235,7 @@ export class WorkspaceDataManager {
 	private static async createDataFilesIfNotExist({ fileName, ...workspace }: WorkspaceMetadata) {
 		log.trace(`createDataFilesIfNotExist called`);
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const { metadata, uiMetadata, ...defaultData } = defaultWorkspaceData;
+		const { uiMetadata, ...defaultData } = defaultWorkspaceData;
 		const paths = this.getWorkspacePath(fileName);
 		const promises = [
 			FileSystemManager.createFileIfNotExists(paths.data, defaultData),

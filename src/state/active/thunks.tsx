@@ -28,11 +28,12 @@ export const relinkEnvironments = createAsyncThunk<void, RelinkEnvironmentsArgs,
 export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>(
 	`${activeThunkName}/saveData`,
 	async (_, thunk) => {
-		const { active, ui } = thunk.getState();
+		const { active, ui, global } = thunk.getState();
 		const { lastModified, lastSaved, ...data } = active;
+		const workspace = global.workspaces[global?.activeWorkspace];
 		if (lastModified < lastSaved || ui.orphans != null) return;
 		try {
-			await WorkspaceDataManager.saveData(data);
+			await WorkspaceDataManager.saveData(data, workspace);
 			thunk.dispatch(activeActions.setSavedNow());
 		} catch (err) {
 			log.error(err);

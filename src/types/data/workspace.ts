@@ -123,7 +123,6 @@ export interface WorkspaceData extends WorkspaceItems {
 	selectedEnvironment?: string;
 	selectedServiceEnvironments: Record<string, string | undefined>;
 	settings: WorkspaceSettings;
-	metadata: WorkspaceMetadata;
 	uiMetadata: UiMetadata;
 	version: number | null;
 	syncMetadata: SyncMetadata;
