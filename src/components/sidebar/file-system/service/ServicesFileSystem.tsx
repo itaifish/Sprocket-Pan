@@ -13,7 +13,7 @@ import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { AddBox } from '@mui/icons-material';
 import { menuOptionCollapseAll, menuOptionExpandAll } from '../tree/FileSystemDropdown';
 import { ItemType } from '@/types/data/item';
-
+import { Virtuoso } from 'react-virtuoso';
 export function ServicesFileSystem() {
 	const services = useSelector(selectServices);
 	const serviceIdsUnfiltered = Object.values(services).map((srv) => srv.id);
@@ -45,9 +45,11 @@ export function ServicesFileSystem() {
 				</Typography>
 			)}
 			<FileSystemTrunk>
-				{serviceIds.map((serviceId) => (
-					<ServiceFileSystem key={serviceId} serviceId={serviceId} />
-				))}
+				<Virtuoso
+					style={{ height: 'calc(100vh - 200px)' }}
+					data={serviceIds}
+					itemContent={(_index, serviceId) => <ServiceFileSystem serviceId={serviceId} />}
+				></Virtuoso>
 			</FileSystemTrunk>
 		</>
 	);
