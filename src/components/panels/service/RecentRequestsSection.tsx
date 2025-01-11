@@ -17,7 +17,7 @@ export function RecentRequestsSection({ service }: RecentRequestsSectionProps) {
 		() =>
 			service.endpointIds
 				.flatMap((endpointId) => endpoints[endpointId]?.requestIds.map((requestId) => requests[requestId]))
-				.filter((request) => request != null)
+				.filter((request) => request != null && (histories[request.id] ?? []).length > 0)
 				.sort((req1, req2) => {
 					const history1 = histories[req1.id] ?? [];
 					const history2 = histories[req2.id] ?? [];
