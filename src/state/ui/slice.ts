@@ -77,7 +77,9 @@ export const uiSlice = createSlice({
 			state.tabs = { ...state.tabs, ...action.payload };
 		},
 		addTab: (state, { payload }: PayloadAction<string>) => {
-			state.tabs.push(payload);
+			if (!state.tabs.includes(payload)) {
+				state.tabs.push(payload);
+			}
 		},
 		setSelectedTab: (state, { payload }: PayloadAction<string>) => {
 			state.selectedTab = payload;

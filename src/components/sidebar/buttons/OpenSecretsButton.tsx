@@ -1,5 +1,4 @@
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
-import { ELEMENT_ID } from '@/constants/uiElementIds';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
 import { Key } from '@mui/icons-material';
@@ -12,7 +11,7 @@ export function OpenSecretsButton() {
 			<IconButton
 				onClick={() => {
 					dispatch(uiActions.addTab('secrets'));
-					dispatch(uiActions.setSelectedTab(ELEMENT_ID.secrets));
+					dispatch(uiActions.setSelectedTab('secrets'));
 				}}
 			>
 				<Key />
