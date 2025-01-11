@@ -40,7 +40,9 @@ export const globalSlice = createSlice({
 			delete state.workspaces[payload];
 		},
 		updateWorkspace: (state, { payload }: PayloadUpdate<WorkspaceMetadata>) => {
-			state.workspaces[payload.id] = { ...state.workspaces[payload.id], ...payload };
+			const workspace = { ...state.workspaces[payload.id], ...payload };
+			state.workspaces[payload.id] = workspace;
+			GlobalDataManager.updateWorkspace(workspace);
 		},
 		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
 			const workspace = action.payload;

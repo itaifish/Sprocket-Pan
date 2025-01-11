@@ -24,8 +24,8 @@ export class GlobalDataManager {
 		return FileSystemManager.createWorkspace(paths, workspace);
 	}
 
-	static async updateWorkspace(workspace: WorkspaceMetadata) {
-		const paths = WorkspaceDataManager.getWorkspacePath(workspace.fileName);
+	static async updateWorkspace({ fileName, ...workspace }: WorkspaceMetadata) {
+		const paths = WorkspaceDataManager.getWorkspacePath(fileName);
 		return FileSystemManager.updateWorkspace(paths, workspace);
 	}
 
