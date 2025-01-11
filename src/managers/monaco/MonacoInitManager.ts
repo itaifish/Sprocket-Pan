@@ -27,6 +27,7 @@ function updateModelDefinition(monaco: Monaco, injectedCode: string) {
 export function getMonacoInjectedCode(scripts: Script[]) {
 	const ret = `${internalTypesRaw}
 	const sp = {} as SprocketInjectedScripts;
+	const sprocketPan = sp;
 	${getScriptsAsCode(scripts)}`;
 	return ret;
 }

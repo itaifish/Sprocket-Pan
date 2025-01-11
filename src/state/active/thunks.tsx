@@ -1,11 +1,16 @@
 import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
 import { getAncestors, getDescendents } from '@/utils/getters';
 import { uiActions } from '@/state/ui/slice';
-import { errorToSprocketError } from '@/utils/conversion';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { RootState } from '@/state/store';
 import { activeActions, activeThunkName, UpdateLinkedEnv } from './slice';
+import { IconButton, Typography } from '@mui/joy';
+import { errorToSprocketError } from '@/utils/conversion';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { appLogDir } from '@tauri-apps/api/path';
+import { RustInvoker } from '@/managers/RustInvoker';
 import { log } from '@/utils/logging';
+import { FluentFolderOpenArrow } from '@/assets/icons/fluent/FluentFolderOpenArrow';
 
 interface RelinkEnvironmentsArgs extends Omit<UpdateLinkedEnv, 'envId'> {
 	remove: string[];
@@ -30,9 +35,29 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 			await WorkspaceDataManager.saveData(data);
 			thunk.dispatch(activeActions.setSavedNow());
 		} catch (err) {
+			log.error(err);
 			thunk.dispatch(
 				uiActions.toast({
-					message: `Failed to save all files! Error: ${errorToSprocketError(err).message}`,
+					title: `Failed to save all files`,
+					details: (
+						<>
+							<Typography color="danger" level="body-sm">
+								{errorToSprocketError(err).message}
+							</Typography>
+							<SprocketTooltip text="Open Logs">
+								<IconButton
+									color="primary"
+									variant="plain"
+									onClick={async () => {
+										const logDir = await appLogDir();
+										RustInvoker.showInExplorer({ path: `${logDir}${log.LOG_FILE_NAME}`, absolute: true });
+									}}
+								>
+									<FluentFolderOpenArrow />
+								</IconButton>
+							</SprocketTooltip>
+						</>
+					),
 					color: 'danger',
 				}),
 			);

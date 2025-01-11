@@ -41,7 +41,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 						inputSx={{ width: 250 }}
 						disabled={!autosaveEnabled}
 						id="autosave-duration"
-						label="Interval"
+						label="Autosave Interval"
 						value={autosave.intervalMS / MS_IN_MINUTE}
 						overlay={oversave?.intervalMS == null ? undefined : oversave.intervalMS / MS_IN_MINUTE}
 						onChange={(val) => onChange({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}

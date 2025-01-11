@@ -37,7 +37,7 @@ export interface SprocketInjectedScripts {
 	// this will get replaced by actual user script typing in the type injection step
 	interrupt: Interrupt;
 	sleep: (ms: number) => Promise<void>;
-	setEnvVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
+	setEnvironmentVariable: (key: string, value: string, level?: 'request' | 'service' | 'global') => void;
 	setQueryParam: (key: string, value?: string | string[]) => void;
 	setHeader: (key: string, value: string) => void;
 	deleteHeader: (key: string) => void;
@@ -67,7 +67,7 @@ export interface SprocketInjectedScripts {
 		rawHeaders: Record<string, string[]>;
 		data: T;
 	}>;
-	readonly environment: Record<string, string>;
+	getEnvironment: () => Record<string, string>;
 	readonly data: WorkspaceData;
 	readonly response: HistoricalEndpointResponse | null;
 	readonly request: EndpointRequest | null;

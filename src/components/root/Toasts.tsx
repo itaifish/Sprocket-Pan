@@ -1,13 +1,13 @@
 import { selectToast } from '@/state/ui/selectors';
 import { Close, Info, Warning } from '@mui/icons-material';
-import { ColorPaletteProp, IconButton, Snackbar, Stack } from '@mui/joy';
+import { ColorPaletteProp, Divider, IconButton, Snackbar, Stack, Typography } from '@mui/joy';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 export interface ToastProps {
-	message?: string;
+	title?: string;
 	color?: ColorPaletteProp;
-	details?: string;
+	details?: string | JSX.Element;
 }
 
 // this is intended for expansion into stacked/multi-toasts
@@ -25,20 +25,56 @@ export function Toasts() {
 	return (
 		<Snackbar
 			sx={{ maxWidth: '900px' }}
-			startDecorator={toast?.color === 'danger' || toast?.color === 'warning' ? <Warning /> : <Info />}
+			startDecorator={
+				toast?.color === 'danger' || toast?.color === 'warning' ? (
+					<Warning fontSize="large" />
+				) : (
+					<Info fontSize="large" />
+				)
+			}
+			size="md"
+			animationDuration={900}
+			autoHideDuration={null}
 			variant="soft"
 			open={open}
 			color={toast?.color}
-			onClose={() => setOpen(false)}
+			onClose={(_event, reason) => {
+				if (reason === 'clickaway') {
+					return;
+				}
+				setOpen(false);
+			}}
 			endDecorator={
 				<IconButton variant="soft" color={toast?.color} onClick={() => setOpen(false)}>
 					<Close />
 				</IconButton>
 			}
 		>
-			<Stack gap={2}>
-				{toast?.message}
-				{toast?.details}
+			<Stack
+				gap={1}
+				direction={'row'}
+				sx={{
+					justifyContent: 'space-between',
+					alignItems: 'center',
+				}}
+				divider={<Divider orientation="vertical" />}
+			>
+				<Typography level="body-md" color={toast?.color}>
+					{toast?.title}
+				</Typography>
+				{toast?.details != null && (
+					<>
+						{typeof toast.details === 'string' ? (
+							<>
+								<Typography color={toast.color} level="body-sm">
+									{toast.details}
+								</Typography>
+							</>
+						) : (
+							<>{toast.details}</>
+						)}
+					</>
+				)}
 			</Stack>
 		</Snackbar>
 	);

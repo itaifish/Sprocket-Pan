@@ -223,3 +223,5 @@ export const activeSlice = createSlice({
 export const activeActions = activeSlice.actions;
 
 export const activeThunkName = `t/${activeSlice.name}`;
+
+export type { Update };

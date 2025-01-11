@@ -117,7 +117,7 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 		}
 	};
 
-	setEnvVariable = (key: string, value: string, level?: 'request' | 'service' | 'global') => {
+	setEnvironmentVariable = (key: string, value: string, level?: 'request' | 'service' | 'global') => {
 		switch (level) {
 			case 'global':
 				return this.setGlobalEnvVariable(key, value);
@@ -195,7 +195,7 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 	get data() {
 		return structuredClone(this.getWorkspace());
 	}
-	get environment() {
+	getEnvironment() {
 		const data = this.data;
 		return EnvironmentContextResolver.buildEnvironmentVariables(
 			getEnvValuesFromData(data, this.context.requestId),

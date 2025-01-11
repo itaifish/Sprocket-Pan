@@ -18,7 +18,7 @@ export function runContextfulInterruptibleScript<T>(
 	sp: SprocketScriptContext,
 	timeout?: number,
 ): InterruptibleScriptReturn<T> {
-	const result = Object.getPrototypeOf(async () => {}).constructor('sp', script)(sp);
+	const result = Object.getPrototypeOf(async () => {}).constructor('sp', 'sprocketPan', script)(sp, sp);
 	return { result: interruptingTimeout(result, sp.interrupt, timeout), interrupt: sp.interrupt };
 }
 

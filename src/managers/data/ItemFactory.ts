@@ -31,7 +31,7 @@ export class ItemFactory {
 			content: '',
 			scriptCallableName,
 			...structuredClone(template),
-			id: this.id(ShortItemType.workspace),
+			id: this.id(ShortItemType.script),
 		};
 	}
 
