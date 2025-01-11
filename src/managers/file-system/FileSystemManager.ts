@@ -6,12 +6,16 @@ import { FileSystemWorker } from './FileSystemWorker';
 type WorkspacePaths = { metadata: string; root: string };
 
 export class FileSystemManager {
-	static async createWorkspace(paths: WorkspacePaths, content: string) {
+	static async createWorkspace(paths: WorkspacePaths, content: Omit<WorkspaceMetadata, 'fileName'>) {
 		if (await FileSystemWorker.exists(paths.metadata)) {
 			return;
 		}
 		await FileSystemWorker.createDir(paths.root);
-		await FileSystemWorker.writeFile({ path: paths.metadata, content });
+		await FileSystemWorker.writeFile({ path: paths.metadata, content: JSON.stringify(content) });
+	}
+
+	static async updateWorkspace(paths: WorkspacePaths, content: Omit<WorkspaceMetadata, 'fileName'>) {
+		return FileSystemWorker.upsertFile({ path: paths.metadata, content: JSON.stringify(content) });
 	}
 
 	static async deleteWorkspace(paths: WorkspacePaths) {

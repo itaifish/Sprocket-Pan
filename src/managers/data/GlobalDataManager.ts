@@ -21,14 +21,22 @@ export class GlobalDataManager {
 
 	static async createWorkspace({ fileName, ...workspace }: WorkspaceMetadata) {
 		const paths = WorkspaceDataManager.getWorkspacePath(fileName);
-		return FileSystemManager.createWorkspace(paths, JSON.stringify(workspace));
+		return FileSystemManager.createWorkspace(paths, workspace);
+	}
+
+	static async updateWorkspace(workspace: WorkspaceMetadata) {
+		const paths = WorkspaceDataManager.getWorkspacePath(workspace.fileName);
+		return FileSystemManager.updateWorkspace(paths, workspace);
 	}
 
 	static async getWorkspaces() {
 		const ret: Record<string, WorkspaceMetadata> = {};
-		const list = SaveUpdateManager.updateWorkspaces(await FileSystemManager.getWorkspaces());
+		const { list, updated } = SaveUpdateManager.updateWorkspaces(await FileSystemManager.getWorkspaces());
 		list.forEach((workspace) => {
 			ret[workspace.id] = workspace;
+		});
+		updated.forEach((id) => {
+			this.updateWorkspace(ret[id]);
 		});
 		return ret;
 	}

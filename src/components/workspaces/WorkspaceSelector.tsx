@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Container, Stack, Typography, useTheme } from '@mui/joy';
 import { useSelector } from 'react-redux';
-import { useFileSystemSynchronization } from '@/hooks/useFileSystemSynchronization';
 import { selectWorkspacesList } from '@/state/global/selectors';
 import { useAppDispatch } from '@/state/store';
 import { GlobalSettingsPanel } from '../settings/GlobalSettingsPanel';
@@ -10,13 +9,25 @@ import { CreateNewWorkspaceModal } from './CreateNewWorkspaceModal';
 import { NewWorkspaceCard } from './NewWorkspaceCard';
 import { WorkspaceEntry } from './WorkspaceEntry';
 import { uiActions } from '@/state/ui/slice';
+import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
+import { globalActions } from '@/state/global/slice';
 
 export function WorkspaceSelector() {
-	useFileSystemSynchronization();
 	const workspaces = useSelector(selectWorkspacesList);
 	const [createNewModalOpen, setCreateNewModalOpen] = useState(false);
 	const dispatch = useAppDispatch();
 	const theme = useTheme();
+
+	async function updateWorkspaceSlice() {
+		const workspaces = await GlobalDataManager.getWorkspaces();
+		const data = await GlobalDataManager.getGlobalData();
+		dispatch(globalActions.setData(data));
+		dispatch(globalActions.setWorkspaces(workspaces));
+	}
+
+	useEffect(() => {
+		updateWorkspaceSlice();
+	}, []);
 
 	return (
 		<>

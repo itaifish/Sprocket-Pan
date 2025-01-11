@@ -180,9 +180,15 @@ export class SaveUpdateManager {
 	}
 
 	public static updateWorkspaces(workspaces: WorkspaceMetadata[]) {
-		return workspaces.map((workspace) => {
-			if (workspace.id == null) return ItemFactory.workspace(workspace);
+		const updated: string[] = [];
+		const list = workspaces.map((workspace) => {
+			if (workspace.id == null) {
+				const factoryWorkspace = ItemFactory.workspace(workspace);
+				updated.push(factoryWorkspace.id);
+				return factoryWorkspace;
+			}
 			return workspace;
 		});
+		return { list, updated };
 	}
 }

@@ -3,7 +3,6 @@ import EditCalendarIcon from '@mui/icons-material/EditCalendar';
 import InfoIcon from '@mui/icons-material/Info';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { loadAndSelectWorkspace } from '@/state/global/thunks';
 import { useAppDispatch } from '@/state/store';
 import { WorkspaceMetadata } from '@/types/data/workspace';
 import { formatFullDate } from '@/utils/string';
@@ -11,6 +10,7 @@ import { EllipsisTypography } from '../shared/EllipsisTypography';
 import { GradientBorderBoundingBox } from '../shared/GradientBorderBoundingBox';
 import { SprocketTooltip } from '../shared/SprocketTooltip';
 import { TextAvatar } from '../shared/Minidenticon';
+import { globalActions } from '@/state/global/slice';
 
 interface WorkspaceEntryProps {
 	workspace: WorkspaceMetadata;
@@ -23,7 +23,7 @@ export function WorkspaceEntry({ workspace, onDelete }: WorkspaceEntryProps) {
 		onDelete(workspace);
 	}
 	function openWorkspace() {
-		dispatch(loadAndSelectWorkspace(workspace));
+		dispatch(globalActions.setSelectedWorkspace(workspace));
 	}
 	return (
 		<Card

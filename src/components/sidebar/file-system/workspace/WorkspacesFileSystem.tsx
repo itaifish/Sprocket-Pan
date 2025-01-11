@@ -6,8 +6,13 @@ import { Box, Stack } from '@mui/joy';
 import { SideDrawerHeader } from '../../SideDrawerHeader';
 import { useAppDispatch } from '@/state/store';
 import { uiActions } from '@/state/ui/slice';
+import { AreYouSureModal } from '@/components/shared/modals/AreYouSureModal';
+import { useState } from 'react';
+import { globalActions } from '@/state/global/slice';
+import { WorkspaceMetadata } from '@/types/data/workspace';
 
 export function WorkspacesFileSystem() {
+	const [switchingTo, setSwitchingTo] = useState<WorkspaceMetadata | undefined>(undefined);
 	const workspaces = useSelector(selectWorkspacesList);
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const dispatch = useAppDispatch();
@@ -16,7 +21,6 @@ export function WorkspacesFileSystem() {
 		dispatch(uiActions.addTab(id));
 		dispatch(uiActions.setSelectedTab(id));
 	};
-	const onSwitchTo = () => {};
 	return (
 		<>
 			<SideDrawerHeader content="Workspaces" />
@@ -28,10 +32,20 @@ export function WorkspacesFileSystem() {
 				)}
 				{inactiveWorkspaces.map((workspace) => (
 					<div key={workspace.fileName}>
-						<WorkspaceFileCard onSwitchTo={onSwitchTo} onOpenTab={onOpenTab} workspace={workspace} />
+						<WorkspaceFileCard
+							onSwitchTo={() => setSwitchingTo(workspace)}
+							onOpenTab={onOpenTab}
+							workspace={workspace}
+						/>
 					</div>
 				))}
 			</Stack>
+			<AreYouSureModal
+				open={switchingTo != null}
+				closeFunc={() => setSwitchingTo(undefined)}
+				action={`switch to workspace ${switchingTo?.name} without saving`}
+				actionFunc={() => dispatch(globalActions.setSelectedWorkspace(switchingTo))}
+			/>
 		</>
 	);
 }
