@@ -19,12 +19,12 @@ workspaceSelectionListener.startListening({
 		dispatch(activeActions.reset());
 		dispatch(uiActions.reset());
 		if (global.activeWorkspace != null) {
-			const data = await WorkspaceDataManager.initializeWorkspace(global.activeWorkspace);
+			const data = await WorkspaceDataManager.initializeWorkspace(global.workspaces[global.activeWorkspace]);
 			const settings = getSettingsFromState({ global, active: data });
 			// TODO: I'd love to move this filtering somewhere more obvious or at least adjacent to other parsing.
 			data.history = filterOldHistoryEntries(data.history, settings.history.maxDays);
 			dispatch(activeActions.setFullState(data));
-			const orphans = await WorkspaceDataManager.processOrphans(data);
+			const orphans = await WorkspaceDataManager.processOrphans(data, global.workspaces[global.activeWorkspace]);
 			if (orphans.endpoints.length > 0 || orphans.requests.length > 0) {
 				dispatch(uiActions.setOrphans(orphans));
 			}

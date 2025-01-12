@@ -16,6 +16,7 @@ import { useAppDispatch } from '@/state/store';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { saveActiveData } from '@/state/active/thunks';
+import { selectActiveWorkspace } from '@/state/global/selectors';
 
 export interface WorkspaceTabProps extends SettingsTabProps {
 	goToWorkspaceSelection: () => void;
@@ -34,6 +35,7 @@ export function WorkspaceTab({ overlay, onChange, goToWorkspaceSelection }: Work
 	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
 	const [isQuitModalOpen, setIsQuitModalOpen] = useState(false);
 	const state = useSelector(selectActiveState);
+	const workspace = useSelector(selectActiveWorkspace);
 
 	const sync = overlay?.data?.sync;
 	const updateSync = (value: typeof sync) => onChange({ data: { sync: value } });
@@ -46,7 +48,7 @@ export function WorkspaceTab({ overlay, onChange, goToWorkspaceSelection }: Work
 		dispatch(activeActions.deleteAllHistory());
 	}
 
-	const exportData = () => WorkspaceDataManager.exportData(state);
+	const exportData = () => WorkspaceDataManager.exportData(state, workspace!);
 
 	return (
 		<Stack spacing={2}>

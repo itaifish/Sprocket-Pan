@@ -47,14 +47,15 @@ export function EnvironmentsFileSystem() {
 					No environments found.
 				</Typography>
 			)}
-			<FileSystemTrunk>
-				{filteredEnvironmentIds.map((environmentId, index) => (
-					<Fragment key={environmentId}>
+			<FileSystemTrunk
+				data={filteredEnvironmentIds}
+				itemContent={(index, environmentId) => (
+					<>
 						{index !== 0 && <ListDivider />}
 						<EnvironmentFileSystem environmentId={environmentId} />
-					</Fragment>
-				))}
-			</FileSystemTrunk>
+					</>
+				)}
+			/>
 		</>
 	);
 }

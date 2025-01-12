@@ -1,12 +1,16 @@
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 import { Box, useTheme } from '@mui/joy';
-import { PropsWithChildren } from 'react';
+import { Virtuoso, VirtuosoProps } from 'react-virtuoso';
 
-export function FileSystemTrunk({ children }: PropsWithChildren) {
+export function FileSystemTrunk<D, C>(props: VirtuosoProps<D, C>) {
+	const { average } = useScrollbarTheme();
 	const theme = useTheme();
 	return (
 		<Box
 			component="ul"
 			sx={{
+				flex: 1,
+				minHeight: '1px',
 				'& button': {
 					':hover': { backgroundColor: 'transparent' },
 					border: 'none',
@@ -37,9 +41,10 @@ export function FileSystemTrunk({ children }: PropsWithChildren) {
 				},
 				p: 0,
 				pl: 1,
+				m: 0,
 			}}
 		>
-			{children}
+			<Virtuoso style={average as any} {...props} />
 		</Box>
 	);
 }

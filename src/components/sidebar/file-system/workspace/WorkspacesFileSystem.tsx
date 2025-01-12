@@ -10,9 +10,11 @@ import { AreYouSureModal } from '@/components/shared/modals/AreYouSureModal';
 import { useState } from 'react';
 import { globalActions } from '@/state/global/slice';
 import { WorkspaceMetadata } from '@/types/data/workspace';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 
 export function WorkspacesFileSystem() {
 	const [switchingTo, setSwitchingTo] = useState<WorkspaceMetadata | undefined>(undefined);
+	const { average } = useScrollbarTheme();
 	const workspaces = useSelector(selectWorkspacesList);
 	const activeWorkspace = useSelector(selectActiveWorkspace);
 	const dispatch = useAppDispatch();
@@ -24,7 +26,7 @@ export function WorkspacesFileSystem() {
 	return (
 		<>
 			<SideDrawerHeader content="Workspaces" />
-			<Stack gap={1} px={1} pb={1}>
+			<Stack gap={1} sx={{ ...average, p: 1, flex: 1, minHeight: '1px', overflow: 'auto' }}>
 				{activeWorkspace != null && (
 					<Box mb={1}>
 						<ActiveWorkspaceFileCard onOpenTab={onOpenTab} workspace={activeWorkspace} />

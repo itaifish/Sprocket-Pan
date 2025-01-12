@@ -40,14 +40,15 @@ export function ScriptsFileSystem() {
 					No scripts found.
 				</Typography>
 			)}
-			<FileSystemTrunk>
-				{filteredScriptIds.map((scriptId, index) => (
-					<Fragment key={index}>
+			<FileSystemTrunk
+				data={filteredScriptIds}
+				itemContent={(index, scriptId) => (
+					<>
 						{index !== 0 && <ListDivider />}
 						<ScriptFileSystem scriptId={scriptId} />
-					</Fragment>
-				))}
-			</FileSystemTrunk>
+					</>
+				)}
+			/>
 		</>
 	);
 }

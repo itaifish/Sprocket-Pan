@@ -38,17 +38,9 @@ export function SideDrawer({ tab }: SideDrawerProps) {
 						<UndoRedoTabsButton />
 					</Stack>
 				</Sheet>
-				<Sheet
-					sx={{
-						flex: 1,
-						overflowY: 'scroll',
-						overflowX: 'hidden',
-						position: 'relative',
-						...scrollbarTheme,
-					}}
-				>
+				<Stack component={Sheet} sx={{ flex: 1, minHeight: '1px' }}>
 					<SideDrawerContent tab={tab} />
-				</Sheet>
+				</Stack>
 			</Stack>
 		</Sheet>
 	);

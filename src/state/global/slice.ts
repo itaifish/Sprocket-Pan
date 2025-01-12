@@ -6,7 +6,7 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { PayloadUpdate } from '../types';
 
 export interface GlobalState extends GlobalData {
-	activeWorkspace?: WorkspaceMetadata;
+	activeWorkspace?: string;
 	workspaces: { [key: string]: WorkspaceMetadata };
 }
 
@@ -34,7 +34,7 @@ export const globalSlice = createSlice({
 				throw new Error('cannot delete a workspace without a path');
 			}
 			GlobalDataManager.deleteWorkspace(path);
-			if (path === state.activeWorkspace?.fileName) {
+			if (payload === state.activeWorkspace) {
 				state.activeWorkspace = undefined;
 			}
 			delete state.workspaces[payload];
@@ -44,9 +44,8 @@ export const globalSlice = createSlice({
 			state.workspaces[payload.id] = workspace;
 			GlobalDataManager.updateWorkspace(workspace);
 		},
-		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
-			const workspace = action.payload;
-			state.activeWorkspace = workspace;
+		setSelectedWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata | undefined>) => {
+			state.activeWorkspace = payload?.id;
 		},
 		insertSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
 			GlobalDataManager.saveGlobalData({ ...state, settings: action.payload, lastSaved: new Date().getTime() });
