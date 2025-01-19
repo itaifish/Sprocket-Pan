@@ -30,15 +30,18 @@ export function Root() {
 		setMode(defaultTheme);
 	}, [defaultTheme]);
 
-	if (activeWorkspace == null) {
-		return <WorkspaceSelector />;
-	}
-
 	return (
 		<ErrorBoundary FallbackComponent={RootErrorFallback}>
-			<Workspace />
+			{activeWorkspace == null ? (
+				<WorkspaceSelector />
+			) : (
+				<>
+					<Workspace />
+					<ListenerWrapper />
+				</>
+			)}
 			<ModalsWrapper />
-			<ListenerWrapper />
+
 			<Toasts />
 		</ErrorBoundary>
 	);

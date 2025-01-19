@@ -1,6 +1,7 @@
 import { ItemPrefix } from '@/types/data/item';
 import { Endpoint, EndpointRequest, Environment, Script, Service, WorkspaceMetadata } from '@/types/data/workspace';
 import { toValidFunctionName } from '@/utils/string';
+import { generateSlug } from 'random-word-slugs';
 import { v4 } from 'uuid';
 
 /**
@@ -15,6 +16,7 @@ export class ItemFactory {
 	static workspace(template?: Partial<WorkspaceMetadata>): WorkspaceMetadata {
 		const id = this.id(ItemPrefix.workspace);
 		return {
+			minidenticon: generateSlug(3),
 			name: 'New Workspace',
 			description: '',
 			...structuredClone(template),

@@ -7,7 +7,7 @@ import { SprocketTooltip } from '../SprocketTooltip';
 import { EllipsisTypography } from '../EllipsisTypography';
 
 export interface EditableTextProps extends Partial<TypographyProps> {
-	text: string;
+	text?: string;
 	setText: (text: string) => void;
 	isValidFunc?: (text: string) => boolean;
 	size?: 'lg' | 'md' | 'sm';
@@ -20,7 +20,7 @@ const widths = {
 } as const;
 
 export function EditableText({
-	text,
+	text = '',
 	setText,
 	isValidFunc = (text) => text.length >= 1,
 	sx,
