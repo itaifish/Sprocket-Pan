@@ -78,9 +78,13 @@ export const selectUiMetadataById = createSelector(
 
 export const selectWorkspaceSettings = createSelector(selectActiveState, (state) => state?.settings);
 
-export const selectSettings = createSelector(selectGlobalSettings, selectWorkspaceSettings, (global, workspace) =>
-	mergeDeep(global, workspace),
-);
+export const selectSettings = createSelector(selectGlobalSettings, selectWorkspaceSettings, (global, workspace) => {
+	const merged = mergeDeep(global, workspace, { allowUndefined: false });
+	console.log(global.theme);
+	console.log(workspace.theme);
+	console.log(merged.theme);
+	return merged;
+});
 
 export const selectZoomLevel = createSelector(selectSettings, (state) => state.theme.zoom);
 

@@ -7,6 +7,7 @@ import { selectTheme } from './state/active/selectors';
 
 function ReduxApp() {
 	const { colors, filters } = useSelector(selectTheme);
+	console.log({ colors, filters });
 	return (
 		<CssVarsProvider theme={createTheme(colors)} disableTransitionOnChange defaultMode="system">
 			<CssBaseline />
