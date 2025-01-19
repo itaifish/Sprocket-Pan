@@ -1,4 +1,5 @@
-import { RecursiveValueOf } from '../utils/utils';
+import { RecursiveValueOf, ValuesOf } from '../utils/utils';
+import { SprocketTheme } from './sprocketTheme';
 
 const levels = ['service', 'endpoint', 'request'] as const;
 type level = (typeof levels)[number];
@@ -14,67 +15,31 @@ export type ScriptRunnerStrategy = RecursiveValueOf<
 	readonly string[]
 >;
 
-export enum VARIABLE_NAME_DISPLAY {
-	before = 'before',
-	hover = 'hover',
-	none = 'none',
-}
+export const LOG_LEVELS = { debug: 'debug', info: 'info', warn: 'warn' } as const;
 
-export enum BASE_THEME {
-	light = 'light',
-	dark = 'dark',
-	default = 'system',
-}
+export type LOG_LEVELS = ValuesOf<typeof LOG_LEVELS>;
 
-export enum LOG_LEVELS {
-	debug = 'debug',
-	info = 'info',
-	warn = 'warn',
-}
+export const TIPS_SECTION = { hidden: 'hidden', tips: 'tips', dyk: 'dyk', all: 'all' } as const;
 
-export enum LIST_STYLING {
-	compact = 'compact',
-	default = 'default',
-	cozy = 'cozy',
-}
+export type TIPS_SECTION = ValuesOf<typeof TIPS_SECTION>;
 
-export enum SCROLLBAR_VISIBILITY {
-	hidden = 'hidden',
-	compact = 'compact',
-	visible = 'visible',
-}
+export const VARIABLE_NAME_DISPLAY = { before: 'before', hover: 'hover', none: 'none' } as const;
 
-export enum TIPS_SECTION {
-	hidden = 'hidden',
-	tips = 'tips',
-	dyk = 'dyk',
-	all = 'all',
-}
+export type VARIABLE_NAME_DISPLAY = ValuesOf<typeof VARIABLE_NAME_DISPLAY>;
+
+export const LIST_STYLING = { compact: 'compact', default: 'default', cozy: 'cozy' } as const;
+
+export type LIST_STYLING = ValuesOf<typeof LIST_STYLING>;
+
+export const SCROLLBAR_VISIBILITY = { hidden: 'hidden', compact: 'compact', visible: 'visible' } as const;
+
+export type SCROLLBAR_VISIBILITY = ValuesOf<typeof SCROLLBAR_VISIBILITY>;
 
 export interface Settings {
 	virtualization: {
 		enabled: boolean;
 	};
-	theme: {
-		base: BASE_THEME;
-		list: LIST_STYLING;
-		zoom: number;
-		scrollbarVisibility: SCROLLBAR_VISIBILITY;
-		decoration: {
-			opacity: number;
-		};
-		colors: {
-			primary: string;
-			neutral: string;
-			danger: string;
-			success: string;
-			warning: string;
-		};
-		filters: {
-			enabled: boolean;
-			contrast: number;
-		};
-	};
+	theme: SprocketTheme;
 	history: {
 		maxLength: number;
 		enabled: boolean;

@@ -1,13 +1,13 @@
 import {
 	Settings,
-	BASE_THEME,
+	LOG_LEVELS,
+	TIPS_SECTION,
 	LIST_STYLING,
 	SCROLLBAR_VISIBILITY,
 	VARIABLE_NAME_DISPLAY,
-	TIPS_SECTION,
-	LOG_LEVELS,
 } from '@/types/data/settings';
 import { MS_IN_MINUTE } from './constants';
+import { BASE_THEME } from '@/types/data/sprocketTheme';
 
 export const DEFAULT_SETTINGS: Settings = {
 	virtualization: {
