@@ -11,7 +11,7 @@ export function EditorActions({ copyText, format }: EditorActionsProps) {
 	return (
 		<Stack direction="row">
 			{copyText != null && <CopyToClipboardButton copyText={copyText} />}
-			{format != null && <FormatButton onChange={format} />}
+			{format != null && <FormatButton onClick={format} />}
 		</Stack>
 	);
 }
