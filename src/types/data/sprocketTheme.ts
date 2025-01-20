@@ -13,6 +13,10 @@ export type SprocketTheme = {
 	decoration: {
 		opacity: number;
 	};
+	selected: string;
+};
+
+export type CustomizableSprocketTheme = {
 	colors: {
 		primary: string;
 		neutral: string;

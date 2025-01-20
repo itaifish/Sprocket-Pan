@@ -1,10 +1,10 @@
 import { Settings } from './settings';
 import { UiMetadata } from './shared';
-import { SprocketTheme } from './sprocketTheme';
+import { CustomizableSprocketTheme } from './sprocketTheme';
 
 export type GlobalData = {
 	uiMetadata: UiMetadata;
 	settings: Settings;
 	lastSaved: number;
-	themes: Record<string, SprocketTheme>;
+	themes: Record<string, CustomizableSprocketTheme>;
 };

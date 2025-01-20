@@ -20,6 +20,10 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
 	const globalSettings = useSelector(selectGlobalSettings);
 	const [unsavedSettings, setUnsavedSettings] = useState(workspaceSettings);
 	const hasChanged = useMemo(() => {
+		console.log('Workspace Settings vs Unsaved:\n');
+		console.log(workspaceSettings);
+		console.log(unsavedSettings);
+		console.log('----------------------------------');
 		return JSON.stringify(workspaceSettings) !== JSON.stringify(unsavedSettings);
 	}, [workspaceSettings, unsavedSettings]);
 	const dispatch = useAppDispatch();

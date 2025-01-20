@@ -16,3 +16,5 @@ export const selectActiveWorkspace = createSelector(selectGlobalState, (state) =
 export const selectGlobalSettings = createSelector(selectGlobalState, (state) => state.settings);
 
 export const selectGlobalLastSaved = createSelector(selectGlobalState, (state) => state.lastSaved);
+
+export const selectGlobalThemes = createSelector(selectGlobalState, (state) => state.themes);

@@ -80,9 +80,6 @@ export const selectWorkspaceSettings = createSelector(selectActiveState, (state)
 
 export const selectSettings = createSelector(selectGlobalSettings, selectWorkspaceSettings, (global, workspace) => {
 	const merged = mergeDeep(global, workspace, { allowUndefined: false });
-	console.log(global.theme);
-	console.log(workspace.theme);
-	console.log(merged.theme);
 	return merged;
 });
 

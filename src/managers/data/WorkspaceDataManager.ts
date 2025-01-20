@@ -196,7 +196,7 @@ export class WorkspaceDataManager {
 		const syncLocation = this.getSyncLocation(parsedData);
 		if (syncLocation != null) {
 			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation)) as WorkspaceItems;
-			parsedData = mergeDeep(parsedData, parsedSync, 1);
+			parsedData = mergeDeep(parsedData, parsedSync);
 		}
 		SaveUpdateManager.update(parsedData);
 		return parsedData;

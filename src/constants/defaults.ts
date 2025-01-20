@@ -21,17 +21,7 @@ export const DEFAULT_SETTINGS: Settings = {
 		decoration: {
 			opacity: 0.3,
 		},
-		colors: {
-			primary: '#005C8A',
-			neutral: '#3F444A',
-			danger: '#C41C1C',
-			success: '#1F7A1F',
-			warning: '#C06C0C',
-		},
-		filters: {
-			enabled: false,
-			contrast: 1,
-		},
+		selected: 'Sprocket Pan Default',
 	},
 	history: {
 		maxLength: 250,

@@ -4,10 +4,12 @@ import { Root } from './components/root/Root';
 import { CssBaseline, CssVarsProvider } from '@mui/joy';
 import { createTheme } from './utils/style';
 import { selectTheme } from './state/active/selectors';
+import { selectGlobalThemes } from './state/global/selectors';
 
 function ReduxApp() {
-	const { colors, filters } = useSelector(selectTheme);
-	console.log({ colors, filters });
+	const { selected } = useSelector(selectTheme);
+	const themes = useSelector(selectGlobalThemes);
+	const { colors, filters } = themes[selected];
 	return (
 		<CssVarsProvider theme={createTheme(colors)} disableTransitionOnChange defaultMode="system">
 			<CssBaseline />

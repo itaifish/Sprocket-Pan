@@ -52,10 +52,6 @@ export function mergeDeep<T, J extends RecursivePartial<T>>(
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		obj1Copy[key] = mergeDeep(obj1Copy[key], obj2Copy[key], settings, depth--);
-		if (key === 'colors') {
-			console.log('Logging Colors:');
-			console.log({ obj1Copy, obj2Copy });
-		}
 	}
 
 	return obj1Copy as T & J;

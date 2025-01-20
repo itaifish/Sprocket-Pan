@@ -1,12 +1,26 @@
-import { Opacity, Contrast } from '@mui/icons-material';
+import { Opacity } from '@mui/icons-material';
 import { SettingsGroup } from '../SettingsGroup';
-import { SettingsSelect, SettingsSlider, SettingsPaletteSelect, SettingsSwitch } from './SettingsFields';
+import { SettingsSelect, SettingsSlider } from './SettingsFields';
 import { SettingsTabProps } from './types';
 import { BASE_THEME } from '@/types/data/sprocketTheme';
+import { useSelector } from 'react-redux';
+import { selectGlobalThemes } from '@/state/global/selectors';
 
 export function ThemeEditor({ overlay, settings, onChange }: SettingsTabProps) {
+	const globalThemes = useSelector(selectGlobalThemes);
 	return (
 		<SettingsGroup title="Theme">
+			<SettingsSelect
+				sx={{ width: 400 }}
+				label="Theme"
+				overlay={overlay?.theme?.selected}
+				value={settings.theme.selected}
+				onChange={(themeName) => themeName && onChange({ theme: { selected: themeName } })}
+				options={Object.keys(globalThemes).map((themeName) => ({
+					value: themeName,
+					label: themeName,
+				}))}
+			/>
 			<SettingsSelect
 				sx={{ width: 240 }}
 				label="Base Theme"
@@ -27,7 +41,7 @@ export function ThemeEditor({ overlay, settings, onChange }: SettingsTabProps) {
 				icon={<Opacity />}
 				range={{ min: 0, max: 1, step: 0.05 }}
 			/>
-			<SettingsGroup title="Palettes">
+			{/* <SettingsGroup title="Palettes">
 				<SettingsPaletteSelect
 					label="Primary"
 					value={settings.theme.colors.primary}
@@ -79,7 +93,7 @@ export function ThemeEditor({ overlay, settings, onChange }: SettingsTabProps) {
 					}}
 					overlay={overlay?.theme?.filters?.contrast}
 				/>
-			</SettingsGroup>
+			</SettingsGroup> */}
 		</SettingsGroup>
 	);
 }

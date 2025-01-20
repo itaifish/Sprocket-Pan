@@ -1,4 +1,4 @@
-import { Settings } from '@/types/data/settings';
+import { CustomizableSprocketTheme } from '@/types/data/sprocketTheme';
 import { extendTheme, Theme, useColorScheme } from '@mui/joy';
 import chroma from 'chroma-js';
 
@@ -42,7 +42,7 @@ export function createPalette(hex = '#000000') {
 	};
 }
 
-export function createTheme(colors: Settings['theme']['colors']): Theme {
+export function createTheme(colors: CustomizableSprocketTheme['colors']): Theme {
 	const paletteColors = {
 		primary: createPalette(colors.primary),
 		warning: createPalette(colors.warning),
