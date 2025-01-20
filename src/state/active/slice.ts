@@ -154,7 +154,11 @@ export const activeSlice = createSlice({
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
 			const { requestId, maxLength, discard, ...entry } = action.payload;
 			// eliminate any errors in history (we only want the latest error) also instantiate empty histories
-			state.history[requestId] = (state.history[requestId] ?? []).filter((entry) => entry.error == null);
+			state.history = {
+				// setting the requestId property directly leads to an immer error when history[requestId] is undefined
+				...state.history,
+				[requestId]: (state.history[requestId] ?? []).filter((entry) => entry.error == null),
+			};
 			// don't pollute the data with a bunch of discard: falses
 			if (discard) (entry as HistoricalEndpointResponse).discard = true;
 			state.history[requestId].push(entry);
