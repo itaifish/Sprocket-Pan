@@ -62,10 +62,8 @@ function deleteEndpoint(state: State, id: string) {
 }
 
 function deleteService(state: State, id: string) {
-	console.log('got this far');
 	const { endpointIds } = state.services[id];
 	delete state.services[id];
-	console.log({ endpointIds, array: [...endpointIds], obj: state.services[id], id });
 	endpointIds.forEach((endId) => deleteEndpoint(state, endId));
 }
 
@@ -91,20 +89,15 @@ export const activeSlice = createSlice({
 			state.lastModified = new Date().getTime();
 		},
 		insertService: (state, { payload }: PayloadAction<Service>) => {
-			console.log('inserting service');
 			state.services[payload.id] = payload;
 		},
 		insertEndpoint: (state, { payload }: PayloadAction<Endpoint>) => {
-			console.log('inserting endpoint w/ id', payload.id);
 			state.endpoints[payload.id] = payload;
-			console.log('adding endpoint to service');
 			state.services[payload.serviceId].endpointIds.push(payload.id);
-			console.log({ endpoint: state.endpoints[payload.id], service: state.services[payload.serviceId] });
 		},
 		insertRequest: (state, { payload }: PayloadAction<EndpointRequest>) => {
 			state.requests[payload.id] = payload;
 			state.endpoints[payload.endpointId].requestIds.push(payload.id);
-			console.log({ request: state.requests[payload.id], endpoint: state.endpoints[payload.endpointId] });
 		},
 		insertScript: (state, { payload }: PayloadAction<Script>) => {
 			state.scripts[payload.id] = payload;

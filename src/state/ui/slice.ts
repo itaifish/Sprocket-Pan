@@ -45,7 +45,6 @@ export const uiSlice = createSlice({
 			closeTab(state, payload);
 		},
 		closeTabs: (state, { payload }: PayloadAction<string[]>) => {
-			console.log({ closeTabs: payload });
 			payload.forEach((id) => closeTab(state, id));
 		},
 		addToDiffQueue: (state, { payload }: PayloadAction<SelectedResponse | DiffQueueEntry>) => {

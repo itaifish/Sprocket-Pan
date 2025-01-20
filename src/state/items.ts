@@ -52,7 +52,6 @@ function constructDeleteThunk(action: ActionCreatorWithPayload<string>, type: It
 	return createAsyncThunk<void, string, { state: RootState }>(deletePrefix + type, (id, thunk) => {
 		thunk.dispatch(uiActions.closeTabs([id, ...getDescendents(thunk.getState().active, id)]));
 		thunk.dispatch(action(id));
-		console.log({ after: thunk.getState().active.services[id] });
 	});
 }
 
@@ -74,17 +73,17 @@ const createEndpoint = createAsyncThunk<string, Create<Endpoint>, { state: RootS
 	({ requestIds, ...base } = {}, thunk) => {
 		const state = thunk.getState().active;
 		const newEndpoint = ItemFactory.endpoint(base);
-		console.log({ newEndpoint, state });
-		// re: [''], we want at least one request made for a new endpoint automatically
-		(requestIds ?? ['']).forEach((id) => {
-			// this avoids using createRequest b/c of the need to set the defaultRequest
-			const newRequest = ItemFactory.request({ ...state.requests[id], endpointId: newEndpoint.id });
-			console.log('creating a new request', newRequest);
-			if (newEndpoint.defaultRequest === id || id === '') newEndpoint.defaultRequest = newRequest.id;
-			console.log('set the default (if applicable)', { newEndpoint, newRequest });
-			thunk.dispatch(activeActions.insertRequest(newRequest));
-		});
 		thunk.dispatch(activeActions.insertEndpoint(newEndpoint));
+		// re: [''], we want at least one request made for a new endpoint automatically
+		// this could be optimized with batch
+		(requestIds ?? ['']).forEach(async (id) => {
+			const newReqId = await thunk
+				.dispatch(createRequest({ ...state.requests[id], endpointId: newEndpoint.id }))
+				.unwrap();
+			if (newEndpoint.defaultRequest === id || id === '') {
+				thunk.dispatch(activeActions.updateEndpoint({ defaultRequest: newReqId, id: newEndpoint.id }));
+			}
+		});
 		return newEndpoint.id;
 	},
 );
@@ -95,7 +94,6 @@ const createService = createAsyncThunk<string, Create<Service>, { state: RootSta
 		const state = thunk.getState().active;
 		const newService = ItemFactory.service(base);
 		thunk.dispatch(activeActions.insertService(newService));
-		console.log({ newService, endpointIds });
 		endpointIds?.forEach((id) => {
 			thunk.dispatch(createEndpoint({ ...state.endpoints[id], serviceId: newService.id }));
 		});
