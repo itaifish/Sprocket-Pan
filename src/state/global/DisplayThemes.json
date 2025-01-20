@@ -25,9 +25,9 @@
 			"contrast": 1.2
 		}
 	},
-	"Material Black Dark": {
+	"Material Dark": {
 		"colors": {
-			"primary": "#000000",
+			"primary": "#3F51B5",
 			"neutral": "#717984",
 			"danger": "#D32F2F",
 			"success": "#2E7D32",
