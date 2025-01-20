@@ -8,14 +8,6 @@ import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { WorkspaceDataManager } from './WorkspaceDataManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
 
-export const defaultWorkspaceMetadata: WorkspaceMetadata = {
-	name: 'Default Workspace',
-	description: 'The default workspace in SprocketPan',
-	lastModified: new Date().getTime(),
-	fileName: 'sprocketpan-default',
-	id: 'sprocketpan-default',
-};
-
 export class GlobalDataManager {
 	public static readonly PATH = 'global.json';
 
