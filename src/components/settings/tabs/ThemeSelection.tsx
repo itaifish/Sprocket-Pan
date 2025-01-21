@@ -6,7 +6,7 @@ import { BASE_THEME } from '@/types/data/sprocketTheme';
 import { useSelector } from 'react-redux';
 import { selectGlobalThemes } from '@/state/global/selectors';
 
-export function ThemeEditor({ overlay, settings, onChange }: SettingsTabProps) {
+export function ThemeSelection({ overlay, settings, onChange }: SettingsTabProps) {
 	const globalThemes = useSelector(selectGlobalThemes);
 	return (
 		<SettingsGroup title="Theme">

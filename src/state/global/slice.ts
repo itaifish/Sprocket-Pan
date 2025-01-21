@@ -51,7 +51,7 @@ export const globalSlice = createSlice({
 		setSelectedWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata | undefined>) => {
 			state.activeWorkspace = payload?.id;
 		},
-		insertSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
+		setSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
 			GlobalDataManager.saveGlobalData({ ...state, settings: action.payload, lastSaved: new Date().getTime() });
 		},
 		setData: (state, { payload }: PayloadAction<GlobalData>) => {

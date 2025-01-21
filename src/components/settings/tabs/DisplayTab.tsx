@@ -3,7 +3,7 @@ import ZoomInIcon from '@mui/icons-material/ZoomIn';
 import { SettingsTabProps } from './types';
 import { SettingsSelect, SettingsSlider } from './SettingsFields';
 import { SettingsGroup } from '../SettingsGroup';
-import { ThemeEditor } from './ThemeEditor';
+import { ThemeSelection } from './ThemeSelection';
 import { LIST_STYLING, SCROLLBAR_VISIBILITY } from '@/types/data/settings';
 
 export function DisplayTab({ overlay, settings, onChange }: SettingsTabProps) {
@@ -44,7 +44,7 @@ export function DisplayTab({ overlay, settings, onChange }: SettingsTabProps) {
 					]}
 				/>
 			</SettingsGroup>
-			<ThemeEditor overlay={overlay} onChange={onChange} settings={settings} />
+			<ThemeSelection overlay={overlay} onChange={onChange} settings={settings} />
 		</Stack>
 	);
 }
