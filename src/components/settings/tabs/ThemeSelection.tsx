@@ -5,22 +5,36 @@ import { SettingsTabProps } from './types';
 import { BASE_THEME } from '@/types/data/sprocketTheme';
 import { useSelector } from 'react-redux';
 import { selectGlobalThemes } from '@/state/global/selectors';
+import { useState } from 'react';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { IconButton, Stack } from '@mui/joy';
+import { FluentNewBeaker } from '@/assets/icons/fluent/FluentNewBeaker';
+import { ThemeEditorModal } from './ThemeEditorModal';
 
 export function ThemeSelection({ overlay, settings, onChange }: SettingsTabProps) {
 	const globalThemes = useSelector(selectGlobalThemes);
+	const [createModalOpen, setCreateModalOpen] = useState(false);
 	return (
 		<SettingsGroup title="Theme">
-			<SettingsSelect
-				sx={{ width: 400 }}
-				label="Theme"
-				overlay={overlay?.theme?.selected}
-				value={settings.theme.selected}
-				onChange={(themeName) => themeName && onChange({ theme: { selected: themeName } })}
-				options={Object.keys(globalThemes).map((themeName) => ({
-					value: themeName,
-					label: themeName,
-				}))}
-			/>
+			<Stack direction={'row'}>
+				<SettingsSelect
+					sx={{ width: 400 }}
+					label="Theme"
+					overlay={overlay?.theme?.selected}
+					value={settings.theme.selected}
+					onChange={(themeName) => themeName && onChange({ theme: { selected: themeName } })}
+					options={Object.keys(globalThemes).map((themeName) => ({
+						value: themeName,
+						label: themeName,
+					}))}
+				/>
+				<SprocketTooltip text="Create New Theme">
+					<IconButton onClick={() => setCreateModalOpen(true)}>
+						<FluentNewBeaker />
+					</IconButton>
+				</SprocketTooltip>
+			</Stack>
+			<ThemeEditorModal open={createModalOpen} close={() => setCreateModalOpen(false)} />
 			<SettingsSelect
 				sx={{ width: 240 }}
 				label="Base Theme"
@@ -41,59 +55,6 @@ export function ThemeSelection({ overlay, settings, onChange }: SettingsTabProps
 				icon={<Opacity />}
 				range={{ min: 0, max: 1, step: 0.05 }}
 			/>
-			{/* <SettingsGroup title="Palettes">
-				<SettingsPaletteSelect
-					label="Primary"
-					value={settings.theme.colors.primary}
-					overlay={overlay?.theme?.colors?.primary}
-					onChange={(primary) => onChange({ theme: { colors: { primary } } })}
-				/>
-				<SettingsPaletteSelect
-					label="Neutral"
-					value={settings.theme.colors.neutral}
-					overlay={overlay?.theme?.colors?.neutral}
-					onChange={(neutral) => onChange({ theme: { colors: { neutral } } })}
-				/>
-				<SettingsPaletteSelect
-					label="Danger"
-					value={settings.theme.colors.danger}
-					overlay={overlay?.theme?.colors?.danger}
-					onChange={(danger) => onChange({ theme: { colors: { danger } } })}
-				/>
-				<SettingsPaletteSelect
-					label="Success"
-					value={settings.theme.colors.success}
-					overlay={overlay?.theme?.colors?.success}
-					onChange={(success) => onChange({ theme: { colors: { success } } })}
-				/>
-				<SettingsPaletteSelect
-					label="Warning"
-					value={settings.theme.colors.warning}
-					overlay={overlay?.theme?.colors?.warning}
-					onChange={(warning) => onChange({ theme: { colors: { warning } } })}
-				/>
-			</SettingsGroup>
-			<SettingsGroup title="Color Adjustment">
-				<SettingsSwitch
-					sx={{ width: 240 }}
-					label="Filters"
-					checked={settings.theme.filters.enabled}
-					onChange={(enabled) => onChange({ theme: { filters: { enabled } } })}
-					overlay={overlay?.theme?.filters?.enabled}
-				/>
-				<SettingsSlider
-					label="Contrast"
-					value={settings.theme.filters.contrast}
-					onChange={(contrast) => onChange({ theme: { filters: { contrast } } })}
-					icon={<Contrast />}
-					range={{
-						min: 0.8,
-						max: 1.2,
-						step: 0.01,
-					}}
-					overlay={overlay?.theme?.filters?.contrast}
-				/>
-			</SettingsGroup> */}
 		</SettingsGroup>
 	);
 }
