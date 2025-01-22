@@ -67,59 +67,65 @@ export function ThemeEditorModal({ open, close }: ThemeEditorModalProps) {
 						isValidFunc={(text) => text.length > 0}
 						sx={{ justifyContent: 'center', alignItems: 'center', margin: 'auto' }}
 					/>
-					<SettingsGroup title="Palettes">
-						<SettingsPaletteSelect
-							label="Primary"
-							value={primary}
-							onChange={(color) => setPrimary((oldPrimary) => color ?? oldPrimary)}
-							overlay={undefined}
-						/>
-						<SettingsPaletteSelect
-							label="Neutral"
-							value={neutral}
-							onChange={(neutral) => setNeutral((oldNeutral) => neutral ?? oldNeutral)}
-							overlay={undefined}
-						/>
-						<SettingsPaletteSelect
-							label="Danger"
-							value={danger}
-							onChange={(danger) => setDanger((oldDanger) => danger ?? oldDanger)}
-							overlay={undefined}
-						/>
-						<SettingsPaletteSelect
-							label="Success"
-							value={success}
-							onChange={(success) => setSuccess((oldSuccess) => success ?? oldSuccess)}
-							overlay={undefined}
-						/>
-						<SettingsPaletteSelect
-							label="Warning"
-							value={warning}
-							onChange={(warning) => setWarning((oldWarning) => warning ?? oldWarning)}
-							overlay={undefined}
-						/>
-					</SettingsGroup>
-					<SettingsGroup title="Color Adjustment">
-						<SettingsSwitch
-							sx={{ width: 240 }}
-							label="Filters"
-							checked={filtersEnabled}
-							onChange={(enabled) => setFiltersEnabled((oldState) => enabled ?? oldState)}
-							overlay={undefined}
-						/>
-						<SettingsSlider
-							label="Contrast"
-							value={contrast}
-							onChange={(contrast) => setContrast((oldContrast) => contrast ?? oldContrast)}
-							icon={<Contrast />}
-							range={{
-								min: 0.8,
-								max: 1.2,
-								step: 0.01,
-							}}
-							overlay={undefined}
-						/>
-					</SettingsGroup>
+					<Stack direction={'row'} justifyContent={'space-between'}>
+						<SettingsGroup title="New Theme">
+							<SettingsGroup title="Palettes">
+								<SettingsPaletteSelect
+									label="Primary"
+									value={primary}
+									onChange={(color) => setPrimary((oldPrimary) => color ?? oldPrimary)}
+									overlay={undefined}
+								/>
+								<SettingsPaletteSelect
+									label="Neutral"
+									value={neutral}
+									onChange={(neutral) => setNeutral((oldNeutral) => neutral ?? oldNeutral)}
+									overlay={undefined}
+								/>
+								<SettingsPaletteSelect
+									label="Danger"
+									value={danger}
+									onChange={(danger) => setDanger((oldDanger) => danger ?? oldDanger)}
+									overlay={undefined}
+								/>
+								<SettingsPaletteSelect
+									label="Success"
+									value={success}
+									onChange={(success) => setSuccess((oldSuccess) => success ?? oldSuccess)}
+									overlay={undefined}
+								/>
+								<SettingsPaletteSelect
+									label="Warning"
+									value={warning}
+									onChange={(warning) => setWarning((oldWarning) => warning ?? oldWarning)}
+									overlay={undefined}
+								/>
+							</SettingsGroup>
+							<SettingsGroup title="Color Adjustment">
+								<SettingsSwitch
+									sx={{ width: 240 }}
+									label="Filters"
+									checked={filtersEnabled}
+									onChange={(enabled) => setFiltersEnabled((oldState) => enabled ?? oldState)}
+									overlay={undefined}
+								/>
+								<SettingsSlider
+									label="Contrast"
+									value={contrast}
+									onChange={(contrast) => setContrast((oldContrast) => contrast ?? oldContrast)}
+									icon={<Contrast />}
+									range={{
+										min: 0.8,
+										max: 1.2,
+										step: 0.01,
+									}}
+									overlay={undefined}
+								/>
+							</SettingsGroup>
+						</SettingsGroup>
+						{/* workspace here */}
+						<></>
+					</Stack>
 					<Stack gap={1} direction="row-reverse">
 						<Button startDecorator={<SaveIcon />} onClick={() => {}}>
 							Create
