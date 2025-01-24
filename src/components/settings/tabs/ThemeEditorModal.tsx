@@ -4,9 +4,11 @@ import { SettingsGroup } from '../SettingsGroup';
 import { SettingsPaletteSelect, SettingsSwitch, SettingsSlider } from './SettingsFields';
 import { useState } from 'react';
 import { EditableText } from '@/components/shared/input/EditableText';
-import { Button, Stack } from '@mui/joy';
+import { Button, Stack, ThemeProvider } from '@mui/joy';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import SaveIcon from '@mui/icons-material/Save';
+import { Workspace } from '@/components/root/Workspace';
+import { createTheme } from '@/utils/style';
 
 type ThemeEditorModalProps = {
 	open: boolean;
@@ -30,7 +32,7 @@ export function ThemeEditorModal({ open, close }: ThemeEditorModalProps) {
 	const [warning, setWarning] = useState(defaults.warning);
 	const [filtersEnabled, setFiltersEnabled] = useState(true);
 	const [contrast, setContrast] = useState(1);
-
+	const newTheme = createTheme({ primary, neutral, danger, success, warning });
 	const reset = () => {
 		setThemeName('New Theme');
 		setPrimary(defaults.primary);
@@ -112,6 +114,7 @@ export function ThemeEditorModal({ open, close }: ThemeEditorModalProps) {
 								<SettingsSlider
 									label="Contrast"
 									value={contrast}
+									disabled={!filtersEnabled}
 									onChange={(contrast) => setContrast((oldContrast) => contrast ?? oldContrast)}
 									icon={<Contrast />}
 									range={{
@@ -123,7 +126,9 @@ export function ThemeEditorModal({ open, close }: ThemeEditorModalProps) {
 								/>
 							</SettingsGroup>
 						</SettingsGroup>
-						{/* workspace here */}
+						<ThemeProvider theme={newTheme}>
+							<Workspace sizeOverride={{ width: '800x', height: '600px' }} />
+						</ThemeProvider>
 						<></>
 					</Stack>
 					<Stack gap={1} direction="row-reverse">
