@@ -48,7 +48,7 @@
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
-		"@tauri-apps/cli": "^1.4.0",
+		"@tauri-apps/cli": "^2.2.7",
 		"@types/js-yaml": "^4.0.6",
 		"@types/react": "^18.2.15",
 		"@types/react-dom": "^18.2.7",
