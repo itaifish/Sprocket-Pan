@@ -1,4 +1,4 @@
-import { open } from '@tauri-apps/api/dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import { useRef, useState } from 'react';
 import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';

@@ -1,6 +1,6 @@
 import { ShortcutManager, COMMAND } from '@/managers/ShortcutManager';
 import { BREAK_ALL_TEXT } from '@/styles/text';
-import { open } from '@tauri-apps/api/shell';
+import { open } from '@tauri-apps/plugin-shell';
 
 interface UriTypographyProps {
 	children?: string;

@@ -1,6 +1,6 @@
 import { log } from '@/utils/logging';
 import { appLocalDataDir, join } from '@tauri-apps/api/path';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 
 export type InvokerPath = { path: string; absolute?: boolean };
 export type InvokerFileUpdate = InvokerPath & { content: string };

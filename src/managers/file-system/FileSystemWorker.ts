@@ -1,5 +1,5 @@
 import { log } from '@/utils/logging';
-import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir } from '@tauri-apps/api/fs';
+import { BaseDirectory, createDir, exists, readDir, readTextFile, removeDir } from '@tauri-apps/plugin-fs';
 import { InvokerFileUpdate, RustInvoker } from '../RustInvoker';
 
 export class FileSystemWorker {

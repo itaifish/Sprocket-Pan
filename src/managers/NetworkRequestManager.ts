@@ -1,4 +1,4 @@
-import { Body, ResponseType, fetch } from '@tauri-apps/api/http';
+import { Body, ResponseType, fetch } from '@tauri-apps/plugin-http';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';

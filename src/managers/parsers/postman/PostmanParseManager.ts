@@ -26,7 +26,7 @@ import type {
 	Description as V210Description,
 } from '../parseTypes/postman2.1Types';
 import mime from 'mime';
-import { readTextFile } from '@tauri-apps/api/fs';
+import { readTextFile } from '@tauri-apps/plugin-fs';
 
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';

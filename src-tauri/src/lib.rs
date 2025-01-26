@@ -1,7 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::{Manager, Window, generate_handler, generate_context};
+use tauri::{generate_context, generate_handler, Manager, Window};
 use tauri_plugin_log::{LogTarget, RotationStrategy};
 
 mod commands;
@@ -36,6 +36,10 @@ pub fn run() {
                 .build(),
         )
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_window_state::Builder::default())
         .invoke_handler(generate_handler![
             close_splashscreen,
             zoom,

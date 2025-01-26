@@ -5,14 +5,15 @@ import { EndpointRequest, HistoricalEndpointResponse } from '@/types/data/worksp
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { activeActions, Update } from '@/state/active/slice';
 import { KeyValuePair, KeyValueValues } from '@/types/shared/keyValues';
-import { Body } from '@tauri-apps/api/http';
-import { http } from '@tauri-apps/api';
+import { Body } from '@tauri-apps/plugin-http';
+import {  } from '@tauri-apps/api';
 import { getEnvValuesFromData, getSettingsFromState } from '@/utils/application';
 import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { sleep } from '@/utils/misc';
 import { log } from '@/utils/logging';
 import { StateAccessManager } from '../data/StateAccessManager';
 import { networkRequestManager } from '../NetworkRequestManager';
+import * as http from "@tauri-apps/plugin-http"
 
 export class SprocketScriptContext implements SprocketInjectedScripts {
 	private token: Token<boolean> = { current: false };

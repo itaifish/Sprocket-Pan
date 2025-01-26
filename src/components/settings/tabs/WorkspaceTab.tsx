@@ -1,6 +1,6 @@
 import { Stack, FormControl, FormLabel, IconButton, Alert, Button, Typography } from '@mui/joy';
 import { SettingsTabProps } from './types';
-import { open } from '@tauri-apps/api/dialog';
+import { open } from '@tauri-apps/plugin-dialog';
 import { SprocketSwitch } from '@/components/shared/input/SprocketSwitch';
 import { SprocketInput } from '@/components/shared/input/SprocketInput';
 import { Folder, Warning } from '@mui/icons-material';
