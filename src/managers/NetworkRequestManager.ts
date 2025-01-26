@@ -1,4 +1,4 @@
-import { Body, ResponseType, fetch } from '@tauri-apps/plugin-http';
+import { fetch } from '@tauri-apps/plugin-http';
 import * as xmlParse from 'xml2js';
 import yaml from 'js-yaml';
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
@@ -158,7 +158,7 @@ class NetworkRequestManager {
 			if (request.bodyType === 'x-www-form-urlencoded') {
 				networkBody = Body.form(body as Record<string, string>);
 			} else {
-				networkBody = Body.json(body as Record<string, string>);
+				networkBody = (body as Record<string, string>);
 			}
 		} else if (category !== 'none') {
 			networkBody = Body.text(networkRequestBodyText);

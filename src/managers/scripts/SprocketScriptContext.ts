@@ -5,15 +5,13 @@ import { EndpointRequest, HistoricalEndpointResponse } from '@/types/data/worksp
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
 import { activeActions, Update } from '@/state/active/slice';
 import { KeyValuePair, KeyValueValues } from '@/types/shared/keyValues';
-import { Body } from '@tauri-apps/plugin-http';
-import {  } from '@tauri-apps/api';
 import { getEnvValuesFromData, getSettingsFromState } from '@/utils/application';
 import { EnvironmentContextResolver } from '../EnvironmentContextResolver';
 import { sleep } from '@/utils/misc';
 import { log } from '@/utils/logging';
 import { StateAccessManager } from '../data/StateAccessManager';
 import { networkRequestManager } from '../NetworkRequestManager';
-import * as http from "@tauri-apps/plugin-http"
+import * as http from '@tauri-apps/plugin-http';
 
 export class SprocketScriptContext implements SprocketInjectedScripts {
 	private token: Token<boolean> = { current: false };
@@ -149,12 +147,22 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 		this.dispatch(activeActions.updateRequest(update));
 	};
 
-	fetch = <T>(url: string, request: HttpOptions) => {
+	fetch = async <T>(url: string, request: HttpOptions) => {
+		const headers = new Headers();
+		Object.entries(request?.headers ?? {}).forEach(([key, value]) => {
+			if (Array.isArray(value)) {
+				(value as string[]).forEach((item) => headers.append(key, item));
+			} else {
+				headers.append(key, value as string);
+			}
+		});
 		const modifiedRequest = {
 			...request,
-			body: request.body != undefined ? Body.json(request.body) : undefined,
+			headers: headers,
+			body: JSON.stringify(request.body),
 		};
-		return http.fetch<T>(url, modifiedRequest);
+		const response = await http.fetch(url, modifiedRequest);
+		return (await response.json()) as T;
 	};
 
 	sendRequest = async (requestId: string) => {
