@@ -1,6 +1,6 @@
+import { ButtonTabs } from '@/components/shared/ButtonTabs';
 import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Button, Stack } from '@mui/joy';
 import { useState } from 'react';
 
 interface OnChangeArgs {
@@ -12,13 +12,6 @@ interface PrePostScriptDisplayProps extends OnChangeArgs {
 	onChange: (args: OnChangeArgs) => void;
 }
 
-const rhomboid = {
-	clipPath: 'polygon(30px 0, 100% 0, 100% 100%, 0 100%)',
-	height: '30px',
-	width: '100%',
-	borderRadius: 0,
-};
-
 export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onChange }: PrePostScriptDisplayProps) {
 	const [isPostActive, setIsPostActive] = useState(false);
 
@@ -27,34 +20,17 @@ export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onCh
 		setState: (text) => onChange(isPostActive ? { postRequestScript: text } : { preRequestScript: text }),
 	});
 
+	const onButtonTabChange = (index: number) => {
+		const isPostActive = !!index;
+		setIsPostActive(isPostActive);
+		setLocalDataState((isPostActive ? postRequestScript : preRequestScript) ?? '');
+	};
+
 	return (
 		<SprocketEditor
-			height="55vh"
+			height="calc(100vh - 300px)"
 			ActionBarItems={
-				<Stack direction="row" minWidth="250px" width="400px">
-					<Button
-						sx={{ ...rhomboid, clipPath: '' }}
-						variant="soft"
-						color={isPostActive ? 'neutral' : 'primary'}
-						onClick={() => {
-							setIsPostActive(false);
-							setLocalDataState(preRequestScript ?? '');
-						}}
-					>
-						Pre-Request
-					</Button>
-					<Button
-						sx={{ ...rhomboid, ml: '-30px' }}
-						variant="soft"
-						color={isPostActive ? 'primary' : 'neutral'}
-						onClick={() => {
-							setIsPostActive(true);
-							setLocalDataState(postRequestScript ?? '');
-						}}
-					>
-						Post-Request
-					</Button>
-				</Stack>
+				<ButtonTabs tabs={[{ title: 'Pre-Request' }, { title: 'Post-Request' }]} onChange={onButtonTabChange} />
 			}
 			value={localDataState}
 			onChange={(value) => {

@@ -1,3 +1,4 @@
+import { InlineItemName } from '@/components/shared/InlineItemName';
 import { AreYouSureModal } from '@/components/shared/modals/AreYouSureModal';
 import { useAppDispatch } from '@/state/store';
 import { selectNextForDeletion } from '@/state/ui/selectors';
@@ -14,7 +15,11 @@ export function DeleteQueueModals() {
 
 	return (
 		<AreYouSureModal
-			action={`delete '${item?.name}' and all its data`}
+			action={
+				<>
+					delete <InlineItemName item={item} /> and all its data
+				</>
+			}
 			open={nextForDeletion != null}
 			closeFunc={removeDeleteQueueEntry}
 			actionFunc={() => {

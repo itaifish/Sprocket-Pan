@@ -24,7 +24,6 @@ Instead, just make sure to add the new property at src\constants\defaults
 */
 
 import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
-import { MS_IN_MINUTE } from '@/constants/constants';
 import {
 	WorkspaceData,
 	HistoricalEndpointResponse,
@@ -32,7 +31,6 @@ import {
 	WorkspaceMetadata,
 	WorkspaceItems,
 } from '@/types/data/workspace';
-import { defaultWorkspaceData } from './data/WorkspaceDataManager';
 import { ItemFactory } from './data/ItemFactory';
 import { ItemPrefix } from '@/types/data/item';
 import { generateSlug } from 'random-word-slugs';
@@ -82,9 +80,10 @@ function toEight(data: WorkspaceData | any) {
 		return { id: env.__id, name: env.__name, pairs: consolidateValues(env) };
 	}
 	function convertHistory({ request, response, auditLog }: HistoricalEndpointResponse): HistoricalEndpointResponse {
-		request.headers = consolidateValues(request.headers);
-		response.headers = consolidateValues(response.headers);
-		return { request, response, auditLog };
+		if (response != null) {
+			response.headers = consolidateValues(response.headers);
+		}
+		return { request, response, auditLog, timestamp: request?.dateTime || response?.dateTime || 0 };
 	}
 	for (const envId in data.environments) {
 		data.environments[envId] = convertEnv(data.environments[envId]);
@@ -129,22 +128,14 @@ function toSix(data: WorkspaceData | any) {
 function toFive() {}
 
 /**
- * Add and enable autosave
+ * Add and enable autosave (safely removed due to settings refactor)
  */
-function toFour(data: WorkspaceData | any) {
-	if (data.settings.autoSaveIntervalMS == undefined) {
-		data.settings.autoSaveIntervalMS = MS_IN_MINUTE * 5;
-	}
-}
+function toFour() {}
 
 /**
- * Update the settings to add scriptTimeoutDurationMS
+ * Update the settings to add scriptTimeoutDurationMS (safely removed due to settings refactor)
  */
-function toThree(data: WorkspaceData | any) {
-	if (data.settings.scriptTimeoutDurationMS == undefined) {
-		data.settings.scriptTimeoutDurationMS = defaultWorkspaceData.settings.scriptTimeoutDurationMS;
-	}
-}
+function toThree() {}
 
 /**
  * Updates response bodies to be strings, rather than Record<string, unknown>.

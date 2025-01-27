@@ -2,11 +2,11 @@ import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor'
 import { EndpointResponse } from '@/types/data/workspace';
 import { SprocketError } from '@/types/state/state';
 import { getStatusCodeColor } from '@/utils/string';
-import { Warning } from '@mui/icons-material';
-import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Typography } from '@mui/joy';
-import { useState } from 'react';
+import { Box, Typography } from '@mui/joy';
 import { defaultResponse } from '../constants';
 import { statusText } from '@/utils/misc';
+import { ButtonTabs } from '@/components/shared/ButtonTabs';
+import { Warning } from '@mui/icons-material';
 
 const editorLanguageOptions = ['json', 'html', 'xml', 'yaml'];
 
@@ -41,37 +41,39 @@ interface ResponseBodyProps extends ResponseDisplayProps {
 }
 
 export function ResponseBody({ response, error }: ResponseBodyProps) {
-	const [index, setIndex] = useState(0);
 	if (error == null) return <ResponseDisplay response={response} />;
 	return (
-		<AccordionGroup>
-			<Accordion expanded={index === 0} onChange={(_, ex) => setIndex(ex ? 0 : 1)}>
-				<AccordionSummary>
-					<Typography color="warning" startDecorator={<Warning sx={{ height: '20px' }} />}>
-						Error
-					</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
-					<SprocketEditor
-						value={JSON.stringify(error)}
-						language="json"
-						// weird bug https://github.com/itaifish/Sprocket-Pan/issues/138
-						height="calc(100vh - 350px)"
-						options={{ readOnly: true, domReadOnly: true }}
-						formatOnChange
-					/>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion expanded={index === 1} onChange={(_, ex) => setIndex(ex ? 1 : 0)}>
-				<AccordionSummary>Response</AccordionSummary>
-				<AccordionDetails>
-					{response.body === defaultResponse.response.body ? (
-						<Typography level="body-sm">No Response Found</Typography>
-					) : (
-						<ResponseDisplay response={response} />
-					)}
-				</AccordionDetails>
-			</Accordion>
-		</AccordionGroup>
+		<ButtonTabs
+			tabs={[
+				{
+					title: 'Error',
+					icon: <Warning />,
+					color: 'danger',
+					content: (
+						<Box mt="-37px">
+							<SprocketEditor
+								value={JSON.stringify(error)}
+								language="json"
+								// weird bug https://github.com/itaifish/Sprocket-Pan/issues/138
+								height="calc(100vh - 350px)"
+								options={{ readOnly: true, domReadOnly: true }}
+								formatOnChange
+							/>
+						</Box>
+					),
+				},
+				{
+					title: 'Response',
+					content:
+						response.body === defaultResponse.response.body ? (
+							<Typography level="body-sm">No Response Found</Typography>
+						) : (
+							<Box mt="-37px">
+								<ResponseDisplay response={response} />
+							</Box>
+						),
+				},
+			]}
+		/>
 	);
 }

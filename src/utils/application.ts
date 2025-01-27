@@ -25,7 +25,9 @@ export function queryParamsToString(
 }
 
 export function toKeyValuePairs<T>(object: Record<string, T>) {
-	return Object.entries(object).map(([key, value]) => ({ key, value }));
+	return Object.entries(object)
+		.map(([key, value]) => ({ key, value }))
+		.filter((x) => typeof x.value != 'object');
 }
 
 export function envParse(value: KeyValueValues | undefined, envValues: OrderedKeyValuePairs<string>) {

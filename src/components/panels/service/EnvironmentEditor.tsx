@@ -7,6 +7,7 @@ import { EditableText } from '@/components/shared/input/EditableText';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { EditableData } from '@/components/shared/input/monaco/EditableData';
 import { KeyValuePair } from '@/types/shared/keyValues';
+import { InlineItemName } from '@/components/shared/InlineItemName';
 
 interface EnvironmentEditorProps {
 	serviceId: string;
@@ -81,7 +82,11 @@ export function EnvironmentEditor({
 			/>
 			<AreYouSureModal
 				open={isDeleteModalOpen}
-				action={`delete ${env.name ?? env.id}`}
+				action={
+					<>
+						delete <InlineItemName item={env} />
+					</>
+				}
 				actionFunc={onDelete}
 				closeFunc={() => setIsDeleteModalOpen(false)}
 			></AreYouSureModal>

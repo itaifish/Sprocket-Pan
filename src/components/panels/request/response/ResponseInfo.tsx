@@ -1,4 +1,4 @@
-import { Accordion, AccordionDetails, AccordionGroup, AccordionSummary, Typography } from '@mui/joy';
+import { Box, Typography } from '@mui/joy';
 import { getEditorLanguage, ResponseBody } from './ResponseBody';
 import { HeadersDisplayTable } from './HeadersDisplayTable';
 import { VisualEventLog } from './VisualEventLog';
@@ -10,6 +10,7 @@ import { formatFullDate } from '@/utils/string';
 import { defaultResponse } from '../constants';
 import { mergeDeep } from '@/utils/variables';
 import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
+import { ButtonTabs } from '@/components/shared/ButtonTabs';
 
 function autofillDefaults(entry: HistoricalEndpointResponse) {
 	return mergeDeep(defaultResponse, entry);
@@ -54,26 +55,29 @@ export function ResponseInfo({ data, requestId }: ResponseInfoProps) {
 								At <u>{formatFullDate(request.dateTime)}</u>, a <u>{request.method}</u> request was sent to{' '}
 								<UriTypography>{request.url}</UriTypography>.
 							</Typography>
-							<HeadersDisplayTable headers={request.headers} label="request" />
-							{Object.keys(request.body).length > 0 && (
-								<>
-									<AccordionGroup>
-										<Accordion defaultExpanded>
-											<AccordionSummary>Request Body</AccordionSummary>
-											<AccordionDetails>
+							<ButtonTabs
+								tabs={[
+									{
+										title: 'Body',
+										content: (
+											<Box mt="-36px">
 												<SprocketEditor
 													// https://github.com/itaifish/Sprocket-Pan/issues/138
-													height="calc(100vh - 350px)"
-													value={response.body}
-													language={getEditorLanguage(response.bodyType)}
+													height="500px"
+													value={request.body}
+													language={getEditorLanguage(request.bodyType ?? 'JSON')}
 													options={{ readOnly: true, domReadOnly: true }}
 													formatOnChange
 												/>
-											</AccordionDetails>
-										</Accordion>
-									</AccordionGroup>
-								</>
-							)}
+											</Box>
+										),
+									},
+									{
+										title: 'Headers',
+										content: <HeadersDisplayTable headers={request.headers} label="request" title={null} />,
+									},
+								]}
+							/>
 						</>
 					),
 				},

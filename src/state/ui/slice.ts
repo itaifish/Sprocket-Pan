@@ -18,6 +18,7 @@ export interface UiState {
 	searchText: string;
 	orphans: OrphanData | null;
 	toast?: ToastProps;
+	isLoading: boolean;
 }
 
 const initialState: UiState = {
@@ -30,6 +31,7 @@ const initialState: UiState = {
 	diffQueue: [],
 	searchText: '',
 	orphans: null,
+	isLoading: false,
 };
 
 function closeTab(state: UiState, closeId: string) {
@@ -114,6 +116,9 @@ export const uiSlice = createSlice({
 		},
 		toast: (state, { payload }: PayloadAction<ToastProps>) => {
 			state.toast = payload;
+		},
+		setLoading: (state, { payload }: PayloadAction<boolean>) => {
+			state.isLoading = payload;
 		},
 		reset: () => initialState,
 	},

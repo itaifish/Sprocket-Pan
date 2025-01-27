@@ -77,7 +77,8 @@ export const activeSlice = createSlice({
 	initialState: initialState,
 	reducers: {
 		setFullState: (state, { payload }: PayloadAction<WorkspaceData>) => {
-			Object.assign(state, { ...initialState, ...payload });
+			const time = new Date().getTime();
+			Object.assign(state, { ...initialState, ...payload, lastModified: time, lastSaved: time });
 		},
 		injectState: (state, { payload }: PayloadAction<Create<WorkspaceData>>) => {
 			assignDeep(state, payload, 1);
