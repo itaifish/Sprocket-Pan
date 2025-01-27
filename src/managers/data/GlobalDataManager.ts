@@ -7,7 +7,7 @@ import { FileSystemManager } from '../file-system/FileSystemManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
 import { WorkspaceDataManager } from './WorkspaceDataManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
-
+import DisplayThemes from '../../state/global/DisplayThemes.json';
 export class GlobalDataManager {
 	public static readonly PATH = 'global.json';
 
@@ -46,7 +46,12 @@ export class GlobalDataManager {
 			globalData.settings = mergeDeep(DEFAULT_SETTINGS, globalData.settings);
 			return globalData;
 		}
-		return { uiMetadata: { idSpecific: {} }, lastSaved: new Date().getTime(), settings: DEFAULT_SETTINGS };
+		return {
+			uiMetadata: { idSpecific: {} },
+			lastSaved: new Date().getTime(),
+			settings: DEFAULT_SETTINGS,
+			themes: DisplayThemes,
+		};
 	}
 
 	static async saveGlobalData({ activeWorkspace, workspaces, ...state }: GlobalState) {

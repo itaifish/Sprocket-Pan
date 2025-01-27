@@ -8,9 +8,9 @@ import { SettingsTabProps } from './types';
 import { SettingsSelect, SettingsSwitch } from './SettingsFields';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { Constants } from '@/constants/constants';
-import { VARIABLE_NAME_DISPLAY, TIPS_SECTION } from '@/types/data/settings';
 import { log } from '@/utils/logging';
 import { sleep } from '@/utils/misc';
+import { TIPS_SECTION, VARIABLE_NAME_DISPLAY } from '@/types/data/settings';
 
 export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);

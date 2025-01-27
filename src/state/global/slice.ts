@@ -4,7 +4,7 @@ import { GlobalData } from '@/types/data/global';
 import { WorkspaceMetadata } from '@/types/data/workspace';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 import { PayloadUpdate } from '../types';
-
+import DisplayThemes from './DisplayThemes.json';
 export interface GlobalState extends GlobalData {
 	activeWorkspace?: string;
 	workspaces: { [key: string]: WorkspaceMetadata };
@@ -15,12 +15,16 @@ const initialState: GlobalState = {
 	uiMetadata: { idSpecific: {} },
 	settings: DEFAULT_SETTINGS,
 	lastSaved: 0,
+	themes: DisplayThemes,
 };
 
 export const globalSlice = createSlice({
 	name: 'global',
 	initialState,
 	reducers: {
+		setThemes: (state, action: PayloadAction<GlobalState['themes']>) => {
+			state.themes = action.payload;
+		},
 		setWorkspaces: (state, action: PayloadAction<GlobalState['workspaces']>) => {
 			state.workspaces = action.payload;
 		},
@@ -47,7 +51,7 @@ export const globalSlice = createSlice({
 		setSelectedWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata | undefined>) => {
 			state.activeWorkspace = payload?.id;
 		},
-		insertSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
+		setSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
 			GlobalDataManager.saveGlobalData({ ...state, settings: action.payload, lastSaved: new Date().getTime() });
 		},
 		setData: (state, { payload }: PayloadAction<GlobalData>) => {

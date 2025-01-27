@@ -8,7 +8,11 @@ import { SprocketResizeHandle } from '../shared/SprocketResizeHandle';
 import { SidebarTabs } from '../sidebar/types';
 import { useRef, useState } from 'react';
 
-export function Workspace() {
+interface WorkspaceProps {
+	sizeOverride?: { width: string; height: string };
+}
+
+export function Workspace({ sizeOverride }: WorkspaceProps) {
 	const [tab, setTab] = useState<SidebarTabs>(SidebarTabs.Workspaces);
 	const theme = useTheme();
 	const [expanded, setIsExpanded] = useState(false);
@@ -26,10 +30,10 @@ export function Workspace() {
 		<Stack
 			direction="row"
 			sx={{
-				height: '100vh',
-				width: '100vw',
-				minHeight: '100vh',
-				maxWidth: '100vw',
+				height: sizeOverride ? sizeOverride.height : '100vh',
+				width: sizeOverride ? sizeOverride.width : '100vw',
+				minHeight: sizeOverride?.height ? '10%' : '100vh',
+				maxWidth: sizeOverride?.width ? '100%' : '100vw',
 				overflow: 'hidden',
 				backgroundColor: theme.palette.background.level1,
 			}}

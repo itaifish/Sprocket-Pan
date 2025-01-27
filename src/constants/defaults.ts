@@ -1,13 +1,13 @@
 import {
 	Settings,
-	BASE_THEME,
+	LOG_LEVELS,
+	TIPS_SECTION,
 	LIST_STYLING,
 	SCROLLBAR_VISIBILITY,
 	VARIABLE_NAME_DISPLAY,
-	TIPS_SECTION,
-	LOG_LEVELS,
 } from '@/types/data/settings';
 import { MS_IN_MINUTE } from './constants';
+import { BASE_THEME } from '@/types/data/sprocketTheme';
 
 export const DEFAULT_SETTINGS: Settings = {
 	virtualization: {
@@ -21,17 +21,7 @@ export const DEFAULT_SETTINGS: Settings = {
 		decoration: {
 			opacity: 0.3,
 		},
-		colors: {
-			primary: '#005C8A',
-			neutral: '#3F444A',
-			danger: '#C41C1C',
-			success: '#1F7A1F',
-			warning: '#C06C0C',
-		},
-		filters: {
-			enabled: false,
-			contrast: 1,
-		},
+		selected: 'Sprocket Pan Default',
 	},
 	history: {
 		maxLength: 250,

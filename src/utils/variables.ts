@@ -35,7 +35,11 @@ export function mergeDeep<T, J extends RecursivePartial<T>>(
 	depth = 10,
 ): T & J {
 	if (!isRecord(obj1) || !isRecord(obj2)) {
-		return (obj2 !== undefined || settings.allowUndefined ? structuredClone(obj2) : structuredClone(obj1)) as T & J;
+		const result = (
+			obj2 !== undefined || settings.allowUndefined ? structuredClone(obj2) : structuredClone(obj1)
+		) as T & J;
+
+		return result;
 	}
 
 	if (depth <= 0) return { ...structuredClone(obj1), ...structuredClone(obj2) };

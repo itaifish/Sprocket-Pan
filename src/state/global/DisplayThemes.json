@@ -1,0 +1,41 @@
+{
+	"Sprocket Pan Default": {
+		"colors": {
+			"primary": "#005C8A",
+			"neutral": "#3F444A",
+			"danger": "#C41C1C",
+			"success": "#1F7A1F",
+			"warning": "#C06C0C"
+		},
+		"filters": {
+			"enabled": false,
+			"contrast": 1
+		}
+	},
+	"High Contrast": {
+		"colors": {
+			"primary": "#0AADFF",
+			"neutral": "#717984",
+			"danger": "#FF0000",
+			"success": "#2ABB2A",
+			"warning": "#A76A25"
+		},
+		"filters": {
+			"enabled": false,
+			"contrast": 1.2
+		}
+	},
+	"Material Dark": {
+		"colors": {
+			"primary": "#3F51B5",
+			"neutral": "#717984",
+			"danger": "#D32F2F",
+			"success": "#2E7D32",
+			"warning": "#ED6C02"
+		},
+		"filters": {
+			"enabled": false,
+			"contrast": 1
+		}
+	}
+}
