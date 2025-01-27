@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "SprocketPan-Prerelease",
-		"version": "2.0.0-prerelease"
+		"version": "2.0.0"
 	},
 	"tauri": {
 		"updater": {
