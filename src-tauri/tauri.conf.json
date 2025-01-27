@@ -7,8 +7,8 @@
 		"withGlobalTauri": false
 	},
 	"package": {
-		"productName": "SprocketPan",
-		"version": "1.3.1"
+		"productName": "SprocketPan-Prerelease",
+		"version": "2.0.0-prerelease"
 	},
 	"tauri": {
 		"updater": {
@@ -55,7 +55,7 @@
 		"bundle": {
 			"active": true,
 			"targets": "all",
-			"identifier": "com.sprocketpan.dev",
+			"identifier": "com.sprocketpan-prerelease.dev",
 			"icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
 		},
 		"security": {
