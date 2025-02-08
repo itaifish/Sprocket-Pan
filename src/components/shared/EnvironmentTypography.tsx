@@ -19,7 +19,9 @@ export function EnvironmentTypography({ snippets, displayVariableNames, typograp
 	return (
 		<Typography {...typographyProps}>
 			{snippets.map((snippet, index) => {
-				if (snippet.variableName == null) return <span key={index}>{snippet.value}</span>;
+				if (snippet.variableName == null) {
+					return <span key={index}>{snippet.value}</span>;
+				}
 				const valueText = snippet.value ?? 'unknown';
 				const shouldDisplayVariable = shouldDisplayVariableNames || snippet.value == null;
 				const displayText = shouldDisplayVariable ? `${snippet.variableName}: ${valueText}` : valueText;

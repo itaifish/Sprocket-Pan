@@ -40,16 +40,19 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 
 	getRequestById = (requestId: string) => {
 		const request = this.getWorkspace().requests[requestId];
-		if (request == null) throw new Error(`request [${requestId}] not found in state!`);
+		if (request == null) {
+			throw new Error(`request [${requestId}] not found in state!`);
+		}
 		return request;
 	};
 
 	getRequest = () => {
 		const requestId = this.context.requestId;
-		if (requestId == null)
+		if (requestId == null) {
 			throw new Error(
 				"Request id missing from context! You may have been trying to access request-scoped methods from a chain of scripts running in the global context. If not, this may be a bug in SprocketPan's context injection.",
 			);
+		}
 		return this.getRequestById(requestId);
 	};
 
@@ -57,11 +60,13 @@ export class SprocketScriptContext implements SprocketInjectedScripts {
 		const { endpoints, services } = this.getWorkspace();
 		const request = this.getRequest();
 		const endpoint = endpoints[request.endpointId];
-		if (endpoint == null)
+		if (endpoint == null) {
 			throw new Error(`endpoint [${request.endpointId}] parent of request [${request.id}] not found in state!`);
+		}
 		const service = services[endpoint.serviceId];
-		if (service == null)
+		if (service == null) {
 			throw new Error(`service [${endpoint.serviceId}] grandparent of request [${request.id}] not found in state!`);
+		}
 		return { request, endpoint, service };
 	};
 

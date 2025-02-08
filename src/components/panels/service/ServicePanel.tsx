@@ -20,7 +20,9 @@ export function ServicePanel({ id }: PanelProps) {
 		dispatch(activeActions.updateService({ ...values, id }));
 	}
 
-	if (service == null) throw new Error(`Service Panel could not find associated Service, id ${id}`);
+	if (service == null) {
+		throw new Error(`Service Panel could not find associated Service, id ${id}`);
+	}
 
 	return (
 		<Stack gap={2} p={2}>

@@ -11,7 +11,9 @@ export class RustInvoker {
 	 * joins the applocaldatadir to non-absolute paths, making them absolute
 	 */
 	private static async absolutify({ path, absolute }: InvokerPath) {
-		if (absolute) return path;
+		if (absolute) {
+			return path;
+		}
 		return await join(await appLocalDataDir(), path);
 	}
 	/**
@@ -24,7 +26,9 @@ export class RustInvoker {
 		}
 		log.debug(`save_files invoked on paths ${data.map((file) => file.path)}`);
 		const errors = await invoke<InvokerFileError[]>('save_files', { data });
-		if (errors.length > 0) throw new Error(errors.map(({ path, error }) => `${error} at path ${path}`).join(', '));
+		if (errors.length > 0) {
+			throw new Error(errors.map(({ path, error }) => `${error} at path ${path}`).join(', '));
+		}
 	}
 	static async showInExplorer(path: InvokerPath) {
 		return await invoke<void>('show_in_explorer', { path: await this.absolutify(path) });

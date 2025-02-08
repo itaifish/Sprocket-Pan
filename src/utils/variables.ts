@@ -38,13 +38,17 @@ export function mergeDeep<T, J extends RecursivePartial<T>>(
 		return (obj2 !== undefined || settings.allowUndefined ? structuredClone(obj2) : structuredClone(obj1)) as T & J;
 	}
 
-	if (depth <= 0) return { ...structuredClone(obj1), ...structuredClone(obj2) };
+	if (depth <= 0) {
+		return { ...structuredClone(obj1), ...structuredClone(obj2) };
+	}
 
 	const obj1Copy = { ...obj1 };
 	const obj2Copy = { ...obj2 };
 
 	for (const key in obj2Copy) {
-		if (key === '__proto__') throw new Error('aaaaaAAAAAAA‽‽‽‽‽');
+		if (key === '__proto__') {
+			throw new Error('aaaaaAAAAAAA‽‽‽‽‽');
+		}
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		obj1Copy[key] = mergeDeep(obj1Copy[key], obj2Copy[key], settings, depth--);
@@ -54,12 +58,18 @@ export function mergeDeep<T, J extends RecursivePartial<T>>(
 }
 
 export function assignDeep<T extends object, J>(obj1: T, obj2: J, depth = 5) {
-	if (!isRecord(obj1) || !isRecord(obj2)) return;
-	if (depth <= 0) Object.assign(obj1, obj2);
+	if (!isRecord(obj1) || !isRecord(obj2)) {
+		return;
+	}
+	if (depth <= 0) {
+		Object.assign(obj1, obj2);
+	}
 	const assignObj = {} as J;
 	for (const key in obj2) {
 		const tskey = key as unknown as keyof T;
-		if (key === '__proto__') throw new Error('‽‽‽‽‽∀∀∀∀∀∀∀ɐɐɐɐɐ');
+		if (key === '__proto__') {
+			throw new Error('‽‽‽‽‽∀∀∀∀∀∀∀ɐɐɐɐɐ');
+		}
 		if (obj1[tskey] === undefined) {
 			assignObj[key] = obj2[key];
 		} else {
@@ -74,7 +84,9 @@ export function groupBy<T>(items: T[], func: (item: T) => string) {
 	const retObj: Record<string, T[]> = {};
 	items.forEach((item) => {
 		const key = func(item);
-		if (retObj[key] == null) retObj[key] = [];
+		if (retObj[key] == null) {
+			retObj[key] = [];
+		}
 		retObj[key].push(item);
 	});
 	return retObj;

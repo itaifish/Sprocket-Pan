@@ -31,7 +31,9 @@ export function RequestInfoSection({ request }: RequestInfoSectionProps) {
 	const triggerDissolve = () => setShouldDissolvingAnimate(true);
 	const endDissolve = () => setShouldDissolvingAnimate(false);
 
-	if (endpoint == null) throw new Error('endpoint is null in the requestInfoSection');
+	if (endpoint == null) {
+		throw new Error('endpoint is null in the requestInfoSection');
+	}
 
 	const isDefault = endpoint.defaultRequest === request.id;
 	function updateAssociatedEndpoint(values: Partial<Endpoint>) {

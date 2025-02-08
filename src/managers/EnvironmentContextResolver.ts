@@ -130,8 +130,12 @@ export class EnvironmentContextResolver {
 		environment?: RootEnvironment | null,
 		validAncestors?: RootEnvironment[] | null,
 	): KeyValuePair[] {
-		if (environment == null) return [];
-		if (validAncestors == null || environment.parents == null) return environment.pairs;
+		if (environment == null) {
+			return [];
+		}
+		if (validAncestors == null || environment.parents == null) {
+			return environment.pairs;
+		}
 
 		const merged = new OrderedKeyValuePairs(environment.pairs);
 		environment.parents.forEach((parentId) => {

@@ -24,7 +24,9 @@ export function ServiceFileSystem({ serviceId }: ServiceFileSystemProps) {
 	const endpointIds = useSelector((state) => selectFilteredNestedIds(state, service?.endpointIds ?? []));
 
 	const dispatch = useAppDispatch();
-	if (service == null) return null;
+	if (service == null) {
+		return null;
+	}
 
 	return (
 		<FileSystemBranch

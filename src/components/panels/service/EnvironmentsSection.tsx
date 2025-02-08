@@ -29,7 +29,9 @@ export function EnvironmentsSection({ service, onChange }: SectionProps) {
 		env: Partial<Environment> = { name: `${service.name}.env.${Object.keys(service.localEnvironments).length}` },
 		nameMod?: string,
 	) {
-		if (nameMod != null) env.name = `${env.name} ${nameMod}`;
+		if (nameMod != null) {
+			env.name = `${env.name} ${nameMod}`;
+		}
 		const newEnv = ItemFactory.environment(env);
 		onChange({
 			localEnvironments: {
@@ -54,7 +56,9 @@ export function EnvironmentsSection({ service, onChange }: SectionProps) {
 	}
 
 	function toggleSelectedEnv() {
-		if (visibleEnvId == null || service.linkedEnvMode) return;
+		if (visibleEnvId == null || service.linkedEnvMode) {
+			return;
+		}
 		const serviceEnvId = selectedEnvironment === visibleEnvId ? undefined : visibleEnvId;
 		dispatch(activeActions.setSelectedServiceEnvironment({ serviceId: service.id, serviceEnvId }));
 	}

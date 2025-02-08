@@ -16,7 +16,9 @@ import { VerbDiv } from '@/components/sidebar/file-system/components/VerbDiv';
 
 function useGetResponseData(selection: SelectedResponse | null) {
 	const history = useSelector((state) => selectHistoryById(state, selection?.id));
-	if (selection == null || history == null) return null;
+	if (selection == null || history == null) {
+		return null;
+	}
 	return history[selection.index];
 }
 

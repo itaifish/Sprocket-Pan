@@ -58,7 +58,9 @@ class InsomniaParseManager {
 	}
 
 	private transformUrlToPostman(insomniaUrl: string) {
-		if (insomniaUrl === '') return {};
+		if (insomniaUrl === '') {
+			return {};
+		}
 		const postmanUrl: Url = {};
 		postmanUrl.raw = insomniaUrl;
 		const urlParts = insomniaUrl.split(/\:\/\//);
@@ -179,13 +181,17 @@ class InsomniaParseManager {
 					break;
 				case 'request':
 					elementArray = parentChildrenMap.get(element.parentId);
-					if (elementArray === undefined) elementArray = [];
+					if (elementArray === undefined) {
+						elementArray = [];
+					}
 					elementArray.push(element);
 					parentChildrenMap.set(element.parentId, elementArray);
 					break;
 				case 'request_group':
 					elementArray = parentChildrenMap.get(element.parentId);
-					if (elementArray === undefined) elementArray = [];
+					if (elementArray === undefined) {
+						elementArray = [];
+					}
 					elementArray.push(element);
 					parentChildrenMap.set(element.parentId, elementArray);
 					break;

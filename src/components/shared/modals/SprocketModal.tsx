@@ -31,7 +31,9 @@ export function SprocketModal({
 		<Modal
 			{...props}
 			onClose={(_, reason) => {
-				if (closeOn.includes(reason)) onClose?.();
+				if (closeOn.includes(reason)) {
+					onClose?.();
+				}
 			}}
 		>
 			<ModalDialog sx={{ ...sizeStyling[size], maxWidth: '100%' }} layout={size == 'full' ? 'fullscreen' : 'center'}>

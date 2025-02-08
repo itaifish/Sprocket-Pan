@@ -70,7 +70,9 @@ interface TipsSection {
 }
 
 export function TipsSection({ variant, timestamp }: TipsSection) {
-	if (variant === TIPS_SECTION.hidden) return <Box />;
+	if (variant === TIPS_SECTION.hidden) {
+		return <Box />;
+	}
 	const messages = MESSAGES[variant];
 	const num = timestamp % messages.length;
 	return messages[num];

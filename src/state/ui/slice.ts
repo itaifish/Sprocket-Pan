@@ -36,7 +36,9 @@ const initialState: UiState = {
 
 function closeTab(state: UiState, closeId: string) {
 	state.tabs = state.tabs.filter((id) => id !== closeId);
-	if (closeId === state.selectedTab) state.selectedTab = state.tabs.at(-1) ?? null;
+	if (closeId === state.selectedTab) {
+		state.selectedTab = state.tabs.at(-1) ?? null;
+	}
 }
 
 export const uiSlice = createSlice({

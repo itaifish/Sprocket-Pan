@@ -15,13 +15,17 @@ export function getClearableTimeout(ms = 0) {
 }
 
 export function interruptingTimeout<T>(promise: Promise<T>, interrupt: Interrupt, timeout?: number): Promise<T> {
-	if (timeout == null) return promise;
+	if (timeout == null) {
+		return promise;
+	}
 	const timeoutPromise = getClearableTimeout(timeout);
 	timeoutPromise.promise.catch((err) => interrupt(err.message));
 	return promise.finally(timeoutPromise.clear);
 }
 
 export function statusText(code?: number) {
-	if (code == null) return 'N/A';
+	if (code == null) {
+		return 'N/A';
+	}
 	return `${code}: ${statusCodes[code]}`;
 }

@@ -15,7 +15,9 @@ export function DissolvingButton({ children, shouldAnimate, clearShouldAnimate, 
 	const [isAnimating, setIsAnimating] = useState(false);
 
 	useEffect(() => {
-		if (isAnimating || !shouldAnimate) return;
+		if (isAnimating || !shouldAnimate) {
+			return;
+		}
 		setHidden(true);
 		clearShouldAnimate();
 	}, [isAnimating, shouldAnimate]);

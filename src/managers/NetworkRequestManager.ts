@@ -124,12 +124,16 @@ class NetworkRequestManager {
 		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
 		endpoint.baseHeaders.forEach((header) => {
-			if (header.value == null) return;
+			if (header.value == null) {
+				return;
+			}
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
 			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});
 		request.headers.forEach((header) => {
-			if (header.value == null) return;
+			if (header.value == null) {
+				return;
+			}
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
 			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});

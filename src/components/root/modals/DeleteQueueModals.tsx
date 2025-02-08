@@ -23,8 +23,9 @@ export function DeleteQueueModals() {
 			open={nextForDeletion != null}
 			closeFunc={removeDeleteQueueEntry}
 			actionFunc={() => {
-				if (actions == null)
+				if (actions == null) {
 					throw new Error(`delete queue deletion called on id ${nextForDeletion} but a delete action was not present!`);
+				}
 				dispatch(actions.delete(nextForDeletion));
 				removeDeleteQueueEntry();
 			}}

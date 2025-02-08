@@ -30,7 +30,9 @@ export function WorkspacesFileSystem() {
 	};
 	const switchWorkspace = async (save = false) => {
 		setSwitchingTo(undefined);
-		if (save) await dispatch(saveActiveData());
+		if (save) {
+			await dispatch(saveActiveData());
+		}
 		dispatch(globalActions.setSelectedWorkspace(switchingTo));
 	};
 	useEffect(() => {

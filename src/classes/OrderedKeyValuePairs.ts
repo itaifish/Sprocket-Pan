@@ -11,7 +11,9 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	}
 
 	public apply(pairs: KeyValueOrOrdered<T> | undefined) {
-		if (pairs == null) return;
+		if (pairs == null) {
+			return;
+		}
 		if ('toArray' in pairs) {
 			pairs = pairs.toArray();
 		}
@@ -19,7 +21,9 @@ export class OrderedKeyValuePairs<T extends KeyValueValues = string> implements 
 	}
 
 	public expand(pairs: KeyValueOrOrdered<T> | undefined) {
-		if (pairs == null) return;
+		if (pairs == null) {
+			return;
+		}
 		if ('toArray' in pairs) {
 			pairs = pairs.toArray();
 		}
