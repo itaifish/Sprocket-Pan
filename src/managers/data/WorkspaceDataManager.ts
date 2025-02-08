@@ -14,13 +14,13 @@ import { save } from '@tauri-apps/api/dialog';
 import { writeTextFile } from '@tauri-apps/api/fs';
 import { FileSystemManager } from '../file-system/FileSystemManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
-import { insomniaParseManager } from '../parsers/InsomniaParseManager';
-import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
-import swaggerParseManager from '../parsers/SwaggerParseManager';
 import { SaveUpdateManager } from '../SaveUpdateManager';
 import { InvokerFileUpdate } from '../RustInvoker';
 import { mergeDeep } from '@/utils/variables';
 import { extractProperty } from '@/utils/getters';
+import { Parser } from '../parsers/types';
+import { SwaggerParseManager } from '../parsers/SwaggerParseManager';
+import { PostmanParseManager } from '../parsers/postman/PostmanParseManager';
 
 export const defaultWorkspaceSyncedData: WorkspaceSyncedData = {
 	services: {},
@@ -51,19 +51,27 @@ export interface OrphanData {
 }
 
 export class WorkspaceDataManager {
-	public static loadSprocketFile(url: string): Partial<WorkspaceData> {
-		return {};
-	}
-	public static loadSwaggerFile(url: string): Partial<WorkspaceData> {
-		return swaggerParseManager.parseSwaggerFile('filePath', url);
-	}
-
-	public static loadPostmanFile(url: string): Partial<WorkspaceData> {
-		return postmanParseManager.parsePostmanFile('filePath', url);
+	private static async parseFile(url: string, parse: Parser): Promise<Partial<WorkspaceData>> {
+		const content = await FileSystemWorker.readTextFile(url);
+		const data = await parse(content);
+		SaveUpdateManager.update(data);
+		return data;
 	}
 
-	public static loadInsomniaFile(url: string): Partial<WorkspaceData> {
-		return insomniaParseManager.parseInsomniaFile('filePath', url);
+	public static loadSprocketFile(url: string) {
+		return this.parseFile(url, (content) => JSON.parse(content));
+	}
+
+	public static loadSwaggerFile(url: string) {
+		return this.parseFile(url, SwaggerParseManager.parse);
+	}
+
+	public static loadPostmanFile(url: string) {
+		return this.parseFile(url, PostmanParseManager.parse);
+	}
+
+	public static loadInsomniaFile(url: string) {
+		return this.parseFile(url, InsomniaParseManager.parse);
 	}
 
 	public static async exportData(data: WorkspaceData, metadata: WorkspaceMetadata) {

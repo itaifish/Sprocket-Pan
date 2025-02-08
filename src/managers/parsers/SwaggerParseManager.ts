@@ -1,367 +1,257 @@
 import { OpenAPI, OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from 'openapi-types';
 import SwaggerParser from '@apidevtools/swagger-parser';
-import { readTextFile } from '@tauri-apps/api/fs';
 import yaml from 'js-yaml';
-import { v4 } from 'uuid';
 import * as xmlParse from 'xml2js';
-import { Endpoint, EndpointRequest, Service } from '@/types/data/workspace';
+import { EndpointRequest, Service, WorkspaceData } from '@/types/data/workspace';
 import { RESTfulRequestVerbs, RESTfulRequestVerb } from '@/types/data/shared';
 import { log } from '@/utils/logging';
 import { ItemFactory } from '../data/ItemFactory';
 
-export type ParsedServiceWorkspaceData = {
-	services: Service[];
-	endpoints: Endpoint[];
-	requests: EndpointRequest[];
-};
+type SwaggerWorkspaceData = Pick<WorkspaceData, 'services' | 'endpoints' | 'requests' | 'version'>;
 
-type SwaggerParamInType = 'body' | 'query' | 'path' | 'header' | 'formData';
+const parser = new SwaggerParser();
 
-class SwaggerParseManager {
-	public static readonly INSTANCE = new SwaggerParseManager();
-	private parser: SwaggerParser;
-	private constructor() {
-		this.parser = new SwaggerParser();
-	}
+type SupportedAPIs = OpenAPIV2.Document | OpenAPIV3.Document | OpenAPIV3_1.Document;
 
-	public async parseSwaggerFile(
-		inputType: 'fileContents' | 'filePath',
-		inputValue: string,
-	): Promise<ParsedServiceWorkspaceData> {
-		const loadedFile = await this.loadSwaggerFile(inputType, inputValue);
-		const input = this.parseSwaggerInput(loadedFile);
-		const api: OpenAPI.Document | undefined = await this.parser?.dereference(input);
-		if (!api) {
-			log.warn(`parser is: ${JSON.stringify(this.parser)}`);
+type SupportedVersions = '3' | '3.1' | '2';
+
+export class SwaggerParseManager {
+	public static async parse(content: string): Promise<SwaggerWorkspaceData> {
+		const input = this.parseSwaggerInput(content);
+		const api = await parser?.dereference(input);
+		if (api == null) {
+			log.warn(`parser is: ${JSON.stringify(parser)}`);
 			throw new Error('Waiting on parser to load');
 		}
 		return this.mapApiToWorkspaceData(api);
 	}
 
-	private parseSwaggerInput(input: string) {
+	private static parseSwaggerInput(input: string) {
 		return yaml.load(input) as OpenAPI.Document;
 	}
 
-	private async loadSwaggerFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<string> {
-		if (inputType === 'fileContents') {
-			return inputValue;
-		}
-		return await readTextFile(inputValue);
+	private static determineVersion(api: SupportedAPIs) {
+		// here is where we should check to see if it's some other weird version other than 2, 3, or 3.1 and throw an unsupported error.
+		if ('swagger' in api) return '2';
+		return api.openapi.charAt(3) === '0' ? '3' : '3.1';
 	}
 
-	private mapApiToWorkspaceData(swaggerApi: OpenAPI.Document): ParsedServiceWorkspaceData {
-		const version =
-			(swaggerApi as OpenAPIV2.Document).swagger != null
-				? '2'
-				: (swaggerApi as OpenAPIV3.Document).openapi.charAt(3) === '0'
-					? '3'
-					: '3.1';
-		const swaggerV3 = swaggerApi as OpenAPIV3.Document;
-		let baseUrl = (swaggerApi as OpenAPIV2.Document)?.host;
-		if ((swaggerV3?.servers?.length as number) > 0) {
-			baseUrl ??= swaggerV3?.servers![0].url;
-		}
-		baseUrl ??= '';
-		const services: Service[] = [
-			{
-				id: v4(),
-				name: swaggerApi?.info?.title ?? 'New Service',
-				version: swaggerApi?.info?.version ?? '1.0.0',
-				description: swaggerApi?.info?.description ?? '',
-				baseUrl,
-				localEnvironments: {},
-				endpointIds: [],
-			},
-		];
-		return { services, ...this.mapPaths(swaggerApi.paths, version, services[0]) };
-	}
-
-	private mapPaths(
-		paths: OpenAPI.Document['paths'],
-		version: '2' | '3' | '3.1',
-		service: Service,
-	): Omit<ParsedServiceWorkspaceData, 'services'> {
-		const empty = {
-			endpoints: [],
-			requests: [],
+	private static mapApiToWorkspaceData(api: SupportedAPIs): SwaggerWorkspaceData {
+		const version = this.determineVersion(api);
+		const baseUrl = 'swagger' in api ? api.host : api.servers?.[0].url;
+		const rootService = ItemFactory.service({
+			name: api?.info?.title ?? 'New Postman Import',
+			version: api?.info?.version,
+			description: api?.info?.description,
+			baseUrl,
+		});
+		return {
+			version: 10,
+			services: { [rootService.id]: rootService },
+			...this.mapPaths(api.paths, version, rootService),
 		};
+	}
+
+	private static mapPaths(
+		paths: OpenAPI.Document['paths'],
+		version: SupportedVersions,
+		service: Service,
+	): Pick<SwaggerWorkspaceData, 'endpoints' | 'requests'> {
 		if (paths == undefined) {
-			return empty;
+			return {
+				endpoints: {},
+				requests: {},
+			};
 		}
-		let _exhaustive: never;
 		switch (version) {
 			case '2':
-				return this.mapV2Path(paths, service);
+				return this.mapV2Paths(paths as OpenAPIV2.PathsObject, service);
 			case '3':
-				return this.mapV3Path(paths, service);
+				return this.mapV3Paths(paths as OpenAPIV3.PathsObject, service);
 			case '3.1':
-				return this.mapV3Path(paths, service, true);
-			default:
-				_exhaustive = version;
+				return this.mapV3Paths(paths as OpenAPIV3_1.PathsObject, service, true);
 		}
-		return empty;
 	}
 
-	private mapV3Path(paths: OpenAPI.Document['paths'], service: Service, is3_1: boolean = false) {
-		const typedPaths = paths as OpenAPIV3.PathsObject;
-		const mappedRequests: EndpointRequest[] = [];
-		const mappedEndpoints = Object.keys(typedPaths).flatMap((pathsUri: keyof typeof typedPaths) => {
-			const paths = typedPaths[pathsUri] ?? {};
-			return RESTfulRequestVerbs.map((verb) => verb.toLocaleLowerCase() as Lowercase<RESTfulRequestVerb>).flatMap(
-				(verb) => {
-					const pathData = paths[verb];
-					if (pathData == undefined) {
-						return [];
-					}
-					const method = verb.toLocaleUpperCase() as RESTfulRequestVerb;
-					const defaultEndpointData: Endpoint = {
-						id: v4(),
-						serviceId: service.id,
-						verb: method,
-						url: `${pathsUri}`,
-						baseHeaders: [],
-						baseQueryParams: [],
-						description: pathData.description ?? 'This is a new endpoint',
-						name: `${method}: ${pathsUri}`,
-						requestIds: [],
-						defaultRequest: null,
-					};
-					service.endpointIds.push(defaultEndpointData.id);
-					const parameters = pathData.parameters ?? [];
-
-					const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
-						id: v4(),
-						endpointId: defaultEndpointData.id,
-						name: defaultEndpointData.name,
-						headers: [],
-						queryParams: [],
-						body: undefined,
-						bodyType: 'none',
-						rawType: undefined,
-						history: [],
-						environmentOverride: ItemFactory.environment(),
-					};
-					const newRequests: EndpointRequest[] = [];
-					parameters.forEach((param) => {
-						const typedParam = param as OpenAPIV3.ParameterObject;
-						const paramIn = typedParam.in;
-						const schema = typedParam.schema as OpenAPIV3.SchemaObject | undefined;
-						const type = schema?.type ?? 'string';
-						switch (paramIn) {
-							case 'header':
-								if (typedParam.name) {
-									defaultEndpointData.baseHeaders.push({ key: typedParam.name, value: type });
-								}
-								break;
-							case 'query':
-								if (typedParam.name) {
-									defaultEndpointData.baseQueryParams.push({
-										key: typedParam.name,
-										value: schema?.type === 'array' ? `${type}2` : type,
-									});
-								}
-								break;
-							case 'path':
-								break;
-							case 'cookie':
-								break;
-						}
-					});
-					if (pathData.requestBody) {
-						const typedRequestBody = pathData.requestBody as OpenAPIV3.RequestBodyObject;
-						Object.keys(typedRequestBody.content).forEach((contentType) => {
-							const newId = v4();
-							const body = is3_1
-								? this.getExampleSwaggerBodyObjectV3_1(
-										typedRequestBody.content[contentType].schema as OpenAPIV3_1.SchemaObject,
-									)
-								: this.getExampleSwaggerBodyObject(
-										typedRequestBody.content[contentType].schema as OpenAPIV3.SchemaObject,
-									);
-							if (contentType.includes('json')) {
-								newRequests.push({
-									...newRequestBase,
-									body: JSON.stringify(body),
-									bodyType: 'raw',
-									rawType: 'JSON',
-									id: newId,
-								});
-							} else if (contentType.includes('xml')) {
-								newRequests.push({
-									...newRequestBase,
-									body: new xmlParse.Builder().buildObject(body),
-									bodyType: 'raw',
-									rawType: 'XML',
-									id: newId,
-								});
-							} else if (contentType.includes('x-www-form-urlencoded')) {
-								const newEndpoint: EndpointRequest<'x-www-form-urlencoded'> = {
-									...newRequestBase,
-									bodyType: 'x-www-form-urlencoded',
-									id: newId,
-									rawType: undefined,
-								};
-								newRequests.push(newEndpoint);
-							} else {
-								newRequests.push({ ...newRequestBase, id: newId });
-							}
-							if (defaultEndpointData.defaultRequest == null) {
-								defaultEndpointData.defaultRequest = newId;
-							}
-							defaultEndpointData.requestIds.push(newId);
-						});
-					} else {
-						newRequests.push(newRequestBase);
-						defaultEndpointData.requestIds.push(newRequestBase.id);
-						defaultEndpointData.defaultRequest = newRequestBase.id;
-					}
-					mappedRequests.push(...newRequests);
-					return defaultEndpointData;
-				},
-			);
-		});
-		return { endpoints: mappedEndpoints, requests: mappedRequests };
-	}
-
-	private mapV2Path(paths: OpenAPI.Document['paths'], service: Service) {
-		const typedPaths = paths as OpenAPIV2.PathsObject;
-		const mappedRequests: EndpointRequest[] = [];
-		const mappedEndpoints = Object.keys(typedPaths).flatMap((pathsUri: keyof typeof typedPaths) => {
-			const paths = typedPaths[pathsUri];
-			return Object.keys(paths).flatMap((pathsVerbUntyped) => {
-				const pathsVerb = pathsVerbUntyped as keyof typeof paths;
-				const pathData = paths[pathsVerb];
-				const method = pathsVerb.toUpperCase() as RESTfulRequestVerb;
-				if (!RESTfulRequestVerbs.includes(method)) {
+	private static mapV3Paths(pathsObj: OpenAPIV3.PathsObject, service: Service, is3_1: boolean = false) {
+		const requests: SwaggerWorkspaceData['requests'] = {};
+		const endpoints: SwaggerWorkspaceData['endpoints'] = {};
+		Object.entries(pathsObj).forEach(([pathsUri, paths = {}]) => {
+			RESTfulRequestVerbs.map((verb) => verb.toLocaleLowerCase() as Lowercase<RESTfulRequestVerb>).forEach((verb) => {
+				const pathData = paths[verb];
+				if (pathData == undefined) {
 					return [];
 				}
-				const defaultEndpointData: Endpoint = {
-					id: v4(),
+				const method = verb.toLocaleUpperCase() as RESTfulRequestVerb;
+				const endpoint = ItemFactory.endpoint({
 					serviceId: service.id,
 					verb: method,
 					url: `${pathsUri}`,
-					baseHeaders: [],
-					baseQueryParams: [],
-					description: 'This is a new endpoint',
+					description: pathData.description,
 					name: `${method}: ${pathsUri}`,
-					requestIds: [],
-					defaultRequest: null,
-				};
-				service.endpointIds.push(defaultEndpointData.id);
-				if (!pathData || typeof pathData === 'string') {
-					return defaultEndpointData;
-				}
-				const typedPathData = pathData as OpenAPIV2.OperationObject;
-				defaultEndpointData.description = typedPathData?.description ?? defaultEndpointData.description;
-
-				const parameters = typedPathData?.parameters ?? (pathData as OpenAPIV2.Parameters | undefined);
-				if (!parameters) {
-					return defaultEndpointData;
-				}
-
-				const newRequestBase: Omit<EndpointRequest, 'body'> & { body: any } = {
-					id: v4(),
-					endpointId: defaultEndpointData.id,
-					name: defaultEndpointData.name,
-					headers: [],
-					queryParams: [],
-					body: undefined,
-					bodyType: 'none',
-					rawType: undefined,
-					history: [],
-					environmentOverride: ItemFactory.environment(),
-				};
-				const newRequests: EndpointRequest[] = [];
-				parameters.forEach((param) => {
-					const typedParam = param as OpenAPIV2.Parameter;
-					const paramIn = typedParam?.in as SwaggerParamInType | null;
-					let _exaustive: never;
-					switch (paramIn) {
-						case null:
+				});
+				service.endpointIds.push(endpoint.id);
+				endpoints[endpoint.id] = endpoint;
+				pathData.parameters?.forEach((param) => {
+					if (!('in' in param) || param.name == null) return;
+					const schema = param.schema as OpenAPIV3.SchemaObject | undefined;
+					const type = schema?.type ?? 'string';
+					switch (param.in) {
+						case 'header':
+							endpoint.baseHeaders.push({ key: param.name, value: type });
 							break;
+						case 'query':
+							endpoint.baseQueryParams.push({
+								key: param.name,
+								value: type === 'array' ? `${type}2` : type,
+							});
+							break;
+					}
+				});
+				const requests: SwaggerWorkspaceData['requests'] = {};
+				const baseRequestProperties = {
+					endpointId: endpoint.id,
+					name: endpoint.name,
+				};
+				if (pathData.requestBody == null || !('content' in pathData.requestBody)) {
+					const request = ItemFactory.request(baseRequestProperties);
+					requests[request.id] = request;
+					endpoint.requestIds.push(request.id);
+					endpoint.defaultRequest = request.id;
+				} else {
+					const content = pathData.requestBody.content;
+					Object.keys(content).forEach((contentType) => {
+						const body = is3_1
+							? this.getExampleSwaggerBodyObjectV3_1(content[contentType].schema as OpenAPIV3_1.SchemaObject)
+							: this.getExampleSwaggerBodyObject(content[contentType].schema as OpenAPIV3.SchemaObject);
+
+						const request = this.getContentTypedRequest(contentType, body, baseRequestProperties);
+
+						if (endpoint.defaultRequest == null) {
+							endpoint.defaultRequest = request.id;
+						}
+						endpoint.requestIds.push(request.id);
+						requests[request.id] = request;
+					});
+				}
+			});
+		});
+		return { endpoints, requests };
+	}
+
+	private static getContentTypedRequest(
+		contentType: string,
+		body: Record<string, string>,
+		base: Partial<EndpointRequest>,
+	) {
+		if (contentType.includes('json')) {
+			return ItemFactory.request({
+				...base,
+				body: JSON.stringify(body),
+				bodyType: 'raw',
+				rawType: 'JSON',
+			});
+		}
+		if (contentType.includes('xml')) {
+			return ItemFactory.request({
+				...base,
+				body: new xmlParse.Builder().buildObject(body),
+				bodyType: 'raw',
+				rawType: 'XML',
+			});
+		}
+		if (contentType.includes('x-www-form-urlencoded')) {
+			return ItemFactory.request({
+				...base,
+				bodyType: 'x-www-form-urlencoded',
+			});
+		}
+		return ItemFactory.request(base);
+	}
+
+	private static mapV2Paths(pathsObj: OpenAPIV2.PathsObject, service: Service) {
+		const requests: SwaggerWorkspaceData['requests'] = {};
+		const endpoints: SwaggerWorkspaceData['endpoints'] = {};
+		Object.entries(pathsObj).forEach(([pathsUri, paths]) => {
+			Object.entries(paths).forEach(([pathVerb, pathData]) => {
+				const method = pathVerb.toUpperCase() as RESTfulRequestVerb;
+				if (!RESTfulRequestVerbs.includes(method)) return;
+				const endpoint = ItemFactory.endpoint({
+					serviceId: service.id,
+					verb: method,
+					url: `${pathsUri}`,
+					name: `${method}: ${pathsUri}`,
+				});
+				endpoints[endpoint.id] = endpoint;
+				service.endpointIds.push(endpoint.id);
+				if (pathData === null || typeof pathData === 'string') return;
+
+				if ('description' in pathData && pathData.description != null) {
+					endpoint.description = pathData.description;
+				}
+
+				const parameters =
+					'parameters' in pathData ? pathData.parameters : (pathData as OpenAPIV2.Parameters | undefined);
+
+				if (parameters == null) return;
+
+				const baseRequestProperties: Partial<EndpointRequest> = {
+					endpointId: endpoint.id,
+					name: endpoint.name,
+					queryParams: [],
+				};
+
+				let body: Record<string, string> = {};
+				let firstReqId = null;
+
+				parameters.forEach((param) => {
+					if (!('in' in param)) return;
+					switch (param.in) {
 						case 'body':
-							const body = this.getExampleSwaggerBodyObject(typedParam.schema);
-							newRequestBase.body = body;
+							body = this.getExampleSwaggerBodyObject(param.schema) ?? body;
 							break;
 						case 'header':
-							if (typedParam.name) {
-								defaultEndpointData.baseHeaders.push({ key: typedParam.name, value: typedParam.type ?? 'string' });
+							if (param.name) {
+								endpoint.baseHeaders.push({ key: param.name, value: param.type ?? 'string' });
 							}
 							break;
 						case 'formData':
-							if (!newRequestBase.body || typeof newRequestBase.body != 'object') {
-								newRequestBase.body = {};
-							}
-							if (typedParam.type === 'file' && typedParam?.name) {
-								newRequestBase.body[typedParam.name] = '__file';
-							} else {
-								newRequestBase.body[typedParam.name] = 'string';
-							}
+							body[param.name] = param.type === 'file' ? '__file' : 'string';
 							break;
 						case 'query':
-							if (typedParam.name) {
-								defaultEndpointData.baseQueryParams.push({
-									key: typedParam.name,
-									value: typedParam.type === 'array' ? 'string2' : 'string',
+							if (param.name) {
+								baseRequestProperties.queryParams!.push({
+									key: param.name,
+									value: param.type === 'array' ? 'string2' : 'string',
 								});
 							}
 							break;
-						case 'path':
-							break;
-						default:
-							_exaustive = paramIn;
 					}
 				});
 
-				const mimeTypes = typedPathData?.consumes;
-				if (mimeTypes) {
-					mimeTypes.forEach((mimeType) => {
-						const newId = v4();
-						if (mimeType.includes('json')) {
-							newRequests.push({
-								...newRequestBase,
-								body: JSON.stringify(newRequestBase.body),
-								bodyType: 'raw',
-								rawType: 'JSON',
-								id: newId,
-							});
-							defaultEndpointData.requestIds.push(newId);
-						} else if (mimeType.includes('xml')) {
-							newRequests.push({
-								...newRequestBase,
-								body: new xmlParse.Builder().buildObject(newRequestBase.body),
-								bodyType: 'raw',
-								rawType: 'XML',
-								id: newId,
-							});
-							defaultEndpointData.requestIds.push(newId);
-						} else if (mimeType.includes('x-www-form-urlencoded')) {
-							const newEndpoint: EndpointRequest<'x-www-form-urlencoded'> = {
-								...newRequestBase,
-								bodyType: 'x-www-form-urlencoded',
-								id: newId,
-								rawType: undefined,
-							};
-							newRequests.push(newEndpoint);
-						}
+				if ('consumes' in pathData) {
+					pathData.consumes?.forEach((mimeType) => {
+						const request = this.getContentTypedRequest(mimeType, body, baseRequestProperties);
+						requests[request.id] = request;
+						endpoint.requestIds.push(request.id);
+						firstReqId ??= request.id;
 					});
 				} else {
-					newRequests.push(newRequestBase);
-					defaultEndpointData.requestIds.push(newRequestBase.id);
+					const request = ItemFactory.request(baseRequestProperties);
+					requests[request.id] = request;
+					endpoint.requestIds.push(request.id);
+					firstReqId ??= request.id;
 				}
-				defaultEndpointData.defaultRequest = newRequests[0]?.id;
-				mappedRequests.push(...newRequests);
 
-				return defaultEndpointData;
+				endpoint.defaultRequest = firstReqId;
 			});
 		});
-		return { endpoints: mappedEndpoints, requests: mappedRequests };
+		return { endpoints, requests };
 	}
 
-	private getExampleSwaggerBodyObject(object: OpenAPIV3.SchemaObject): any {
+	private static getExampleSwaggerBodyObject(object: OpenAPIV3.SchemaObject): any {
 		const resObj: any = {};
 		const type = object.type;
-		let _exhaustive: never;
 		if (object.example) {
 			return object.example;
 		}
@@ -383,17 +273,12 @@ class SwaggerParseManager {
 				return [
 					this.getExampleSwaggerBodyObject((object as OpenAPIV3.ArraySchemaObject).items as OpenAPIV3.SchemaObject),
 				];
-			case undefined:
-				break;
-			default:
-				_exhaustive = type;
 		}
 	}
 
-	private getExampleSwaggerBodyObjectV3_1(object: OpenAPIV3_1.SchemaObject) {
+	private static getExampleSwaggerBodyObjectV3_1(object: OpenAPIV3_1.SchemaObject) {
 		const resObj: any = {};
 		const type = object.type;
-		let _exhaustive: never;
 		let nonArrayType: 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
 		if (type?.length) {
 			nonArrayType = type[0] as 'array' | OpenAPIV3_1.NonArraySchemaObjectType | undefined;
@@ -422,14 +307,6 @@ class SwaggerParseManager {
 				return [
 					this.getExampleSwaggerBodyObject((object as OpenAPIV3.ArraySchemaObject).items as OpenAPIV3.SchemaObject),
 				];
-			case 'null':
-			case undefined:
-				break;
-			default:
-				_exhaustive = nonArrayType;
 		}
 	}
 }
-
-const swaggerParseManager = SwaggerParseManager.INSTANCE;
-export default swaggerParseManager;

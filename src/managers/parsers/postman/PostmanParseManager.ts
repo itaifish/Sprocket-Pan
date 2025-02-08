@@ -1,46 +1,29 @@
 import { v4 } from 'uuid';
 import type {
-	Auth as V200Auth,
 	EventList as V200EventList,
-	Folder as V200Folder,
-	FormParameter as V200FormParameter,
 	Header as V200Header,
 	HttpsSchemaGetpostmanComJsonCollectionV200 as V200Schema,
 	Item as V200Item,
 	Url,
 	Request1 as V200Request1,
-	UrlEncodedParameter as V200UrlEncodedParameter,
 	Description as V200Description,
 } from '../parseTypes/postman2.0Types';
 import type {
-	Auth as V210Auth,
 	EventList as V210EventList,
-	Folder as V210Folder,
-	FormParameter as V210FormParameter,
 	Header as V210Header,
 	HttpsSchemaGetpostmanComJsonCollectionV210 as V210Schema,
 	Item as V210Item,
 	Request1 as V210Request1,
 	QueryParam,
-	UrlEncodedParameter as V210UrlEncodedParameter,
 	Description as V210Description,
 } from '../parseTypes/postman2.1Types';
 import mime from 'mime';
-import { readTextFile } from '@tauri-apps/api/fs';
-
 import yaml from 'js-yaml';
 import { postmanScriptParseManager } from './PostmanScriptParseManager';
 import { CONTENT_TYPE } from '../../../constants/request';
 import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
-import {
-	QueryParams,
-	RawBodyType,
-	RESTfulRequestVerbs,
-	RESTfulRequestVerb,
-	SPHeaders,
-	RequestBodyType,
-} from '@/types/data/shared';
-import { Service, Endpoint, EndpointRequest, Environment, Script } from '@/types/data/workspace';
+import { QueryParams, RawBodyType, RESTfulRequestVerbs, RESTfulRequestVerb, SPHeaders } from '@/types/data/shared';
+import { Service, Endpoint, EndpointRequest, Script, WorkspaceData } from '@/types/data/workspace';
 import { log } from '@/utils/logging';
 import {
 	toValidFunctionName,
@@ -54,27 +37,15 @@ type PostmanCollection = V200Schema | V210Schema;
 
 type EventList = V200EventList | V210EventList;
 
-type Authetication = V200Auth | V210Auth;
+type Body = V200Request1['body'] | V210Request1['body'];
 
-export type Body = V200Request1['body'] | V210Request1['body'];
+type Item = V200Item | V210Item;
 
-type UrlEncodedParameter = V200UrlEncodedParameter | V210UrlEncodedParameter;
-
-type FormParameter = V200FormParameter | V210FormParameter;
-
-export type Item = V200Item | V210Item;
-
-type Folder = V200Folder | V210Folder;
-
-export type Header = V200Header | V210Header;
+type Header = V200Header | V210Header;
 
 type Description = V200Description | V210Description;
 
-type ImportedGrouping = {
-	services: Service[];
-	endpoints: Endpoint[];
-	requests: EndpointRequest[];
-};
+type PostmanWorkspaceData = Pick<WorkspaceData, 'services' | 'endpoints' | 'requests' | 'version'>;
 
 type ImportSource = 'Postman' | 'Insomnia';
 
@@ -83,34 +54,21 @@ type ImportSource = 'Postman' | 'Insomnia';
  * https://github.com/Kong/insomnia/blob/570c1c005541c2c3715b522aab5f53d642a52f7a/packages/insomnia/src/utils/importers/importers/postman.ts
  */
 
-class PostmanParseManager {
-	public static readonly INSTANCE = new PostmanParseManager();
-
-	private constructor() {}
-
-	public async parsePostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string) {
-		const loadedFile = await this.loadPostmanFile(inputType, inputValue);
-		const input = this.importPostmanCollection(this.parsePostmanInput(loadedFile), 'Postman');
-		return input;
+export class PostmanParseManager {
+	public static parse(content: string): PostmanWorkspaceData {
+		return this.importPostmanCollection(this.parsePostmanInput(content), 'Postman');
 	}
 
-	private parsePostmanInput(input: string) {
+	private static parsePostmanInput(input: string) {
 		return yaml.load(input) as PostmanCollection;
 	}
 
-	private async loadPostmanFile(inputType: 'fileContents' | 'filePath', inputValue: string): Promise<string> {
-		if (inputType === 'fileContents') {
-			return inputValue;
-		}
-		return await readTextFile(inputValue);
-	}
-
-	importPostmanCollection(collection: PostmanCollection, importSource: ImportSource) {
-		const { item, info, variable, event } = collection;
+	public static importPostmanCollection(collection: PostmanCollection, importSource: ImportSource) {
+		const { item, info, variable = [], event } = collection;
 		const items = this.importItems(info, item, importSource);
-		const env = this.importVariables((variable as { [key: string]: string }[]) || [], importSource);
+		const env = this.importVariables(variable, importSource);
 		const preRequestScript = this.importPreRequestScript(event);
-		const postRequestScript = this.importAfterResponseScript(event);
+		const postRequestScript = this.importPostRequestScript(event);
 		const scripts: Script[] = [];
 		[preRequestScript, postRequestScript].forEach((script, index) => {
 			if (script) {
@@ -125,6 +83,7 @@ class PostmanParseManager {
 		});
 		const { services, endpoints, requests } = this.consolidateUnderGroupedServices(items);
 		return {
+			version: 10,
 			services,
 			endpoints,
 			requests,
@@ -133,7 +92,7 @@ class PostmanParseManager {
 		};
 	}
 
-	private consolidateUnderGroupedServices(items: ReturnType<PostmanParseManager['importItems']>): ImportedGrouping {
+	private static consolidateUnderGroupedServices(items: Pick<WorkspaceData, 'services' | 'endpoints' | 'requests'>) {
 		const services: Service[] = [];
 
 		const groupings = new Map<string, string>();
@@ -199,57 +158,53 @@ class PostmanParseManager {
 		return { services, endpoints: items.endpoints, requests: items.requests };
 	}
 
-	private importVariables(variables: { [key: string]: string }[], importSource: ImportSource): Environment {
+	private static importVariables(variables: { [key: string]: string }[], importSource: ImportSource) {
 		return ItemFactory.environment({
 			name: `${importSource} Variables`,
 			pairs: variables.map(({ key, value }) => ({ key, value })),
 		});
 	}
 
-	private importItems = (
+	private static importItems(
 		info: PostmanCollection['info'],
 		items: PostmanCollection['item'],
 		importSource: ImportSource,
-	): Omit<ImportedGrouping, 'services'> & { service: Service } => {
-		const rootService: Service = {
+	) {
+		const rootService = ItemFactory.service({
 			name: info.name,
-			id: v4(),
 			description: this.importDescription(info.description, importSource),
 			version: info.version
 				? typeof info.version === 'string'
 					? info.version
 					: `${info.version.major}.${info.version.minor}.${info.version.patch}`
 				: '1.0.0',
-			endpointIds: [],
-			localEnvironments: {},
-			baseUrl: '',
-		};
-
-		const endpoints: Endpoint[] = [];
-		const requests: EndpointRequest[] = [];
+		});
+		let endpoints: WorkspaceData['endpoints'] = {};
+		let requests: WorkspaceData['requests'] = {};
+		let services: WorkspaceData['services'] = { [rootService.id]: rootService };
 		items.forEach((item) => {
-			if (Object.prototype.hasOwnProperty.call(item, 'request')) {
-				const res = this.importRequestItem(item as Item, rootService.id, importSource);
+			if ('request' in item) {
+				const res = this.importRequestItem(item, rootService.id, importSource);
 				if (res != null) {
-					const { request, endpoint } = res;
-					requests.push(request);
-					endpoints.push(endpoint);
+					requests[res.request.id] = res.request;
+					endpoints[res.endpoint.id] = res.endpoint;
 				} else {
-					log.trace(`res is null for item ${item.name}`);
+					log.trace(`[PostmanParseManager] res is null for item ${item.name}`);
 				}
 			} else {
-				const newItems = this.importItems(info, item.item as PostmanCollection['item'], importSource);
-				endpoints.push(...newItems.endpoints);
-				requests.push(...newItems.requests);
+				const newItems = this.importItems(info, item.item, importSource);
+				endpoints = { ...endpoints, ...newItems.endpoints };
+				requests = { ...requests, ...newItems.requests };
+				services = { ...services, ...newItems.services };
 			}
 		});
 
-		return { service: rootService, endpoints, requests };
-	};
+		return { services, endpoints, requests };
+	}
 
-	private convertVariablesToSprocketVariables<TOnlyReturnsUndefinedIfInputIsUndefined extends string | undefined>(
-		postmanString: TOnlyReturnsUndefinedIfInputIsUndefined,
-	): TOnlyReturnsUndefinedIfInputIsUndefined {
+	private static convertVariablesToSprocketVariables<
+		TOnlyReturnsUndefinedIfInputIsUndefined extends string | undefined,
+	>(postmanString: TOnlyReturnsUndefinedIfInputIsUndefined): TOnlyReturnsUndefinedIfInputIsUndefined {
 		if (postmanString == undefined) {
 			return undefined as TOnlyReturnsUndefinedIfInputIsUndefined;
 		}
@@ -257,8 +212,8 @@ class PostmanParseManager {
 		return postmanString.replaceAll(/{({.*?})}/g, '$1') as TOnlyReturnsUndefinedIfInputIsUndefined;
 	}
 
-	private importRequestItem = (
-		{ request, name = '', event }: Item,
+	private static importRequestItem = (
+		{ request, name, event }: Item,
 		parentId: string,
 		importSource: ImportSource,
 	): { request: EndpointRequest; endpoint: Endpoint } | null => {
@@ -276,10 +231,7 @@ class PostmanParseManager {
 		}
 
 		const preRequestScript = this.importPreRequestScript(event);
-		const postRequestScript = this.importAfterResponseScript(event);
-
-		const endpointId = v4();
-		const requestId = v4();
+		const postRequestScript = this.importPostRequestScript(event);
 
 		const { body, bodyType, rawType } = this.importBody(
 			request.body,
@@ -288,47 +240,42 @@ class PostmanParseManager {
 			) as RawBodyType,
 		);
 
-		const newRequest: EndpointRequest = {
-			id: requestId,
-			endpointId,
-			name,
-			headers: [],
-			queryParams: [],
-			history: [],
-			environmentOverride: ItemFactory.environment(),
-			body,
-			bodyType,
-			rawType,
-		};
-
-		const newEndpoint: Endpoint = {
-			id: endpointId,
-			requestIds: [requestId],
+		const endpoint = ItemFactory.endpoint({
 			url,
 			verb: RESTfulRequestVerbs.includes(request.method as RESTfulRequestVerb)
 				? (request.method as RESTfulRequestVerb)
 				: 'GET',
 			baseHeaders: headers,
-			name,
+			name: name ?? `New ${importSource} Endpoint`,
 			description: this.importDescription(request.description, importSource),
 			serviceId: parentId,
 			baseQueryParams: parameters,
-			defaultRequest: requestId,
 			preRequestScript,
 			postRequestScript,
-		};
+		});
 
-		return { request: newRequest, endpoint: newEndpoint };
+		const sprocketRequest = ItemFactory.request({
+			endpointId: endpoint.id,
+			name: name ?? `New ${importSource} Request`,
+			body,
+			bodyType,
+			rawType,
+		});
+
+		endpoint.requestIds.push(sprocketRequest.id);
+		endpoint.defaultRequest = sprocketRequest.id;
+
+		return { request: sprocketRequest, endpoint };
 	};
 
-	private importDescription(description: Description | string | null | undefined, importSource: ImportSource) {
+	private static importDescription(description: Description | string | null | undefined, importSource: ImportSource) {
 		if (typeof description === 'string') {
 			return description;
 		}
 		return description?.content ?? `Imported from ${importSource}`;
 	}
 
-	private importHeaders = (headers?: Header[] | string): SPHeaders => {
+	private static importHeaders(headers?: Header[] | string): SPHeaders {
 		const result = new OrderedKeyValuePairs();
 		if (Array.isArray(headers)) {
 			headers.forEach(({ key, value }) => {
@@ -336,9 +283,9 @@ class PostmanParseManager {
 			});
 		}
 		return result.toArray();
-	};
+	}
 
-	private importParameters = (parameters?: QueryParam[]): QueryParams => {
+	private static importParameters(parameters?: QueryParam[]): QueryParams {
 		const result = new OrderedKeyValuePairs();
 		parameters?.forEach(({ key, value }) =>
 			result.set(
@@ -347,21 +294,18 @@ class PostmanParseManager {
 			),
 		);
 		return result.toArray();
-	};
+	}
 
-	private importBody = (
+	private static importBody(
 		body: Body,
 		contentType?: RawBodyType,
-	): { body: EndpointRequest['body']; bodyType: RequestBodyType; rawType: RawBodyType | undefined } => {
+	): Pick<EndpointRequest, 'body' | 'bodyType' | 'rawType'> {
 		const defaultReturn = {
 			body: undefined,
 			bodyType: 'none',
 			rawType: undefined,
 		} as const;
-
 		switch (body?.mode) {
-			case null:
-				return defaultReturn;
 			case 'raw':
 				return {
 					body: this.convertVariablesToSprocketVariables(body.raw),
@@ -393,17 +337,13 @@ class PostmanParseManager {
 					bodyType: 'form-data',
 					rawType: undefined,
 				};
-			// TODO
-			// case 'graphql':
-			// 	return this.importBodyGraphQL(body.graphql);
-			default:
-				return defaultReturn;
 		}
-	};
+		return defaultReturn;
+	}
 
-	private importUrl = (url?: Url | string) => {
+	private static importUrl(url?: Url | string) {
 		let res: string = '';
-		if (!url) {
+		if (url == null) {
 			res = '';
 		} else if (typeof url === 'object' && url.query && url.raw?.includes('?')) {
 			// remove ? and everything after it if there are QueryParams strictly defined
@@ -414,54 +354,25 @@ class PostmanParseManager {
 			res = url;
 		}
 		return this.convertVariablesToSprocketVariables(res);
-	};
+	}
 
-	private importPreRequestScript = (events: EventList | undefined): string => {
+	private static importPreRequestScript(events?: EventList) {
+		return this.importScript('prerequest', events);
+	}
+
+	private static importPostRequestScript(events?: EventList) {
+		return this.importScript('test', events);
+	}
+
+	private static importScript(eventName: string, events?: EventList) {
 		if (events == null) {
 			return '';
 		}
-
-		const preRequestEvent = events.find((event) => event.listen === 'prerequest');
-
-		const scriptOrRows = preRequestEvent != null ? preRequestEvent.script : '';
-		if (scriptOrRows == null || scriptOrRows === '') {
+		const event = events.find((event) => event.listen === eventName);
+		if (event?.script == null || event.script.exec == null) {
 			return '';
 		}
-
-		const scriptContent =
-			scriptOrRows.exec != null
-				? Array.isArray(scriptOrRows.exec)
-					? scriptOrRows.exec.join('\n')
-					: scriptOrRows.exec
-				: '';
-
-		return this.importScript(scriptContent);
-	};
-
-	private importAfterResponseScript = (events: EventList | undefined): string => {
-		if (events == null) {
-			return '';
-		}
-
-		const afterResponseEvent = events.find((event) => event.listen === 'test');
-
-		const scriptOrRows = afterResponseEvent ? afterResponseEvent.script : '';
-		if (!scriptOrRows) {
-			return '';
-		}
-
-		const scriptContent = scriptOrRows.exec
-			? Array.isArray(scriptOrRows.exec)
-				? scriptOrRows.exec.join('\n')
-				: scriptOrRows.exec
-			: '';
-
-		return this.importScript(scriptContent);
-	};
-
-	private importScript(postmanScript: string) {
-		return postmanScriptParseManager.convertPostmanScriptToSprocketPan(postmanScript);
+		const scriptContent = Array.isArray(event.script.exec) ? event.script.exec.join('\n') : event.script.exec;
+		return postmanScriptParseManager.convertPostmanScriptToSprocketPan(scriptContent);
 	}
 }
-
-export const postmanParseManager = PostmanParseManager.INSTANCE;
