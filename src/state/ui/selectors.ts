@@ -45,7 +45,7 @@ export const selectIsActiveTab = createSelector(
 	(activeTab, id) => activeTab === id,
 );
 
-export const selectIsLoading = createSelector(selectUiState, (state) => state.isLoading);
+export const selectIsLoadingWorkspace = createSelector(selectUiState, (state) => state.isLoadingWorkspace);
 
 export const selectOrphans = createSelector(selectUiState, (state) => state.orphans);
 

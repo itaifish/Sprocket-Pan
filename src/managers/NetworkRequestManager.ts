@@ -28,18 +28,10 @@ class NetworkRequestManager {
 		this.xmlBuilder = new xmlParse.Builder();
 	}
 
-	private buildPreScripts(state: RootState, scriptObjs: ScriptObjs) {
-		return getSettingsFromState(state).script.strategy.pre.map((strat) => ({
-			script: scriptObjs[strat]?.preRequestScript,
-			name: `pre${capitalizeWord(strat)}Script` as const,
-			id: scriptObjs[strat]?.id,
-		}));
-	}
-
-	private buildPostScripts(state: RootState, scriptObjs: ScriptObjs) {
-		return getSettingsFromState(state).script.strategy.post.map((strat) => ({
-			script: scriptObjs[strat]?.postRequestScript,
-			name: `post${capitalizeWord(strat)}Script` as const,
+	private buildScripts(state: RootState, scriptObjs: ScriptObjs, type: 'pre' | 'post') {
+		return getSettingsFromState(state).script.strategy[type].map((strat) => ({
+			script: scriptObjs[strat] ? scriptObjs[strat][`${type}RequestScript`]?.trim() || undefined : undefined,
+			name: `${type}${capitalizeWord(strat)}Script` as const,
 			id: scriptObjs[strat]?.id,
 		}));
 	}
@@ -48,8 +40,8 @@ class NetworkRequestManager {
 		let ret;
 		const timestamp = new Date().getTime();
 		try {
-			const state = StateAccessManager.getState();
 			await this.runScripts(requestId, auditLog);
+			const state = StateAccessManager.getState();
 			ret = await this.sendRequest(requestId, state, auditLog);
 			await this.runScripts(requestId, auditLog, ret.response);
 			return { ...ret, timestamp, auditLog };
@@ -66,10 +58,9 @@ class NetworkRequestManager {
 		const endpoint = data.endpoints[endpointId];
 		const service = data.services[endpoint.serviceId];
 		const scriptObjs = { service, endpoint, request };
-		const scripts =
-			response == null ? this.buildPreScripts(state, scriptObjs) : this.buildPostScripts(state, scriptObjs);
+		const scripts = this.buildScripts(state, scriptObjs, response == null ? 'pre' : 'post');
 		for (const script of scripts) {
-			if (script.script != null) {
+			if (script.script != undefined) {
 				const interruptible = this.runScript({
 					script: script.script,
 					requestId,
@@ -133,12 +124,16 @@ class NetworkRequestManager {
 		log.info(`Resolving endpoint headers ${JSON.stringify(endpoint.baseHeaders)}`);
 		// endpoint headers and then request headers
 		endpoint.baseHeaders.forEach((header) => {
-			if (header.value == null) return;
+			if (header.value == null) {
+				return;
+			}
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
 			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});
 		request.headers.forEach((header) => {
-			if (header.value == null) return;
+			if (header.value == null) {
+				return;
+			}
 			const parsedKey = EnvironmentContextResolver.resolveVariablesForString(header.key, envValues);
 			headers.set(parsedKey, EnvironmentContextResolver.resolveVariablesForString(header.value, envValues));
 		});
@@ -205,8 +200,17 @@ class NetworkRequestManager {
 	}
 
 	public runScript(args: Partial<RunTypescriptWithFullContextArgs>) {
-		if (args.script == null) throw new Error("cannot run script that doesn't exist");
-		return ScriptRunnerManager.runTypescriptWithFullContext(args as RunTypescriptWithFullContextArgs);
+		if (args.script == null) {
+			throw new Error("cannot run script that doesn't exist");
+		}
+		if (args.auditLog != undefined) {
+			AuditLogManager.addToAuditLog(args.auditLog, 'before', 'standaloneScript', args.associatedId);
+		}
+		const result = ScriptRunnerManager.runTypescriptWithFullContext(args as RunTypescriptWithFullContextArgs);
+		if (args.auditLog != undefined) {
+			AuditLogManager.addToAuditLog(args.auditLog, 'after', 'standaloneScript', args.associatedId);
+		}
+		return result;
 	}
 
 	private headersContentTypeToBodyType(contentType: string | null): RawBodyType {

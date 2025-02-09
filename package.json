@@ -29,6 +29,7 @@
 		"@tauri-apps/api": "^1.4.0",
 		"@types/chroma-js": "^2.4.5",
 		"chroma-js": "^3.1.2",
+		"dayjs": "^1.11.13",
 		"js-yaml": "^4.1.0",
 		"mime": "^4.0.4",
 		"minidenticons": "^4.2.0",

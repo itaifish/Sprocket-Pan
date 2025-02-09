@@ -11,7 +11,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { RootErrorFallback } from './RootErrorFallback';
 import { RustInvoker } from '@/managers/RustInvoker';
 import { Toasts } from './Toasts';
-import { LoadingOverlay } from './overlays/LoadingOverlay';
+import { LoadingWorkspaceOverlay } from './overlays/LoadingWorkspaceOverlay';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -33,7 +33,7 @@ export function Root() {
 
 	return (
 		<>
-			<LoadingOverlay />
+			<LoadingWorkspaceOverlay />
 			<ErrorBoundary FallbackComponent={RootErrorFallback}>
 				{activeWorkspace == null ? (
 					<WorkspaceSelector />

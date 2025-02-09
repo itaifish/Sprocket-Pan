@@ -15,7 +15,9 @@ export function AdoptionModals() {
 		<Modal
 			open={!!orphans}
 			onClose={(_, reason) => {
-				if (reason === 'backdropClick') return;
+				if (reason === 'backdropClick') {
+					return;
+				}
 				onClose();
 			}}
 		>

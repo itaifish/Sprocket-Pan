@@ -25,7 +25,9 @@ export function ResponsePanel({ request }: ResponsePanelProps) {
 	const data = history[boundedIndex];
 
 	useEffect(() => {
-		if (index === history.length - 2) setIndex(history.length - 1);
+		if (index === history.length - 2) {
+			setIndex(history.length - 1);
+		}
 	}, [history]);
 
 	if (data == null) {

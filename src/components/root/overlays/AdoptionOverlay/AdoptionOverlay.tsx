@@ -22,8 +22,12 @@ type OrphanStrategy = Record<string, string | OrphanResolution>;
 const resVals: string[] = Object.values(OrphanResolution);
 
 function getGroup(strat?: string) {
-	if (strat == null) return OrphanResolution.none;
-	if (resVals.includes(strat)) return strat;
+	if (strat == null) {
+		return OrphanResolution.none;
+	}
+	if (resVals.includes(strat)) {
+		return strat;
+	}
 	return OrphanResolution.assign;
 }
 
@@ -43,7 +47,9 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 	const endpointList = useMemo(() => Object.values(endpoints), [endpoints]);
 	const dispatch = useAppDispatch();
 
-	if (orphanData == null) return null;
+	if (orphanData == null) {
+		return null;
+	}
 
 	const onApply = async () => {
 		const {
@@ -62,15 +68,18 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 		const revivedIds = new Set();
 		if (reviveEndpoints?.length || reviveRequests?.length) {
 			reviveEndpoints?.forEach(({ parent }) => {
-				if (parent == null) throw new Error('trying to revive a non-existent parent');
+				if (parent == null) {
+					throw new Error('trying to revive a non-existent parent');
+				}
 				if (!revivedIds.has(parent)) {
 					activeActions.insertService(orphanData.ancestors[parent] as Service);
 					revivedIds.add(parent);
 				}
 			});
 			reviveRequests?.forEach(({ parent, grandparent }) => {
-				if (parent == null || grandparent == null)
+				if (parent == null || grandparent == null) {
 					throw new Error('trying to revive a non-existent parent or grandparent');
+				}
 				if (services[grandparent] == null && !revivedIds.has(grandparent)) {
 					activeActions.insertService(orphanData.ancestors[grandparent] as Service);
 					revivedIds.add(grandparent);
@@ -136,7 +145,9 @@ export function AdoptionOverlay({ orphanData }: AdoptionOverlayProps) {
 					The workspace cannot be accessed until these items are reassigned, restored, or discarded.
 				</Alert>
 				{orphanKinds.map(({ label, orphans, ...dropdownArgs }) => {
-					if (orphans.length === 0) return null;
+					if (orphans.length === 0) {
+						return null;
+					}
 					return (
 						<Fragment key={label}>
 							<Typography mt={2} level="title-md">

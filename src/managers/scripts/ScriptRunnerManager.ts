@@ -39,7 +39,9 @@ export class ScriptRunnerManager {
 
 	public static runTypescriptWithFullContext<TReturnType>({ script, ...context }: RunTypescriptWithFullContextArgs) {
 		const stateAccess = StateAccessManager.stateAccess;
-		if (stateAccess == null) throw new Error('State access not available on script run! This is a SprocketPan bug.');
+		if (stateAccess == null) {
+			throw new Error('State access not available on script run! This is a SprocketPan bug.');
+		}
 		const state = stateAccess.getState();
 		const { runnable, name } = constructRunnableScript(script, Object.values(state.active.scripts), context);
 		return this.runTypescript<TReturnType>(

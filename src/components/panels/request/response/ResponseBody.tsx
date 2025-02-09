@@ -41,7 +41,9 @@ interface ResponseBodyProps extends ResponseDisplayProps {
 }
 
 export function ResponseBody({ response, error }: ResponseBodyProps) {
-	if (error == null) return <ResponseDisplay response={response} />;
+	if (error == null) {
+		return <ResponseDisplay response={response} />;
+	}
 	return (
 		<ButtonTabs
 			tabs={[

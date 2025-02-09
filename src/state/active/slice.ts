@@ -68,7 +68,9 @@ function deleteService(state: State, id: string) {
 }
 
 function update<T extends Item>(state: { [key: string]: T }, item: Update<T>) {
-	if (item.id == null) throw new Error("can't update item without an id");
+	if (item.id == null) {
+		throw new Error("can't update item without an id");
+	}
 	state[item.id] = { ...state[item.id], ...item };
 }
 
@@ -161,7 +163,9 @@ export const activeSlice = createSlice({
 				[requestId]: (state.history[requestId] ?? []).filter((entry) => entry.error == null),
 			};
 			// don't pollute the data with a bunch of discard: falses
-			if (discard) (entry as HistoricalEndpointResponse).discard = true;
+			if (discard) {
+				(entry as HistoricalEndpointResponse).discard = true;
+			}
 			state.history[requestId].push(entry);
 			if (maxLength > 0 && state.history[requestId].length > maxLength) {
 				state.history[requestId].shift();

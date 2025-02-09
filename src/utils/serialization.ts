@@ -7,7 +7,9 @@ export function parseOrderedKeyValuePairs<T extends KeyValueValues>(value: strin
 }
 
 export function headersToJson(headers?: Record<string, string> | KeyValuePair[]): string {
-	if (headers == null) return '{}';
+	if (headers == null) {
+		return '{}';
+	}
 	const convertedHeaders = Array.isArray(headers) ? headers.slice() : toKeyValuePairs(headers);
 	return JSON.stringify(
 		convertedHeaders

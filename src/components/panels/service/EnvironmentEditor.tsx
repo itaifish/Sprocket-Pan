@@ -37,9 +37,13 @@ export function EnvironmentEditor({
 		setIsForcedRerender(true);
 	}, [env.id, envPairs]);
 	useEffect(() => {
-		if (isForcedRerender) setIsForcedRerender(false);
+		if (isForcedRerender) {
+			setIsForcedRerender(false);
+		}
 	}, [isForcedRerender]);
-	if (isForcedRerender) return null;
+	if (isForcedRerender) {
+		return null;
+	}
 	// end Editor bug workaround
 
 	return (

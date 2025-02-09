@@ -23,7 +23,9 @@ const contentMap: Record<string | 'secrets', FunctionComponent<PanelProps>> = {
 
 function extractTabContent(id: string) {
 	for (const key in contentMap) {
-		if (id.startsWith(key)) return contentMap[key];
+		if (id.startsWith(key)) {
+			return contentMap[key];
+		}
 	}
 	throw new Error(`could not determine tab content type from id ${id}`);
 }

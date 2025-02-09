@@ -30,7 +30,9 @@ export const saveActiveData = createAsyncThunk<void, void, { state: RootState }>
 	async (_, thunk) => {
 		const { active, ui, global } = thunk.getState();
 		const { lastModified, lastSaved, ...data } = active;
-		if (lastModified < lastSaved || ui.orphans != null || global.activeWorkspace == null) return;
+		if (lastModified < lastSaved || ui.orphans != null || global.activeWorkspace == null) {
+			return;
+		}
 		try {
 			await WorkspaceDataManager.saveData(data, global.workspaces[global.activeWorkspace]);
 			thunk.dispatch(activeActions.setSavedNow());

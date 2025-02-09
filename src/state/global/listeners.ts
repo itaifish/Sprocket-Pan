@@ -19,7 +19,7 @@ workspaceSelectionListener.startListening({
 		dispatch(activeActions.reset());
 		dispatch(uiActions.reset());
 		if (global.activeWorkspace != null) {
-			dispatch(uiActions.setLoading(true));
+			dispatch(uiActions.setIsLoadingWorkspace(true));
 			const data = await WorkspaceDataManager.initializeWorkspace(global.workspaces[global.activeWorkspace]);
 			const settings = getSettingsFromState({ global, active: data });
 			// TODO: I'd love to move this filtering somewhere more obvious or at least adjacent to other parsing.
@@ -29,7 +29,7 @@ workspaceSelectionListener.startListening({
 			if (orphans.endpoints.length > 0 || orphans.requests.length > 0) {
 				dispatch(uiActions.setOrphans(orphans));
 			}
-			dispatch(uiActions.setLoading(false));
+			dispatch(uiActions.setIsLoadingWorkspace(false));
 		}
 	},
 });

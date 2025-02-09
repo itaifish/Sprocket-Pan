@@ -18,7 +18,9 @@ import { RelativeTimeChip } from '@/components/shared/RelativeTimeChip';
 export function WorkspacePanel({ id }: PanelProps) {
 	const workspace = useSelector((state) => itemActions.workspace.select(state, id));
 	const dispatch = useAppDispatch();
-	if (workspace == null) throw new Error(`${id} could not be found`);
+	if (workspace == null) {
+		throw new Error(`${id} could not be found`);
+	}
 
 	const update = (val: Partial<WorkspaceMetadata>) => {
 		dispatch(globalActions.updateWorkspace({ ...workspace, ...val }));

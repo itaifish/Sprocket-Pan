@@ -38,7 +38,9 @@ import { generateSlug } from 'random-word-slugs';
 function toTen(data: WorkspaceData) {
 	const transformedIds = new Set<string>();
 	const collectIds = (key: keyof WorkspaceItems, prefix: ItemPrefix) => {
-		if (data[key] == null) return;
+		if (data[key] == null) {
+			return;
+		}
 		Object.keys(data[key]).forEach((id) => {
 			if (!id.startsWith(prefix)) {
 				transformedIds.add(`${prefix}:${id}`);

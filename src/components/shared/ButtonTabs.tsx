@@ -19,7 +19,9 @@ export function ButtonTabs({ tabs, onChange }: ButtonTabsProps) {
 		if (index === activeIndex) {
 			//if only two, toggle between them. if more, out of luck
 			if (tabs.length === 2) {
-				setActiveIndex(activeIndex ? 0 : 1);
+				const newIndex = activeIndex ? 0 : 1;
+				onChange?.(newIndex, activeIndex);
+				setActiveIndex(newIndex);
 			}
 		} else {
 			onChange?.(index, activeIndex);

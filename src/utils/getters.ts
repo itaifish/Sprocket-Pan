@@ -9,7 +9,9 @@ const itemPrefixes = Object.entries(ItemPrefix);
  */
 export function extractItemType(id: string) {
 	for (const [key, type] of itemPrefixes) {
-		if (id.startsWith(type)) return key as ItemType;
+		if (id.startsWith(type)) {
+			return key as ItemType;
+		}
 	}
 }
 

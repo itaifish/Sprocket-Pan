@@ -20,7 +20,9 @@ import { FormatButton } from '../../buttons/FormatButton';
 import { SprocketTooltip } from '../../SprocketTooltip';
 
 export function parseEditorJSON<T>(text: string): Record<string, T> {
-	if (text === '') return {};
+	if (text === '') {
+		return {};
+	}
 	return JSON.parse(text) as Record<string, T>;
 }
 
@@ -114,7 +116,9 @@ export function EditableData<T extends KeyValueValues>({
 
 	const onEditorChange = (value: string | undefined) => {
 		setIsMalformedJSON(false);
-		if (ignoreEditorUpdates.current) return;
+		if (ignoreEditorUpdates.current) {
+			return;
+		}
 		setEditorText(value ?? '');
 		if (isFormatting) {
 			setIsFormatting(false);

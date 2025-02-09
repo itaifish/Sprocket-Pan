@@ -1,10 +1,10 @@
-# Sprocket Pan
+# SprocketPan
 
 A tool for sending HTTP(S) requests over the internet. Similar to [Postman](https://www.postman.com/) and [Insomnia](https://insomnia.rest/).
 
 ## Docs
 
-[Sprocket Pan Docs Website](https://sprocketpan.com)
+[SprocketPan Docs Website](https://sprocketpan.com)
 
 ## Running Locally
 
@@ -28,7 +28,7 @@ A tool for sending HTTP(S) requests over the internet. Similar to [Postman](http
 - Add workspaces 
 - Import / Export
   - Imports from:
-    - Sprocket Pan 
+    - SprocketPan 
     - Postman 
     - Insomnia 
     - Swagger / OpenAPI 

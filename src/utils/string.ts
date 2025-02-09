@@ -135,7 +135,9 @@ export function truncate(
 	str = '',
 	{ ellipses = true, length = 20 }: { ellipses: boolean; length: number } = {} as any,
 ) {
-	if (str.length < length + 1) return str;
+	if (str.length < length + 1) {
+		return str;
+	}
 	let truncated = str.substring(0, length).trim();
 	if (ellipses) {
 		truncated += '...';

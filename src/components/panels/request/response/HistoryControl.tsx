@@ -37,7 +37,7 @@ export function HistoryControl({ value, onChange, historyLength }: HistoryContro
 						}}
 						size="sm"
 					/>
-					<span style={{ marginLeft: '5px' }}>/{historyLength}</span>
+					<span style={{ paddingLeft: '10px' }}>/ {historyLength}</span>
 				</>
 			</Typography>
 			<SprocketTooltip text="Next Response">

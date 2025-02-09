@@ -19,7 +19,9 @@ export function EndpointFileSystem({ endpointId }: EndpointFileSystemProps) {
 	const requestIds = useSelector((state) => selectFilteredNestedIds(state, endpoint?.requestIds ?? []));
 	const dispatch = useAppDispatch();
 
-	if (endpoint == null) return null;
+	if (endpoint == null) {
+		return null;
+	}
 
 	return (
 		<FileSystemBranch

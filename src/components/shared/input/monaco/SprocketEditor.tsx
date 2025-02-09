@@ -44,7 +44,9 @@ export function SprocketEditor({
 	}, [combinedOptions]);
 
 	useEffect(() => {
-		if (formatOnChange) format();
+		if (formatOnChange) {
+			format();
+		}
 	}, [value, editorRef.current, formatOnChange]);
 
 	return (

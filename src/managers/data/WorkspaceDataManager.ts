@@ -113,7 +113,9 @@ export class WorkspaceDataManager {
 		for (const key in history) {
 			history[key] = history[key].filter((res) => !res.discard);
 			// cleanliness
-			if (history[key].length === 0) delete history[key];
+			if (history[key].length === 0) {
+				delete history[key];
+			}
 		}
 		return history;
 	}
@@ -196,7 +198,7 @@ export class WorkspaceDataManager {
 		const syncLocation = this.getSyncLocation(parsedData);
 		if (syncLocation != null) {
 			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation)) as WorkspaceItems;
-			parsedData = mergeDeep(parsedData, parsedSync, 1);
+			parsedData = mergeDeep(parsedData, parsedSync, undefined, 1);
 		}
 		SaveUpdateManager.update(parsedData);
 		return parsedData;

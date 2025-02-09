@@ -13,9 +13,13 @@ interface HeadersDisplayTableProps {
 }
 
 export function HeadersDisplayTable({ headers, label, title = 'Headers' }: HeadersDisplayTableProps) {
-	if (headers == null) return <></>;
+	if (headers == null) {
+		return <></>;
+	}
 	headers = Array.isArray(headers) ? headers : toKeyValuePairs(headers);
-	if (headers.length === 0) return <></>;
+	if (headers.length === 0) {
+		return <></>;
+	}
 	return (
 		<>
 			{title != null && <Typography level="title-md">{title}</Typography>}
