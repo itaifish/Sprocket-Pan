@@ -25,12 +25,8 @@ const postmanToSprocketEquivalents: { postmanMatch: RegExp; convertTo: string }[
 	},
 ];
 
-class PostmanScriptParseManager {
-	public static readonly INSTANCE = new PostmanScriptParseManager();
-
-	private constructor() {}
-
-	public convertPostmanScriptToSprocketPan(postmanScript: string) {
+export class PostmanScriptParseManager {
+	public static convertPostmanScriptToSprocketPan(postmanScript: string) {
 		let conversion = postmanScript;
 		postmanToSprocketEquivalents.forEach((postmanToSprocket) => {
 			conversion = conversion.replaceAll(postmanToSprocket.postmanMatch, postmanToSprocket.convertTo);
@@ -38,5 +34,3 @@ class PostmanScriptParseManager {
 		return conversion;
 	}
 }
-
-export const postmanScriptParseManager = PostmanScriptParseManager.INSTANCE;

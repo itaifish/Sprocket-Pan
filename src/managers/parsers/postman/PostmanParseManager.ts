@@ -19,7 +19,6 @@ import type {
 } from '../parseTypes/postman2.1Types';
 import mime from 'mime';
 import yaml from 'js-yaml';
-import { postmanScriptParseManager } from './PostmanScriptParseManager';
 import { CONTENT_TYPE } from '../../../constants/request';
 import { OrderedKeyValuePairs } from '../../../classes/OrderedKeyValuePairs';
 import { QueryParams, RawBodyType, RESTfulRequestVerbs, RESTfulRequestVerb, SPHeaders } from '@/types/data/shared';
@@ -32,6 +31,7 @@ import {
 	camelCaseToTitle,
 } from '@/utils/string';
 import { ItemFactory } from '@/managers/data/ItemFactory';
+import { PostmanScriptParseManager } from './PostmanScriptParseManager';
 
 type PostmanCollection = V200Schema | V210Schema;
 
@@ -92,9 +92,9 @@ export class PostmanParseManager {
 		};
 	}
 
-	private static consolidateUnderGroupedServices(items: Pick<WorkspaceData, 'services' | 'endpoints' | 'requests'>) {
-		const services: Service[] = [];
-
+	private static consolidateUnderGroupedServices(
+		items: Pick<WorkspaceData, 'services' | 'endpoints' | 'requests'> & { rootService: Service },
+	) {
 		const groupings = new Map<string, string>();
 
 		const updateGroupings = (root: string, path: string) => {
@@ -107,7 +107,10 @@ export class PostmanParseManager {
 			}
 		};
 
-		items.endpoints.forEach((endpoint) => {
+		// map of full preceeding url to service
+		const serviceMap = new Map<string, Service>();
+
+		Object.values(items.endpoints).forEach((endpoint) => {
 			try {
 				const url = new URL(endpoint.url);
 				updateGroupings(url.origin, url.pathname);
@@ -125,37 +128,29 @@ export class PostmanParseManager {
 					groupings.set(endpoint.url, endpoint.url);
 				}
 			}
-		});
-
-		// map of full preceeding url to service
-		const serviceMap = new Map<string, Service>();
-
-		items.endpoints.forEach((endpoint) => {
-			let urlRoot: string;
+			let baseUrl: string;
 			try {
-				urlRoot = new URL(endpoint.url).origin;
+				baseUrl = new URL(endpoint.url).origin;
 			} catch (e) {
 				const foundVariables = endpoint.url.match(/{.+?}/);
 				if (foundVariables != null) {
 					const startingPoint = foundVariables[0].length + (foundVariables.index ?? 0);
-					urlRoot = endpoint.url.substring(0, startingPoint);
+					baseUrl = endpoint.url.substring(0, startingPoint);
 				} else {
-					urlRoot = endpoint.url;
+					baseUrl = endpoint.url;
 				}
 			}
-			let existingService = serviceMap.get(urlRoot);
+			let existingService = serviceMap.get(baseUrl);
 			if (existingService == null) {
-				existingService = { ...structuredClone(items.service), id: v4(), baseUrl: urlRoot };
-				serviceMap.set(urlRoot, existingService);
+				existingService = ItemFactory.service({ ...items.rootService, baseUrl });
+				serviceMap.set(baseUrl, existingService);
 			}
 			existingService.endpointIds.push(endpoint.id);
 			endpoint.serviceId = existingService.id;
-			endpoint.url = getStringDifference(endpoint.url, urlRoot);
+			endpoint.url = getStringDifference(endpoint.url, baseUrl);
 		});
 
-		services.push(...serviceMap.values());
-
-		return { services, endpoints: items.endpoints, requests: items.requests };
+		return { services: serviceMap.values(), endpoints: items.endpoints, requests: items.requests };
 	}
 
 	private static importVariables(variables: { [key: string]: string }[], importSource: ImportSource) {
@@ -199,7 +194,7 @@ export class PostmanParseManager {
 			}
 		});
 
-		return { services, endpoints, requests };
+		return { services, endpoints, requests, rootService };
 	}
 
 	private static convertVariablesToSprocketVariables<
@@ -373,6 +368,6 @@ export class PostmanParseManager {
 			return '';
 		}
 		const scriptContent = Array.isArray(event.script.exec) ? event.script.exec.join('\n') : event.script.exec;
-		return postmanScriptParseManager.convertPostmanScriptToSprocketPan(scriptContent);
+		return PostmanScriptParseManager.convertPostmanScriptToSprocketPan(scriptContent);
 	}
 }
