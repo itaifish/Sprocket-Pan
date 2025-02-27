@@ -1,4 +1,4 @@
-import { Box } from '@mui/joy';
+import { Box, Stack } from '@mui/joy';
 import { useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { SettingsTabs } from './tabs/SettingsTabs';
@@ -8,6 +8,7 @@ import { selectGlobalLastSaved, selectGlobalSettings } from '@/state/global/sele
 import { globalActions } from '@/state/global/slice';
 import { useAppDispatch } from '@/state/store';
 import { mergeDeep } from '@/utils/variables';
+import { SettingsTitle } from './SettingsTitle';
 
 export function GlobalSettingsPanel({ onClose }: SettingsPanelProps) {
 	const lastSaved = useSelector(selectGlobalLastSaved);
@@ -17,12 +18,18 @@ export function GlobalSettingsPanel({ onClose }: SettingsPanelProps) {
 		return JSON.stringify(previousSettings) !== JSON.stringify(unsavedSettings);
 	}, [previousSettings, unsavedSettings]);
 	const dispatch = useAppDispatch();
+	const [search, setSearch] = useState('');
 	return (
-		<Box height="75vh">
-			<SettingsTabs
-				settings={unsavedSettings}
-				onChange={(settings) => setUnsavedSettings(mergeDeep(unsavedSettings, settings))}
-			/>
+		<Stack height="75vh" justifyContent="stretch" alignItems="stretch" gap={1}>
+			<SettingsTitle onChange={setSearch} />
+			<Box sx={{ flex: 1, overflow: 'auto' }}>
+				<SettingsTabs
+					searchText={search}
+					settings={unsavedSettings}
+					onChange={(settings) => setUnsavedSettings(mergeDeep(unsavedSettings, settings))}
+					onUpdateGlobal={() => undefined}
+				/>
+			</Box>
 			<SettingsBar
 				onSave={() => dispatch(globalActions.insertSettings(unsavedSettings))}
 				onClose={onClose}
@@ -30,6 +37,6 @@ export function GlobalSettingsPanel({ onClose }: SettingsPanelProps) {
 				hasChanged={hasChanged}
 				lastSaved={lastSaved}
 			/>
-		</Box>
+		</Stack>
 	);
 }

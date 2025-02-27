@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-key */
 // disabling jsx-key because we don't need keys for single items picked from an array
-import { COMMAND } from '@/managers/ShortcutManager';
-import { TIPS_SECTION } from '@/types/data/settings';
+import { Command } from '@/managers/ShortcutManager';
+import { TipsSection } from '@/types/data/settings';
 import { Box, Chip, Stack, Typography } from '@mui/joy';
 import { PropsWithChildren } from 'react';
 import { Keys } from '../shared/Keys';
@@ -26,7 +26,7 @@ function Tip({ children, label = 'Tip' }: TipProps) {
 
 const TIPS: React.ReactNode[] = [
 	<Tip>
-		You can <Keys commands={[COMMAND.meta, COMMAND.click]} /> on underlined URLs to open them.
+		You can <Keys commands={[Command.meta, Command.click]} /> on underlined URLs to open them.
 	</Tip>,
 	<Tip>
 		An endpoint&apos;s default request can be accessed via the <code>Jump to Request</code> button.
@@ -59,18 +59,18 @@ const DYKS: React.ReactNode[] = [
 const ALL = [...TIPS, ...DYKS];
 
 const MESSAGES = {
-	[TIPS_SECTION.all]: ALL,
-	[TIPS_SECTION.dyk]: DYKS,
-	[TIPS_SECTION.tips]: TIPS,
+	[TipsSection.all]: ALL,
+	[TipsSection.dyk]: DYKS,
+	[TipsSection.tips]: TIPS,
 } as const;
 
-interface TipsSection {
-	variant: TIPS_SECTION;
+interface TipsSectionProps {
+	variant: TipsSection;
 	timestamp: number;
 }
 
-export function TipsSection({ variant, timestamp }: TipsSection) {
-	if (variant === TIPS_SECTION.hidden) {
+export function TipsSectionComponent({ variant, timestamp }: TipsSectionProps) {
+	if (variant === TipsSection.hidden) {
 		return <Box />;
 	}
 	const messages = MESSAGES[variant];

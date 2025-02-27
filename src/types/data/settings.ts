@@ -1,4 +1,4 @@
-import { RecursiveValueOf } from '../utils/utils';
+import { RecursiveValueOf, TypeOf } from '../utils/utils';
 
 const levels = ['service', 'endpoint', 'request'] as const;
 type level = (typeof levels)[number];
@@ -14,52 +14,64 @@ export type ScriptRunnerStrategy = RecursiveValueOf<
 	readonly string[]
 >;
 
-export enum VARIABLE_NAME_DISPLAY {
-	before = 'before',
-	hover = 'hover',
-	none = 'none',
-}
+export const VariableNameDisplay = {
+	before: 'before',
+	hover: 'hover',
+	none: 'none',
+} as const;
 
-export enum BASE_THEME {
-	light = 'light',
-	dark = 'dark',
-	default = 'system',
-}
+export type VariableNameDisplay = TypeOf<typeof VariableNameDisplay>;
 
-export enum LOG_LEVELS {
-	debug = 'debug',
-	info = 'info',
-	warn = 'warn',
-}
+export const BaseTheme = {
+	light: 'light',
+	dark: 'dark',
+	default: 'system',
+} as const;
 
-export enum LIST_STYLING {
-	compact = 'compact',
-	default = 'default',
-	cozy = 'cozy',
-}
+export type BaseTheme = TypeOf<typeof BaseTheme>;
 
-export enum SCROLLBAR_VISIBILITY {
-	hidden = 'hidden',
-	compact = 'compact',
-	visible = 'visible',
-}
+export const LogLevels = {
+	debug: 'debug',
+	info: 'info',
+	warn: 'warn',
+} as const;
 
-export enum TIPS_SECTION {
-	hidden = 'hidden',
-	tips = 'tips',
-	dyk = 'dyk',
-	all = 'all',
-}
+export type LogLevels = TypeOf<typeof LogLevels>;
+
+export const ListStyling = {
+	compact: 'compact',
+	default: 'default',
+	cozy: 'cozy',
+} as const;
+
+export type ListStyling = TypeOf<typeof ListStyling>;
+
+export const ScrollbarVisibility = {
+	hidden: 'hidden',
+	compact: 'compact',
+	visible: 'visible',
+} as const;
+
+export type ScrollbarVisibility = TypeOf<typeof ScrollbarVisibility>;
+
+export const TipsSection = {
+	hidden: 'hidden',
+	tips: 'tips',
+	dyk: 'dyk',
+	all: 'all',
+} as const;
+
+export type TipsSection = TypeOf<typeof TipsSection>;
 
 export interface Settings {
 	virtualization: {
 		enabled: boolean;
 	};
 	theme: {
-		base: BASE_THEME;
-		list: LIST_STYLING;
+		base: BaseTheme;
+		list: ListStyling;
 		zoom: number;
-		scrollbarVisibility: SCROLLBAR_VISIBILITY;
+		scrollbarVisibility: ScrollbarVisibility;
 		decoration: {
 			opacity: number;
 		};
@@ -89,6 +101,9 @@ export interface Settings {
 			enabled: boolean;
 			location: string | null;
 		};
+		validation: {
+			enabled: boolean;
+		};
 	};
 	script: {
 		strategy: {
@@ -101,10 +116,10 @@ export interface Settings {
 		timeoutMS: number;
 	};
 	interface: {
-		variableNameDisplay: VARIABLE_NAME_DISPLAY;
-		tipsSection: TIPS_SECTION;
+		variableNameDisplay: VariableNameDisplay;
+		tipsSection: TipsSection;
 	};
 	log: {
-		level: LOG_LEVELS;
+		level: LogLevels;
 	};
 }

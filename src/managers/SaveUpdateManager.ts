@@ -62,7 +62,9 @@ function toTen(data: WorkspaceData) {
 
 function toNine(data: WorkspaceData | any) {
 	data.syncMetadata = { items: {} };
-	data.history = Object.fromEntries(data.history.map(({ id, history }) => [id, history]));
+	data.history = Object.fromEntries(
+		data.history.map(({ id, history }: { id: string; history: unknown }) => [id, history]),
+	);
 }
 
 /**

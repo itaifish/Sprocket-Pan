@@ -3,7 +3,8 @@ import { uiActions } from '@/state/ui/slice';
 import { useSelector } from 'react-redux';
 import { useAppDispatch } from '@/state/store';
 import { PropsWithChildren } from 'react';
-import { FileSystemDropdown, FileSystemMenuOption } from './FileSystemDropdown';
+import { FileSystemMenuOption } from './FileSystemDropdown';
+import { FileSystemEntry } from './FileSystemEntry';
 
 export interface FileSystemLeafProps extends PropsWithChildren {
 	id: string;
@@ -15,7 +16,7 @@ export function FileSystemLeaf({ id, menuOptions, children, color }: FileSystemL
 	const dispatch = useAppDispatch();
 	const isSelected = useSelector((state) => selectIsActiveTab(state, id));
 	return (
-		<li id={`file_${id}`} style={{ display: 'flex' }} className={isSelected ? 'selected' : undefined}>
+		<FileSystemEntry id={id} menuOptions={menuOptions} isSelected={isSelected}>
 			<button
 				style={{ gap: '7px', display: 'flex', alignItems: 'center', flex: 1, minWidth: '50px', color }}
 				onClick={() => {
@@ -25,7 +26,6 @@ export function FileSystemLeaf({ id, menuOptions, children, color }: FileSystemL
 			>
 				{children}
 			</button>
-			{menuOptions == null ? null : <FileSystemDropdown options={menuOptions} />}
-		</li>
+		</FileSystemEntry>
 	);
 }

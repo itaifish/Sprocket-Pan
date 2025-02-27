@@ -1,4 +1,4 @@
-import { ShortcutManager, COMMAND } from '@/managers/ShortcutManager';
+import { ShortcutManager, Command } from '@/managers/ShortcutManager';
 import { BREAK_ALL_TEXT } from '@/styles/text';
 import { open } from '@tauri-apps/api/shell';
 
@@ -11,7 +11,7 @@ export function UriTypography({ children = '' }: UriTypographyProps) {
 		<u>
 			<span
 				onClick={(event) => {
-					if (ShortcutManager.translateClick(event) === COMMAND.meta) {
+					if (ShortcutManager.translateClick(event) === Command.meta) {
 						open(children);
 					}
 				}}

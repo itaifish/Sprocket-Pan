@@ -40,7 +40,6 @@ export function WorkspacesFileSystem() {
 			switchWorkspace();
 		}
 	}, [switchingTo, isModified]);
-	console.log({ isModified, switchingTo, actual: isModified && switchingTo != null });
 	return (
 		<>
 			<SideDrawerHeader content="Workspaces" />

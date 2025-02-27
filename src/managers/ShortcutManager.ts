@@ -1,36 +1,32 @@
+import { TypeOf } from '@/types/utils/utils';
+
 type ClickEvent = Pick<MouseEvent, 'ctrlKey' | 'metaKey' | 'shiftKey'>;
 
-export enum COMMAND {
-	meta,
-	click,
-	shift,
-}
+export const Command = {
+	meta: 'meta',
+	click: 'click',
+	shift: 'shift',
+} as const;
+
+export type Command = TypeOf<typeof Command>;
 
 const clickTranslations = [
 	{
-		command: COMMAND.meta,
+		command: Command.meta,
 		matches: (event: ClickEvent) => event.ctrlKey || event.metaKey,
 	},
 	{
-		command: COMMAND.shift,
+		command: Command.shift,
 		matches: (event: ClickEvent) => event.shiftKey,
 	},
 ];
-
-const commandMapping = {
-	[COMMAND.meta]: 'command',
-	[COMMAND.click]: 'click',
-	[COMMAND.shift]: 'shift',
-};
 
 export class ShortcutManager {
 	public static translateClick(event: ClickEvent) {
 		return clickTranslations.find(({ matches }) => matches(event))?.command;
 	}
-	public static getKey(command: COMMAND) {
-		return commandMapping[command];
-	}
-	public static getKeys(commands: COMMAND[]) {
-		return commands.map((command) => this.getKey(command)).join('+');
+
+	public static getKeys(commands: Command[]) {
+		return commands.join('+');
 	}
 }

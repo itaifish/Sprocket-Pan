@@ -17,7 +17,7 @@ function toMSMinuteOrUndefined(num: unknown) {
 	return ret == null ? undefined : ret * MS_IN_MINUTE;
 }
 
-export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
+export function DataTab({ overlay, onChange, onUpdateGlobal, searchText, settings }: SettingsTabProps) {
 	const autosave = settings.data.autosave;
 	const oversave = overlay?.data?.autosave;
 	const autosaveEnabled = oversave?.enabled ?? autosave.enabled;
@@ -28,14 +28,17 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 				<Typography>Saving</Typography>
 				<Stack direction="row" gap={2}>
 					<SettingsSwitch
+						searchText={searchText}
 						sx={{ width: 240 }}
 						label="Autosave"
 						checked={autosave.enabled}
 						onChange={(enabled) => onChange({ data: { autosave: { enabled } } })}
+						onUpdateGlobal={(enabled) => onUpdateGlobal({ data: { autosave: { enabled } } })}
 						overlay={oversave?.enabled}
 					/>
 					<SettingsInput
 						sx={{ width: 240 }}
+						searchText={searchText}
 						inputSx={{ width: 240 }}
 						disabled={!autosaveEnabled}
 						id="autosave-duration"
@@ -43,6 +46,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 						value={autosave.intervalMS / MS_IN_MINUTE}
 						overlay={oversave?.intervalMS == null ? undefined : oversave.intervalMS / MS_IN_MINUTE}
 						onChange={(val) => onChange({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
+						onUpdateGlobal={(val) => onUpdateGlobal({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
 						startDecorator={<TimerIcon />}
 						endDecorator="Minutes"
 					/>
@@ -50,14 +54,17 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 				<Stack direction="row" gap={2}>
 					<SettingsSwitch
 						sx={{ width: 240 }}
+						searchText={searchText}
 						label="History Tracking"
 						checked={settings.history.enabled}
 						onChange={(enabled) => onChange({ history: { enabled } })}
+						onUpdateGlobal={(enabled) => onUpdateGlobal({ history: { enabled } })}
 						overlay={overlay?.history?.enabled}
 					/>
 					<Stack gap={2}>
 						<SettingsInput
 							type="number"
+							searchText={searchText}
 							disabled={!historyEnabled}
 							sx={{ width: 240 }}
 							inputSx={{ width: 240 }}
@@ -66,12 +73,14 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 							value={settings.history.maxLength}
 							overlay={overlay?.history?.maxLength}
 							onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
+							onUpdateGlobal={(val) => onUpdateGlobal({ history: { maxLength: toNumberOrUndefined(val) } })}
 							startDecorator={<ManageHistoryIcon />}
 							endDecorator="Records"
 							hint="Set this value to -1 for no maximum."
 						/>
 						<SettingsInput
 							type="number"
+							searchText={searchText}
 							disabled={!historyEnabled}
 							sx={{ width: 240 }}
 							inputSx={{ width: 240 }}
@@ -80,6 +89,7 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 							value={settings.history.maxDays}
 							overlay={overlay?.history?.maxDays}
 							onChange={(val) => onChange({ history: { maxDays: toNumberOrUndefined(val) } })}
+							onUpdateGlobal={(val) => onUpdateGlobal({ history: { maxDays: toNumberOrUndefined(val) } })}
 							startDecorator={<History />}
 							endDecorator="Days"
 							hint="Set this value to -1 for no maximum."
@@ -87,6 +97,15 @@ export function DataTab({ overlay, onChange, settings }: SettingsTabProps) {
 					</Stack>
 				</Stack>
 				<Typography>Data</Typography>
+				<SettingsSwitch
+					searchText={searchText}
+					sx={{ width: 240 }}
+					label="Workspace Data Validation"
+					checked={settings.data.validation.enabled}
+					onChange={(enabled) => onChange({ data: { validation: { enabled } } })}
+					onUpdateGlobal={(enabled) => onUpdateGlobal({ data: { validation: { enabled } } })}
+					overlay={overlay?.data?.validation?.enabled}
+				/>
 				<Stack direction="row" gap={2}>
 					<Button
 						sx={{ width: '240px' }}

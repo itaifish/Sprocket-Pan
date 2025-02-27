@@ -17,7 +17,7 @@ export function SettingsTabs({ goToWorkspaceSelection, ...tabProps }: SettingsTa
 				<Tab>Actions</Tab>
 				<Tab>Display</Tab>
 				<Tab>Data</Tab>
-				<Tab>Workspace</Tab>
+				{goToWorkspaceSelection != null && <Tab>Workspace</Tab>}
 			</TabList>
 			<TabPanel sx={panelStyles} value={0}>
 				<GeneralTab {...tabProps} />

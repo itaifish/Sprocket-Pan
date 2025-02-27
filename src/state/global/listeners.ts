@@ -25,9 +25,11 @@ workspaceSelectionListener.startListening({
 			// TODO: I'd love to move this filtering somewhere more obvious or at least adjacent to other parsing.
 			data.history = filterOldHistoryEntries(data.history, settings.history.maxDays);
 			dispatch(activeActions.setFullState(data));
-			const orphans = await WorkspaceDataManager.processOrphans(data, global.workspaces[global.activeWorkspace]);
-			if (orphans.endpoints.length > 0 || orphans.requests.length > 0) {
-				dispatch(uiActions.setOrphans(orphans));
+			if (settings.data.validation.enabled) {
+				const orphans = await WorkspaceDataManager.processOrphans(data, global.workspaces[global.activeWorkspace]);
+				if (orphans.endpoints.length > 0 || orphans.requests.length > 0) {
+					dispatch(uiActions.setOrphans(orphans));
+				}
 			}
 			dispatch(uiActions.setIsLoadingWorkspace(false));
 		}

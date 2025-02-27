@@ -79,6 +79,7 @@ export function EditableData<T extends KeyValueValues>({
 		await editorRef.current?.getAction('editor.action.formatDocument')?.run();
 		editorRef.current?.updateOptions({ readOnly: prevReadOnly });
 		ignoreEditorUpdates.current = prevIgnore;
+		setIsFormatting(false);
 	};
 
 	const reset = () => {

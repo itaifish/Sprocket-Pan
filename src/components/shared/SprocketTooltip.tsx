@@ -11,7 +11,7 @@ export function SprocketTooltip({ children, text, disabled, sx, ...props }: Spro
 		<>{children}</>
 	) : (
 		<Tooltip
-			enterDelay={750}
+			enterDelay={250}
 			enterNextDelay={100}
 			variant="outlined"
 			arrow

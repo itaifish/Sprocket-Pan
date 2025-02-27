@@ -58,3 +58,15 @@ export function checkInterrupt<T, A extends any[]>(func: (...args: A) => T, toke
 		return func(...args);
 	};
 }
+
+export function clearLeafProperties<T extends object>(item: T, newValue: null | undefined) {
+	for (const key in item) {
+		if (item.hasOwnProperty(key)) {
+			if (typeof item[key] === 'object' && item[key] != null) {
+				clearLeafProperties(item[key], newValue);
+			} else {
+				item[key] = newValue as any;
+			}
+		}
+	}
+}

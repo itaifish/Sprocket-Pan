@@ -44,6 +44,13 @@ export function FileSystemTrunk<T extends Item>({ items, render }: FileSystemTru
 				'& .selected': {
 					backgroundColor: theme.palette.background.level1,
 				},
+				'& .onHoverContainer': {
+					':hover': {
+						'.onHoverButton': {
+							opacity: '1 !important',
+						},
+					},
+				},
 				'& ul': {
 					ml: 1,
 					pl: 1,

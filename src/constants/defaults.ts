@@ -1,11 +1,11 @@
 import {
 	Settings,
-	BASE_THEME,
-	LIST_STYLING,
-	SCROLLBAR_VISIBILITY,
-	VARIABLE_NAME_DISPLAY,
-	TIPS_SECTION,
-	LOG_LEVELS,
+	BaseTheme,
+	ListStyling,
+	ScrollbarVisibility,
+	VariableNameDisplay,
+	TipsSection,
+	LogLevels,
 } from '@/types/data/settings';
 import { MS_IN_MINUTE } from './constants';
 
@@ -14,10 +14,10 @@ export const DEFAULT_SETTINGS: Settings = {
 		enabled: true,
 	},
 	theme: {
-		base: BASE_THEME.default,
-		list: LIST_STYLING.default,
+		base: BaseTheme.default,
+		list: ListStyling.default,
 		zoom: 100,
-		scrollbarVisibility: SCROLLBAR_VISIBILITY.compact,
+		scrollbarVisibility: ScrollbarVisibility.compact,
 		decoration: {
 			opacity: 0.3,
 		},
@@ -47,6 +47,9 @@ export const DEFAULT_SETTINGS: Settings = {
 			enabled: false,
 			location: null,
 		},
+		validation: {
+			enabled: true,
+		},
 	},
 	script: {
 		strategy: {
@@ -59,10 +62,10 @@ export const DEFAULT_SETTINGS: Settings = {
 		timeoutMS: MS_IN_MINUTE * 1,
 	},
 	interface: {
-		variableNameDisplay: VARIABLE_NAME_DISPLAY.before,
-		tipsSection: TIPS_SECTION.tips,
+		variableNameDisplay: VariableNameDisplay.before,
+		tipsSection: TipsSection.tips,
 	},
 	log: {
-		level: LOG_LEVELS.warn,
+		level: LogLevels.warn,
 	},
 };

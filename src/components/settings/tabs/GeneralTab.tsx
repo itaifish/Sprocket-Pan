@@ -8,11 +8,11 @@ import { SettingsTabProps } from './types';
 import { SettingsSelect, SettingsSwitch } from './SettingsFields';
 import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
 import { Constants } from '@/constants/constants';
-import { VARIABLE_NAME_DISPLAY, TIPS_SECTION } from '@/types/data/settings';
+import { VariableNameDisplay, TipsSection } from '@/types/data/settings';
 import { log } from '@/utils/logging';
 import { sleep } from '@/utils/misc';
 
-export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
+export function GeneralTab({ overlay, settings, onChange, onUpdateGlobal, searchText }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
 	const [version, setVersion] = useState('Loading Version...');
@@ -28,36 +28,42 @@ export function GeneralTab({ overlay, settings, onChange }: SettingsTabProps) {
 	return (
 		<Stack spacing={3}>
 			<SettingsSelect
+				searchText={searchText}
 				value={settings.interface.variableNameDisplay}
 				overlay={overlay?.interface?.variableNameDisplay}
 				sx={{ width: 250 }}
 				label="Display Variable Names"
 				tooltip="Controls how {environment_variables} are displayed alongside their computed values."
 				onChange={(val) => onChange({ interface: { variableNameDisplay: val } })}
+				onUpdateGlobal={(val) => onUpdateGlobal({ interface: { variableNameDisplay: val } })}
 				options={[
-					{ value: VARIABLE_NAME_DISPLAY.before, label: 'Key and Value' },
-					{ value: VARIABLE_NAME_DISPLAY.none, label: 'Value Only' },
-					{ value: VARIABLE_NAME_DISPLAY.hover, label: 'Key on Hover' },
+					{ value: VariableNameDisplay.before, label: 'Key and Value' },
+					{ value: VariableNameDisplay.none, label: 'Value Only' },
+					{ value: VariableNameDisplay.hover, label: 'Key on Hover' },
 				]}
 			/>
 			<SettingsSelect
 				sx={{ width: 250 }}
 				label="Tips Section Messages"
+				searchText={searchText}
 				value={settings.interface.tipsSection}
 				overlay={overlay?.interface?.tipsSection}
 				onChange={(val) => onChange({ interface: { tipsSection: val } })}
+				onUpdateGlobal={(val) => onUpdateGlobal({ interface: { tipsSection: val } })}
 				options={[
-					{ value: TIPS_SECTION.tips, label: 'Sprocket Tips Only' },
-					{ value: TIPS_SECTION.all, label: 'All Messages' },
-					{ value: TIPS_SECTION.dyk, label: 'Did You Know Only' },
-					{ value: TIPS_SECTION.hidden, label: 'Hidden' },
+					{ value: TipsSection.tips, label: 'Sprocket Tips Only' },
+					{ value: TipsSection.all, label: 'All Messages' },
+					{ value: TipsSection.dyk, label: 'Did You Know Only' },
+					{ value: TipsSection.hidden, label: 'Hidden' },
 				]}
 			/>
 			<SettingsSwitch
 				sx={{ width: 250 }}
+				searchText={searchText}
 				label="List Virtualization"
 				checked={settings.virtualization.enabled}
 				onChange={(enabled) => onChange({ virtualization: { enabled } })}
+				onUpdateGlobal={(enabled) => onUpdateGlobal({ virtualization: { enabled } })}
 				overlay={overlay?.virtualization?.enabled}
 			/>
 			<Divider />

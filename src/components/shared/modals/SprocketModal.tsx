@@ -1,4 +1,5 @@
 import { Modal, ModalClose, ModalDialog, ModalProps, Stack, Typography } from '@mui/joy';
+import { SxProps } from '@mui/material';
 import { ReactNode } from 'react';
 
 const allCloseOn = ['backdropClick', 'escapeKeyDown', 'closeClick'] as const;
@@ -16,6 +17,7 @@ interface SprocketModalProps extends Omit<ModalProps, 'onClose' | 'title'> {
 	closeOn?: ('backdropClick' | 'escapeKeyDown' | 'closeClick')[];
 	size?: keyof typeof sizeStyling;
 	title?: ReactNode;
+	dialogSx?: SxProps;
 }
 
 export function SprocketModal({
@@ -25,6 +27,7 @@ export function SprocketModal({
 	actions,
 	title,
 	size = 'md',
+	dialogSx,
 	...props
 }: SprocketModalProps) {
 	return (
@@ -36,13 +39,18 @@ export function SprocketModal({
 				}
 			}}
 		>
-			<ModalDialog sx={{ ...sizeStyling[size], maxWidth: '100%' }} layout={size == 'full' ? 'fullscreen' : 'center'}>
+			<ModalDialog
+				sx={{ ...sizeStyling[size], maxWidth: '100%', ...dialogSx }}
+				layout={size == 'full' ? 'fullscreen' : 'center'}
+			>
 				{closeOn.includes('closeClick') && <ModalClose />}
 				{title != null && <Typography level="title-lg">{title}</Typography>}
 				{children}
-				<Stack sx={{ position: 'absolute', bottom: '10px', width: 'calc(100% - 40px)' }} direction="row" gap={2}>
-					{actions}
-				</Stack>
+				{actions && (
+					<Stack sx={{ position: 'absolute', bottom: '10px', width: 'calc(100% - 40px)' }} direction="row" gap={2}>
+						{actions}
+					</Stack>
+				)}
 			</ModalDialog>
 		</Modal>
 	);

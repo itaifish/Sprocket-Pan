@@ -4,6 +4,7 @@ import FolderCopyIcon from '@mui/icons-material/FolderCopy';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { useState } from 'react';
 import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
+import { DotMenuSvg } from '@/assets/icons/DotMenu';
 
 export interface FileSystemMenuOption {
 	label: string;
@@ -76,13 +77,13 @@ export function FileSystemDropdown({ options }: FileSystemDropdownProps) {
 
 	return (
 		<Dropdown open={menuOpen} onOpenChange={(_event, isOpen) => setMenuOpen(isOpen)}>
-			<MenuButton slots={{ root: IconButton }} slotProps={{ root: { variant: 'plain', color: 'neutral' } }}>
-				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-					<path
-						fill="currentColor"
-						d="M12 8a2 2 0 1 1 0-4a2 2 0 0 1 0 4m0 6a2 2 0 1 1 0-4a2 2 0 0 1 0 4m-2 4a2 2 0 1 0 4 0a2 2 0 0 0-4 0"
-					/>
-				</svg>
+			<MenuButton
+				slots={{ root: IconButton }}
+				slotProps={{
+					root: { variant: 'plain', color: 'neutral', sx: { minWidth: 0, pr: 0, mr: 0, ml: '-17px' } },
+				}}
+			>
+				<DotMenuSvg />
 			</MenuButton>
 			<Menu sx={{ zIndex: 1201 }}>
 				{options.map((option) => (

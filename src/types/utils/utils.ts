@@ -7,6 +7,7 @@ export type RecursivePartial<T> = {
 };
 
 export type ValuesOf<T extends readonly unknown[]> = T[number];
+export type TypeOf<T extends Record<string, string>> = T[keyof T];
 
 export type RecursiveValueOf<TMaybeObject, TValueTypeData> =
 	TMaybeObject extends Record<string, infer ValueType>
