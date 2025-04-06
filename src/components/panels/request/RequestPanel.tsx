@@ -39,7 +39,7 @@ export function RequestPanel({ id }: PanelProps) {
 				requestId: request.id,
 				...result,
 				maxLength: settings.history.maxLength,
-				discard: settings.history.enabled,
+				discard: !settings.history.enabled,
 			}),
 		);
 		setLoading(false);
