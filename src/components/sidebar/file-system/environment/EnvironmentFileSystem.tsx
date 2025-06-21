@@ -1,15 +1,17 @@
-import { ListItemDecorator, ListSubheader } from '@mui/joy';
-import TableChartIcon from '@mui/icons-material/TableChart';
 import { useSelector } from 'react-redux';
 import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined';
-import { selectSelectedEnvironment, selectEnvironmentsById } from '../../../../state/active/selectors';
-import { selectEnvironment } from '../../../../state/active/slice';
-import { addNewEnvironmentById } from '../../../../state/active/thunks/environments';
-import { useAppDispatch } from '../../../../state/store';
-import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
-import { EllipsisSpan } from '../../../shared/EllipsisTypography';
+import { selectSelectedEnvironment } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { useShowSync } from '@/hooks/useShowSync';
+import { FluentCubeLinkSvg } from '@/assets/icons/fluent/FluentCubeLink';
+import { FluentCubeSvg } from '@/assets/icons/fluent/FluentCube';
+import { EllipsesP } from '../components/EllipsesP';
+import { itemActions } from '@/state/items';
+import { useTheme } from '@mui/joy';
 
 interface EnvironmentFileSystemProps {
 	environmentId: string;
@@ -18,29 +20,27 @@ interface EnvironmentFileSystemProps {
 export function EnvironmentFileSystem({ environmentId }: EnvironmentFileSystemProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const envSelected = selectedEnvironment === environmentId;
-	const environment = useSelector((state) => selectEnvironmentsById(state, environmentId));
+	const environment = useSelector((state) => itemActions.environment.select(state, environmentId));
 	const dispatch = useAppDispatch();
+	const showSync = useShowSync(environmentId);
+	const theme = useTheme();
+	const color = envSelected ? theme.palette.primary.plainColor : undefined;
 	return (
 		<FileSystemLeaf
+			color={color}
 			id={environmentId}
-			tabType="environment"
-			color={envSelected ? 'success' : 'neutral'}
 			menuOptions={[
 				{
-					onClick: () => dispatch(selectEnvironment(envSelected ? undefined : environment.__id)),
+					onClick: () => dispatch(activeActions.selectEnvironment(envSelected ? undefined : environment.id)),
 					Icon: CheckCircleOutlinedIcon,
 					label: envSelected ? 'Deselect' : 'Select',
 				},
-				menuOptionDuplicate(() => dispatch(addNewEnvironmentById(environment.__id))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(environment.__id))),
+				menuOptionDuplicate(() => dispatch(itemActions.environment.duplicate(environment))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(environment.id))),
 			]}
 		>
-			<ListItemDecorator>
-				<TableChartIcon fontSize="small" />
-			</ListItemDecorator>
-			<ListSubheader sx={{ width: '100%' }}>
-				<EllipsisSpan>{environment.__name}</EllipsisSpan>
-			</ListSubheader>
+			<div style={{ flex: 0 }}>{showSync ? <FluentCubeLinkSvg /> : <FluentCubeSvg />}</div>
+			<EllipsesP>{environment.name}</EllipsesP>
 		</FileSystemLeaf>
 	);
 }

@@ -1,37 +1,35 @@
-import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { defaultWorkspaceData } from '@/managers/data/WorkspaceDataManager';
+import { IdSpecificUiMetadata } from '@/types/data/shared';
 import {
-	WorkspaceData,
 	Endpoint,
 	EndpointRequest,
-	EndpointResponse,
 	Environment,
-	IdSpecificUiMetadata,
-	NetworkFetchRequest,
+	HistoricalEndpointResponse,
+	RootEnvironment,
 	Script,
 	Service,
-} from '../../types/application-data/application-data';
-import { AuditLog } from '../../managers/AuditLogManager';
-import { log } from '../../utils/logging';
-import { defaultWorkspaceData } from '../../managers/data/WorkspaceDataManager';
+	SyncMetadata,
+	WorkspaceData,
+} from '@/types/data/workspace';
+import { KeyValuePair } from '@/types/shared/keyValues';
+import { RecursivePartial } from '@/types/utils/utils';
+import { mergeDeep } from '@/utils/variables';
+import { PayloadAction, createSlice } from '@reduxjs/toolkit';
+import { Create, PayloadUpdate, Update } from '../types';
+import { Item } from '@/types/data/item';
 
-export type ActiveWorkspaceMetadata = {
-	lastModified: number;
-	lastSaved: number;
-	autosaveInterval?: NodeJS.Timeout | undefined;
-};
-export type ActiveWorkspaceSlice = WorkspaceData & ActiveWorkspaceMetadata;
-
-const initialState: ActiveWorkspaceSlice = {
+const initialState = {
 	...defaultWorkspaceData,
 	lastModified: 0,
 	lastSaved: 0,
 };
 
-interface AddResponseToHistory {
+type State = typeof initialState;
+
+interface AddResponseToHistory extends HistoricalEndpointResponse {
 	requestId: string;
-	networkRequest: NetworkFetchRequest;
-	response: EndpointResponse;
-	auditLog?: AuditLog;
+	maxLength: number;
+	discard: boolean;
 }
 
 interface DeleteResponseFromHistory {
@@ -39,91 +37,112 @@ interface DeleteResponseFromHistory {
 	historyIndex: number;
 }
 
-interface AddRequestToEndpoint {
-	requestId: string;
-	endpointId: string;
-}
-
-interface AddEndpointToService {
-	endpointId: string;
+export interface UpdateLinkedEnv {
+	envId: string;
+	serviceEnvId: string;
 	serviceId: string;
 }
 
-interface DeleteScript {
-	scriptId: string;
+interface SetSelectedServiceEnvironment {
+	serviceEnvId: string | undefined;
+	serviceId: string;
 }
 
-export type Update<T, TKey extends string = 'id'> = Partial<Omit<T, TKey>> & { [key in TKey]: string };
+function deleteRequest(state: State, id: string) {
+	const { endpointId } = state.requests[id];
+	state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter((reqId) => reqId !== id);
+	if (state.endpoints[endpointId].defaultRequest === id) {
+		state.endpoints[endpointId].defaultRequest = state.endpoints[endpointId].requestIds[0];
+	}
+	delete state.requests[id];
+}
+
+function deleteEndpoint(state: State, id: string) {
+	const { serviceId, requestIds } = state.endpoints[id];
+	state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((endId) => endId !== id);
+	requestIds.forEach((reqId) => deleteRequest(state, reqId));
+	delete state.endpoints[id];
+}
+
+function deleteService(state: State, id: string) {
+	const { endpointIds } = state.services[id];
+	endpointIds.forEach((endId) => deleteEndpoint(state, endId));
+	delete state.services[id];
+}
+
+function update<T extends Item>(state: { [key: string]: T }, item: Update<T>) {
+	if (item.id == null) {
+		throw new Error("can't update item without an id");
+	}
+	state[item.id] = { ...state[item.id], ...item };
+}
+
+const injectableKeys: (keyof WorkspaceData)[] = [
+	'endpoints',
+	'environments',
+	'requests',
+	'scripts',
+	'secrets',
+	'services',
+	'settings',
+	'syncMetadata',
+];
 
 export const activeSlice = createSlice({
 	name: 'active',
 	initialState: initialState,
 	reducers: {
-		setFullState: (state, action: PayloadAction<WorkspaceData>) => {
-			Object.assign(state, action.payload);
-			log.debug(`setFullState called`, 0);
+		setFullState: (state, { payload }: PayloadAction<WorkspaceData>) => {
+			const time = new Date().getTime();
+			Object.assign(state, { ...initialState, ...payload, lastModified: time, lastSaved: time });
+		},
+		injectState: (state, { payload }: PayloadAction<Create<WorkspaceData>>) => {
+			if (payload == null) {
+				return;
+			}
+			injectableKeys.forEach((key) => {
+				if (key in payload && payload[key] != null) {
+					// I can't get typescript to shut up without putting never here.
+					state[key] = mergeDeep(state[key], payload[key], undefined, 5) as never;
+				}
+			});
 		},
 		setSavedNow: (state) => {
 			state.lastSaved = new Date().getTime();
-			log.debug(`setSavedNow called at time ${state.lastSaved}`, 0);
 		},
 		setModifiedNow: (state) => {
 			state.lastModified = new Date().getTime();
-			log.debug(`setModifiedNow called at time ${state.lastModified}`, 0);
 		},
-		setAutosaveInterval: (state, action: PayloadAction<NodeJS.Timeout | undefined>) => {
-			if (state.autosaveInterval != undefined) {
-				clearInterval(state.autosaveInterval);
-			}
-			state.autosaveInterval = action.payload;
+		insertService: (state, { payload }: PayloadAction<Service>) => {
+			state.services[payload.id] = payload;
 		},
-		// basic CRUD
-		insertService: (state, action: PayloadAction<Service>) => {
-			const service = action.payload;
-			log.debug(`insertService called with service ${JSON.stringify(service)}`);
-			Object.assign(state.services, { [service.id]: service });
+		insertEndpoint: (state, { payload }: PayloadAction<Endpoint>) => {
+			state.endpoints[payload.id] = payload;
+			state.services[payload.serviceId].endpointIds.push(payload.id);
 		},
-		updateService: (state, action: PayloadAction<Update<Service>>) => {
-			const { id, ...updateFields } = action.payload;
-			log.debug(`updateService called for fields ${JSON.stringify(updateFields)} on service ${id}`);
-			Object.assign(state.services[id], updateFields);
+		insertRequest: (state, { payload }: PayloadAction<EndpointRequest>) => {
+			state.requests[payload.id] = payload;
+			state.endpoints[payload.endpointId].requestIds.push(payload.id);
 		},
-		insertEndpoint: (state, action: PayloadAction<Endpoint>) => {
-			const endpoint = action.payload;
-			log.debug(`insertEndpoint called with endpoint ${JSON.stringify(endpoint)}`);
-			Object.assign(state.endpoints, { [endpoint.id]: endpoint });
+		insertScript: (state, { payload }: PayloadAction<Script>) => {
+			state.scripts[payload.id] = payload;
 		},
-		updateEndpoint: (state, action: PayloadAction<Update<Endpoint>>) => {
-			const { id, ...updateFields } = action.payload;
-			log.debug(`updateEndpoint called for fields ${JSON.stringify(updateFields)} on endpoint ${id}`);
-			Object.assign(state.endpoints[id], updateFields);
+		insertEnvironment: (state, { payload }: PayloadAction<Environment>) => {
+			state.environments[payload.id] = payload;
 		},
-		insertRequest: (state, action: PayloadAction<EndpointRequest>) => {
-			const request = action.payload;
-			log.debug(`insertRequest called with request ${JSON.stringify(request)}`);
-			Object.assign(state.requests, { [request.id]: request });
-		},
-		updateRequest: (state, action: PayloadAction<Update<EndpointRequest>>) => {
-			const { id, ...updateFields } = action.payload;
-			log.debug(`updateRequest called for fields ${JSON.stringify(updateFields)} on request ${id}`);
-			Object.assign(state.requests[id], updateFields);
-		},
-		insertEnvironment: (state, action: PayloadAction<Environment>) => {
-			const environment = action.payload;
-			log.debug(`insertEnvironment called with environment ${JSON.stringify(environment)}`);
-			Object.assign(state.environments, { [environment.__id]: environment });
-		},
-		updateEnvironment: (state, action: PayloadAction<Update<Environment, '__id'>>) => {
-			const { __id, ...updateFields } = action.payload;
-			if (__id == null) {
-				throw new Error('attempted to update environment with null __id');
-			}
-			log.debug(`updateEnvironment called for fields ${JSON.stringify(updateFields)} on environment ${__id}`);
-			Object.assign(state.environments[__id], updateFields);
+		updateService: (state, { payload }: PayloadUpdate<Service>) => update(state.services, payload),
+		updateEndpoint: (state, { payload }: PayloadUpdate<Endpoint>) => update(state.endpoints, payload),
+		updateRequest: (state, { payload }: PayloadUpdate<EndpointRequest>) => update(state.requests, payload),
+		deleteService: (state, { payload }: PayloadAction<string>) => deleteService(state, payload),
+		deleteEndpoint: (state, { payload }: PayloadAction<string>) => deleteEndpoint(state, payload),
+		deleteRequest: (state, { payload }: PayloadAction<string>) => deleteRequest(state, payload),
+		updateScript: (state, { payload }: PayloadUpdate<Script>) => update(state.scripts, payload),
+		updateEnvironment: (state, { payload }: PayloadUpdate<RootEnvironment>) => update(state.environments, payload),
+		deleteScript: (state, action: PayloadAction<string>) => {
+			delete state.scripts[action.payload];
 		},
 		insertSettings: (state, action: PayloadAction<WorkspaceData['settings']>) => {
-			log.debug(`insertSettings called with settings ${JSON.stringify(action.payload)}`);
-			Object.assign(state.settings, action.payload);
+			state.settings = action.payload;
 		},
 		setUiMetadataById: (state, action: PayloadAction<IdSpecificUiMetadata & { id: string }>) => {
 			const { id, ...updateFields } = action.payload;
@@ -133,129 +152,107 @@ export const activeSlice = createSlice({
 			Object.assign(state.uiMetadata.idSpecific[id], updateFields);
 		},
 		selectEnvironment: (state, action: PayloadAction<string | undefined>) => {
-			log.debug(`selectEnvironment called on env ${action.payload}`);
+			for (const key in state.services) {
+				if (state.services[key].linkedEnvMode) {
+					state.selectedServiceEnvironments[key] = undefined;
+				}
+			}
 			state.selectedEnvironment = action.payload;
+			if (state.selectedEnvironment != null) {
+				const linkedValues = Object.entries(state.environments[state.selectedEnvironment].linked ?? {});
+				for (const [key, value] of linkedValues) {
+					if (state.services[key].linkedEnvMode) {
+						state.selectedServiceEnvironments[key] = value ?? undefined;
+					}
+				}
+			}
 		},
-		deleteServiceFromState: (state, action: PayloadAction<string>) => {
-			log.debug(`deleteServiceFromState called on service ${action.payload}`);
-			delete state.services[action.payload];
-		},
-		deleteEndpointFromState: (state, action: PayloadAction<string>) => {
-			log.debug(`deleteEndpointFromState called on endpoint ${action.payload}`);
-			delete state.endpoints[action.payload];
-		},
-		deleteRequestFromState: (state, action: PayloadAction<string>) => {
-			log.debug(`deleteRequestFromState called on endpoint ${action.payload}`);
-			delete state.requests[action.payload];
-		},
-		deleteEnvironmentFromState: (state, action: PayloadAction<string>) => {
-			log.debug(`deleteEnvironmentFromState called on env ${action.payload}`);
+		deleteEnvironment: (state, action: PayloadAction<string>) => {
 			delete state.environments[action.payload];
 		},
-		// more specific logic
-		addRequestToEndpoint: (state, action: PayloadAction<AddRequestToEndpoint>) => {
-			const { endpointId, requestId } = action.payload;
-			const endpoint = state.endpoints[endpointId];
-			endpoint.requestIds.push(requestId);
-			if (endpoint.defaultRequest == null) {
-				endpoint.defaultRequest = requestId;
-			}
-			log.debug(`addRequestToEndpoint called on endpoint ${endpointId} for request ${requestId}`);
-		},
-		removeRequestFromEndpoint: (state, action: PayloadAction<string>) => {
-			const requestId = action.payload;
-			const { endpointId } = state.requests[requestId];
-			state.endpoints[endpointId].requestIds = state.endpoints[endpointId].requestIds.filter((id) => id !== requestId);
-			log.debug(`removeRequestFromEndpoint called on request ${requestId} for its endpoint ${endpointId} `);
-		},
-		addEndpointToService: (state, action: PayloadAction<AddEndpointToService>) => {
-			const { endpointId, serviceId } = action.payload;
-			state.services[serviceId].endpointIds.push(endpointId);
-			log.debug(`addEndpointToService called on service ${serviceId} for endpoint ${endpointId}`);
-		},
-		removeEndpointFromService: (state, action: PayloadAction<string>) => {
-			const endpointId = action.payload;
-			const { serviceId } = state.endpoints[endpointId];
-			state.services[serviceId].endpointIds = state.services[serviceId].endpointIds.filter((id) => id !== endpointId);
-			log.debug(`removeEndpointFromService called on endpoint ${endpointId} for its service ${serviceId}`);
+		setSecrets: (state, action: PayloadAction<KeyValuePair[]>) => {
+			state.secrets = action.payload;
 		},
 		deleteAllHistory: (state) => {
-			const requestIds = Object.keys(state.requests);
-			for (const requestId in requestIds) {
-				state.requests[requestId].history = [];
-			}
-			log.debug(`deleteAllHistory called`);
+			state.history = {};
 		},
 		addResponseToHistory: (state, action: PayloadAction<AddResponseToHistory>) => {
-			const { requestId, networkRequest, response, auditLog } = action.payload;
-			const reqToUpdate = state.requests[requestId];
-			if (reqToUpdate == null) {
-				throw new Error('addResponseToHistory called with no associated request');
+			const { requestId, maxLength, discard, ...entry } = action.payload;
+			// eliminate any errors in history (we only want the latest error) also instantiate empty histories
+			state.history = {
+				// setting the requestId property directly leads to an immer error when history[requestId] is undefined
+				...state.history,
+				[requestId]: (state.history[requestId] ?? []).filter((entry) => entry.error == null),
+			};
+			// don't pollute the data with a bunch of discard: falses
+			if (discard) {
+				(entry as HistoricalEndpointResponse).discard = true;
 			}
-			reqToUpdate.history.push({
-				request: networkRequest,
-				response,
-				auditLog,
-			});
-			if (state.settings.maxHistoryLength > 0 && reqToUpdate.history.length > state.settings.maxHistoryLength) {
-				reqToUpdate.history.shift();
+			state.history[requestId].push(entry);
+			if (maxLength > 0 && state.history[requestId].length > maxLength) {
+				state.history[requestId].shift();
 			}
-			log.debug(`addResponseToHistory called for request ${reqToUpdate.name}[${reqToUpdate.id}]`);
-			log.trace(`new history item:\n${JSON.stringify(reqToUpdate.history[reqToUpdate.history.length - 1])}`);
 		},
 		deleteResponseFromHistory: (state, action: PayloadAction<DeleteResponseFromHistory>) => {
 			const { requestId, historyIndex } = action.payload;
-			const reqToUpdate = state.requests[requestId];
-			if (reqToUpdate == null) {
-				throw new Error('addResponseToHistory called with no associated request');
+			state.history[requestId].splice(historyIndex, 1);
+		},
+		addLinkedEnv: (state, action: PayloadAction<UpdateLinkedEnv>) => {
+			const { serviceEnvId, serviceId, envId } = action.payload;
+			state.environments[envId].linked = {
+				...state.environments[envId].linked,
+				[serviceId]: serviceEnvId,
+			};
+			if (state.selectedEnvironment === envId) {
+				state.selectedServiceEnvironments[serviceId] = serviceEnvId;
 			}
-			log.debug(`deleteResponseFromHistory called for request ${requestId} history item index ${historyIndex}`);
-			reqToUpdate.history.splice(historyIndex, 1);
 		},
-		updateScript: (state, action: PayloadAction<Update<Script>>) => {
-			const { id, ...updateFields } = action.payload;
-			log.debug(`updateScript called for fields ${JSON.stringify(updateFields)} on script ${id}`);
-			Object.assign(state.scripts[id], updateFields);
+		removeLinkedEnv: (state, action: PayloadAction<Omit<UpdateLinkedEnv, 'serviceEnvId'>>) => {
+			const { serviceId, envId } = action.payload;
+			if (state.environments[envId].linked != null) {
+				delete state.environments[envId].linked[serviceId];
+			}
+			if (state.selectedEnvironment === envId) {
+				state.selectedServiceEnvironments[serviceId] = undefined;
+			}
 		},
-		insertScript: (state, action: PayloadAction<Script>) => {
-			log.debug(`insertScript called with script ${JSON.stringify(action.payload)}`);
-			state.scripts[action.payload.id] = action.payload;
+		updateSyncMetadata: (state, action: PayloadAction<RecursivePartial<SyncMetadata>>) => {
+			state.syncMetadata = mergeDeep(state.syncMetadata, action.payload);
 		},
-		deleteScript: (state, action: PayloadAction<DeleteScript>) => {
-			log.debug(`deleteScript called on script ${action.payload.scriptId}`);
-			delete state.scripts[action.payload.scriptId];
+		setSyncItem: (state, action: PayloadAction<{ id: string; value: boolean }>) => {
+			const { id, value } = action.payload;
+			state.syncMetadata.items[id] = value;
 		},
+		setSyncItems: (state, action: PayloadAction<{ ids: string[]; value: boolean }>) => {
+			const { ids, value } = action.payload;
+			ids.forEach((id) => {
+				state.syncMetadata.items[id] = value;
+			});
+		},
+		setSelectedServiceEnvironment: (state, action: PayloadAction<SetSelectedServiceEnvironment>) => {
+			const { serviceEnvId, serviceId } = action.payload;
+			state.selectedServiceEnvironments[serviceId] = serviceEnvId;
+		},
+		addEndpointToService: (
+			state,
+			{ payload: { serviceId, id } }: PayloadAction<Pick<Endpoint, 'id' | 'serviceId'>>,
+		) => {
+			state.services[serviceId].endpointIds.push(id);
+			state.endpoints[id].serviceId = serviceId;
+		},
+		addRequestToEndpoint: (
+			state,
+			{ payload: { endpointId, id } }: PayloadAction<Pick<EndpointRequest, 'id' | 'endpointId'>>,
+		) => {
+			state.endpoints[endpointId].requestIds.push(id);
+			state.requests[id].endpointId = endpointId;
+		},
+		reset: () => initialState,
 	},
 });
 
-export const {
-	setFullState,
-	setSavedNow,
-	setModifiedNow,
-	setAutosaveInterval,
-	insertService,
-	updateService,
-	insertEndpoint,
-	updateEndpoint,
-	insertRequest,
-	updateRequest,
-	insertEnvironment,
-	updateEnvironment,
-	insertSettings,
-	selectEnvironment,
-	deleteEndpointFromState,
-	deleteEnvironmentFromState,
-	deleteRequestFromState,
-	deleteServiceFromState,
-	addRequestToEndpoint,
-	removeRequestFromEndpoint,
-	addEndpointToService,
-	removeEndpointFromService,
-	deleteAllHistory,
-	addResponseToHistory,
-	deleteResponseFromHistory,
-	insertScript,
-	deleteScript,
-	updateScript,
-	setUiMetadataById,
-} = activeSlice.actions;
+export const activeActions = activeSlice.actions;
+
+export const activeThunkName = `t/${activeSlice.name}`;
+
+export type { Update };

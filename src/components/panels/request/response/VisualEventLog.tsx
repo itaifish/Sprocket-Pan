@@ -22,45 +22,46 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import WhereToVoteIcon from '@mui/icons-material/WhereToVote';
 import { useSelector } from 'react-redux';
 import SelfImprovementIcon from '@mui/icons-material/SelfImprovement';
-import { TransformedAuditLog, auditLogManager, AuditLog } from '../../../../managers/AuditLogManager';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { CollapseExpandButton } from '@/components/sidebar/buttons/CollapseExpandButton';
+import { tabTypeIcon } from '@/constants/components';
+import { AuditLogManager } from '@/managers/AuditLogManager';
 import {
 	selectRequests,
 	selectEnvironments,
 	selectServices,
 	selectEndpoints,
 	selectScripts,
-} from '../../../../state/active/selectors';
-import { useAppDispatch } from '../../../../state/store';
-import { iconFromTabType } from '../../../../types/application-data/application-data';
-import { camelCaseToTitle, formatMilliseconds } from '../../../../utils/string';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { CollapseExpandButton } from '../../../sidebar/buttons/CollapseExpandButton';
-import { tabsActions } from '../../../../state/tabs/slice';
+} from '@/state/active/selectors';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { TransformedAuditLog, AuditLog } from '@/types/data/audit';
+import { camelCaseToTitle, formatMilliseconds } from '@/utils/string';
 
 const indentationSize = 20;
 
 const eventStrIconsMap = {
 	Service: (
 		<>
-			{iconFromTabType.service}
+			{tabTypeIcon.service}
 			<CodeIcon />
 		</>
 	),
 	Endpoint: (
 		<>
-			{iconFromTabType.endpoint}
+			{tabTypeIcon.endpoint}
 			<CodeIcon />
 		</>
 	),
 	Request: (
 		<>
-			{iconFromTabType.request}
+			{tabTypeIcon.request}
 			<CodeIcon />
 		</>
 	),
 	request: (
 		<>
-			{iconFromTabType.request}
+			{tabTypeIcon.request}
 			<SendIcon />
 		</>
 	),
@@ -68,7 +69,7 @@ const eventStrIconsMap = {
 	standaloneScript: (
 		<>
 			<SelfImprovementIcon />
-			{iconFromTabType.script}
+			{tabTypeIcon.script}
 		</>
 	),
 };
@@ -101,7 +102,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 			}
 		</>
 	);
-	const dataType = requestEvent.eventType === 'root' ? null : auditLogManager.getEventDataType(requestEvent);
+	const dataType = requestEvent.eventType === 'root' ? null : AuditLogManager.getEventDataType(requestEvent);
 	const associatedItem = dataType && requestEvent.associatedId ? data[`${dataType}s`][requestEvent.associatedId] : null;
 	return (
 		<>
@@ -113,7 +114,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 						requests[requestEvent.associatedId].name}{' '}
 					{camelCaseToTitle(requestEvent.eventType)}
 					{transformedLog.innerEvents.length > 0 && (
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
+						<CollapseExpandButton collapsed={collapsed} toggleCollapsed={() => setCollapsed(!collapsed)} />
 					)}
 				</ListItemDecorator>
 				<ListItemButton>
@@ -125,7 +126,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 								{formatMilliseconds(transformedLog.after.timestamp - transformedLog.before.timestamp)}
 							</Stack>
 							{dataType && requestEvent.associatedId && (
-								<Stack direction="row" alignItems={'center'} gap={1}>
+								<Stack direction="row" alignItems="center" gap={1}>
 									<BadgeIcon />
 									{associatedItem?.name ?? 'Unknown'} {camelCaseToTitle(dataType)}
 									{requestEvent.associatedId != requestId ? (
@@ -137,8 +138,8 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 												onClick={() => {
 													if (associatedItem != null) {
 														const id = requestEvent.associatedId as string;
-														dispatch(tabsActions.addTabs({ [id]: dataType }));
-														dispatch(tabsActions.setSelectedTab(id));
+														dispatch(uiActions.addTab(id));
+														dispatch(uiActions.setSelectedTab(id));
 													}
 												}}
 											>
@@ -183,7 +184,7 @@ function VisualEventLogInner({ transformedLog, requestId, indentation }: VisualE
 }
 
 export function VisualEventLog(props: { auditLog: AuditLog; requestId: string }) {
-	const transformedLog = auditLogManager.transformAuditLog(props.auditLog);
+	const transformedLog = AuditLogManager.transformAuditLog(props.auditLog);
 	return (
 		<List sx={{ '--List-nestedInsetStart': '10rem' }}>
 			{transformedLog && (

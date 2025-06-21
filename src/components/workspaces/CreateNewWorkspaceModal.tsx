@@ -11,39 +11,34 @@ import {
 	Input,
 	Modal,
 	ModalDialog,
-	Textarea,
+	Stack,
 } from '@mui/joy';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useAppDispatch } from '../../state/store';
-import { toValidFolderName } from '../../utils/string';
-import { createWorkspace } from '../../state/global/thunks';
+import { useSelector } from 'react-redux';
+import { selectWorkspacesList } from '@/state/global/selectors';
+import { useAppDispatch } from '@/state/store';
+import { toValidFolderName } from '@/utils/string';
+import { itemActions } from '@/state/items';
 
 interface CreateNewWorkspaceModalProps {
 	open: boolean;
 	closeFunc: () => void;
 }
 
-export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
-	const { open, closeFunc } = props;
-	const [workspaceName, setWorkspaceName] = useState('');
-	const [workspaceFileName, setWorkspaceFileName] = useState('');
-	const [workspaceDescription, setWorkspaceDescription] = useState('A SprocketPan Workspace');
+export function CreateNewWorkspaceModal({ open, closeFunc }: CreateNewWorkspaceModalProps) {
+	const workspaces = useSelector(selectWorkspacesList);
+	const [name, setName] = useState('');
+	const [description, setDescription] = useState('');
 	const [loading, setLoading] = useState(false);
-	const [isError, setError] = useState(true);
 	const dispatch = useAppDispatch();
-
-	useEffect(() => {
-		setWorkspaceFileName(toValidFolderName(workspaceName));
-	}, [workspaceName]);
-	useEffect(() => {
-		setError(workspaceFileName.length > 25 || workspaceFileName.length == 0);
-	}, [workspaceFileName]);
+	const fileName = toValidFolderName(name).substring(0, 25);
+	const isEmpty = fileName === '';
+	const alreadyExists = workspaces.some((workspace) => workspace.fileName === fileName);
 
 	const reset = () => {
-		setWorkspaceDescription('A SprocketPan Workspace');
-		setWorkspaceName('');
-		setWorkspaceFileName('');
+		setDescription('');
+		setName('');
 		setLoading(false);
 	};
 
@@ -52,63 +47,63 @@ export function CreateNewWorkspaceModal(props: CreateNewWorkspaceModalProps) {
 		closeFunc();
 	};
 
-	async function onCreate() {
+	function onCreate() {
 		setLoading(true);
-		await dispatch(
-			createWorkspace({
-				name: workspaceName,
-				description: workspaceDescription,
+		dispatch(
+			itemActions.workspace.create({
+				name,
+				description,
 				lastModified: new Date().getTime(),
-				fileName: workspaceFileName,
+				fileName,
 			}),
-		).unwrap();
+		);
 		onClose();
 	}
 
 	return (
-		<Modal
-			open={open}
-			onClose={() => {
-				onClose();
-			}}
-		>
+		<Modal open={open} onClose={onClose}>
 			<ModalDialog variant="outlined" role="alertdialog">
-				<DialogTitle>Create a new workspace</DialogTitle>
+				<DialogTitle>Create a New Workspace</DialogTitle>
 				<Divider />
-				<DialogContent>
-					<FormControl>
-						<FormLabel>Workspace Name</FormLabel>
-						<Input
-							placeholder="New Workspace Name"
-							value={workspaceName}
-							onChange={(e) => setWorkspaceName(e.target.value)}
-							error={isError}
-						></Input>
-						{!isError && (
-							<FormHelperText>This will be saved in the &quot;{workspaceFileName}&quot; folder</FormHelperText>
-						)}
-					</FormControl>
-					<FormControl>
-						<FormLabel>Workspace Description</FormLabel>
-						<Textarea
-							placeholder="New Workspace Description"
-							value={workspaceDescription}
-							onChange={(e) => setWorkspaceDescription(e.target.value)}
-						></Textarea>
-					</FormControl>
+				<DialogContent sx={{ minWidth: '500px' }}>
+					<Stack gap={2}>
+						<FormControl>
+							<FormLabel>Name</FormLabel>
+							<Input
+								placeholder="New Workspace Name"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								error={alreadyExists}
+							/>
+							{!isEmpty && (
+								<FormHelperText>
+									This will be saved in the <code>{fileName}</code> folder.
+								</FormHelperText>
+							)}
+							{alreadyExists && <FormHelperText>A workspace this folder name already exists.</FormHelperText>}
+						</FormControl>
+						<FormControl>
+							<FormLabel>Short Description</FormLabel>
+							<Input
+								placeholder="New Workspace Description"
+								value={description}
+								onChange={(e) => setDescription(e.target.value)}
+							/>
+						</FormControl>
+					</Stack>
 				</DialogContent>
 				<DialogActions>
-					<Button variant="plain" color="danger" onClick={() => onClose()} disabled={loading}>
-						Cancel
-					</Button>
 					<Button
 						variant="solid"
 						color="primary"
 						onClick={onCreate}
 						startDecorator={loading ? <CircularProgress /> : <AddCircleIcon />}
-						disabled={loading || isError}
+						disabled={loading || isEmpty || alreadyExists}
 					>
 						Create
+					</Button>
+					<Button variant="plain" color="danger" onClick={onClose} disabled={loading}>
+						Cancel
 					</Button>
 				</DialogActions>
 			</ModalDialog>

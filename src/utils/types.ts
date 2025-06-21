@@ -1,11 +1,6 @@
-import { Environment } from '../types/application-data/application-data';
+export type Interrupt = (comment?: string) => void;
 
-interface ProbablyAnEnvironment {
-	__name: string;
-	__id: string;
-	__data: { key: string; value: string }[];
-}
-
-export function asEnv(env: ProbablyAnEnvironment) {
-	return env as unknown as Environment;
+export interface InterruptibleScriptReturn<T> {
+	result: Promise<T>;
+	interrupt: Interrupt;
 }

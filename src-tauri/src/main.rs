@@ -6,7 +6,7 @@ use tauri_plugin_log::{LogTarget, RotationStrategy};
 
 mod commands;
 
-use commands::{close_splashscreen, show_in_explorer, zoom};
+use commands::{close_splashscreen, save_files, show_in_explorer, zoom};
 
 #[cfg(debug_assertions)]
 fn open_devtools(window: &Window) {
@@ -38,7 +38,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             close_splashscreen,
             zoom,
-            show_in_explorer
+            show_in_explorer,
+            save_files
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

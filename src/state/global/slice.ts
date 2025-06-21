@@ -1,34 +1,59 @@
+import { DEFAULT_SETTINGS } from '@/constants/defaults';
+import { GlobalDataManager } from '@/managers/data/GlobalDataManager';
+import { GlobalData } from '@/types/data/global';
+import { WorkspaceMetadata } from '@/types/data/workspace';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { GlobalData, WorkspaceMetadata } from '../../types/application-data/application-data';
-import { Settings } from '../../types/settings/settings';
-
-export const defaultWorkspace: WorkspaceMetadata = {
-	name: 'Default Workspace',
-	description: 'The default workspace in SprocketPan',
-	lastModified: new Date().getTime(),
-	fileName: undefined,
-};
+import { PayloadUpdate } from '../types';
 
 export interface GlobalState extends GlobalData {
-	activeWorkspace?: WorkspaceMetadata;
+	activeWorkspace?: string;
+	workspaces: { [key: string]: WorkspaceMetadata };
 }
 
 const initialState: GlobalState = {
-	workspaces: [],
+	workspaces: {},
 	uiMetadata: { idSpecific: {} },
-	settings: {} as Settings,
+	settings: DEFAULT_SETTINGS,
+	lastSaved: 0,
 };
 
 export const globalSlice = createSlice({
 	name: 'global',
 	initialState,
 	reducers: {
-		setWorkspaces: (state, action: PayloadAction<WorkspaceMetadata[]>) => {
+		setWorkspaces: (state, action: PayloadAction<GlobalState['workspaces']>) => {
 			state.workspaces = action.payload;
 		},
-		setSelectedWorkspace: (state, action: PayloadAction<WorkspaceMetadata | undefined>) => {
-			const workspace = action.payload;
-			state.activeWorkspace = workspace;
+		insertWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata>) => {
+			GlobalDataManager.createWorkspace(payload);
+			state.workspaces[payload.id] = payload;
+		},
+		deleteWorkspace: (state, { payload }: PayloadAction<string>) => {
+			const path = state.workspaces[payload]?.fileName;
+			if (path == null) {
+				throw new Error('cannot delete a workspace without a path');
+			}
+			GlobalDataManager.deleteWorkspace(path);
+			if (payload === state.activeWorkspace) {
+				state.activeWorkspace = undefined;
+			}
+			delete state.workspaces[payload];
+		},
+		updateWorkspace: (state, { payload }: PayloadUpdate<WorkspaceMetadata>) => {
+			const workspace = { ...state.workspaces[payload.id], ...payload };
+			state.workspaces[payload.id] = workspace;
+			GlobalDataManager.updateWorkspace(workspace);
+		},
+		setSelectedWorkspace: (state, { payload }: PayloadAction<WorkspaceMetadata | undefined>) => {
+			state.activeWorkspace = payload?.id;
+		},
+		insertSettings: (state, action: PayloadAction<GlobalState['settings']>) => {
+			const newState = { ...state, settings: action.payload, lastSaved: new Date().getTime() };
+			GlobalDataManager.saveGlobalData(newState);
+			state.settings = action.payload;
+		},
+		setData: (state, { payload }: PayloadAction<GlobalData>) => {
+			Object.assign(state, payload);
 		},
 	},
 });

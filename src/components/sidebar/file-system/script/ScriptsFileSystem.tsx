@@ -1,26 +1,54 @@
-import { Box, ListDivider } from '@mui/joy';
+import { IconButton, ListDivider, Stack, Typography } from '@mui/joy';
 import { ScriptFileSystem } from './ScriptFileSystem';
 import { useSelector } from 'react-redux';
-import { useMemo, useState } from 'react';
-import { selectScripts } from '../../../../state/active/selectors';
-import { SearchField } from '../../../shared/SearchField';
+import { Fragment, useMemo, useState } from 'react';
+import { selectScripts } from '@/state/active/selectors';
+import { searchScripts } from '@/utils/search';
 import { FileSystemTrunk } from '../tree/FileSystemTrunk';
-import { searchScripts } from '../../../../utils/search';
+import { SearchField } from '@/components/shared/input/SearchField';
+import { SideDrawerHeader } from '../../SideDrawerHeader';
+import { useAppDispatch } from '@/state/store';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { uiActions } from '@/state/ui/slice';
+import { AddBox } from '@mui/icons-material';
+import { ItemType } from '@/types/data/item';
 
 export function ScriptsFileSystem() {
 	const scripts = useSelector(selectScripts);
 	const [searchText, setSearchText] = useState('');
+	const dispatch = useAppDispatch();
 
 	const filteredScriptIds = useMemo(() => searchScripts(scripts, searchText), [scripts, searchText]);
 
 	return (
-		<FileSystemTrunk header="Scripts" actions={<SearchField onChange={(text) => setSearchText(text)} />}>
-			{filteredScriptIds.map((scriptId, index) => (
-				<Box key={index}>
-					{index !== 0 && <ListDivider />}
-					<ScriptFileSystem scriptId={scriptId} />
-				</Box>
-			))}
-		</FileSystemTrunk>
+		<>
+			<SideDrawerHeader
+				content="Scripts"
+				actions={
+					<Stack flexWrap="wrap" direction="row" justifyContent="end" alignItems="center" gap={1}>
+						<SearchField onChange={setSearchText} />
+						<SprocketTooltip text="Add New Script">
+							<IconButton onClick={() => dispatch(uiActions.addToCreateQueue(ItemType.script))}>
+								<AddBox />
+							</IconButton>
+						</SprocketTooltip>
+					</Stack>
+				}
+			/>
+			{filteredScriptIds.length === 0 && (
+				<Typography textAlign="center" sx={{ width: '100%', mt: 4 }}>
+					No scripts found.
+				</Typography>
+			)}
+			<FileSystemTrunk
+				items={filteredScriptIds}
+				render={(id, index) => (
+					<>
+						{index !== 0 && <ListDivider />}
+						<ScriptFileSystem scriptId={id} />
+					</>
+				)}
+			/>
+		</>
 	);
 }

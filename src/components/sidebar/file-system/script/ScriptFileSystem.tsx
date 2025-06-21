@@ -1,46 +1,33 @@
 import { useSelector } from 'react-redux';
-import { ListItemDecorator, ListSubheader } from '@mui/joy';
-import { selectScript } from '../../../../state/active/selectors';
-import { useAppDispatch } from '../../../../state/store';
-import { menuOptionDuplicate, menuOptionDelete } from '../FileSystemDropdown';
-import CodeIcon from '@mui/icons-material/Code';
-import { createScript } from '../../../../state/active/thunks/scripts';
-import { EllipsisSpan } from '../../../shared/EllipsisTypography';
+import { menuOptionDuplicate, menuOptionDelete } from '../tree/FileSystemDropdown';
 import { FileSystemLeaf } from '../tree/FileSystemLeaf';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { useShowSync } from '@/hooks/useShowSync';
+import { FluentLinkSvg } from '@/assets/icons/fluent/FluentLink';
+import { FluentCodeSvg } from '@/assets/icons/fluent/FluentCode';
+import { EllipsesP } from '../components/EllipsesP';
+import { itemActions } from '@/state/items';
 
 interface ScriptFileSystemProps {
 	scriptId: string;
 }
 
 export function ScriptFileSystem({ scriptId }: ScriptFileSystemProps) {
-	const script = useSelector((state) => selectScript(state, scriptId));
+	const script = useSelector((state) => itemActions.script.select(state, scriptId));
 	const dispatch = useAppDispatch();
+	const showSync = useShowSync(scriptId);
 
 	return (
 		<FileSystemLeaf
 			id={scriptId}
-			tabType="script"
 			menuOptions={[
-				menuOptionDuplicate(() =>
-					dispatch(
-						createScript({
-							name: `${script.name} (Copy)`,
-							content: script.content,
-							returnVariableName: script.returnVariableName,
-							returnVariableType: structuredClone(script.returnVariableType),
-						}),
-					),
-				),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(script.id))),
+				menuOptionDuplicate(() => dispatch(itemActions.script.duplicate(script))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(script.id))),
 			]}
 		>
-			<ListItemDecorator>
-				<CodeIcon fontSize="small" />
-			</ListItemDecorator>
-			<ListSubheader sx={{ width: '100%' }}>
-				<EllipsisSpan>{script.name}</EllipsisSpan>
-			</ListSubheader>
+			<div style={{ flex: 0 }}>{showSync ? <FluentLinkSvg /> : <FluentCodeSvg />}</div>
+			<EllipsesP>{script.name}</EllipsesP>
 		</FileSystemLeaf>
 	);
 }

@@ -12,11 +12,10 @@ import {
 	Textarea,
 } from '@mui/joy';
 import { CreateModalsProps } from './createModalsProps';
-import { iconFromTabType, Service } from '../../../../types/application-data/application-data';
 import { useState } from 'react';
-import { useAppDispatch } from '../../../../state/store';
-import { cloneService } from '../../../../state/active/thunks/services';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { tabTypeIcon } from '@/constants/components';
+import { useAppDispatch } from '@/state/store';
+import { itemActions } from '@/state/items';
 
 export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const dispatch = useAppDispatch();
@@ -25,19 +24,6 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 	const [baseUrl, setBaseUrl] = useState('');
 	const serviceNameValid = serviceName.length > 0;
 	const allFieldsValid = serviceNameValid;
-
-	const createServiceFunction = async () => {
-		const newService: Partial<Service> = { name: serviceName };
-		if (serviceDescription) {
-			newService.description = serviceDescription;
-		}
-		if (baseUrl) {
-			newService.baseUrl = baseUrl;
-		}
-		const createdServiceId = await dispatch(cloneService({ data: newService })).unwrap();
-		dispatch(tabsActions.addTabs({ [createdServiceId]: 'service' }));
-		dispatch(tabsActions.setSelectedTab(createdServiceId));
-	};
 
 	return (
 		<Modal
@@ -48,7 +34,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 		>
 			<ModalDialog variant="outlined" role="alertdialog">
 				<DialogTitle>
-					{iconFromTabType['service']}
+					{tabTypeIcon['service']}
 					Create New Service
 				</DialogTitle>
 				<Divider />
@@ -83,7 +69,7 @@ export function CreateServiceModal({ open, closeFunc }: CreateModalsProps) {
 						color="success"
 						disabled={!allFieldsValid}
 						onClick={() => {
-							createServiceFunction();
+							dispatch(itemActions.service.create({ name: serviceName, description: serviceDescription, baseUrl }));
 							closeFunc();
 						}}
 					>

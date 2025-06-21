@@ -1,39 +1,36 @@
 import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import CreateNewFolderSharpIcon from '@mui/icons-material/CreateNewFolderSharp';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import CodeIcon from '@mui/icons-material/Code';
-import { useAppDispatch } from '../../../state/store';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
-import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
-import { tabsActions } from '../../../state/tabs/slice';
+import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { ItemType } from '@/types/data/item';
 
 export function NewButton() {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const dispatch = useAppDispatch();
-	const ref = useRef(null);
-	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
-	useEffect(() => {
-		emitterForOutsideClicks.addListener('outsideClick', () => {
-			setMenuOpen(false);
-		});
-	}, [emitterForOutsideClicks]);
+	const ref = useRef<HTMLInputElement>(null);
+	useClickOutsideAlerter({ ref, onOutsideClick: () => setMenuOpen(false) });
+
 	const newEntities = [
 		{
 			name: 'Service',
-			createFunc: () => tabsActions.addToCreateQueue('service'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.service),
 			icon: <CreateNewFolderSharpIcon fontSize="small" />,
 		},
 		{
 			name: 'Environment',
-			createFunc: () => tabsActions.addToCreateQueue('environment'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.environment),
 			icon: <TableChartIcon fontSize="small" />,
 		},
 		{
 			name: 'Script',
-			createFunc: () => tabsActions.addToCreateQueue('script'),
+			createFunc: () => uiActions.addToCreateQueue(ItemType.script),
 			icon: <CodeIcon fontSize="small" />,
 		},
 	];

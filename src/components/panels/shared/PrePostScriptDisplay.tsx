@@ -1,6 +1,7 @@
-import { Accordion, AccordionDetails, AccordionSummary } from '@mui/joy';
-
-import { RequestScript } from '../script/RequestScript';
+import { ButtonTabs } from '@/components/shared/ButtonTabs';
+import { SprocketEditor } from '@/components/shared/input/monaco/SprocketEditor';
+import { useDebounce } from '@/hooks/useDebounce';
+import { useState } from 'react';
 
 interface OnChangeArgs {
 	preRequestScript?: string;
@@ -12,32 +13,32 @@ interface PrePostScriptDisplayProps extends OnChangeArgs {
 }
 
 export function PrePostScriptDisplay({ preRequestScript, postRequestScript, onChange }: PrePostScriptDisplayProps) {
+	const [isPostActive, setIsPostActive] = useState(false);
+
+	const { localDataState, setLocalDataState } = useDebounce({
+		state: isPostActive ? postRequestScript : preRequestScript,
+		setState: (text) => onChange(isPostActive ? { postRequestScript: text } : { preRequestScript: text }),
+	});
+
+	const onButtonTabChange = (index: number) => {
+		const isPostActive = !!index;
+		setIsPostActive(isPostActive);
+		setLocalDataState((isPostActive ? postRequestScript : preRequestScript) ?? '');
+	};
+
 	return (
-		<>
-			<Accordion defaultExpanded>
-				<AccordionSummary>Pre-Request Script</AccordionSummary>
-				<AccordionDetails>
-					<RequestScript
-						scriptText={preRequestScript}
-						scriptKey={'preRequestScript'}
-						updateScript={(scriptText: string) => {
-							onChange({ preRequestScript: scriptText });
-						}}
-					/>
-				</AccordionDetails>
-			</Accordion>
-			<Accordion defaultExpanded>
-				<AccordionSummary>Post-Request Script</AccordionSummary>
-				<AccordionDetails>
-					<RequestScript
-						scriptText={postRequestScript}
-						scriptKey={'postRequestScript'}
-						updateScript={(scriptText: string) => {
-							onChange({ postRequestScript: scriptText });
-						}}
-					/>
-				</AccordionDetails>
-			</Accordion>
-		</>
+		<SprocketEditor
+			height="calc(100vh - 300px)"
+			ActionBarItems={
+				<ButtonTabs tabs={[{ title: 'Pre-Request' }, { title: 'Post-Request' }]} onChange={onButtonTabChange} />
+			}
+			value={localDataState}
+			onChange={(value) => {
+				if (value != null) {
+					setLocalDataState(value);
+				}
+			}}
+			language="typescript"
+		/>
 	);
 }

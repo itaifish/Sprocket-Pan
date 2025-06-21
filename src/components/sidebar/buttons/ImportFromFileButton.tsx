@@ -1,33 +1,23 @@
-import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import { open } from '@tauri-apps/api/dialog';
-import { Avatar, Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton, useColorScheme } from '@mui/joy';
-import { WorkspaceDataManager } from '../../../managers/data/WorkspaceDataManager';
-import { InjectLoadedData } from '../../../state/active/thunks/applicationData';
-import { useAppDispatch } from '../../../state/store';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { useEffect, useRef, useState } from 'react';
-import OpenApiIcon from '../../../assets/buttonIcons/openapi.svg';
-import PostmanIcon from '../../../assets/buttonIcons/postman.svg';
-import InsomniaIcon from '../../../assets/buttonIcons/insomnia.svg';
-import SprocketIconDark from '../../../assets/logo.svg';
-import SprocketIconLight from '../../../assets/logo-light.svg';
-
-import { useClickOutsideAlerter } from '../../../hooks/useClickOutsideAlerter';
-import { readTextFile } from '@tauri-apps/api/fs';
-import { WorkspaceData } from '../../../types/application-data/application-data';
-import { DropdownMenuItem } from '../../shared/DropdownMenuItem';
+import { Box, Dropdown, IconButton, ListItemDecorator, Menu, MenuButton } from '@mui/joy';
+import { useRef, useState } from 'react';
+import { DropdownMenuItem } from '@/components/shared/DropdownMenuItem';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useClickOutsideAlerter } from '@/hooks/useClickOutsideAlerter';
+import { WorkspaceDataManager } from '@/managers/data/WorkspaceDataManager';
+import { useAppDispatch } from '@/state/store';
+import { OpenApi } from '@/assets/icons/brands/OpenApi';
+import { Postman } from '@/assets/icons/brands/Postman';
+import { Insomnia } from '@/assets/icons/brands/Insomnia';
+import { SprocketPan } from '@/assets/icons/brands/SprocketPan';
+import { FluentImport } from '@/assets/icons/fluent/FluentImport';
+import { activeActions } from '@/state/active/slice';
 
 export function ImportFromFileButton() {
 	const dispatch = useAppDispatch();
 	const [menuOpen, setMenuOpen] = useState(false);
-	const ref = useRef(null);
-	const emitterForOutsideClicks = useClickOutsideAlerter(ref as any);
-	useEffect(() => {
-		emitterForOutsideClicks.addListener('outsideClick', () => {
-			setMenuOpen(false);
-		});
-	}, [emitterForOutsideClicks]);
-	const { systemMode } = useColorScheme();
+	const ref = useRef<HTMLInputElement>(null);
+	useClickOutsideAlerter({ ref, onOutsideClick: () => setMenuOpen(false) });
 	return (
 		<SprocketTooltip text="Import From File" disabled={menuOpen}>
 			<Box>
@@ -36,7 +26,7 @@ export function ImportFromFileButton() {
 						slots={{ root: IconButton }}
 						slotProps={{ root: { variant: 'soft', color: 'neutral', size: 'sm' } }}
 					>
-						<CreateNewFolderIcon />
+						<FluentImport />
 					</MenuButton>
 					<Menu ref={ref}>
 						<DropdownMenuItem
@@ -48,29 +38,17 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedDataString = await readTextFile(selectedUrl);
-									const asData: Partial<WorkspaceData> = JSON.parse(loadedDataString);
-									const toInject = {
-										services: Object.values(asData.services ?? {}),
-										endpoints: Object.values(asData.endpoints ?? {}),
-										requests: Object.values(asData.requests ?? {}),
-										environments: Object.values(asData.environments ?? {}),
-										scripts: Object.values(asData.scripts ?? {}),
-									};
-									dispatch(InjectLoadedData(toInject));
+									const data = WorkspaceDataManager.loadSprocketFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Sprocketpan`} size="sm" color="primary">
-									<Avatar
-										src={systemMode === 'dark' ? SprocketIconLight : SprocketIconDark}
-										size="sm"
-										color="primary"
-									/>
+								<IconButton aria-label="Import from Sprocketpan Workspace" color="primary">
+									<SprocketPan />
 								</IconButton>
-								Import from Sprocketpan Workspace
 							</ListItemDecorator>
+							Sprocketpan Workspace
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -81,17 +59,17 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadSwaggerFile(selectedUrl);
-									dispatch(InjectLoadedData(loadedData));
+									const data = WorkspaceDataManager.loadSwaggerFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Swagger/OpenAPI`} size="sm" color="primary">
-									<Avatar src={OpenApiIcon} size="sm" />
+								<IconButton aria-label="Import from Swagger/OpenAPI" color="primary">
+									<OpenApi />
 								</IconButton>
-								Import from Swagger/OpenAPI
 							</ListItemDecorator>
+							Swagger/OpenAPI
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -102,17 +80,17 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadPostmanFile(selectedUrl);
-									dispatch(InjectLoadedData(loadedData));
+									const data = WorkspaceDataManager.loadPostmanFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Postman`} size="sm" color="primary">
-									<Avatar src={PostmanIcon} size="sm" />
+								<IconButton aria-label="Import from Postman" color="primary">
+									<Postman />
 								</IconButton>
-								Import from Postman Collection
 							</ListItemDecorator>
+							Postman Collection
 						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={async () => {
@@ -123,19 +101,17 @@ export function ImportFromFileButton() {
 									],
 								});
 								if (selectedUrl && typeof selectedUrl === 'string') {
-									const loadedData = await WorkspaceDataManager.loadInsomniaFile(selectedUrl);
-									if (loadedData) {
-										dispatch(InjectLoadedData(loadedData));
-									}
+									const data = WorkspaceDataManager.loadInsomniaFile(selectedUrl);
+									dispatch(activeActions.injectState(data));
 								}
 							}}
 						>
 							<ListItemDecorator>
-								<IconButton aria-label={`Import from Insomnia`} size="sm" color="primary">
-									<Avatar src={InsomniaIcon} size="sm" />
+								<IconButton aria-label="Import from Insomnia Collection" color="primary">
+									<Insomnia />
 								</IconButton>
-								Import from Insomnia Collection
 							</ListItemDecorator>
+							Insomnia Collection
 						</DropdownMenuItem>
 					</Menu>
 				</Dropdown>

@@ -1,12 +1,4 @@
-export function keepStringLengthReasonable(string: string, reasonableLength = 30) {
-	if (string == null) {
-		return '';
-	}
-	if (string.length <= reasonableLength) {
-		return string;
-	}
-	return `${string.slice(0, reasonableLength - 3)}...`;
-}
+import { MS_IN_DAY, MS_IN_HOUR, MS_IN_MINUTE, MS_IN_WEEK } from '@/constants/constants';
 
 function getLongestCommonSubstringStartingAtBeginningIndex(string1: string, string2: string): number {
 	let i;
@@ -58,11 +50,11 @@ const dateTimeFormatters = {
 		fractionalSecondDigits: 3,
 	}),
 	shortDateFull: new Intl.DateTimeFormat('en-US', {
-		year: '2-digit',
-		month: '2-digit',
+		year: 'numeric',
+		month: 'short',
 		day: 'numeric',
 		hour12: true,
-		hour: '2-digit',
+		hour: 'numeric',
 		minute: '2-digit',
 		second: '2-digit',
 		fractionalSecondDigits: 2,
@@ -72,10 +64,28 @@ const dateTimeFormatters = {
 		month: 'long',
 		day: 'numeric',
 	}),
+	relative: new Intl.RelativeTimeFormat('en'),
 };
 
+function getNumericDateSuffix(x: number) {
+	if (x > 3 && x < 21) {
+		return 'th';
+	}
+	switch (x % 10) {
+		case 1:
+			return 'st';
+		case 2:
+			return 'nd';
+		case 3:
+			return 'rd';
+		default:
+			return 'th';
+	}
+}
+
 export function formatShortFullDate(date: Date | string | number) {
-	return dateTimeFormatters.shortDateFull.format(new Date(date));
+	const parts = dateTimeFormatters.shortDateFull.formatToParts(new Date(date)).map((part) => part.value);
+	return `${parts[0]} ${parts[2]}${getNumericDateSuffix(+parts[2])} ${parts[4]} at ${parts.slice(6).join('')}`;
 }
 
 export function formatFullDate(date: Date | string | number) {
@@ -94,67 +104,52 @@ export function getStatusCodeColor(statusCode: number) {
 	return statusCode < 200 ? 'neutral' : statusCode < 300 ? 'success' : statusCode < 400 ? 'primary' : 'danger';
 }
 
-export const statusCodes: Record<number, string> = {
-	100: 'Continue',
-	101: 'Switching Protocols',
-	102: 'Processing',
-	103: 'Early Hints',
-	200: 'Okay',
-	201: 'Created',
-	202: 'Accepted',
-	203: 'Non-Authoritative Information',
-	204: 'No Content',
-	205: 'Reset Content',
-	206: 'Partial Content',
-	207: 'Multi-Status',
-	208: 'Already Reported',
-	226: 'IM Used',
-	300: 'Multiple Choices',
-	301: 'Moved Permanently',
-	302: 'Found',
-	303: 'See Other',
-	304: 'Not Modified',
-	305: 'Use Proxy',
-	307: 'Temporary Redirect',
-	308: 'Permanent Redirect',
-	400: 'Bad Request',
-	401: 'Unauthorized',
-	402: 'Payment Required',
-	403: 'Forbidden',
-	404: 'Not Found',
-	405: 'Method Not Allowed',
-	406: 'Not Acceptable',
-	407: 'Proxy Authentication Required',
-	408: 'Request Timeout',
-	409: 'Conflict',
-	410: 'Gone',
-	411: 'Length Required',
-	412: 'Precondition Failed',
-	413: 'Payload Too Large',
-	414: 'URI Too Long',
-	415: 'Unsupported Media Type',
-	416: 'Range Not Satisfiable',
-	417: 'Expectation Failed',
-	418: "I'm a teapot",
-	421: 'Misdirected Request',
-	422: 'Unprocessable Entity',
-	423: 'Locked',
-	424: 'Failed Dependency',
-	425: 'Too Early',
-	426: 'Upgrade Required',
-	428: 'Precondition Required',
-	429: 'Too Many Requests',
-	431: 'Request Header Fields Too Large',
-	451: 'Unavailable For Legal Reasons',
-	500: 'Internal Server Error',
-	501: 'Not Implemented',
-	502: 'Bad Gateway',
-	503: 'Service Unavailable',
-	504: 'Gateway Timeout',
-	505: 'HTTP Version Not Supported',
-	506: 'Variant Also Negotiates',
-	507: 'Insufficient Storage',
-	508: 'Loop Detected',
-	510: 'Not Extended',
-	511: 'Network Authentication Required',
-};
+export function formatRelativeDate(date: Date | string | number) {
+	let value: number;
+	let units: any;
+	const then = new Date(date);
+	const now = new Date();
+	const gap = then.getTime() - now.getTime();
+	const gapAbs = Math.abs(gap);
+	if (gapAbs < MS_IN_MINUTE) {
+		value = gap / 1000;
+		units = 'seconds';
+	} else if (gapAbs < MS_IN_HOUR) {
+		value = gap / MS_IN_MINUTE;
+		units = 'minutes';
+	} else if (gapAbs < MS_IN_DAY) {
+		value = gap / MS_IN_HOUR;
+		units = 'hours';
+	} else if (gapAbs < MS_IN_WEEK) {
+		value = gap / MS_IN_DAY;
+		units = 'days';
+	} else {
+		value = gap / MS_IN_WEEK;
+		units = 'weeks';
+	}
+	value = value < 0 ? Math.ceil(value) : Math.floor(value);
+	return dateTimeFormatters.relative.format(value, units);
+}
+
+export function truncate(
+	str = '',
+	{ ellipses = true, length = 20 }: { ellipses: boolean; length: number } = {} as any,
+) {
+	if (str.length < length + 1) {
+		return str;
+	}
+	let truncated = str.substring(0, length).trim();
+	if (ellipses) {
+		truncated += '...';
+	}
+	return truncated;
+}
+
+export function joinList(arr: string[]) {
+	if (arr.length < 3) {
+		return arr.join(' and ');
+	}
+	arr = [...arr];
+	arr[arr.length - 1] = 'and ' + arr[arr.length - 1];
+	return arr.join(', ');
+}

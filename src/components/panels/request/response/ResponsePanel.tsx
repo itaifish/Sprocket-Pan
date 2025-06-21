@@ -1,67 +1,70 @@
-import { Typography, Card, Divider, Stack } from '@mui/joy';
-
-import { EndpointRequest, HistoricalEndpointResponse } from '../../../../types/application-data/application-data';
-import { useAppDispatch } from '../../../../state/store';
+import { Typography, Stack, IconButton } from '@mui/joy';
 import { HistoryControl } from './HistoryControl';
-import { deleteResponseFromHistory } from '../../../../state/active/slice';
 import { ResponseInfo } from './ResponseInfo';
-import { ResponseState } from '../RequestActions';
-import { formatFullDate } from '../../../../utils/string';
 import { OpenDiffToolButton } from './OpenDiffToolButton';
-
-function extractResponseStateData(responseState: 'latest' | number, request: EndpointRequest) {
-	const responseStateIndex = responseState === 'latest' ? Math.max(request.history.length - 1, 0) : responseState;
-	return responseStateIndex >= request.history.length ? null : request.history[responseStateIndex];
-}
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { EndpointRequest } from '@/types/data/workspace';
+import { formatFullDate } from '@/utils/string';
+import { useSelector } from 'react-redux';
+import { selectHistoryById } from '@/state/active/selectors';
+import { useEffect, useState } from 'react';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { DeleteForever } from '@mui/icons-material';
+import { clamp } from '@/utils/math';
 
 interface ResponsePanelProps {
-	responseState: ResponseState;
-	setResponseState: (state: ResponseState) => void;
 	request: EndpointRequest;
-	lastError: HistoricalEndpointResponse;
 }
 
-export function ResponsePanel({ responseState, request, setResponseState, lastError }: ResponsePanelProps) {
+export function ResponsePanel({ request }: ResponsePanelProps) {
 	const dispatch = useAppDispatch();
-	const responseStateData = responseState === 'error' ? lastError : extractResponseStateData(responseState, request);
+	const history = useSelector((state) => selectHistoryById(state, request.id));
+	const [index, setIndex] = useState(history.length - 1);
+	const boundedIndex = clamp(index, 0, history.length - 1);
+	const data = history[boundedIndex];
+
+	useEffect(() => {
+		// whenever the history changes, jump to the front
+		setIndex(history.length - 1);
+	}, [history]);
+
+	if (data == null) {
+		return (
+			<Stack justifyContent="center" alignItems="center" pt={8} height="100%" width="100%">
+				<Typography level="title-md">No Response Data Available</Typography>
+				<Typography>Make a request to see the response here!</Typography>
+			</Stack>
+		);
+	}
+
 	return (
-		<Card sx={{ height: '100%', width: '100%' }}>
-			<Typography level="h3" sx={{ textAlign: 'center' }}>
-				Response
-			</Typography>
-			<Divider />
-			{responseStateData == null ? (
-				<Stack justifyContent="center" alignItems="center" height="100%" width="100%">
-					<Typography level="title-md">No Response Data Available</Typography>
-					<Typography>Make a request to see the response here!</Typography>
+		<>
+			<Stack direction="row" justifyContent="space-between" alignItems="center">
+				<Stack direction="row" gap={0} alignItems="center">
+					<SprocketTooltip text="Delete Response">
+						<IconButton
+							disabled={history.length === 0}
+							aria-label="Delete Response"
+							onClick={() => {
+								dispatch(
+									activeActions.deleteResponseFromHistory({ requestId: request.id, historyIndex: boundedIndex }),
+								);
+							}}
+						>
+							<DeleteForever />
+						</IconButton>
+					</SprocketTooltip>
+					<Typography level="title-md" textAlign="center">
+						{data.response?.dateTime == null ? 'N/A' : formatFullDate(data.response.dateTime)}
+					</Typography>
 				</Stack>
-			) : (
-				<>
-					<Stack direction="row" justifyContent="space-between" alignItems="center">
-						<Typography level="title-md" textAlign={'center'}>
-							{formatFullDate(new Date(responseStateData?.response.dateTime))}
-						</Typography>
-						<Stack direction={'row'} spacing={0}>
-							<OpenDiffToolButton
-								historyIndex={
-									typeof responseState === 'number' ? responseState : Math.max(request.history.length - 1, 0)
-								}
-								request={request}
-							/>
-							<HistoryControl
-								value={responseState}
-								onChange={setResponseState}
-								historyLength={request.history.length}
-								onDelete={(index) =>
-									dispatch(deleteResponseFromHistory({ requestId: request.id, historyIndex: index }))
-								}
-							/>
-						</Stack>
-					</Stack>
-					<Divider />
-					<ResponseInfo response={responseStateData} requestId={request.id} />
-				</>
-			)}
-		</Card>
+				<Stack direction="row" gap={0}>
+					<HistoryControl value={boundedIndex} onChange={setIndex} historyLength={history.length} />
+					<OpenDiffToolButton historyIndex={boundedIndex} id={request.id} />
+				</Stack>
+			</Stack>
+			<ResponseInfo data={data} requestId={request.id} />
+		</>
 	);
 }

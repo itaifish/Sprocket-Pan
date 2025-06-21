@@ -1,169 +1,249 @@
-import { log } from '../../utils/logging';
-import { path } from '@tauri-apps/api';
 import {
 	WorkspaceData,
-	HistoricalEndpointResponse,
+	EndpointRequest,
 	WorkspaceMetadata,
-	UiMetadata,
-} from '../../types/application-data/application-data';
-import swaggerParseManager from '../parsers/SwaggerParseManager';
-import { noHistoryReplacer } from '../../utils/functions';
-import { dateTimeReviver } from '../../utils/json-parse';
-import { saveUpdateManager } from '../SaveUpdateManager';
-import { postmanParseManager } from '../parsers/postman/PostmanParseManager';
-import { insomniaParseManager } from '../parsers/InsomniaParseManager';
+	WorkspaceSyncedData,
+	Endpoint,
+	Service,
+	WorkspaceItems,
+} from '@/types/data/workspace';
+import { nullifyProperties } from '@/utils/functions';
+import { log } from '@/utils/logging';
+import { path } from '@tauri-apps/api';
+import { save } from '@tauri-apps/api/dialog';
+import { writeTextFile } from '@tauri-apps/api/fs';
+import { FileSystemManager } from '../file-system/FileSystemManager';
 import { FileSystemWorker } from '../file-system/FileSystemWorker';
-import { fileSystemManager } from '../file-system/FileSystemManager';
+import { SaveUpdateManager } from '../SaveUpdateManager';
+import { InvokerFileUpdate } from '../RustInvoker';
+import { mergeDeep } from '@/utils/variables';
+import { extractProperty } from '@/utils/getters';
 
-export const defaultWorkspaceData: WorkspaceData = {
+export const defaultWorkspaceSyncedData: WorkspaceSyncedData = {
 	services: {},
 	endpoints: {},
 	requests: {},
 	environments: {},
 	scripts: {},
+	secrets: [],
+};
+
+export const defaultWorkspaceData: WorkspaceData = {
+	...defaultWorkspaceSyncedData,
+	history: {},
 	selectedEnvironment: undefined,
-	metadata: undefined,
 	uiMetadata: {
 		idSpecific: {},
 	},
-	settings: {
-		debugLogs: true,
-		zoomLevel: 100,
-		timeoutDurationMS: 1_000 * 30,
-		scriptTimeoutDurationMS: 1_000 * 10,
-		autoSaveIntervalMS: 60_000 * 5,
-		defaultTheme: 'system-default',
-		maxHistoryLength: -1,
-		displayVariableNames: true,
-		scriptRunnerStrategy: {
-			pre: ['service', 'endpoint', 'request'],
-			post: ['request', 'endpoint', 'service'],
-		},
-		listStyle: 'default',
-	},
-	version: saveUpdateManager.getCurrentVersion(),
+	settings: {},
+	version: SaveUpdateManager.getCurrentVersion(),
+	syncMetadata: { items: {} },
+	selectedServiceEnvironments: {},
 };
 
+export interface OrphanData {
+	endpoints: { orphan: Endpoint; parent?: string }[];
+	requests: { orphan: EndpointRequest; parent?: string; grandparent?: string }[];
+	ancestors: Record<string, Service | Endpoint>;
+}
+
+type Parser = (content: string) => Promise<Partial<WorkspaceData>> | Partial<WorkspaceData>;
+
 export class WorkspaceDataManager {
-	public static loadSwaggerFile(url: string) {
-		return swaggerParseManager.parseSwaggerFile('filePath', url);
+	private static async parseFile(url: string, parse: Parser): Promise<Partial<WorkspaceData>> {
+		const content = await FileSystemWorker.readTextFile(url);
+		const data = await parse(content);
+		SaveUpdateManager.update(data);
+		return data;
 	}
 
-	public static loadPostmanFile(url: string) {
-		return postmanParseManager.parsePostmanFile('filePath', url);
+	public static loadSprocketFile(url: string) {
+		return WorkspaceDataManager.parseFile(url, (content) => JSON.parse(content));
 	}
 
-	public static loadInsomniaFile(url: string) {
-		return insomniaParseManager.parseInsomniaFile('filePath', url);
-	}
+	public static async exportData(data: WorkspaceData, metadata: WorkspaceMetadata) {
+		const filePath = await save({
+			title: `Save ${metadata.name} Workspace`,
+			filters: [
+				{ name: 'Sprocketpan Workspace', extensions: ['json'] },
+				{ name: 'All Files', extensions: ['*'] },
+			],
+		});
 
-	public static async saveData(data: WorkspaceData) {
-		const selectedWorkspace = data.metadata;
-		const paths = this.getWorkspacePath(selectedWorkspace?.fileName);
-		const { metadata, uiMetadata, ...noMetadataData } = data;
-
-		const saveData = FileSystemWorker.tryUpdateFile(paths.data, JSON.stringify(noMetadataData, noHistoryReplacer));
-		const saveHistory = FileSystemWorker.tryUpdateFile(
-			paths.history,
-			JSON.stringify(
-				Object.values(data.requests).map((request) => {
-					return { id: request.id, history: request.history };
-				}),
-			),
-		);
-		const saveMetadata = FileSystemWorker.tryUpdateFile(
-			paths.metadata,
-			JSON.stringify(metadata == null ? null : { ...metadata, lastModified: new Date().getTime() }),
-		);
-		const saveUiMetadata = FileSystemWorker.tryUpdateFile(paths.uiMetadata, JSON.stringify(uiMetadata));
-
-		const results = await Promise.all([saveData, saveHistory, saveMetadata, saveUiMetadata]);
-		if (results.includes('doesNotExist')) {
-			throw new Error('could not save one or more categories of data, file(s) did not exist');
+		if (!filePath) {
+			return;
 		}
+
+		const dataToWrite = JSON.stringify(
+			{ ...data, secrets: data.secrets.map(({ key }) => ({ key, value: '' })) },
+			nullifyProperties<WorkspaceData & EndpointRequest>('history', 'settings', 'uiMetadata'),
+		);
+
+		await writeTextFile(filePath, dataToWrite);
 	}
 
-	public static getWorkspacePath(workspace: string = 'default') {
-		const root = `${FileSystemWorker.DATA_FOLDER_NAME}${path.sep}${workspace}`;
+	public static async saveData(allData: WorkspaceData, { fileName, ...metadata }: WorkspaceMetadata) {
+		const { data, sync, location } = this.splitWorkspace(allData);
+		const { uiMetadata, secrets, history, ...strippedData } = structuredClone(data);
+
+		const paths = this.getWorkspacePath(fileName);
+		const processedHistory = this.processHistoryForSave(history);
+		const filesToWrite: InvokerFileUpdate[] = [
+			{ path: paths.data, content: JSON.stringify(strippedData) },
+			{ path: paths.history, content: JSON.stringify(processedHistory) },
+			{ path: paths.metadata, content: JSON.stringify({ ...metadata, lastModified: new Date().getTime() }) },
+			{ path: paths.uiMetadata, content: JSON.stringify(uiMetadata) },
+			{ path: paths.secrets, content: JSON.stringify(secrets) },
+		];
+
+		if (location != null) {
+			const syncContent = JSON.stringify(sync);
+			filesToWrite.push({ path: location, content: syncContent, absolute: true });
+			filesToWrite.push({ path: paths.syncBackup, content: syncContent });
+		}
+		await FileSystemWorker.writeFiles(filesToWrite);
+	}
+
+	private static processHistoryForSave(history: WorkspaceData['history']) {
+		for (const key in history) {
+			history[key] = history[key].filter((res) => !res.discard);
+			// cleanliness
+			if (history[key].length === 0) {
+				delete history[key];
+			}
+		}
+		return history;
+	}
+
+	public static findOrphans(data: WorkspaceData) {
+		return {
+			endpoints: Object.values(data.endpoints).filter((endpoint) => data.services[endpoint.serviceId] == null),
+			requests: Object.values(data.requests).filter((request) => data.endpoints[request.endpointId] == null),
+		};
+	}
+
+	public static async processOrphans(data: WorkspaceData, metadata: WorkspaceMetadata): Promise<OrphanData> {
+		const list = this.findOrphans(data);
+		const orphan: OrphanData = {
+			endpoints: list.endpoints.map((orphan) => ({ orphan })),
+			requests: list.requests.map((orphan) => ({ orphan })),
+			ancestors: {},
+		};
+		const paths = this.getWorkspacePath(metadata.fileName);
+		if (this.getSyncLocation(data) != null && (await FileSystemWorker.exists(paths.syncBackup))) {
+			const backup = JSON.parse(await FileSystemWorker.readTextFile(paths.syncBackup)) as WorkspaceSyncedData;
+			orphan.endpoints.forEach((endpoint) => {
+				const service = backup.services[endpoint.orphan.serviceId];
+				if (service != null) {
+					endpoint.parent = service.id;
+					orphan.ancestors[service.id] = service;
+				}
+			});
+			orphan.requests.forEach((request) => {
+				const endpoint = backup.endpoints[request.orphan.endpointId];
+				if (endpoint != null) {
+					request.parent = endpoint.id;
+					request.grandparent = endpoint.serviceId;
+					orphan.ancestors[endpoint.id] = endpoint;
+					const service = backup.services[endpoint.serviceId];
+					if (service != null) {
+						orphan.ancestors[service.id] = service;
+					}
+				}
+			});
+		}
+		return orphan;
+	}
+
+	public static getWorkspacePath(folder: string) {
+		if (folder == null) {
+			throw new Error('workspace folder path must be provided');
+		}
+		const root = `${FileSystemWorker.DATA_FOLDER_NAME}${path.sep}${folder}`;
 		const base = `${root}${path.sep}${FileSystemWorker.DATA_FILE_NAME}`;
 		return {
 			root,
 			data: `${base}.json`,
 			history: `${base}_history.json`,
 			metadata: `${base}_metadata.json`,
-			uiMetadata: `${base}_ui_metadata`,
+			uiMetadata: `${base}_ui_metadata.json`,
+			secrets: `${base}_secrets.json`,
+			syncBackup: `${base}_sync_backup.json`,
 		};
 	}
 
-	public static async initializeWorkspace(workspace?: WorkspaceMetadata) {
-		const folderStatus = await fileSystemManager.createDataFolderIfNotExists();
-		const fileStatus = await this.createDataFilesIfNotExist(workspace);
-		if (folderStatus === 'alreadyExists' && fileStatus === 'alreadyExists') {
-			try {
-				return await this.loadDataFromFile(workspace);
-			} catch (e) {
-				log.error((e as Error).message);
-			}
-		}
+	public static async initializeWorkspace(workspace: WorkspaceMetadata) {
+		await FileSystemManager.createDataFolderIfNotExists();
+		await this.createDataFilesIfNotExist(workspace);
+		return await this.loadDataFromFile(workspace);
 	}
 
-	private static async loadDataFromFile(workspace: WorkspaceMetadata | undefined) {
-		const paths = this.getWorkspacePath(workspace?.fileName);
-
-		const [data, metadata, history, uiMetadata] = await Promise.all([
+	private static async loadDataFromFile(workspace: WorkspaceMetadata) {
+		const paths = this.getWorkspacePath(workspace.fileName);
+		const [data, history, uiMetadata, secrets] = await Promise.all([
 			FileSystemWorker.readTextFile(paths.data),
-			FileSystemWorker.readTextFile(paths.metadata),
 			FileSystemWorker.readTextFile(paths.history),
 			FileSystemWorker.readTextFile(paths.uiMetadata),
+			FileSystemWorker.readTextFile(paths.secrets),
 		]);
-
-		const parsedData = JSON.parse(data, dateTimeReviver) as WorkspaceData;
-		const parsedHistory = JSON.parse(history, dateTimeReviver) as {
-			id: string;
-			history: HistoricalEndpointResponse[];
-		}[];
-		parsedHistory.forEach((responseHistory) => {
-			parsedData.requests[responseHistory.id].history = responseHistory?.history ?? [];
-		});
-		parsedData.metadata = JSON.parse(metadata, dateTimeReviver) as WorkspaceMetadata;
-		parsedData.uiMetadata = JSON.parse(uiMetadata, dateTimeReviver) as UiMetadata;
-		saveUpdateManager.update(parsedData);
+		let parsedData = JSON.parse(data) as WorkspaceData;
+		parsedData.history = JSON.parse(history);
+		parsedData.uiMetadata = JSON.parse(uiMetadata);
+		parsedData.secrets = JSON.parse(secrets);
+		const syncLocation = this.getSyncLocation(parsedData);
+		if (syncLocation != null) {
+			const parsedSync = JSON.parse(await FileSystemWorker.readTextFile(syncLocation)) as WorkspaceItems;
+			parsedData = mergeDeep(parsedData, parsedSync, undefined, 1);
+		}
+		SaveUpdateManager.update(parsedData);
 		return parsedData;
 	}
 
-	/**
-	 * This function creates a data file if it does not already exist.
-	 * @returns 'created' if a new file is created, 'alreadyExists' if not
-	 */
-	private static async createDataFilesIfNotExist(workspace?: WorkspaceMetadata) {
-		log.trace(`createDataFolderIfNotExists called`);
-		const { metadata, uiMetadata, ...defaultData } = defaultWorkspaceData;
-		const paths = this.getWorkspacePath(workspace?.fileName);
-		const pathsAndDataToCreate = [
-			{ path: paths.data, content: defaultData },
-			{ path: paths.history, content: [] },
-			{ path: paths.metadata, content: workspace ?? metadata },
-			{ path: paths.uiMetadata, content: uiMetadata },
-		];
-		const createIfNotExistsPromises = pathsAndDataToCreate.map(({ path, content }) => {
-			const action = async () => {
-				const doesExist = await FileSystemWorker.exists(path);
-				if (!doesExist) {
-					log.debug(`File does not exist, creating...`);
-					await FileSystemWorker.writeFile(path, JSON.stringify(content));
-					// we only care if we had to create a new metadata file as to whether or not to use default data
-					if (path !== paths.metadata) {
-						return 'alreadyExists' as const;
-					}
-					return 'created' as const;
-				} else {
-					log.trace(`File already exists, no need to create`);
-					return 'alreadyExists' as const;
+	private static splitWorkspace(data: WorkspaceData) {
+		const location = this.getSyncLocation(data);
+		if (location == null) {
+			return { data };
+		}
+		const retData: WorkspaceData = structuredClone(data);
+		const syncData: WorkspaceSyncedData = structuredClone(defaultWorkspaceSyncedData);
+		Object.entries(data.syncMetadata.items).forEach(([id, value]) => {
+			if (value) {
+				const key = extractProperty(id);
+				if (key == null || key == 'workspaces') {
+					delete retData.syncMetadata.items[id];
+					return;
 				}
-			};
-			return action();
+				delete retData[key][id];
+				syncData[key][id] = data[key][id];
+			}
 		});
-		const results = await Promise.all(createIfNotExistsPromises);
-		return results.includes('created') ? 'created' : 'alreadyExists';
+		return { data: retData, sync: syncData, location };
+	}
+
+	private static getSyncLocation(data: WorkspaceData) {
+		const sync = data.settings.data?.sync;
+		return sync?.enabled && sync?.location != null && sync.location !== ''
+			? `${sync.location}${path.sep}data_sync.json`
+			: null;
+	}
+
+	/**
+	 * This function creates the data folder and workspace data files if they do not already exist.
+	 * @returns true if it created at least one file or folder, false if not.
+	 */
+	private static async createDataFilesIfNotExist({ fileName, ...workspace }: WorkspaceMetadata) {
+		log.trace(`createDataFilesIfNotExist called`);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { uiMetadata, ...defaultData } = defaultWorkspaceData;
+		const paths = this.getWorkspacePath(fileName);
+		const promises = [
+			FileSystemManager.createFileIfNotExists(paths.data, defaultData),
+			FileSystemManager.createFileIfNotExists(paths.history, []),
+			FileSystemManager.createFileIfNotExists(paths.uiMetadata, uiMetadata),
+			FileSystemManager.createFileIfNotExists(paths.metadata, workspace),
+			FileSystemManager.createFileIfNotExists(paths.secrets, []),
+		];
+		const results = await Promise.all(promises);
+		return results.includes(true);
 	}
 }

@@ -1,50 +1,90 @@
-import Checkbox from '@mui/joy/Checkbox';
-import { Environment } from '../../../types/application-data/application-data';
-import { selectEnvironments, selectSelectedEnvironment } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { useAppDispatch } from '../../../state/store';
-import { selectEnvironment, updateEnvironment } from '../../../state/active/slice';
-import { Typography } from '@mui/joy';
+import { IconButton, Option, Select, Stack, Typography } from '@mui/joy';
 import { Box } from '@mui/joy';
-import { EditableText } from '../../shared/input/EditableText';
+import { useMemo } from 'react';
+import { AccountTree, RadioButtonChecked, RadioButtonUnchecked } from '@mui/icons-material';
+import { EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { selectSelectedEnvironment, selectEnvironments, selectSecrets } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { toKeyValuePairs } from '@/utils/application';
 import { PanelProps } from '../panels.interface';
-import { EnvironmentEditableTable } from '../shared/EnvironmentEditableTable';
+import { EditableHeader } from '../shared/EditableHeader';
+import { SyncButton } from '@/components/shared/buttons/SyncButton';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { parseEditorJSON, toEditorJSON, EditableData } from '@/components/shared/input/monaco/EditableData';
 
 export function EnvironmentPanel({ id }: PanelProps) {
 	const selectedEnvironment = useSelector(selectSelectedEnvironment);
 	const environments = useSelector(selectEnvironments);
 	const environment = environments[id];
+	const secrets = useSelector(selectSecrets);
 	const dispatch = useAppDispatch();
 
-	function update(values: Partial<Environment>) {
-		dispatch(updateEnvironment({ ...values, __id: id } as unknown as Environment));
-	}
+	const envList = useMemo(
+		() => Object.values(environments).filter((env) => env.id !== environment?.id),
+		[environments],
+	);
 
 	if (environment == null) {
 		return <Typography>No Environment Found</Typography>;
 	}
 
+	function parseEditorText(text: string) {
+		const pairs = toKeyValuePairs<string>(parseEditorJSON(text));
+		const parsedPairs = EnvironmentContextResolver.buildEnvironmentVariables({
+			secrets,
+			rootEnv: { ...environment, pairs },
+			rootAncestors: Object.values(environments),
+		});
+		return toEditorJSON(parsedPairs.toArray());
+	}
+
 	return (
-		<>
-			<EditableText
-				text={environment.__name}
-				setText={(newText: string) => update({ __name: newText })}
-				isValidFunc={(text: string) =>
-					text.length >= 1 &&
-					Object.values(environments)
-						.filter((env) => env.__id != id)
-						.filter((env) => env.__name === text).length === 0
+		<Stack gap={2} p={2}>
+			<EditableHeader
+				left={
+					<SprocketTooltip text={selectedEnvironment === id ? 'Unselect' : 'Select'}>
+						<IconButton
+							onClick={() => dispatch(activeActions.selectEnvironment(selectedEnvironment === id ? undefined : id))}
+						>
+							{selectedEnvironment === id ? <RadioButtonChecked /> : <RadioButtonUnchecked />}
+						</IconButton>
+					</SprocketTooltip>
 				}
-				isTitle
-			/>
-			<Checkbox
-				label="Selected"
-				checked={selectedEnvironment === id}
-				onChange={() => dispatch(selectEnvironment(selectedEnvironment === id ? undefined : id))}
+				value={environment.name}
+				onChange={(name) => dispatch(activeActions.updateEnvironment({ name, id }))}
+				right={<SyncButton id={id} />}
 			/>
 			<Box sx={{ height: '70vh', pb: '5vh' }}>
-				<EnvironmentEditableTable environment={environment} setNewEnvironment={update} fullSize={true} />
+				<EditableData
+					actions={{
+						start: (
+							<SprocketTooltip text="Parent Environments">
+								<Select
+									startDecorator={<AccountTree />}
+									sx={{ minWidth: '250px' }}
+									placeholder="None"
+									multiple
+									value={environment.parents ?? []}
+									onChange={(_, parents) => dispatch(activeActions.updateEnvironment({ parents, id }))}
+								>
+									{envList.map((env) => (
+										<Option key={env.id} value={env.id}>
+											{env.name}
+										</Option>
+									))}
+								</Select>
+							</SprocketTooltip>
+						),
+					}}
+					initialValues={environment.pairs}
+					onChange={(pairs) => dispatch(activeActions.updateEnvironment({ pairs, id }))}
+					fullSize
+					envPairs={secrets}
+					viewParser={parseEditorText}
+				/>
 			</Box>
-		</>
+		</Stack>
 	);
 }

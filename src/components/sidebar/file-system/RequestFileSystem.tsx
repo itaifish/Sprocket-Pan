@@ -1,40 +1,51 @@
-import { ListItemDecorator, ListSubheader } from '@mui/joy';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
-import { useAppDispatch } from '../../../state/store';
-import { addNewRequestFromId } from '../../../state/active/thunks/requests';
-import { selectEndpointById, selectRequestsById } from '../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { menuOptionDuplicate, menuOptionDelete } from './FileSystemDropdown';
-import { EllipsisSpan } from '../../shared/EllipsisTypography';
+import { menuOptionDuplicate, menuOptionDelete } from './tree/FileSystemDropdown';
 import { FileSystemLeaf } from './tree/FileSystemLeaf';
-import { tabsActions } from '../../../state/tabs/slice';
+import { Add, Close } from '@mui/icons-material';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { EllipsesP } from './components/EllipsesP';
+import { FluentSnippetSvg } from '@/assets/icons/fluent/FluentSnippet';
+import { FluentSnippetLinkSvg } from '@/assets/icons/fluent/FluentSnippetLink';
+import { useShowSync } from '@/hooks/useShowSync';
+import { itemActions } from '@/state/items';
+import { useTheme } from '@mui/joy';
 
 interface RequestFileSystemProps {
 	requestId: string;
 }
 
 export function RequestFileSystem({ requestId }: RequestFileSystemProps) {
-	const request = useSelector((state) => selectRequestsById(state, requestId));
-	const endpoint = useSelector((state) => selectEndpointById(state, request.endpointId));
-	const isDefaultRequest = request.id === endpoint.defaultRequest;
+	const showSync = useShowSync(requestId);
+	const request = useSelector((state) => itemActions.request.select(state, requestId));
+	const endpoint = useSelector((state) => itemActions.endpoint.select(state, request?.endpointId));
 	const dispatch = useAppDispatch();
-
+	if (request == null) {
+		return null;
+	}
+	const theme = useTheme();
+	const isDefault = endpoint?.defaultRequest === request.id;
+	const color = isDefault ? theme.palette.primary.plainColor : undefined;
 	return (
 		<FileSystemLeaf
+			color={color}
 			id={requestId}
-			tabType="request"
-			color={isDefaultRequest ? 'primary' : 'neutral'}
 			menuOptions={[
-				menuOptionDuplicate(() => dispatch(addNewRequestFromId(request.id))),
-				menuOptionDelete(() => dispatch(tabsActions.addToDeleteQueue(request.id))),
+				{
+					Icon: isDefault ? Close : Add,
+					label: isDefault ? 'Unset Endpoint Default' : 'Set Endpoint Default',
+					onClick: () =>
+						dispatch(
+							activeActions.updateEndpoint({ defaultRequest: isDefault ? null : request.id, id: request.endpointId }),
+						),
+				},
+				menuOptionDuplicate(() => dispatch(itemActions.request.create(request))),
+				menuOptionDelete(() => dispatch(uiActions.addToDeleteQueue(request.id))),
 			]}
 		>
-			<ListItemDecorator>
-				<TextSnippetIcon fontSize="small" />
-			</ListItemDecorator>
-			<ListSubheader sx={{ width: '100%' }}>
-				<EllipsisSpan>{request.name}</EllipsisSpan>
-			</ListSubheader>
+			<div style={{ flex: 0 }}>{showSync ? <FluentSnippetLinkSvg /> : <FluentSnippetSvg />}</div>
+			<EllipsesP>{request.name}</EllipsesP>
 		</FileSystemLeaf>
 	);
 }

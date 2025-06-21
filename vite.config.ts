@@ -34,6 +34,12 @@ export default defineConfig(async () => ({
 		}),
 		getCustomNoNullDefaultsPlugin(),
 	],
+	// https://github.com/vitejs/vite/issues/6828
+	resolve: {
+		alias: {
+			'@': path.resolve(__dirname, './src'),
+		},
+	},
 	build: {
 		minify: true,
 		rollupOptions: {

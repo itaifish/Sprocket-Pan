@@ -1,31 +1,76 @@
-import { QueryParams } from '../types/application-data/application-data';
+import { QueryParams } from '@/types/data/shared';
+import { WorkspaceData } from '@/types/data/workspace';
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import { BuildEnvironmentVariablesArgs, EnvironmentContextResolver } from '@/managers/EnvironmentContextResolver';
+import { mergeDeep } from './variables';
+import { Settings } from '@/types/data/settings';
+import { MS_IN_DAY } from '@/constants/constants';
+import { GlobalData } from '@/types/data/global';
+import { KeyValueValues } from '@/types/shared/keyValues';
 
-export function queryParamsToString(queryParams: QueryParams): string {
-	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				searchParams.append(queryParamKey, queryParamVal);
-			});
-		}
-	});
-
-	return decodeURIComponent(searchParams.toString());
-}
-
-export function queryParamsToStringReplaceVars(
+export function queryParamsToString(
 	queryParams: QueryParams,
-	replaceFunc: (text: string) => string,
+	encoded = false,
+	replaceFunc: (text: string) => string = (element) => element,
 ): string {
 	const searchParams = new URLSearchParams();
-	Object.keys(queryParams).forEach((queryParamKey) => {
-		if (!queryParamKey.startsWith('__')) {
-			queryParams[queryParamKey].forEach((queryParamVal) => {
-				const newKey = replaceFunc(queryParamKey);
-				const newVal = replaceFunc(queryParamVal);
-				searchParams.append(newKey, newVal);
-			});
+	queryParams.forEach(({ key, value }) => {
+		if (Array.isArray(value)) {
+			value.forEach((element) => searchParams.append(replaceFunc(key), replaceFunc(element)));
+		} else {
+			searchParams.append(replaceFunc(key), replaceFunc(value ?? ''));
 		}
 	});
-	return searchParams.toString();
+	return encoded ? searchParams.toString() : decodeURIComponent(searchParams.toString());
+}
+
+export function toKeyValuePairs<T>(object: Record<string, T>) {
+	return Object.entries(object)
+		.map(([key, value]) => ({ key, value }))
+		.filter((x) => typeof x.value != 'object');
+}
+
+export function envParse(value: KeyValueValues | undefined, envValues: OrderedKeyValuePairs<string>) {
+	if (value == null) {
+		return '';
+	}
+	if (Array.isArray(value)) {
+		value = value.join(', ');
+	}
+	return EnvironmentContextResolver.parseStringWithEnvironment(value, envValues)
+		.map((x) => x.value)
+		.join('');
+}
+
+export function getEnvValuesFromData(data: WorkspaceData, requestId?: string): BuildEnvironmentVariablesArgs {
+	const values: BuildEnvironmentVariablesArgs = {
+		secrets: data.secrets,
+		rootEnv: data.selectedEnvironment == null ? null : data.environments[data.selectedEnvironment],
+		rootAncestors: Object.values(data.environments),
+	};
+	if (requestId != null) {
+		const request = data.requests[requestId];
+		const endpoint = data.endpoints[request.endpointId];
+		const service = data.services[endpoint.serviceId];
+		const servEnvId = data.selectedServiceEnvironments[service.id];
+		values.servEnv = servEnvId == null ? null : service.localEnvironments[servEnvId];
+		values.reqEnv = request.environmentOverride;
+	}
+	return values;
+}
+
+type MinimumSettingsObject = { global: Pick<GlobalData, 'settings'>; active: Pick<WorkspaceData, 'settings'> };
+
+export function getSettingsFromState({ global, active }: MinimumSettingsObject): Settings {
+	return mergeDeep(global.settings, active.settings);
+}
+
+export function filterOldHistoryEntries(history: WorkspaceData['history'], days: number) {
+	if (days >= 0) {
+		const earliestTime = new Date().getTime() - days * MS_IN_DAY;
+		for (const key in history) {
+			history[key] = history[key].filter((entry) => entry.timestamp >= earliestTime);
+		}
+	}
+	return history;
 }

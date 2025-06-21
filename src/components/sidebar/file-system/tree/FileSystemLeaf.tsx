@@ -1,20 +1,31 @@
-import { Box, ListItem } from '@mui/joy';
-import { FileSystemMenuOption } from '../FileSystemDropdown';
-import { FileSystemButton, FileSystemButtonProps } from './FileSystemButton';
+import { selectIsActiveTab } from '@/state/ui/selectors';
+import { uiActions } from '@/state/ui/slice';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '@/state/store';
+import { PropsWithChildren } from 'react';
+import { FileSystemMenuOption } from './FileSystemDropdown';
+import { FileSystemEntry } from './FileSystemEntry';
 
-export interface FileSystemLeafProps extends FileSystemButtonProps {
+export interface FileSystemLeafProps extends PropsWithChildren {
+	id: string;
 	menuOptions?: FileSystemMenuOption[];
+	color?: string;
 }
 
-export function FileSystemLeaf({ id, menuOptions, children, tabType, color = 'neutral' }: FileSystemLeafProps) {
+export function FileSystemLeaf({ id, menuOptions, children, color }: FileSystemLeafProps) {
+	const dispatch = useAppDispatch();
+	const isSelected = useSelector((state) => selectIsActiveTab(state, id));
 	return (
-		<>
-			<Box id={`file_${id}`} />
-			<ListItem nested>
-				<FileSystemButton tabType={tabType} id={id} color={color} menuOptions={menuOptions}>
-					{children}
-				</FileSystemButton>
-			</ListItem>
-		</>
+		<FileSystemEntry id={id} menuOptions={menuOptions} isSelected={isSelected}>
+			<button
+				style={{ gap: '7px', display: 'flex', alignItems: 'center', flex: 1, minWidth: '50px', color }}
+				onClick={() => {
+					dispatch(uiActions.addTab(id));
+					dispatch(uiActions.setSelectedTab(id));
+				}}
+			>
+				{children}
+			</button>
+		</FileSystemEntry>
 	);
 }

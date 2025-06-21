@@ -1,63 +1,35 @@
-import { Box, IconButton, List, ListItem, ListItemDecorator } from '@mui/joy';
 import { FileSystemLeafProps } from './FileSystemLeaf';
-import { FileSystemButton } from './FileSystemButton';
-import { selectSettings, selectUiMetadataById } from '../../../../state/active/selectors';
 import { useSelector } from 'react-redux';
-import { LIST_STYLING } from '../../../../styles/list';
-import { useAppDispatch } from '../../../../state/store';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
-import { Folder, FolderOpen } from '@mui/icons-material';
-import { setUiMetadataById } from '../../../../state/active/slice';
+import { selectUiMetadataById } from '@/state/active/selectors';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
+import { selectIsActiveTab } from '@/state/ui/selectors';
+import { CollapsibleFolder } from '../components/CollapsibleFolder';
+import { FileSystemEntry } from './FileSystemEntry';
 
 interface FileSystemBranchProps extends FileSystemLeafProps {
 	buttonContent: React.ReactNode;
-	folderSize?: 'md' | 'sm';
 }
 
-export function FileSystemBranch({
-	buttonContent,
-	children,
-	menuOptions,
-	tabType,
-	id,
-	folderSize = 'md',
-}: FileSystemBranchProps) {
-	const style = LIST_STYLING[useSelector(selectSettings).listStyle];
+export function FileSystemBranch({ buttonContent, children, menuOptions, id }: FileSystemBranchProps) {
 	const dispatch = useAppDispatch();
 	const collapsed = useSelector((state) => selectUiMetadataById(state, id))?.collapsed ?? false;
-	const setCollapsed = (value: boolean) => {
-		dispatch(setUiMetadataById({ id: id, collapsed: value }));
-	};
+	const isSelected = useSelector((state) => selectIsActiveTab(state, id));
 	return (
 		<>
-			<Box id={`file_${id}`} />
-			<ListItem nested>
-				<FileSystemButton tabType={tabType} id={id} menuOptions={menuOptions}>
-					<ListItemDecorator>
-						<SprocketTooltip text={collapsed ? 'Expand' : 'Collapse'}>
-							<IconButton
-								size={folderSize}
-								onClick={(e) => {
-									setCollapsed(!collapsed);
-									e.preventDefault();
-									e.stopPropagation();
-								}}
-							>
-								{collapsed ? <Folder fontSize="small" /> : <FolderOpen fontSize="small" />}
-							</IconButton>
-						</SprocketTooltip>
-					</ListItemDecorator>
-					{buttonContent}
-				</FileSystemButton>
-				<List
-					aria-labelledby="nav-list-browse"
-					sx={{
-						'--List-nestedInsetStart': style.inset,
+			<FileSystemEntry id={id} menuOptions={menuOptions} isSelected={isSelected}>
+				<CollapsibleFolder collapsed={collapsed} id={id} />
+				<button
+					style={{ gap: '7px', display: 'flex', alignItems: 'center', flex: 1, minWidth: '50px' }}
+					onClick={() => {
+						dispatch(uiActions.addTab(id));
+						dispatch(uiActions.setSelectedTab(id));
 					}}
 				>
-					{!collapsed && children}
-				</List>
-			</ListItem>
+					{buttonContent}
+				</button>
+			</FileSystemEntry>
+			{!collapsed && <ul>{children}</ul>}
 		</>
 	);
 }

@@ -3,31 +3,25 @@ import { CircularProgress, IconButton } from '@mui/joy';
 import SaveIcon from '@mui/icons-material/Save';
 import Badge from '@mui/joy/Badge';
 import { useSelector } from 'react-redux';
-import { selectHasBeenModifiedSinceLastSave } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { log } from '../../../utils/logging';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
-import { saveActiveData } from '../../../state/active/thunks/applicationData';
+import { selectHasBeenModifiedSinceLastSave } from '@/state/active/selectors';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useAppDispatch } from '@/state/store';
+import { saveActiveData } from '@/state/active/thunks';
 
 export function SaveButton() {
 	const [loading, setLoading] = useState(false);
 	const isModified = useSelector(selectHasBeenModifiedSinceLastSave);
 	const dispatch = useAppDispatch();
 
-	async function save() {
+	function save() {
 		setLoading(true);
-		try {
-			dispatch(saveActiveData())
-				.unwrap()
-				.then(() => setTimeout(() => setLoading(false), 500));
-		} catch (e) {
-			const err = e as Error;
-			log.error(`${err.message}\n${err.stack}`);
-		}
+		dispatch(saveActiveData())
+			.unwrap()
+			.then(() => setTimeout(() => setLoading(false), 500));
 	}
 
 	return (
-		<SprocketTooltip text="Save">
+		<SprocketTooltip text="Save" placement="right">
 			<Badge
 				size="sm"
 				invisible={!isModified}
@@ -37,14 +31,7 @@ export function SaveButton() {
 				}}
 				badgeInset="14%"
 			>
-				<IconButton
-					id="toggle-mode"
-					size="sm"
-					variant="soft"
-					color="neutral"
-					onClick={save}
-					disabled={!isModified || loading}
-				>
+				<IconButton variant="plain" color="neutral" onClick={save} disabled={!isModified || loading}>
 					{loading ? <CircularProgress /> : <SaveIcon />}
 				</IconButton>
 			</Badge>

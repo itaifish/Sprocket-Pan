@@ -1,14 +1,16 @@
-import { TabList, tabClasses } from '@mui/joy';
-import { TabType } from '../../types/state/state';
+import { TabList, tabClasses, useTheme } from '@mui/joy';
 import { Tab } from './Tab';
-import { useHorizontalScroll } from '../../hooks/useHorizontalScroll';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
+import { useSingleAxisScroll } from '@/hooks/useSingleAxisScroll';
 
 interface TabRowProps {
-	list: Record<string, TabType>;
+	list: string[];
 }
 
 export function TabRow({ list }: TabRowProps) {
-	const ref = useHorizontalScroll();
+	const ref = useSingleAxisScroll();
+	const { average: scrollbarTheme } = useScrollbarTheme();
+	const theme = useTheme();
 	return (
 		<TabList
 			ref={ref}
@@ -19,15 +21,19 @@ export function TabRow({ list }: TabRowProps) {
 			disableUnderline
 			id="tabScroll"
 			sx={{
+				...scrollbarTheme,
+				backgroundColor: theme.palette.background.level2,
+				zIndex: 110,
 				overflowX: 'auto',
 				overflowY: 'hidden',
 				scrollSnapType: 'x mandatory',
+				maxHeight: '45px',
+				boxSizing: 'border-box',
 				[`& .${tabClasses.root}`]: {
 					'&[aria-selected="true"]': {
 						color: `secondary.500`,
 						bgcolor: 'background.surface',
 						borderColor: 'divider',
-						outline: 'none',
 						'&::before': {
 							content: '""',
 							display: 'block',
@@ -42,8 +48,8 @@ export function TabRow({ list }: TabRowProps) {
 				},
 			}}
 		>
-			{Object.entries(list).map((tab, index) => (
-				<Tab tab={tab} key={index} />
+			{list.map((id) => (
+				<Tab key={id} id={id} />
 			))}
 		</TabList>
 	);

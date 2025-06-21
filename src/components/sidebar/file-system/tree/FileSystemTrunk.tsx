@@ -1,34 +1,76 @@
-import { List, ListItem, ListSubheader, Stack } from '@mui/joy';
-import { PropsWithChildren, useState } from 'react';
-import { CollapseExpandButton } from '../../buttons/CollapseExpandButton';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
+import { selectSettings } from '@/state/active/selectors';
+import { Box, useTheme } from '@mui/joy';
+import { Fragment, ReactNode } from 'react';
+import { useSelector } from 'react-redux';
+import { Virtuoso } from 'react-virtuoso';
 
-interface FileSystemTrunkProps extends PropsWithChildren {
-	header: string | React.ReactNode;
-	actions?: React.ReactNode;
-	isCollapsed?: boolean;
+interface FileSystemTrunkProps {
+	items: string[];
+	render: (id: string, index: number) => ReactNode;
 }
 
-export function FileSystemTrunk({ children, header, actions, isCollapsed = false }: FileSystemTrunkProps) {
-	const [collapsed, setCollapsed] = useState(isCollapsed);
+export function FileSystemTrunk({ items, render }: FileSystemTrunkProps) {
+	const { average } = useScrollbarTheme();
+	const {
+		virtualization: { enabled },
+	} = useSelector(selectSettings);
+	const theme = useTheme();
 	return (
-		<ListItem nested>
-			<ListSubheader>
-				<Stack direction="row" alignItems="center" justifyContent="space-between" width="100%" gap={3}>
-					{header}
-					<Stack direction="row" flex={1} justifyContent="end">
-						{actions}
-						<CollapseExpandButton collapsed={collapsed} setCollapsed={setCollapsed} />
-					</Stack>
-				</Stack>
-			</ListSubheader>
-			<List
-				aria-labelledby="nav-list-browse"
-				sx={{
-					'& .JoyListItemButton-root': { p: '8px' },
-				}}
-			>
-				{!collapsed && children}
-			</List>
-		</ListItem>
+		<Box
+			component="ul"
+			sx={{
+				flex: 1,
+				minHeight: '1px',
+				'& button': {
+					':hover': { backgroundColor: 'transparent' },
+					border: 'none',
+					backgroundColor: 'transparent',
+					cursor: 'pointer',
+					color: theme.palette.text.secondary,
+				},
+				'& li': {
+					display: 'flex',
+					width: '100%',
+					justifyContent: 'stretch',
+					alignItems: 'center',
+					listStyle: 'none',
+					m: 0,
+					p: 0,
+					':hover': { backgroundColor: theme.palette.background.level2 },
+					':active': { backgroundColor: theme.palette.background.level3 },
+				},
+				'& .selected': {
+					backgroundColor: theme.palette.background.level1,
+				},
+				'& .onHoverContainer': {
+					':hover': {
+						'.onHoverButton': {
+							opacity: '1 !important',
+						},
+					},
+				},
+				'& ul': {
+					ml: 1,
+					pl: 1,
+					transition: 'all 0.1s',
+					borderLeft: '1px solid transparent',
+					':hover': { borderLeft: '1px solid ' + theme.palette.background.level2 },
+				},
+				p: 0,
+				pl: 1,
+				m: 0,
+			}}
+		>
+			{enabled ? (
+				<Virtuoso style={average as any} data={items} itemContent={(index, item) => render(item, index)} />
+			) : (
+				<Box sx={{ ...average, height: '100%', overflow: 'auto' }}>
+					{items.map((item, index) => (
+						<Fragment key={item}>{render(item, index)}</Fragment>
+					))}
+				</Box>
+			)}
+		</Box>
 	);
 }

@@ -1,5 +1,5 @@
-import { WorkspaceData } from '../types/application-data/application-data';
-import { AppDispatch } from './store';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { AppDispatch, RootState } from './store';
 
 /**
  * This a TEMPORARY type that exists to facilitate the transition from a manager-based
@@ -8,6 +8,11 @@ import { AppDispatch } from './store';
  * @deprecated
  */
 export interface StateAccess {
-	getState: () => WorkspaceData;
+	getState: () => RootState;
 	dispatch: AppDispatch;
 }
+
+export type Update<T extends { id: string }> = Partial<T> & { id: string };
+export type Create<T> = Partial<T> | undefined;
+
+export type PayloadUpdate<T extends { id: string }> = PayloadAction<Update<T>>;

@@ -1,25 +1,19 @@
 import { IconButton } from '@mui/joy';
-import { SprocketTooltip } from '../../../shared/SprocketTooltip';
 import DifferenceIcon from '@mui/icons-material/Difference';
-import { EndpointRequest } from '../../../../types/application-data/application-data';
-import { useAppDispatch } from '../../../../state/store';
-import { tabsActions } from '../../../../state/tabs/slice';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { useAppDispatch } from '@/state/store';
+import { uiActions } from '@/state/ui/slice';
 
 interface OpenDiffToolButtonProps {
 	historyIndex: number;
-	request: EndpointRequest;
+	id: string;
 }
 
-export function OpenDiffToolButton({ historyIndex, request }: OpenDiffToolButtonProps) {
+export function OpenDiffToolButton({ historyIndex, id }: OpenDiffToolButtonProps) {
 	const dispatch = useAppDispatch();
 
 	const openDiffModal = () => {
-		dispatch(
-			tabsActions.addToDiffQueue({
-				left: { requestId: request.id, historyIndex },
-				right: { requestId: request.id, historyIndex },
-			}),
-		);
+		dispatch(uiActions.addToDiffQueue({ id, index: historyIndex }));
 	};
 	return (
 		<SprocketTooltip text="Show Difference From Another Response">

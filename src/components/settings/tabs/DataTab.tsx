@@ -1,263 +1,133 @@
-import {
-	Box,
-	Button,
-	Divider,
-	FormControl,
-	FormHelperText,
-	FormLabel,
-	Grid,
-	Input,
-	Stack,
-	Switch,
-	Typography,
-} from '@mui/joy';
-import { useState } from 'react';
+import { Button, Stack, Typography } from '@mui/joy';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
-import { appLocalDataDir, appLogDir } from '@tauri-apps/api/path';
-import DeleteForever from '@mui/icons-material/DeleteForever';
-import SaveIcon from '@mui/icons-material/Save';
-import { invoke } from '@tauri-apps/api';
-import { deleteAllHistory } from '../../../state/active/slice';
-import { useAppDispatch } from '../../../state/store';
-import { AreYouSureModal } from '../../shared/modals/AreYouSureModal';
-import { log } from '../../../utils/logging';
-import FileUploadIcon from '@mui/icons-material/FileUpload';
-import { save as saveFile } from '@tauri-apps/api/dialog';
-import { useSelector } from 'react-redux';
-import { saveActiveData } from '../../../state/active/thunks/applicationData';
-import { selectAllItems } from '../../../state/active/selectors';
-import { writeTextFile } from '@tauri-apps/api/fs';
-import {
-	noMetadataReplacer,
-	noHistoryReplacer,
-	noEnvironmentsReplacer,
-	combineReplacers,
-	noSettingsReplacer,
-} from '../../../utils/functions';
-import { Settings } from '../../../types/settings/settings';
+import { appLogDir } from '@tauri-apps/api/path';
 import TimerIcon from '@mui/icons-material/Timer';
-import { FileSystemWorker } from '../../../managers/file-system/FileSystemWorker';
-import { selectActiveWorkspace } from '../../../state/global/selectors';
+import { SettingsTabProps } from './types';
+import { SettingsInput, SettingsSwitch } from './SettingsFields';
+import { MS_IN_MINUTE } from '@/constants/constants';
+import { FileSystemWorker } from '@/managers/file-system/FileSystemWorker';
+import { log } from '@/utils/logging';
+import { toNumberOrUndefined } from '@/utils/math';
+import ManageHistoryIcon from '@mui/icons-material/ManageHistory';
+import { History } from '@mui/icons-material';
+import { RustInvoker } from '@/managers/RustInvoker';
 
-interface DataTabProps {
-	onQuit: () => void;
-	goToWorkspaceSelection: () => void;
-	settings: Settings;
-	setSettings: (settings: Partial<Settings>) => void;
+function toMSMinuteOrUndefined(num: unknown) {
+	const ret = toNumberOrUndefined(num);
+	return ret == null ? undefined : ret * MS_IN_MINUTE;
 }
 
-export function DataTab({ onQuit, goToWorkspaceSelection, setSettings, settings }: DataTabProps) {
-	const dispatch = useAppDispatch();
-	const [deleteHistoryModalOpen, setDeleteHistoryModalOpen] = useState(false);
-	const activeWorkspace = useSelector(selectActiveWorkspace);
-	const state = useSelector(selectAllItems);
-	function save() {
-		dispatch(saveActiveData());
-	}
-
-	function deleteHistory() {
-		dispatch(deleteAllHistory());
-	}
-	const exportData = async (exportEnvironments: boolean) => {
-		const filePath = await saveFile({
-			title: `Save ${activeWorkspace?.name} Workspace`,
-			filters: [
-				{ name: 'Sprocketpan Workspace', extensions: ['json'] },
-				{ name: 'All Files', extensions: ['*'] },
-			],
-		});
-
-		if (!filePath) {
-			return;
-		}
-		const dataToWrite = JSON.stringify(
-			state,
-			exportEnvironments
-				? combineReplacers([noHistoryReplacer, noSettingsReplacer, noMetadataReplacer])
-				: combineReplacers([noEnvironmentsReplacer, noHistoryReplacer, noMetadataReplacer, noSettingsReplacer]),
-		);
-
-		await writeTextFile(filePath, dataToWrite);
-	};
-
+export function DataTab({ overlay, onChange, onUpdateGlobal, searchText, settings }: SettingsTabProps) {
+	const autosave = settings.data.autosave;
+	const oversave = overlay?.data?.autosave;
+	const autosaveEnabled = oversave?.enabled ?? autosave.enabled;
+	const historyEnabled = overlay?.history?.enabled ?? settings.history.enabled;
 	return (
-		<Box sx={{ maxWidth: '700px' }}>
-			<Stack spacing={2}>
-				<Box>
-					<Typography>Saving</Typography>
-					<Divider />
-					<Grid container justifyContent={'left'} spacing={4} sx={{ mt: '10px' }}>
-						<Grid xs={6}>
-							<FormControl orientation="horizontal" sx={{ width: 300, justifyContent: 'space-between' }}>
-								<div>
-									<FormLabel>Autosave</FormLabel>
-									<FormHelperText sx={{ mt: 0 }}>
-										Sprocket Pan will automatically save at a recurring interval
-									</FormHelperText>
-								</div>
-								<Switch
-									checked={settings.autoSaveIntervalMS != undefined}
-									onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-										setSettings({ autoSaveIntervalMS: event.target.checked ? 60_000 * 5 : undefined })
-									}
-									color={settings.autoSaveIntervalMS != undefined ? 'success' : 'neutral'}
-									variant={settings.autoSaveIntervalMS != undefined ? 'solid' : 'outlined'}
-									endDecorator={settings.autoSaveIntervalMS != undefined ? 'Enabled' : 'Disabled'}
-									slotProps={{
-										endDecorator: {
-											sx: {
-												minWidth: 24,
-											},
-										},
-									}}
-								/>
-							</FormControl>
-						</Grid>
-						{settings.autoSaveIntervalMS != undefined && (
-							<Grid xs={4}>
-								<FormControl sx={{ width: 300 }}>
-									<FormLabel id="autosave-duration-label" htmlFor="autosave-duration-input">
-										Autosave Interval Duration
-									</FormLabel>
-									<Input
-										sx={{ width: 300 }}
-										value={(settings.autoSaveIntervalMS ?? 0) / 60_000}
-										onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-											const value = +e.target.value;
-											if (!isNaN(value) && value > 0) {
-												setSettings({ autoSaveIntervalMS: value * 60_000 });
-											}
-										}}
-										slotProps={{
-											input: {
-												id: 'autosave-duration-input',
-												// TODO: Material UI set aria-labelledby correctly & automatically
-												// but Base UI and Joy UI don't yet.
-												'aria-labelledby': 'autosave-duration-label autosave-duration-input',
-											},
-										}}
-										startDecorator={<TimerIcon />}
-										endDecorator={'Minutes'}
-									/>
-								</FormControl>
-							</Grid>
-						)}
-					</Grid>
-				</Box>
-				<Box>
-					<Typography>Data</Typography>
-					<Grid container justifyContent={'left'} spacing={4}>
-						<Grid xs={4}>
-							<Button
-								sx={{ width: '200px' }}
-								startDecorator={<FolderOpenIcon />}
-								onClick={async () => {
-									const localDir = await appLocalDataDir();
-									const data = `${localDir}${FileSystemWorker.DATA_FOLDER_NAME}`;
-									invoke('show_in_explorer', { path: data });
-								}}
-								variant="outlined"
-							>
-								Open Data Folder
-							</Button>
-						</Grid>
-						<Grid xs={4}>
-							<Button
-								sx={{ width: '200px' }}
-								startDecorator={<FolderOpenIcon />}
-								onClick={async () => {
-									const logDir = await appLogDir();
-									const data = `${logDir}${log.LOG_FILE_NAME}`;
-									invoke('show_in_explorer', { path: data });
-								}}
-								variant="outlined"
-							>
-								Open Logs Folder
-							</Button>
-						</Grid>
-						<Grid xs={4}>
-							<Button
-								sx={{ width: '200px' }}
-								startDecorator={<DeleteForever />}
-								color="danger"
-								onClick={() => setDeleteHistoryModalOpen(true)}
-								variant="outlined"
-							>
-								Delete All History
-							</Button>
-						</Grid>
-					</Grid>
-				</Box>
-				<Box>
-					<Typography>Workspace</Typography>
-					<Grid container justifyContent={'left'} spacing={4}>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<SaveIcon />}
-								color="success"
-								variant="outlined"
-								onClick={async () => {
-									save();
-									goToWorkspaceSelection();
-								}}
-							>
-								Save & Select Another Workspace
-							</Button>
-						</Grid>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<SaveIcon />}
-								color="danger"
-								variant="outlined"
-								onClick={onQuit}
-							>
-								Leave Without Saving & Select Another Workspace
-							</Button>
-						</Grid>
-					</Grid>
-				</Box>
-				<Box>
-					<Typography>Export</Typography>
-					<Grid container justifyContent={'left'} spacing={4}>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<FileUploadIcon />}
-								color="primary"
-								variant="outlined"
-								onClick={async () => {
-									exportData(true);
-								}}
-							>
-								Export With Environment Variables
-							</Button>
-						</Grid>
-						<Grid xs={6}>
-							<Button
-								sx={{ width: '300px' }}
-								startDecorator={<FileUploadIcon />}
-								color="primary"
-								variant="outlined"
-								onClick={async () => {
-									exportData(false);
-								}}
-							>
-								Export Without Environment Variables
-							</Button>
-						</Grid>
-					</Grid>
-				</Box>
+		<>
+			<Stack spacing={3}>
+				<Typography>Saving</Typography>
+				<Stack direction="row" gap={2}>
+					<SettingsSwitch
+						searchText={searchText}
+						sx={{ width: 240 }}
+						label="Autosave"
+						checked={autosave.enabled}
+						onChange={(enabled) => onChange({ data: { autosave: { enabled } } })}
+						onUpdateGlobal={(enabled) => onUpdateGlobal({ data: { autosave: { enabled } } })}
+						overlay={oversave?.enabled}
+					/>
+					<SettingsInput
+						sx={{ width: 240 }}
+						searchText={searchText}
+						inputSx={{ width: 240 }}
+						disabled={!autosaveEnabled}
+						id="autosave-duration"
+						label="Autosave Interval"
+						value={autosave.intervalMS / MS_IN_MINUTE}
+						overlay={oversave?.intervalMS == null ? undefined : oversave.intervalMS / MS_IN_MINUTE}
+						onChange={(val) => onChange({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
+						onUpdateGlobal={(val) => onUpdateGlobal({ data: { autosave: { intervalMS: toMSMinuteOrUndefined(val) } } })}
+						startDecorator={<TimerIcon />}
+						endDecorator="Minutes"
+					/>
+				</Stack>
+				<Stack direction="row" gap={2}>
+					<SettingsSwitch
+						sx={{ width: 240 }}
+						searchText={searchText}
+						label="History Tracking"
+						checked={settings.history.enabled}
+						onChange={(enabled) => onChange({ history: { enabled } })}
+						onUpdateGlobal={(enabled) => onUpdateGlobal({ history: { enabled } })}
+						overlay={overlay?.history?.enabled}
+					/>
+					<Stack gap={2}>
+						<SettingsInput
+							type="number"
+							searchText={searchText}
+							disabled={!historyEnabled}
+							sx={{ width: 240 }}
+							inputSx={{ width: 240 }}
+							id="maximum-history-duration"
+							label="Maximum Records Per Request"
+							value={settings.history.maxLength}
+							overlay={overlay?.history?.maxLength}
+							onChange={(val) => onChange({ history: { maxLength: toNumberOrUndefined(val) } })}
+							onUpdateGlobal={(val) => onUpdateGlobal({ history: { maxLength: toNumberOrUndefined(val) } })}
+							startDecorator={<ManageHistoryIcon />}
+							endDecorator="Records"
+							hint="Set this value to -1 for no maximum."
+						/>
+						<SettingsInput
+							type="number"
+							searchText={searchText}
+							disabled={!historyEnabled}
+							sx={{ width: 240 }}
+							inputSx={{ width: 240 }}
+							id="maximum-history-time"
+							label="Automatically Delete Records After"
+							value={settings.history.maxDays}
+							overlay={overlay?.history?.maxDays}
+							onChange={(val) => onChange({ history: { maxDays: toNumberOrUndefined(val) } })}
+							onUpdateGlobal={(val) => onUpdateGlobal({ history: { maxDays: toNumberOrUndefined(val) } })}
+							startDecorator={<History />}
+							endDecorator="Days"
+							hint="Set this value to -1 for no maximum."
+						/>
+					</Stack>
+				</Stack>
+				<Typography>Data</Typography>
+				<SettingsSwitch
+					searchText={searchText}
+					sx={{ width: 240 }}
+					label="Workspace Data Validation"
+					checked={settings.data.validation.enabled}
+					onChange={(enabled) => onChange({ data: { validation: { enabled } } })}
+					onUpdateGlobal={(enabled) => onUpdateGlobal({ data: { validation: { enabled } } })}
+					overlay={overlay?.data?.validation?.enabled}
+				/>
+				<Stack direction="row" gap={2}>
+					<Button
+						sx={{ width: '240px' }}
+						startDecorator={<FolderOpenIcon />}
+						onClick={() => RustInvoker.showInExplorer({ path: FileSystemWorker.DATA_FOLDER_NAME })}
+						variant="outlined"
+					>
+						Open Data Folder
+					</Button>
+					<Button
+						sx={{ width: '240px' }}
+						startDecorator={<FolderOpenIcon />}
+						onClick={async () => {
+							const logDir = await appLogDir();
+							RustInvoker.showInExplorer({ path: `${logDir}${log.LOG_FILE_NAME}`, absolute: true });
+						}}
+						variant="outlined"
+					>
+						Open Logs Folder
+					</Button>
+				</Stack>
 			</Stack>
-			<AreYouSureModal
-				open={deleteHistoryModalOpen}
-				closeFunc={function (): void {
-					setDeleteHistoryModalOpen(false);
-				}}
-				action={'Delete All History'}
-				actionFunc={deleteHistory}
-			/>
-		</Box>
+		</>
 	);
 }

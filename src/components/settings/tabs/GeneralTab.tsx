@@ -1,24 +1,18 @@
 import { Stack, Button, CircularProgress, Divider, Typography, Link } from '@mui/joy';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
-import { InputSlider } from '../../shared/input/InputSlider';
-import { Settings } from '../../../types/settings/settings';
 import { emit } from '@tauri-apps/api/event';
-import { log } from '../../../utils/logging';
 import { useEffect, useState } from 'react';
-import { sleep } from '../../../utils/misc';
-import { Constants } from '../../../utils/constants';
 import HelpIcon from '@mui/icons-material/Help';
 import CloudDoneIcon from '@mui/icons-material/CloudDone';
-import { SprocketTooltip } from '../../shared/SprocketTooltip';
 import { getVersion } from '@tauri-apps/api/app';
-import { SprocketSelect } from '../../shared/SprocketSelect';
+import { SettingsTabProps } from './types';
+import { SettingsSelect, SettingsSwitch } from './SettingsFields';
+import { SprocketTooltip } from '@/components/shared/SprocketTooltip';
+import { Constants } from '@/constants/constants';
+import { VariableNameDisplay, TipsSection } from '@/types/data/settings';
+import { log } from '@/utils/logging';
+import { sleep } from '@/utils/misc';
 
-export interface SettingsTabProps {
-	settings: Settings;
-	setSettings: (settings: Partial<Settings>) => void;
-}
-
-export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
+export function GeneralTab({ overlay, settings, onChange, onUpdateGlobal, searchText }: SettingsTabProps) {
 	const [checkingForUpdate, setCheckingForUpdate] = useState(false);
 	const [hasCheckedForUpdate, setHasCheckedForUpdate] = useState(false);
 	const [version, setVersion] = useState('Loading Version...');
@@ -26,56 +20,51 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 		const newVersion = await getVersion();
 		setVersion(newVersion);
 	};
+
 	useEffect(() => {
 		updateVersion();
 	}, []);
+
 	return (
 		<Stack spacing={3}>
-			<InputSlider
-				value={settings.zoomLevel}
-				label="Zoom"
-				setValue={(val) => setSettings({ zoomLevel: val })}
-				endDecorator="%"
-				icon={<ZoomInIcon />}
-				range={{ min: 20, max: 300 }}
-			/>
-			<SprocketSelect
-				sx={{ width: 240 }}
-				label="Theme"
-				value={settings.defaultTheme}
-				onChange={(value) => {
-					setSettings({ defaultTheme: value as Settings['defaultTheme'] });
-				}}
-				options={[
-					{ value: 'light', label: 'Light Mode' },
-					{ value: 'dark', label: 'Dark Mode' },
-					{ value: 'system-default', label: 'System Default' },
-				]}
-			/>
-			<SprocketSelect
-				sx={{ width: 240 }}
+			<SettingsSelect
+				searchText={searchText}
+				value={settings.interface.variableNameDisplay}
+				overlay={overlay?.interface?.variableNameDisplay}
+				sx={{ width: 250 }}
 				label="Display Variable Names"
-				value={settings.displayVariableNames}
-				onChange={(value) => {
-					setSettings({ displayVariableNames: value });
-				}}
+				tooltip="Controls how {environment_variables} are displayed alongside their computed values."
+				onChange={(val) => onChange({ interface: { variableNameDisplay: val } })}
+				onUpdateGlobal={(val) => onUpdateGlobal({ interface: { variableNameDisplay: val } })}
 				options={[
-					{ value: true, label: 'Key and Value' },
-					{ value: false, label: 'Value Only' },
+					{ value: VariableNameDisplay.before, label: 'Key and Value' },
+					{ value: VariableNameDisplay.none, label: 'Value Only' },
+					{ value: VariableNameDisplay.hover, label: 'Key on Hover' },
 				]}
 			/>
-			<SprocketSelect
-				sx={{ width: 240 }}
-				label="List Style"
-				value={settings.listStyle}
-				onChange={(value) => {
-					setSettings({ listStyle: value as Settings['listStyle'] });
-				}}
+			<SettingsSelect
+				sx={{ width: 250 }}
+				label="Tips Section Messages"
+				searchText={searchText}
+				value={settings.interface.tipsSection}
+				overlay={overlay?.interface?.tipsSection}
+				onChange={(val) => onChange({ interface: { tipsSection: val } })}
+				onUpdateGlobal={(val) => onUpdateGlobal({ interface: { tipsSection: val } })}
 				options={[
-					{ value: 'compact', label: 'Compact' },
-					{ value: 'default', label: 'Default' },
-					{ value: 'cozy', label: 'Cozy' },
+					{ value: TipsSection.tips, label: 'Sprocket Tips Only' },
+					{ value: TipsSection.all, label: 'All Messages' },
+					{ value: TipsSection.dyk, label: 'Did You Know Only' },
+					{ value: TipsSection.hidden, label: 'Hidden' },
 				]}
+			/>
+			<SettingsSwitch
+				sx={{ width: 250 }}
+				searchText={searchText}
+				label="List Virtualization"
+				checked={settings.virtualization.enabled}
+				onChange={(enabled) => onChange({ virtualization: { enabled } })}
+				onUpdateGlobal={(enabled) => onUpdateGlobal({ virtualization: { enabled } })}
+				overlay={overlay?.virtualization?.enabled}
 			/>
 			<Divider />
 			<Typography level="body-md">
@@ -84,7 +73,7 @@ export function GeneralTab({ settings, setSettings }: SettingsTabProps) {
 					View the docs
 				</Link>
 			</Typography>
-			<Stack direction="row" spacing={2} alignItems={'center'}>
+			<Stack direction="row" spacing={2} alignItems="center">
 				<Button
 					startDecorator={checkingForUpdate ? <CircularProgress /> : <></>}
 					onClick={async () => {

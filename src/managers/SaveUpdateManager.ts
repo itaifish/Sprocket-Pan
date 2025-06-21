@@ -18,8 +18,96 @@ and not even know, especially while refactoring. By naming them, it becomes
 much more difficult to get them out of order and much easier to fix if they do.
 */
 
-import { WorkspaceData } from '../types/application-data/application-data';
-import { defaultWorkspaceData } from './data/WorkspaceDataManager';
+/*
+You likely DO NOT need to write a save converter to add new properties to the Settings.
+Instead, just make sure to add the new property at src\constants\defaults
+*/
+
+import { OrderedKeyValuePairs } from '@/classes/OrderedKeyValuePairs';
+import {
+	WorkspaceData,
+	HistoricalEndpointResponse,
+	Environment,
+	WorkspaceMetadata,
+	WorkspaceItems,
+} from '@/types/data/workspace';
+import { ItemFactory } from './data/ItemFactory';
+import { ItemPrefix } from '@/types/data/item';
+import { generateSlug } from 'random-word-slugs';
+
+function toTen(data: WorkspaceData) {
+	const transformedIds = new Set<string>();
+	const collectIds = (key: keyof WorkspaceItems, prefix: ItemPrefix) => {
+		if (data[key] == null) {
+			return;
+		}
+		Object.keys(data[key]).forEach((id) => {
+			if (!id.startsWith(prefix)) {
+				transformedIds.add(`${prefix}:${id}`);
+			}
+		});
+	};
+	collectIds('endpoints', ItemPrefix.endpoint);
+	collectIds('scripts', ItemPrefix.script);
+	collectIds('environments', ItemPrefix.environment);
+	collectIds('requests', ItemPrefix.request);
+	collectIds('services', ItemPrefix.service);
+	// this is dumb but holy hell is it effective
+	let stringData = JSON.stringify(data);
+	transformedIds.forEach((id) => {
+		stringData = stringData.replaceAll(id.split(':')[1], id);
+	});
+	Object.assign(data, JSON.parse(stringData));
+}
+
+function toNine(data: WorkspaceData | any) {
+	data.syncMetadata = { items: {} };
+	data.history = Object.fromEntries(
+		data.history.map(({ id, history }: { id: string; history: unknown }) => [id, history]),
+	);
+}
+
+/**
+ * KeyValuePairs for everyone!
+ */
+function toEight(data: WorkspaceData | any) {
+	function consolidateValues(obj: any) {
+		const pairs = new OrderedKeyValuePairs(obj.__data);
+		Object.entries(obj).forEach(([key, value]) => {
+			if (!key.startsWith('__')) {
+				pairs.set(key, value as any);
+			}
+		});
+		return pairs.toArray();
+	}
+	function convertEnv(env: any): Environment {
+		return { id: env.__id, name: env.__name, pairs: consolidateValues(env) };
+	}
+	function convertHistory({ request, response, auditLog }: HistoricalEndpointResponse): HistoricalEndpointResponse {
+		if (response != null) {
+			response.headers = consolidateValues(response.headers);
+		}
+		return { request, response, auditLog, timestamp: request?.dateTime || response?.dateTime || 0 };
+	}
+	for (const envId in data.environments) {
+		data.environments[envId] = convertEnv(data.environments[envId]);
+	}
+	for (const servId in data.services) {
+		for (const envId in data.services[servId].localEnvironments) {
+			data.services[servId].localEnvironments[envId] = convertEnv(data.services[servId].localEnvironments[envId]);
+		}
+	}
+	for (const endId in data.endpoints) {
+		data.endpoints[endId].baseHeaders = consolidateValues(data.endpoints[endId].baseHeaders);
+		data.endpoints[endId].baseQueryParams = consolidateValues(data.endpoints[endId].baseQueryParams);
+	}
+	for (const reqId in data.requests) {
+		data.requests[reqId].headers = consolidateValues(data.requests[reqId].headers);
+		data.requests[reqId].queryParams = consolidateValues(data.requests[reqId].queryParams);
+		data.requests[reqId].environmentOverride = convertEnv(data.requests[reqId].environmentOverride);
+		data.requests[reqId].history = data.requests[reqId].history.map((history: any) => convertHistory(history));
+	}
+}
 
 /**
  * add user interface data
@@ -44,22 +132,14 @@ function toSix(data: WorkspaceData | any) {
 function toFive() {}
 
 /**
- * Add and enable autosave
+ * Add and enable autosave (safely removed due to settings refactor)
  */
-function toFour(data: WorkspaceData | any) {
-	if (data.settings.autoSaveIntervalMS == undefined) {
-		data.settings.autoSaveIntervalMS = 60_000 * 5;
-	}
-}
+function toFour() {}
 
 /**
- * Update the settings to add scriptTimeoutDurationMS
+ * Update the settings to add scriptTimeoutDurationMS (safely removed due to settings refactor)
  */
-function toThree(data: WorkspaceData | any) {
-	if (data.settings.scriptTimeoutDurationMS == undefined) {
-		data.settings.scriptTimeoutDurationMS = defaultWorkspaceData.settings.scriptTimeoutDurationMS;
-	}
-}
+function toThree() {}
 
 /**
  * Updates response bodies to be strings, rather than Record<string, unknown>.
@@ -84,21 +164,32 @@ function toOne(data: any) {
 	}
 }
 
-const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven] as const;
+const transformers = [toOne, toTwo, toThree, toFour, toFive, toSix, toSeven, toEight, toNine, toTen] as const;
 
-class SaveUpdateManager {
-	public static readonly INSTANCE = new SaveUpdateManager();
-
-	private constructor() {}
-
-	public getCurrentVersion(): number {
+export class SaveUpdateManager {
+	public static getCurrentVersion(): number {
 		return transformers.length;
 	}
 
-	public update(data: WorkspaceData | any) {
+	public static update(data: WorkspaceData | any) {
 		transformers.slice(data.version || 0).forEach((transform) => transform(data));
 		data.version = transformers.length;
 	}
-}
 
-export const saveUpdateManager = SaveUpdateManager.INSTANCE;
+	public static updateWorkspaces(workspaces: WorkspaceMetadata[]) {
+		const updated: string[] = [];
+		const list = workspaces.map((workspace) => {
+			let ret = workspace;
+			if (workspace.id == null) {
+				const factoryWorkspace = ItemFactory.workspace(workspace);
+				updated.push(factoryWorkspace.id);
+				ret = factoryWorkspace;
+			}
+			if (workspace.minidenticon == null) {
+				ret.minidenticon = generateSlug(3);
+			}
+			return ret;
+		});
+		return { list, updated };
+	}
+}

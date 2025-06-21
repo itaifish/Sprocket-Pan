@@ -1,13 +1,17 @@
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
 import { useColorScheme } from '@mui/joy';
-import invoke from '../../utils/invoke';
-import { selectDefaultTheme, selectZoomLevel } from '../../state/active/selectors';
 import { WorkspaceSelector } from '../workspaces/WorkspaceSelector';
 import { Workspace } from './Workspace';
 import { ModalsWrapper } from './modals/ModalsWrapper';
 import { ListenerWrapper } from './listeners/ListenerWrapper';
-import { selectActiveWorkspace } from '../../state/global/selectors';
+import { selectZoomLevel, selectDefaultTheme } from '@/state/active/selectors';
+import { selectActiveWorkspace } from '@/state/global/selectors';
+import { ErrorBoundary } from 'react-error-boundary';
+import { RootErrorFallback } from './RootErrorFallback';
+import { RustInvoker } from '@/managers/RustInvoker';
+import { Toasts } from './Toasts';
+import { LoadingWorkspaceOverlay } from './overlays/LoadingWorkspaceOverlay';
 
 export function Root() {
 	const activeWorkspace = useSelector(selectActiveWorkspace);
@@ -16,26 +20,33 @@ export function Root() {
 	const { setMode } = useColorScheme();
 
 	useEffect(() => {
-		invoke('close_splashscreen', undefined);
+		RustInvoker.closeSplashscreen();
 	}, []);
 
 	useEffect(() => {
-		invoke('zoom', { amount: zoomLevel / 100 });
+		RustInvoker.zoom(zoomLevel / 100);
 	}, [zoomLevel]);
 
 	useEffect(() => {
-		setMode(defaultTheme === 'system-default' ? 'system' : defaultTheme);
+		setMode(defaultTheme);
 	}, [defaultTheme]);
-
-	if (activeWorkspace == null) {
-		return <WorkspaceSelector />;
-	}
 
 	return (
 		<>
-			<Workspace />
-			<ModalsWrapper />
-			<ListenerWrapper />
+			<LoadingWorkspaceOverlay />
+			<ErrorBoundary FallbackComponent={RootErrorFallback}>
+				{activeWorkspace == null ? (
+					<WorkspaceSelector />
+				) : (
+					<>
+						<Workspace />
+						<ListenerWrapper />
+					</>
+				)}
+				<ModalsWrapper />
+
+				<Toasts />
+			</ErrorBoundary>
 		</>
 	);
 }

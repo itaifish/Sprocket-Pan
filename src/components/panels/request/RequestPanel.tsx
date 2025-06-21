@@ -1,22 +1,26 @@
-import { Grid, Typography, Card, Divider } from '@mui/joy';
-import { EndpointRequest } from '../../../types/application-data/application-data';
+import { Stack, CircularProgress, Button, Box } from '@mui/joy';
 import { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { selectFullRequestInfoById } from '../../../state/active/selectors';
-import { useAppDispatch } from '../../../state/store';
-import { updateRequest } from '../../../state/active/slice';
-import { PanelProps } from '../panels.interface';
-import { EditableText } from '../../shared/input/EditableText';
 import { RequestEditTabs } from './RequestEditTabs';
-import { RequestActions, ResponseState } from './RequestActions';
-import { defaultResponse } from './constants';
 import { ResponsePanel } from './response/ResponsePanel';
+import { selectFullRequestInfoById, selectSettings } from '@/state/active/selectors';
+import { activeActions } from '@/state/active/slice';
+import { useAppDispatch } from '@/state/store';
+import { EndpointRequest } from '@/types/data/workspace';
+import { PanelProps } from '../panels.interface';
+import { networkRequestManager } from '@/managers/NetworkRequestManager';
+import { Send } from '@mui/icons-material';
+import { EditableText } from '@/components/shared/input/EditableText';
+import { Panel, PanelGroup } from 'react-resizable-panels';
+import { SprocketResizeHandle } from '@/components/shared/SprocketResizeHandle';
+import { TrapezoidalHeader } from '@/components/shared/flair/TrapezoidalHeader';
+import { useScrollbarTheme } from '@/hooks/useScrollbarTheme';
 
 export function RequestPanel({ id }: PanelProps) {
 	const { request, endpoint, service } = useSelector((state) => selectFullRequestInfoById(state, id));
-
-	const [responseState, setResponseState] = useState<ResponseState>('latest');
-	const [lastError, setLastError] = useState(defaultResponse);
+	const settings = useSelector(selectSettings);
+	const [isLoading, setLoading] = useState(false);
+	const { guttered: scrollbarTheme } = useScrollbarTheme();
 
 	const dispatch = useAppDispatch();
 
@@ -24,38 +28,57 @@ export function RequestPanel({ id }: PanelProps) {
 		return <>Request data not found</>;
 	}
 
+	async function sendRequest() {
+		if (isLoading) {
+			return;
+		}
+		setLoading(true);
+		const result = await networkRequestManager.makeRequestWithScripts(request.id);
+		dispatch(
+			activeActions.addResponseToHistory({
+				requestId: request.id,
+				...result,
+				maxLength: settings.history.maxLength,
+				discard: !settings.history.enabled,
+			}),
+		);
+		setLoading(false);
+	}
+
 	function update(values: Partial<EndpointRequest>) {
-		dispatch(updateRequest({ ...values, id: request.id }));
+		dispatch(activeActions.updateRequest({ ...values, id: request.id }));
 	}
 
 	return (
-		<>
-			<EditableText
-				text={request.name}
-				setText={(newText: string) => update({ name: newText })}
-				isValidFunc={(text: string) => text.length >= 1}
-				isTitle
-			/>
-			<RequestActions endpoint={endpoint} request={request} onError={setLastError} onResponse={setResponseState} />
-			<Grid container direction={'row'} spacing={1} sx={{ height: '100%' }}>
-				<Grid xs={6}>
-					<Card sx={{ height: '100%', width: '100%' }}>
-						<Typography level="h3" sx={{ textAlign: 'center' }}>
-							Request
-						</Typography>
-						<Divider />
+		<PanelGroup direction="horizontal">
+			<Panel defaultSize={50} minSize={33}>
+				<Box height="100%" sx={{ overflow: 'auto', ...scrollbarTheme }}>
+					<TrapezoidalHeader>Request</TrapezoidalHeader>
+					<Stack gap={1} p={2} minWidth="400px">
+						<Stack direction="row" justifyContent="space-between">
+							<EditableText level="title-lg" text={request.name} setText={(name) => update({ name })} />
+							<Button
+								color={isLoading ? 'warning' : 'primary'}
+								startDecorator={isLoading ? <CircularProgress /> : <Send />}
+								onClick={sendRequest}
+								sx={{ minWidth: 150 }}
+							>
+								Send{isLoading ? 'ing' : ''}
+							</Button>
+						</Stack>
 						<RequestEditTabs request={request} />
-					</Card>
-				</Grid>
-				<Grid xs={6}>
-					<ResponsePanel
-						responseState={responseState}
-						setResponseState={setResponseState}
-						lastError={lastError}
-						request={request}
-					/>
-				</Grid>
-			</Grid>
-		</>
+					</Stack>
+				</Box>
+			</Panel>
+			<SprocketResizeHandle sx={{ my: 7 }} />
+			<Panel defaultSize={50} minSize={33}>
+				<Box height="100%" sx={{ overflowY: 'auto', ...scrollbarTheme }}>
+					<TrapezoidalHeader reverse>Response</TrapezoidalHeader>
+					<Stack gap={1} p={2} minWidth="400px">
+						<ResponsePanel request={request} />
+					</Stack>
+				</Box>
+			</Panel>
+		</PanelGroup>
 	);
 }
